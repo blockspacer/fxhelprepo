@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CCFB287C-F085-6794-9D45-0035D28BB318}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>images</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Unicode</CharacterSet>
+    <CharacterSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PlatformToolset>v120_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PlatformToolset>v120_xp</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="PropertySheets">
+    <Import Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <ExecutablePath>$(ExecutablePath);$(MSBuildProjectDirectory)\..\..\gyp\bin\;$(MSBuildProjectDirectory)\..\..\gyp\bin\</ExecutablePath>
+    <IntDir>$(SolutionDir)$(Configuration)\obj\skia\$(ProjectName)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir>$(SolutionDir)$(Configuration)\lib\skia\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\images;..\..\include\utils;..\..\include\utils\win;$(SolutionDir)source\third_party\chromium\third_party\libpng;$(SolutionDir)source\third_party\chromium\third_party\zlib;$(SolutionDir)source\third_party\jpeglib;$(SolutionDir)source\third_party\LibGIF;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>PSAPI_VERSION=1;_DEBUG;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_DEBUG=1;SK_ENABLE_LIBBMP;SK_ENABLE_LIBICO;SK_ENABLE_LIBJPEG;SK_ENABLE_LIBPNG;SK_ENABLE_LIBWBMP;SK_ENABLE_LIBGIF;SKIA_DLL;WIN32;SKIA_IMPLEMENTATION=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\images;..\..\third_party\externals\libjpeg;..\..\include\utils;..\..\include\utils\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_DEBUG;GR_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\images;..\..\include\utils;..\..\include\utils\win;$(SolutionDir)source\third_party\chromium\third_party\libpng;$(SolutionDir)source\third_party\chromium\third_party\zlib;$(SolutionDir)source\third_party\jpeglib;$(SolutionDir)source\third_party\LibGIF;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+      <Optimization>Full</Optimization>
+      <PreprocessorDefinitions>PSAPI_VERSION=1;NDEBUG;SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;SK_ENABLE_LIBBMP;SK_ENABLE_LIBICO;SK_ENABLE_LIBJPEG;SK_ENABLE_LIBPNG;SK_ENABLE_LIBWBMP;SK_ENABLE_LIBGIF;SKIA_DLL;WIN32;SKIA_IMPLEMENTATION=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ProgramDataBaseFileName>$(OutDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level3</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <OmitFramePointers>false</OmitFramePointers>
+      <StringPooling>true</StringPooling>
+      <DisableSpecificWarnings>4251;4275;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Lib>
+      <LinkTimeCodeGeneration>true</LinkTimeCodeGeneration>
+    </Lib>
+    <Link>
+      <AdditionalDependencies>OpenGL32.lib;usp10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..\..\include\config;..\..\include\core;..\..\include\images;..\..\third_party\externals\libjpeg;..\..\include\utils;..\..\include\utils\win;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>SK_SCALAR_IS_FLOAT;SK_CAN_USE_FLOAT;SK_BUILD_FOR_WIN32;SK_IGNORE_STDINT_DOT_H;_CRT_SECURE_NO_WARNINGS;SK_RELEASE;GR_RELEASE=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <None Include="..\..\gyp\images.gyp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\images\SkScaledBitmapSampler.h" />
+    <ClInclude Include="..\..\src\images\bmpdecoderhelper.h" />
+    <ClInclude Include="..\..\src\images\SkImageRefPool.h" />
+    <ClInclude Include="..\..\include\images\SkImageEncoder.h" />
+    <ClInclude Include="..\..\include\images\SkFlipPixelRef.h" />
+    <ClInclude Include="..\..\include\images\SkImageRef.h" />
+    <ClInclude Include="..\..\include\images\SkMovie.h" />
+    <ClInclude Include="..\..\include\images\SkJpegUtility.h" />
+    <ClInclude Include="..\..\include\images\SkImageDecoder.h" />
+    <ClInclude Include="..\..\include\images\SkPageFlipper.h" />
+    <ClInclude Include="..\..\include\images\SkImageRef_GlobalPool.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\images\SkImageDecoder_Factory.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageDecoder_libgif.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageDecoder_libpng.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageEncoder_Factory.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageRef_GlobalPool.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageEncoder.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageDecoder.cpp" />
+    <ClCompile Include="..\..\src\images\SkMovie.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageDecoder_libico.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageDecoder_wbmp.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageRef.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageDecoder_libjpeg.cpp" />
+    <ClCompile Include="..\..\src\images\bmpdecoderhelper.cpp" />
+    <ClCompile Include="..\..\src\images\SkScaledBitmapSampler.cpp" />
+    <ClCompile Include="..\..\src\images\SkPageFlipper.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageRefPool.cpp" />
+    <ClCompile Include="..\..\src\images\SkJpegUtility.cpp" />
+    <ClCompile Include="..\..\src\images\SkFlipPixelRef.cpp" />
+    <ClCompile Include="..\..\src\images\SkImageDecoder_libbmp.cpp" />
+    <ClCompile Include="..\..\src\images\SkFDStream.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\images\SkMovie_gif.cpp" />
+    <ClCompile Include="..\..\src\ports\SkImageDecoder_WIC.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ports\SkImageDecoder_CG.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

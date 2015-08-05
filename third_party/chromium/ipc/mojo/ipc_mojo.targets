@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml"/>
+    <AvailableItemName Include="ipc_mojo_mojom_bindings_generator">
+      <Targets>_ipc_mojo_mojom_bindings_generator</Targets>
+    </AvailableItemName>
+  </ItemGroup>
+  <UsingTask AssemblyName="Microsoft.Build.Tasks.v4.0" TaskFactory="XamlTaskFactory" TaskName="ipc_mojo_mojom_bindings_generator">
+    <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
+  </UsingTask>
+  <Target AfterTargets="$(ipc_mojo_mojom_bindings_generatorAfterTargets)" BeforeTargets="$(ipc_mojo_mojom_bindings_generatorBeforeTargets)" Condition="'@(ipc_mojo_mojom_bindings_generator)' != ''" DependsOnTargets="$(ipc_mojo_mojom_bindings_generatorDependsOn);Computeipc_mojo_mojom_bindings_generatorOutput" Inputs="%(ipc_mojo_mojom_bindings_generator.Identity);%(ipc_mojo_mojom_bindings_generator.AdditionalDependencies);$(MSBuildProjectFile)" Name="_ipc_mojo_mojom_bindings_generator" Outputs="%(ipc_mojo_mojom_bindings_generator.Outputs)">
+    <ItemGroup Condition="'@(SelectedFiles)' != ''">
+      <ipc_mojo_mojom_bindings_generator Condition="'%(Identity)' != '@(SelectedFiles)'" Remove="@(ipc_mojo_mojom_bindings_generator)"/>
+    </ItemGroup>
+    <ItemGroup>
+      <ipc_mojo_mojom_bindings_generator_inputs Include="%(ipc_mojo_mojom_bindings_generator.AdditionalDependencies)"/>
+    </ItemGroup>
+    <ItemGroup>
+      <ipc_mojo_mojom_bindings_generator_tlog Condition="'%(ipc_mojo_mojom_bindings_generator.Outputs)' != '' and '%(ipc_mojo_mojom_bindings_generator.ExcludedFromBuild)' != 'true'" Include="%(ipc_mojo_mojom_bindings_generator.Outputs)">
+        <Source>@(ipc_mojo_mojom_bindings_generator, &apos;|&apos;)</Source>
+        <Inputs>@(ipc_mojo_mojom_bindings_generator_inputs -&gt; &apos;%(Fullpath)&apos;, &apos;;&apos;)</Inputs>
+      </ipc_mojo_mojom_bindings_generator_tlog>
+    </ItemGroup>
+    <Message Importance="High" Text="%(ipc_mojo_mojom_bindings_generator.ExecutionDescription)"/>
+    <WriteLinesToFile Condition="'@(ipc_mojo_mojom_bindings_generator_tlog)' != '' and '%(ipc_mojo_mojom_bindings_generator_tlog.ExcludedFromBuild)' != 'true'" File="$(IntDir)$(ProjectName).write.1.tlog" Lines="^%(ipc_mojo_mojom_bindings_generator_tlog.Source);@(ipc_mojo_mojom_bindings_generator_tlog-&gt;'%(Fullpath)')"/>
+    <WriteLinesToFile Condition="'@(ipc_mojo_mojom_bindings_generator_tlog)' != '' and '%(ipc_mojo_mojom_bindings_generator_tlog.ExcludedFromBuild)' != 'true'" File="$(IntDir)$(ProjectName).read.1.tlog" Lines="^%(ipc_mojo_mojom_bindings_generator_tlog.Source);%(ipc_mojo_mojom_bindings_generator_tlog.Inputs)"/>
+    <ipc_mojo_mojom_bindings_generator AdditionalOptions="%(ipc_mojo_mojom_bindings_generator.AdditionalOptions)" CommandLineTemplate="%(ipc_mojo_mojom_bindings_generator.CommandLineTemplate)" Condition="'@(ipc_mojo_mojom_bindings_generator)' != '' and '%(ipc_mojo_mojom_bindings_generator.ExcludedFromBuild)' != 'true'" Inputs="%(ipc_mojo_mojom_bindings_generator.Identity)"/>
+  </Target>
+  <PropertyGroup>
+    <ComputeLinkInputsTargets>$(ComputeLinkInputsTargets);Computeipc_mojo_mojom_bindings_generatorOutput;</ComputeLinkInputsTargets>
+    <ComputeLibInputsTargets>$(ComputeLibInputsTargets);Computeipc_mojo_mojom_bindings_generatorOutput;</ComputeLibInputsTargets>
+  </PropertyGroup>
+  <Target Condition="'@(ipc_mojo_mojom_bindings_generator)' != ''" Name="Computeipc_mojo_mojom_bindings_generatorOutput">
+    <ItemGroup>
+      <ipc_mojo_mojom_bindings_generatorDirsToMake Condition="'@(ipc_mojo_mojom_bindings_generator)' != '' and '%(ipc_mojo_mojom_bindings_generator.ExcludedFromBuild)' != 'true'" Include="%(ipc_mojo_mojom_bindings_generator.Outputs)"/>
+      <Link Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" Include="%(ipc_mojo_mojom_bindings_generatorDirsToMake.Identity)"/>
+      <Lib Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" Include="%(ipc_mojo_mojom_bindings_generatorDirsToMake.Identity)"/>
+      <ImpLib Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" Include="%(ipc_mojo_mojom_bindings_generatorDirsToMake.Identity)"/>
+    </ItemGroup>
+    <MakeDir Directories="@(ipc_mojo_mojom_bindings_generatorDirsToMake-&gt;'%(RootDir)%(Directory)')"/>
+  </Target>
+</Project>

@@ -1,0 +1,35 @@
+Microsoft Visual Studio Solution File, Format Version 13.00
+# Visual Studio 2013
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dynamic_annotations", "dynamic_annotations.vcxproj", "{29D1CADD-CC25-7A7E-B33A-4720034D8E92}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dynamic_annotations_win64", "dynamic_annotations_win64.vcxproj", "{B2EBC6EA-E0AE-48E8-2204-40C64A2094D6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|Win32 = Debug|Win32
+		Release|x64 = Release|x64
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{29D1CADD-CC25-7A7E-B33A-4720034D8E92}.Debug|x64.ActiveCfg = Debug|x64
+		{29D1CADD-CC25-7A7E-B33A-4720034D8E92}.Debug|x64.Build.0 = Debug|x64
+		{29D1CADD-CC25-7A7E-B33A-4720034D8E92}.Debug|Win32.ActiveCfg = Debug|Win32
+		{29D1CADD-CC25-7A7E-B33A-4720034D8E92}.Debug|Win32.Build.0 = Debug|Win32
+		{29D1CADD-CC25-7A7E-B33A-4720034D8E92}.Release|x64.ActiveCfg = Release|x64
+		{29D1CADD-CC25-7A7E-B33A-4720034D8E92}.Release|x64.Build.0 = Release|x64
+		{29D1CADD-CC25-7A7E-B33A-4720034D8E92}.Release|Win32.ActiveCfg = Release|Win32
+		{29D1CADD-CC25-7A7E-B33A-4720034D8E92}.Release|Win32.Build.0 = Release|Win32
+		{B2EBC6EA-E0AE-48E8-2204-40C64A2094D6}.Debug|x64.ActiveCfg = Debug|x64
+		{B2EBC6EA-E0AE-48E8-2204-40C64A2094D6}.Debug|x64.Build.0 = Debug|x64
+		{B2EBC6EA-E0AE-48E8-2204-40C64A2094D6}.Debug|Win32.ActiveCfg = Debug|x64
+		{B2EBC6EA-E0AE-48E8-2204-40C64A2094D6}.Debug|Win32.Build.0 = Debug|x64
+		{B2EBC6EA-E0AE-48E8-2204-40C64A2094D6}.Release|x64.ActiveCfg = Release|x64
+		{B2EBC6EA-E0AE-48E8-2204-40C64A2094D6}.Release|x64.Build.0 = Release|x64
+		{B2EBC6EA-E0AE-48E8-2204-40C64A2094D6}.Release|Win32.ActiveCfg = Release|x64
+		{B2EBC6EA-E0AE-48E8-2204-40C64A2094D6}.Release|Win32.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

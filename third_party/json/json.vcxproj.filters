@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="src\json_batchallocator.h" />
+    <ClInclude Include="autolink.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="features.h" />
+    <ClInclude Include="forwards.h" />
+    <ClInclude Include="json.h" />
+    <ClInclude Include="reader.h" />
+    <ClInclude Include="value.h" />
+    <ClInclude Include="writer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\json_internalarray.inl" />
+    <None Include="src\json_internalmap.inl" />
+    <None Include="src\json_valueiterator.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\json_reader.cpp" />
+    <ClCompile Include="src\json_value.cpp" />
+    <ClCompile Include="src\json_writer.cpp" />
+  </ItemGroup>
+</Project>

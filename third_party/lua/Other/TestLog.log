@@ -1,0 +1,388 @@
+========================================
+G:\Test\Start CaseID FAL_0001, FAL_0002:Create\Write\Read\Delete a file, List a dir
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    45
+
+CreateDirectory: "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\ltstlib.c at line 853: CreateDirectory(); error == 0x00000003
+Cleaning up "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test" Last error == 0x00000003
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    46
+
+========================================
+G:\Test\CaseID FAL_0001 Result>:FALSE
+========================================
+========================================
+G:\Test\Start CaseID FAL_0003:Copy a file.
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    46
+
+CreateDirectory: "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\ltstlib.c at line 853: CreateDirectory(); error == 0x00000003
+Cleaning up "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test" Last error == 0x00000003
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    46
+
+========================================
+G:\Test\CaseID FAL_0003 Result>:FALSE
+========================================
+========================================
+G:\Test\Start CaseID FAL_0004:Copy many files.
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    46
+
+CreateDirectory: "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\ltstlib.c at line 853: CreateDirectory(); error == 0x00000003
+Cleaning up "G:\Test\\Src"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test\\Src" Last error == 0x00000003
+Cleaning up "G:\Test\\Dst"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test\\Dst" Last error == 0x00000003
+Cleaning up "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test" Last error == 0x00000003
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    46
+
+========================================
+G:\Test\CaseID FAL_0004 Result>:FALSE
+========================================
+========================================
+G:\Test\Start CaseID FAL_0005:Move a file.
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    46
+
+CreateDirectory: "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\ltstlib.c at line 853: CreateDirectory(); error == 0x00000003
+Cleaning up "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test" Last error == 0x00000003
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    46
+
+========================================
+G:\Test\CaseID FAL_0005 Result>:FALSE
+========================================
+========================================
+G:\Test\Start CaseID FAL_0006:Move many files.
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    47
+
+CreateDirectory: "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\ltstlib.c at line 853: CreateDirectory(); error == 0x00000003
+Cleaning up "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test" Last error == 0x00000003
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    47
+
+========================================
+G:\Test\CaseID FAL_0006 Result>:FALSE
+========================================
+========================================
+G:\Test\Start CaseID FAL_0007:Copy, Move a file between 2 drivers.
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    47
+
+CreateDirectory: "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\ltstlib.c at line 853: CreateDirectory(); error == 0x00000003
+Cleaning up "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test" Last error == 0x00000003
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    47
+
+========================================
+G:\Test\CaseID FAL_0007 Result>:FALSE
+========================================
+========================================
+G:\Test\Start CaseID FAL_0008:Copy, Move a file between 2 drivers.
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    47
+
+CreateDirectory: "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\ltstlib.c at line 853: CreateDirectory(); error == 0x00000003
+Cleaning up "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test" Last error == 0x00000003
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    47
+
+========================================
+G:\Test\CaseID FAL_0008 Result>:FALSE
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    47
+
+========================================
+G:\Test\CaseID FAL_0009_SKIP(NO SDCard) Result>:FALSE
+========================================
+========================================
+G:\Test\Start CaseID FAL_0012:Cut a file.
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    47
+
+CreateDirectory: "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\ltstlib.c at line 853: CreateDirectory(); error == 0x00000003
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 1342: CreateFile(); error == 0x00000003
+Unable to open file G:\Test\TEST_CUT Last error == 0x00000003
+Size of "G:\Test\TEST_CUT": 0
+File Size Error!
+Cleaning up "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test" Last error == 0x00000003
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    48
+
+========================================
+G:\Test\CaseID FAL_0012 Result>:FALSE
+========================================
+========================================
+G:\Test\Start CaseID FAL_0013:Seek Test.
+========================================
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    48
+
+CreateDirectory: "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\ltstlib.c at line 853: CreateDirectory(); error == 0x00000003
+Cleaning up "G:\Test\"...
+ERROR in c:\users\pc\desktop\test\filesystemtest\src\legacy.c at line 134: RemoveDirectory(); error == 0x00000003
+Could not remove directory: "G:\Test" Last error == 0x00000003
+2013-9-5, 16:52:48
+
+Memory Statu Information:
+  Length:                      32
+  MemoryLoad:                  40
+  TotalPhys:         2,147,483,647
+  AvailPhys          2,147,483,647
+  TotalPageFile:     4,294,967,295
+  AvailPageFile:     4,294,967,295
+  TotalVirtual:      2,147,352,576
+  AvailVirtual:      2,116,861,952
+Lua Statu Information:
+  Gc_Count:                    49
+
+========================================
+G:\Test\CaseID FAL_0013 Result>:FALSE
+========================================
+G:\Test\CaseID FAL_0001 Result>:FALSE
+G:\Test\CaseID FAL_0003 Result>:FALSE
+G:\Test\CaseID FAL_0004 Result>:FALSE
+G:\Test\CaseID FAL_0005 Result>:FALSE
+G:\Test\CaseID FAL_0006 Result>:FALSE
+G:\Test\CaseID FAL_0007 Result>:FALSE
+G:\Test\CaseID FAL_0008 Result>:FALSE
+G:\Test\CaseID FAL_0009_SKIP(NO SDCard) Result>:FALSE
+G:\Test\CaseID FAL_0012 Result>:FALSE
+G:\Test\CaseID FAL_0013 Result>:FALSE
