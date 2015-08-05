@@ -138,3 +138,4 @@ std::wstring GBKToWide(const std::string& text)
 {
     return base::SysMultiByteToWide(text, 936);
 }
+
