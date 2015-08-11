@@ -83,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CookiesManager.h" />
+    <ClInclude Include="CurlWrapper.h" />
     <ClInclude Include="DataParser.h" />
     <ClInclude Include="EncodeHelper.h" />
     <ClInclude Include="MessageLoop.h" />
@@ -94,6 +95,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CookiesManager.cpp" />
+    <ClCompile Include="CurlWrapper.cpp" />
     <ClCompile Include="DataParser.cpp" />
     <ClCompile Include="EncodeHelper.cpp" />
     <ClCompile Include="FanxingMain.cpp" />

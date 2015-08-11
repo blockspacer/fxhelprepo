@@ -89,12 +89,12 @@ CookiesManager::~CookiesManager()
 {
 }
 
-bool CookiesManager::GetCookies(std::string* cookies)
+bool CookiesManager::GetCookies(const std::string& url, std::string* cookies)
 {
     if (!cookies)
     {
         return false;
     }
 
-    return InternalInternetGetCookie("http://www.fanxing.kugou.com", cookies);
+    return InternalInternetGetCookie(url, cookies);
 }

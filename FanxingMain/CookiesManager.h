@@ -9,7 +9,7 @@ public:
     CookiesManager();
     ~CookiesManager();
 
-    static bool GetCookies(std::string* cookies);
+    static bool GetCookies(const std::string&url, std::string* cookies);
 
 };
 
