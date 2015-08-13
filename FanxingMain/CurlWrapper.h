@@ -9,11 +9,14 @@ public:
     ~CurlWrapper();
     static void CurlInit();
     static void CurlCleanup();
+
     bool LoginRequest();
     bool Services_UserService_UserService_getMyUserDataInfo();
     bool Services_IndexService_IndexService_getUserCenter();
 
     bool EnterRoom(uint32 roomid);
+
+    bool WriteCallback(const std::string& data);
 
 };
 
