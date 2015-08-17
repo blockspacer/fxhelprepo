@@ -55,7 +55,8 @@ bool GetCookieTest()
     ret = curlWrapper.LoginRequest();
     ret = curlWrapper.Services_UserService_UserService_getMyUserDataInfo();
     ret = curlWrapper.Services_IndexService_IndexService_getUserCenter();
-    ret = curlWrapper.EnterRoom(1052925);
+    ret = curlWrapper.EnterRoom(1021987);//Ç×æ¤·¿¼ä
+	ret = curlWrapper.Servies_Uservice_UserService_getCurrentUserInfo(1021987);
     return ret;
 }
 int _tmain(int argc, _TCHAR* argv[])

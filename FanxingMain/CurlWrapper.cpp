@@ -488,3 +488,121 @@ bool CurlWrapper::EnterRoom(uint32 roomid)
     }
     return false;
 }
+
+//未调试通过
+bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
+{
+	std::string cookies = "";
+	std::string temp = "";
+	bool ret = false;
+	if (!CookiesManager::GetCookies(fanxingurl, &temp))
+	{
+		return false;
+	}
+	cookies += temp;
+	if (!CookiesManager::GetCookies(kugouurl, &temp))
+	{
+		return false;
+	}
+	cookies += ";" + temp;
+
+	CURL *curl;
+	CURLcode res;
+	curl = curl_easy_init();
+
+	if (!curl)
+		return false;
+
+	std::string strtime = base::IntToString(static_cast<int>(base::Time::Now().ToDoubleT())) + "144";
+	std::string url = std::string(fanxingurl);
+	url += "/Services.php?d="+strtime+"&act=UserService.UserService&mtd=getCurrentUserInfo&args=%5B%5D&test=3";
+	curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+	/* example.com is redirected, so we tell libcurl to follow redirection */
+	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+	curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+
+	struct curl_slist *headers = 0;
+	headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
+	//headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+	headers = curl_slist_append(headers, "Connection: Keep-Alive");
+	headers = curl_slist_append(headers, "Accept-Language: zh-CN");
+	headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
+
+
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+	curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+	std::string referer = "http://fanxing.kugou.com/" + base::IntToString(roomid);
+	curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+
+	curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+	// 把请求返回来时设置的cookie保存起来
+	curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/cookie.txt");
+
+	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+
+	/* Perform the request, res will get the return code */
+	res = curl_easy_perform(curl);
+	/* Check for errors */
+	if (res != CURLE_OK)
+	{
+		fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+		return false;
+	}
+	// 获取请求业务结果
+	long responsecode = 0;
+	res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+
+	// 获取服务器时间
+	long servertime = 0;
+	res = curl_easy_getinfo(curl, CURLINFO_FILETIME, &servertime);
+
+	char* redirecturl = 0;
+	res = curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirecturl);
+	if (redirecturl)
+	{
+		assert(false);
+		std::string redirect = redirecturl;
+	}
+
+	long headersize = 0;
+	res = curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &headersize);
+
+	long requestsize = 0;
+	res = curl_easy_getinfo(curl, CURLINFO_REQUEST_SIZE, &requestsize);
+
+	char* localip = 0;
+	res = curl_easy_getinfo(curl, CURLINFO_LOCAL_IP, &localip);
+
+	long localport = 0;
+	res = curl_easy_getinfo(curl, CURLINFO_LOCAL_PORT, &localport);
+
+	// 获取本次请求cookies
+	struct curl_slist* curllist = 0;
+	res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
+	if (curllist)
+	{
+		struct curl_slist* temp = curllist;
+		std::string retCookies;
+		while (temp)
+		{
+			retCookies += std::string(temp->data);
+			temp = temp->next;
+		}
+		std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+		curl_slist_free_all(curllist);
+	}
+
+	/* always cleanup */
+	curl_easy_cleanup(curl);
+
+	if (responsecode == 200)
+	{
+		return true;
+	}
+	return false;
+}

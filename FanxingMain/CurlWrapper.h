@@ -16,6 +16,9 @@ public:
 
     bool EnterRoom(uint32 roomid);
 
+	// 在进入房间以后，获取用户信息
+	bool Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid);
+
     bool WriteCallback(const std::string& data);
 
 };
