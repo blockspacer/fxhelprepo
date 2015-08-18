@@ -52,7 +52,7 @@ bool GetCookieTest()
 
     bool ret = false;
     CurlWrapper curlWrapper;
-    ret = curlWrapper.LoginRequest();
+    ret = curlWrapper.LoginRequestWithCookies();
     ret = curlWrapper.Services_UserService_UserService_getMyUserDataInfo();
     ret = curlWrapper.Services_IndexService_IndexService_getUserCenter();
     ret = curlWrapper.EnterRoom(1021987);//Ç×æ¤·¿¼ä

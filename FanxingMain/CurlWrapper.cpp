@@ -49,7 +49,7 @@ void CurlWrapper::CurlCleanup()
 }
 
 // 测试成功
-bool CurlWrapper::LoginRequest()
+bool CurlWrapper::LoginRequestWithCookies()
 {
     std::string cookies = "";
     bool ret = false;
@@ -87,7 +87,7 @@ bool CurlWrapper::LoginRequest()
 
     curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/cookie.txt");
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/LoginRequest.txt");
 
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
@@ -195,7 +195,7 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
 
     curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/cookie.txt");
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/Services_UserService_UserService_getMyUserDataInfo.txt");
 
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
@@ -307,7 +307,7 @@ bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
 
     curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/cookie.txt");
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/Services_IndexService_IndexService_getUserCenter.txt");
 
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
@@ -541,7 +541,7 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
 
 	curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
 	// 把请求返回来时设置的cookie保存起来
-	curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/cookie.txt");
+	curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/Servies_Uservice_UserService_getCurrentUserInfo.txt");
 
 	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 

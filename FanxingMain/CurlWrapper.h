@@ -10,7 +10,7 @@ public:
     static void CurlInit();
     static void CurlCleanup();
 
-    bool LoginRequest();
+    bool LoginRequestWithCookies();
     bool Services_UserService_UserService_getMyUserDataInfo();
     bool Services_IndexService_IndexService_getUserCenter();
 
