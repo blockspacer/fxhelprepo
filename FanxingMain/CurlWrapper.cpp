@@ -4,6 +4,7 @@
 #include "third_party/libcurl/curl/curl.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/time/time.h"
+//#include "third_party/chromium/base/files/file_path.h"
 
 #include "CookiesManager.h"
 
@@ -29,21 +30,30 @@ namespace
         return base::Uint64ToString(
             static_cast<uint64>(base::Time::Now().ToDoubleT() * 1000));
     }
-
 }
 
 bool CurlWrapper::WriteCallback(const std::string& data)
 {
     std::cout << data <<std::endl;
+    //int count = file_.WriteAtCurrentPos(data.c_str(), data.length());
+    currentWriteData_ += data;
     return true;
 }
 
 CurlWrapper::CurlWrapper()
+    :currentWriteData_(""),
+    response_of_RoomService_RoomService_enterRoom_(""),
+    response_of_Services_UserService_UserService_getMyUserDataInfo_("")
 {
+    //base::FilePath path(L"d:/response.txt");
+    //file_.Initialize(path, base::File::FLAG_OPEN_ALWAYS | base::File::FLAG_WRITE);
+    //bool valid = file_.IsValid();
+    //file_.Seek(base::File::FROM_BEGIN,0L);
 }
 
 CurlWrapper::~CurlWrapper()
 {
+    //file_.Close();
 }
 
 void CurlWrapper::CurlInit()
@@ -255,9 +265,10 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
     // 把请求返回来时设置的cookie保存起来
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/Services_UserService_UserService_getMyUserDataInfo.txt");
 
+    currentWriteData_.clear();
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-
+    response_of_Services_UserService_UserService_getMyUserDataInfo_ = currentWriteData_;
 
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
@@ -272,7 +283,7 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
     // 获取请求业务结果
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
-
+    
     // 获取本次请求cookies
     struct curl_slist* curllist = 0;
     res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
@@ -619,7 +630,8 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    // 这里不要接受压缩的数据包，免得解压麻烦
+    //curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
     std::string referer = "http://fanxing.kugou.com/" + strroomid;
     curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
@@ -628,6 +640,7 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     // 把请求返回来时设置的cookie保存起来
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/RoomService_RoomService_enterRoom.txt");
 
+    currentWriteData_.clear();
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
@@ -643,6 +656,7 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     // 获取请求业务结果
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+    response_of_RoomService_RoomService_enterRoom_ = currentWriteData_;
 
     // 获取本次请求cookies
     struct curl_slist* curllist = 0;

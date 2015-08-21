@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "third_party/chromium/base/basictypes.h"
+#include"third_party/chromium/base/files/file.h"
 
 // 提供方便的使用curl接口的执行请求函数。
 class CurlWrapper
@@ -26,5 +27,11 @@ public:
     bool RoomService_RoomService_enterRoom(uint32 roomid);
 
     bool WriteCallback(const std::string& data);
+
+private:
+    //base::File file_;
+    std::string currentWriteData_;
+    std::string response_of_RoomService_RoomService_enterRoom_;
+    std::string response_of_Services_UserService_UserService_getMyUserDataInfo_;
 };
 
