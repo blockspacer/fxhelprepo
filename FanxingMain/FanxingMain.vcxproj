@@ -84,6 +84,7 @@
   <ItemGroup>
     <ClInclude Include="DataParser.h" />
     <ClInclude Include="EncodeHelper.h" />
+    <ClInclude Include="GiftNotifyManager.h" />
     <ClInclude Include="MessageLoop.h" />
     <ClInclude Include="SocketWrapper.h" />
     <ClInclude Include="stdafx.h" />
@@ -95,6 +96,7 @@
     <ClCompile Include="DataParser.cpp" />
     <ClCompile Include="EncodeHelper.cpp" />
     <ClCompile Include="FanxingMain.cpp" />
+    <ClCompile Include="GiftNotifyManager.cpp" />
     <ClCompile Include="MessageLoop.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
     <ClCompile Include="stdafx.cpp" />

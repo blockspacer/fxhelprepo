@@ -70,7 +70,6 @@ int _tmain(int argc, _TCHAR* argv[])
     tcpClient_8080.Send(data_8080);
 
 
-    while (1);
     GlobalCleanup();
 	return 0;
 }
