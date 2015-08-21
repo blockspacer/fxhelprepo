@@ -49,16 +49,18 @@ bool GetFirstPackage(std::vector<uint8> *packagedata)
 
 bool GetCookieTest()
 {
-
+    uint32 roomId = 1021987;
     bool ret = false;
     CurlWrapper curlWrapper;
     ret = curlWrapper.LoginRequestWithCookies();
     ret = curlWrapper.Services_UserService_UserService_getMyUserDataInfo();
     ret = curlWrapper.Services_IndexService_IndexService_getUserCenter();
-    ret = curlWrapper.EnterRoom(1021987);//亲妞房间
-	ret = curlWrapper.Servies_Uservice_UserService_getCurrentUserInfo(1021987);
+    ret = curlWrapper.EnterRoom(roomId);//亲妞房间
+    ret = curlWrapper.Servies_Uservice_UserService_getCurrentUserInfo(roomId);
+    ret = curlWrapper.RoomService_RoomService_enterRoom(roomId);
     return ret;
 }
+
 int _tmain(int argc, _TCHAR* argv[])
 {
     GlobalInit();
