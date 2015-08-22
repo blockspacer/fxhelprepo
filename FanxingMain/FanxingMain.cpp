@@ -25,15 +25,21 @@ bool GlobalCleanup()
 
 bool GetCookieTest()
 {
-    uint32 roomId = 1021987;
+    uint32 roomId = 1053121;
     bool ret = false;
     CurlWrapper curlWrapper;
     ret = curlWrapper.LoginRequestWithCookies();
+    assert(ret);
     ret = curlWrapper.Services_UserService_UserService_getMyUserDataInfo();
+    assert(ret);
     ret = curlWrapper.Services_IndexService_IndexService_getUserCenter();
-    ret = curlWrapper.EnterRoom(roomId);//Ç×æ¤·¿¼ä
+    assert(ret);
+    ret = curlWrapper.EnterRoom(roomId);
+    assert(ret);
     ret = curlWrapper.Servies_Uservice_UserService_getCurrentUserInfo(roomId);
+    assert(ret);
     ret = curlWrapper.RoomService_RoomService_enterRoom(roomId);
+    assert(ret);
     return ret;
 }
 

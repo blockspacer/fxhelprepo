@@ -1,4 +1,5 @@
 #include "CurlWrapper.h"
+#include <memory>
 #include <assert.h>
 #include <iostream>
 #include "third_party/libcurl/curl/curl.h"
@@ -13,7 +14,7 @@ namespace
     const char* fanxingurl = "http://fanxing.kugou.com";
     const char* kugouurl = "http://kugou.com";
     const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
-    const char* acceptencode = "gzip, deflate";
+    const char* acceptencode = "gzip, deflate";//目前都不应该接收压缩数据，免得解压麻烦
 
     static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     {
@@ -29,6 +30,18 @@ namespace
     {
         return base::Uint64ToString(
             static_cast<uint64>(base::Time::Now().ToDoubleT() * 1000));
+    }
+
+    std::string MakeReasonablePath(const std::string& pathfile)
+    {
+        auto temp = pathfile;
+        auto pos = temp.find(':');
+        while (pos != std::string::npos)
+        {
+            temp.erase(pos,1);
+            pos = temp.find(':');
+        }
+        return std::move(temp);
     }
 }
 
@@ -105,7 +118,9 @@ bool CurlWrapper::LoginRequestWithCookies()
 
     curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/LoginRequest.txt");
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
 
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
@@ -180,7 +195,9 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
 
     //curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/LoginRequestWithUsernameAndPassword.txt");
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
 
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1L);
 
@@ -263,7 +280,9 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
 
     curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/Services_UserService_UserService_getMyUserDataInfo.txt");
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
 
     currentWriteData_.clear();
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
@@ -352,7 +371,9 @@ bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
 
     curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/Services_IndexService_IndexService_getUserCenter.txt");
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
 
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
@@ -444,7 +465,9 @@ bool CurlWrapper::EnterRoom(uint32 roomid)
 
     curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/cookie.txt");
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
 
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
@@ -538,7 +561,9 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
 
 	curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
 	// 把请求返回来时设置的cookie保存起来
-	curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/Servies_Uservice_UserService_getCurrentUserInfo.txt");
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
 
 	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
@@ -583,7 +608,7 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
 // 测试通过
 bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
 {
-    //GET / Services.php ? act = RoomService.RoomService&mtd = enterRoom&args = ["1017131", "", "", "web"] & _ = 1439814776455 HTTP / 1.1
+    //GET /Services.php?act=RoomService.RoomService&mtd=enterRoom&args=["1017131","","","web"]&_=1439814776455 HTTP/1.1
     std::string cookies = "";
     std::string temp = "";
     bool ret = false;
@@ -638,7 +663,9 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
 
     curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "d:/RoomService_RoomService_enterRoom.txt");
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__)+ ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
 
     currentWriteData_.clear();
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
