@@ -1,4 +1,10 @@
 #pragma once
+#include <memory>
+#include <string>
+#include "third_party/chromium/base/basictypes.h"
+
+class TcpClient;
+
 class GiftNotifyManager
 {
 public:
@@ -41,10 +47,12 @@ public:
     //    " token " : " c920ae50679115ada1ef5f89b350829466b035f515c4ac4693f965e5321b41b3 ",
     //    " kugouId " : 454395944
     //}
-    bool Connect8080();
+    bool Connect8080(uint32 roomid, uint32 userid, const std::string& nickname, 
+        uint32 richlevel, uint32 ismaster, uint32 staruserid,
+        const std::string& key,uint64 keytime, const std::string& ext);
 
 private:
-    TcpClient tcpClient_8080_;
-    TcpClient tcpClient_843_;
+    std::unique_ptr<TcpClient> tcpClient_8080_;
+    std::unique_ptr<TcpClient> tcpClient_843_;
 };
 
