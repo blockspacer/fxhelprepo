@@ -42,6 +42,12 @@
     <ClInclude Include="SocketWrapper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CookiesManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CurlWrapper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="GiftNotifyManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -69,6 +75,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SocketWrapper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CookiesManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CurlWrapper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GiftNotifyManager.cpp">
