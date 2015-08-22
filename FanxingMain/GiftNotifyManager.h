@@ -43,5 +43,8 @@ public:
     //}
     bool Connect8080();
 
+private:
+    TcpClient tcpClient_8080_;
+    TcpClient tcpClient_843_;
 };
 

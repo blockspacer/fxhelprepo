@@ -4,11 +4,6 @@
 #include "stdafx.h"
 #include <WinSock2.h>
 #include "TcpClient.h"
-#include "third_party/chromium/base/time/time.h"
-#include "third_party/json/json.h"
-#include "third_party/chromium/base/basictypes.h"
-#include "encodehelper.h"
-
 #include "CurlWrapper.h"
 
 #pragma comment(lib,"ws2_32.lib")
@@ -26,25 +21,6 @@ bool GlobalCleanup()
     CurlWrapper::CurlCleanup();
     WSACleanup();
     return true;
-}
-
-bool GetFirstPackage(std::vector<uint8> *packagedata)
-{
-    uint32 nowtime = static_cast<uint32>(base::Time::Now().ToDoubleT());
-
-    Json::FastWriter writer;
-    Json::Value root(Json::objectValue);
-    root["cmd"];
-    root["roomid"];
-    root["userid"];
-    root["nickname"];
-    root["richlevel"];
-    root["ismaster"];
-    root["staruserid"];
-    root["key"];
-    root["keytime"];
-    root["ext"];
-    return false;
 }
 
 bool GetCookieTest()
