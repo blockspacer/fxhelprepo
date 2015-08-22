@@ -40,7 +40,7 @@ bool TcpClient::Connect(const std::string& ip, unsigned short port)
     
     thread_->Start();
 
-    return false;
+    return true;
 }
 
 DWORD TcpClient::Recv(LPVOID lpParam)

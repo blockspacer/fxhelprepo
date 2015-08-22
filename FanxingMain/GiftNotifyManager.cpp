@@ -6,6 +6,7 @@
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/json/json.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 
 
 
@@ -24,28 +25,32 @@ struct cmd201package
     uint32 ismaster;
     uint32 staruserid;
     std::string key;
-    uint64 keytime;
+    uint32 keytime;
     std::string ext;
 };
 // 这个数据包应该从http请求那边返回过来设置
 bool GetFirstPackage(const cmd201package& package, 
     std::vector<uint8> *packagedata)
 {
-    uint32 nowtime = static_cast<uint32>(base::Time::Now().ToDoubleT());
+    // 10位的时间截
+    //uint32 nowtime = static_cast<uint32>(base::Time::Now().ToDoubleT());
 
     Json::FastWriter writer;
     Json::Value root(Json::objectValue);
-    root["cmd"];
-    root["roomid"];
-    root["userid"];
-    root["nickname"];
-    root["richlevel"];
-    root["ismaster"];
-    root["staruserid"];
-    root["key"];
-    root["keytime"];
-    root["ext"];
-    return false;
+    root["cmd"] = package.cmd;
+    root["roomid"] = package.roomid;
+    root["userid"] = package.userid;
+    root["nickname"] = package.nickname;
+    root["richlevel"] = package.richlevel;
+    root["ismaster"] = package.ismaster;
+    root["staruserid"] = package.staruserid;
+    root["key"] = package.key;
+    root["keytime"] = package.keytime;
+    root["ext"] = package.ext;
+    std::string data = writer.write(root);
+    packagedata->assign(data.begin(), data.end());
+
+    return true;
 }
 
 };
@@ -73,7 +78,7 @@ bool GiftNotifyManager::Connect843()
 
 bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid, 
     const std::string& nickname, uint32 richlevel, uint32 ismaster, 
-    uint32 staruserid, const std::string& key, uint64 keytime, 
+    uint32 staruserid, const std::string& key,/* uint64 keytime, */
     const std::string& ext)
 {
     std::string decodestr = UrlDecode(ext);// 测试使用
@@ -83,7 +88,7 @@ bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
         assert(false && L"socket连接失败");
         return false;
     }
-    
+    uint32 keytime = static_cast<uint32>(base::Time::Now().ToDoubleT());
     std::vector<uint8> data_for_send;
     cmd201package package = { 
         201, roomid, userid, nickname, richlevel, ismaster, staruserid, key, 

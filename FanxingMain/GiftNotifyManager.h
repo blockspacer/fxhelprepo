@@ -49,7 +49,7 @@ public:
     //}
     bool Connect8080(uint32 roomid, uint32 userid, const std::string& nickname, 
         uint32 richlevel, uint32 ismaster, uint32 staruserid,
-        const std::string& key,uint64 keytime, const std::string& ext);
+        const std::string& key,/*uint64 keytime, */const std::string& ext);
 
 private:
     std::unique_ptr<TcpClient> tcpClient_8080_;

@@ -5,6 +5,11 @@
 #include <WinSock2.h>
 #include "TcpClient.h"
 #include "CurlWrapper.h"
+#include "GiftNotifyManager.h"
+
+#include <string>
+#include "third_party/chromium/base/files/file.h"
+#include "third_party/chromium/base/files/file_path.h"
 
 #pragma comment(lib,"ws2_32.lib")
 
@@ -23,32 +28,66 @@ bool GlobalCleanup()
     return true;
 }
 
-bool GetCookieTest()
+bool RunTest()
 {
-    uint32 roomId = 1053121;
+    uint32 roomid = 1051837;
     bool ret = false;
     CurlWrapper curlWrapper;
+
     ret = curlWrapper.LoginRequestWithCookies();
     assert(ret);
     ret = curlWrapper.Services_UserService_UserService_getMyUserDataInfo();
     assert(ret);
     ret = curlWrapper.Services_IndexService_IndexService_getUserCenter();
     assert(ret);
-    ret = curlWrapper.EnterRoom(roomId);
+    ret = curlWrapper.EnterRoom(roomid);
     assert(ret);
-    ret = curlWrapper.Servies_Uservice_UserService_getCurrentUserInfo(roomId);
+    ret = curlWrapper.Servies_Uservice_UserService_getCurrentUserInfo(roomid);
     assert(ret);
-    ret = curlWrapper.RoomService_RoomService_enterRoom(roomId);
+    ret = curlWrapper.RoomService_RoomService_enterRoom(roomid);
+    assert(ret);
+
+    uint32 userid = 0;
+    std::string nickname = "";
+    uint32 richlevel = 0;
+    uint32 ismaster = 0;
+    uint32 staruserid = 0;
+    std::string key = "";   
+    std::string ext = "";
+
+    curlWrapper.ExtractUsefulInfo_RoomService_enterRoom(&userid,
+        &nickname, &richlevel, &staruserid, &key, &ext);
+
+    GiftNotifyManager giftNotifyManager;
+    ret = giftNotifyManager.Connect843();
+    assert(ret);
+    ret = giftNotifyManager.Connect8080(roomid, userid, nickname, richlevel,
+        ismaster, staruserid, key, ext);
     assert(ret);
     return ret;
 }
 
+void test_get_key_data()
+{
+    base::FilePath path(std::wstring(L"d:/response.txt"));
+    base::File fileobject;
+    fileobject.Initialize(path, base::File::FLAG_READ | base::File::FLAG_OPEN);
+    bool valid = fileobject.IsValid();
+    fileobject.Seek(base::File::FROM_BEGIN, 0L);
+    auto len = fileobject.GetLength();
+    std::string responsedata;
+    responsedata.resize(len);
+    auto readsize = fileobject.ReadAtCurrentPos(&responsedata[0], len);
+
+    CurlWrapper curlWrapper;
+    //curlWrapper.ExtractUsefulInfo_RoomService_enterRoom(responsedata);
+
+}
 int _tmain(int argc, _TCHAR* argv[])
 {
     GlobalInit();
-
-    GetCookieTest();
-
+    RunTest();
+    while (1);
     GlobalCleanup();
 	return 0;
 }

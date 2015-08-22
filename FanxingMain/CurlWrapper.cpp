@@ -6,6 +6,7 @@
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/time/time.h"
 //#include "third_party/chromium/base/files/file_path.h"
+#include "third_party/json/json.h"
 
 #include "CookiesManager.h"
 
@@ -709,4 +710,102 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
         return true;
     }
     return false;
+}
+
+bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom(
+    uint32* userid,
+    std::string* nickname, uint32* richlevel, uint32* staruserid,
+    std::string* key, std::string* ext)
+{
+    return ExtractUsefulInfo_RoomService_enterRoom_(
+        response_of_RoomService_RoomService_enterRoom_,
+        userid, nickname, richlevel, staruserid, key, ext);
+}
+
+
+// 测试通过
+bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom_(
+    const std::string& inputstr, uint32* userid,
+    std::string* nickname, uint32* richlevel, uint32* staruserid,
+    std::string* key, std::string* ext)
+{
+    if (inputstr.empty())
+    {
+        return false;
+    }
+    
+    const std::string& data = inputstr;
+    //解析json数据
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(data, rootdata, false))
+    {
+        return false;
+    }
+    
+    // 暂时没有必要检测status的值
+    Json::Value dataObject(Json::objectValue);
+    dataObject = rootdata.get(std::string("data"), dataObject);
+    if (dataObject.empty())
+    {
+        return false;
+    }
+
+    Json::Value fxUserInfoObject(Json::objectValue);
+    fxUserInfoObject = dataObject.get("fxUserInfo", fxUserInfoObject);
+    if (fxUserInfoObject.empty())
+    {
+        return false;
+    }
+
+    std::string struserid = fxUserInfoObject["userId"].asString();
+    if (!base::StringToUint(struserid, userid))
+    {
+        return false;
+    }
+
+    *nickname = fxUserInfoObject["nickName"].asString();
+    std::string strrichLevel = fxUserInfoObject["richLevel"].asString();
+    if (!base::StringToUint(strrichLevel, richlevel))
+    {
+        return false;
+    }
+
+    Json::Value liveDataObject(Json::objectValue);
+    liveDataObject = dataObject.get("liveData", liveDataObject);
+    if (liveDataObject.empty())
+    {
+        return false;
+    }
+
+    std::string recInfo = liveDataObject["recInfo"].asString();
+    auto beginPos = recInfo.find(R"("starUserId":")");
+    if (beginPos == std::string::npos)
+    {
+        assert(false);
+        return false;
+    }
+    beginPos += strlen(R"("starUserId":")");
+    auto endPos = recInfo.find(R"(",)", beginPos);
+    std::string strstarUserId = recInfo.substr(beginPos, endPos - beginPos);
+    if (!base::StringToUint(strstarUserId, staruserid))
+    {
+        return false;
+    }
+
+    Json::Value socketConfigObject(Json::objectValue);
+    socketConfigObject = dataObject.get("socketConfig", socketConfigObject);
+    if (socketConfigObject.empty())
+    {
+        return false;
+    }
+
+    // 这是flash的tcp连接的服务器的ip(由url解析出来)和端口信息，后续可能用到，目前不解析
+    std::string strsokt = socketConfigObject["sokt"].asString();
+
+    // 重要数据，进入房间后连接tcp所使用的key
+    *key = socketConfigObject["enter"].asString();
+    *ext = socketConfigObject["ext"].asString();
+
+    return true;
 }
