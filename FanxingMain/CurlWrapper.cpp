@@ -6,6 +6,7 @@
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/time/time.h"
 //#include "third_party/chromium/base/files/file_path.h"
+#include "third_party/chromium/base/rand_util.h"
 #include "third_party/json/json.h"
 
 #include "CookiesManager.h"
@@ -722,7 +723,119 @@ bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom(
         userid, nickname, richlevel, staruserid, key, ext);
 }
 
+// GET /Services.php?act=GiftService.GiftService&args=["1020846","1a392af9cd9a2c9276c956bbb09f9676_vs0601"]&mtd=tryGetHappyFreeCoin&ran=0.3374897129466474 HTTP/1.1
+// GET /Services.php?act=GiftService%2EGiftService&args=%5B%221020846%22%2C%221a392af9cd9a2c9276c956bbb09f9676_vs0601%22%5D&mtd=tryGetHappyFreeCoin&ran=0%2E3377602129466474 HTTP/1.1
+bool CurlWrapper::GiftService_GiftService(uint32 userid,
+    const std::string& key_601)
+{
+    std::string cookies = "";
+    std::string temp = "";
+    bool ret = false;
+    if (!CookiesManager::GetCookies(fanxingurl, &temp))
+    {
+        return false;
+    }
+    cookies += temp;
+    if (!CookiesManager::GetCookies(kugouurl, &temp))
+    {
+        return false;
+    }
+    cookies += ";" + temp;
 
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (!curl)
+        return false;
+
+    std::string url = fanxingurl;
+    url += "/Services.php?act=GiftService%2EGiftService&args=%5B%22";
+    url += base::UintToString(userid);
+    url += "%22%2C%22";
+    url += key_601;
+    url += "%22%5D&mtd=tryGetHappyFreeCoin&ran=";
+    // 生成一个小数，小数16位，方式比较丑陋，实现就好
+    uint32 first = base::RandInt(10000000, 99999999);
+    uint32 second = base::RandInt(10000000, 99999999);
+    url += "0%2E" + base::UintToString(first) + base::UintToString(second);
+
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+
+    struct curl_slist *headers = 0;
+    //headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
+    //headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Connection: Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Language: zh-CN");
+    headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
+    //headers = curl_slist_append(headers, "Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3");
+    headers = curl_slist_append(headers, "Accept: */*");
+    headers = curl_slist_append(headers, "x-flash-version: 12,0,0,77");
+    headers = curl_slist_append(headers, "application/x-www-form-urlencoded");
+
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+    // 这里不要接受压缩的数据包，免得解压麻烦
+    //curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    std::string referer = "http://fanxing.kugou.com/static/swf/award/CommonMoneyGift.swf?version=20140221";
+    curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+
+    curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+    // 把请求返回来时设置的cookie保存起来
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
+
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if (res != CURLE_OK)
+    {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return false;
+    }
+    // 获取请求业务结果
+    long responsecode = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+    response_of_GiftService_GiftService_ = currentWriteData_;
+
+    // 获取本次请求cookies
+    struct curl_slist* curllist = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
+    if (curllist)
+    {
+        struct curl_slist* temp = curllist;
+        std::string retCookies;
+        while (temp)
+        {
+            retCookies += std::string(temp->data);
+            temp = temp->next;
+        }
+        std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        curl_slist_free_all(curllist);
+    }
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+
+    if (responsecode == 200)
+    {
+        return true;
+    }
+    return false;
+}
 // 测试通过
 bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom_(
     const std::string& inputstr, uint32* userid,

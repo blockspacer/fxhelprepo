@@ -11,6 +11,7 @@ public:
     ~CurlWrapper();
     static void CurlInit();
     static void CurlCleanup();
+    bool WriteCallback(const std::string& data);
 
     bool LoginRequestWithCookies();
     bool LoginRequestWithUsernameAndPassword(const std::string& username, 
@@ -32,7 +33,9 @@ public:
         std::string* nickname, uint32* richlevel, uint32* staruserid,
         std::string* key, std::string* ext);
 
-    bool WriteCallback(const std::string& data);
+    // 抢星币的重要请求, 时机由flash收到601包礼物通知数据，601包里有key_601值
+    bool GiftService_GiftService(uint32 userid,
+        const std::string& key_601);
 
 private:
 
@@ -45,6 +48,7 @@ private:
     std::string currentWriteData_;
     std::string response_of_RoomService_RoomService_enterRoom_;
     std::string response_of_Services_UserService_UserService_getMyUserDataInfo_;
+    std::string response_of_GiftService_GiftService_;
 };
 
 

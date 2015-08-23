@@ -67,6 +67,11 @@ bool RunTest()
     return ret;
 }
 
+void RunUnitTest()
+{
+    CurlWrapper curlWrapper;
+    curlWrapper.GiftService_GiftService(123, "123456");
+}
 void test_get_key_data()
 {
     base::FilePath path(std::wstring(L"d:/response.txt"));
@@ -81,8 +86,14 @@ void test_get_key_data()
 
     CurlWrapper curlWrapper;
     //curlWrapper.ExtractUsefulInfo_RoomService_enterRoom(responsedata);
+}
+
+// 接收flash tcp线程收到的数据回调消息
+void NotifyFunction()
+{
 
 }
+
 int _tmain(int argc, _TCHAR* argv[])
 {
     GlobalInit();
