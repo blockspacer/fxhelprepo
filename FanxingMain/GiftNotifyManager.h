@@ -1,16 +1,20 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <vector>
 #include "third_party/chromium/base/basictypes.h"
 
 class TcpClient;
 
+typedef void(*Notify601)(uint32 userid, const std::string& key);
 class GiftNotifyManager
 {
 public:
     GiftNotifyManager();
     ~GiftNotifyManager();
 
+    void Set601Notify(Notify601 notify601);
+    void Notify(const std::vector<char>& data);
     // 固定的请求，不需要带其他参数
     bool Connect843();
 
@@ -54,5 +58,6 @@ public:
 private:
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
+    Notify601 notify601_;
 };
 

@@ -9,6 +9,7 @@
 class Thread;
 class SocketWrapper;
 
+typedef void(*NotifyFunction)(void* privatedata, const std::vector<char>& data);
 class TcpClient
     //:std::enable_shared_from_this<TcpClient>
 {
@@ -16,6 +17,7 @@ public:
     TcpClient();
     ~TcpClient();
 
+    void SetNotify(NotifyFunction notify, void* privatedata);
     bool Connect(const std::string& ip, unsigned short port);
     bool Send(const std::vector<char>& data);
 
@@ -26,5 +28,7 @@ private:
     std::unique_ptr<Thread> thread_;
     //std::unique_ptr<SocketWrapper> socketWrapper_;
     SOCKET socket_;
+    NotifyFunction notify_;
+    void* privateData_;
 };
 

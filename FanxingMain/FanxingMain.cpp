@@ -52,7 +52,7 @@ bool RunTest()
     uint32 richlevel = 0;
     uint32 ismaster = 0;
     uint32 staruserid = 0;
-    std::string key = "";   
+    std::string key = "";
     std::string ext = "";
 
     curlWrapper.ExtractUsefulInfo_RoomService_enterRoom(&userid,
@@ -64,7 +64,15 @@ bool RunTest()
     ret = giftNotifyManager.Connect8080(roomid, userid, nickname, richlevel,
         ismaster, staruserid, key, ext);
     assert(ret);
+    while (1);
     return ret;
+}
+
+// 接收flash tcp线程收到的数据回调消息
+void globalNotifyFunction_601(uint32 userid, const std::string& key)
+{
+    CurlWrapper curlWrapper;
+    curlWrapper.GiftService_GiftService(userid, key);
 }
 
 void RunUnitTest()
@@ -88,17 +96,12 @@ void test_get_key_data()
     //curlWrapper.ExtractUsefulInfo_RoomService_enterRoom(responsedata);
 }
 
-// 接收flash tcp线程收到的数据回调消息
-void NotifyFunction()
-{
 
-}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
     GlobalInit();
     RunTest();
-    while (1);
     GlobalCleanup();
 	return 0;
 }

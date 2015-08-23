@@ -52,11 +52,17 @@ bool GetFirstPackage(const cmd201package& package,
 
     return true;
 }
-
+void TcpNotify(void* privatedata, const std::vector<char>& data)
+{
+    GiftNotifyManager* manager = static_cast<GiftNotifyManager*>(privatedata);
+    manager->Notify(data);
+    return;
+}
 };
 GiftNotifyManager::GiftNotifyManager()
     :tcpClient_843_(new TcpClient),
-    tcpClient_8080_(new TcpClient)
+    tcpClient_8080_(new TcpClient),
+    notify601_(nullptr)
 {
 
 }
@@ -65,9 +71,16 @@ GiftNotifyManager::~GiftNotifyManager()
 {
 
 }
+void GiftNotifyManager::Notify(const std::vector<char>& data)
+{
+    std::string str(data.begin(), data.end());
+    std::cout << str << std::endl;
+    // 解析json数据，拿到命令号
+}
 
 bool GiftNotifyManager::Connect843()
 {
+    tcpClient_843_->SetNotify((NotifyFunction)TcpNotify, this);
     tcpClient_843_->Connect(targetip, port843);
     std::string str = "<policy-file-request/>";
     std::vector<char> data;
@@ -83,6 +96,7 @@ bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
 {
     std::string decodestr = UrlDecode(ext);// 测试使用
        
+    tcpClient_8080_->SetNotify((NotifyFunction)TcpNotify, this);
     if (!tcpClient_8080_->Connect(targetip, port8080))
     {
         assert(false && L"socket连接失败");

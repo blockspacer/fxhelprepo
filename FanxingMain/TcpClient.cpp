@@ -5,15 +5,25 @@
 
 TcpClient::TcpClient()
     : socket_(0)
+    , notify_(nullptr)
+    , privateData_(nullptr)
 {
     thread_.reset(new Thread);
     thread_->Init(TcpClient::Recv, this);
 }
 
-
 TcpClient::~TcpClient()
-{
+{  
     thread_->Stop();
+    notify_ = nullptr;
+    privateData_ = nullptr;
+    closesocket(socket_);
+}
+
+void TcpClient::SetNotify(NotifyFunction notify, void* privatedata)
+{
+    notify_ = notify;
+    privateData_ = privatedata;
 }
 
 bool TcpClient::Connect(const std::string& ip, unsigned short port)
@@ -69,10 +79,15 @@ bool TcpClient::DoRecv()
 
 bool TcpClient::HandleData(const std::vector<char>& data, int len)
 {
-
-    std::string strdata = BinToAnsiHex(&data[0], len);
-    printf(strdata.c_str());
-    return false;
+    //std::string strdata = BinToAnsiHex(&data[0], len);
+    //printf(strdata.c_str());
+    if (notify_ && privateData_)
+    {
+        std::vector<char> outdata;
+        outdata.assign(&data[0], &data[0] + len);
+        notify_(privateData_, outdata);
+    }
+    return true;
 }
 
 bool TcpClient::Send(const std::vector<char>& data)
