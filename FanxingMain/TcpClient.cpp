@@ -40,7 +40,9 @@ bool TcpClient::Connect(const std::string& ip, unsigned short port)
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = inet_addr(ip.c_str());
-
+    int keepalivetime = 10;
+    setsockopt(socket_, IPPROTO_TCP, SO_KEEPALIVE,
+        (const char FAR *)&keepalivetime, sizeof(keepalivetime));
     rc = connect(socket_, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
     if (SOCKET_ERROR == rc)
     {
