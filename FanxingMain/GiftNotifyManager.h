@@ -7,6 +7,7 @@
 class TcpClient;
 
 typedef void(*Notify601)(uint32 userid, const std::string& key);
+typedef void(*NormalNotify)(const std::string& data);
 class GiftNotifyManager
 {
 public:
@@ -14,6 +15,7 @@ public:
     ~GiftNotifyManager();
 
     void Set601Notify(Notify601 notify601);
+    void SetNormalNotify(NormalNotify normalNotify);
     void Notify(const std::vector<char>& data);
     // 固定的请求，不需要带其他参数
     bool Connect843();
@@ -59,5 +61,6 @@ private:
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
     Notify601 notify601_;
+    NormalNotify normalNotify_;
 };
 

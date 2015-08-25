@@ -49,7 +49,7 @@ namespace
 
 bool CurlWrapper::WriteCallback(const std::string& data)
 {
-    std::cout << data <<std::endl;
+    //std::cout << data <<std::endl;
     //int count = file_.WriteAtCurrentPos(data.c_str(), data.length());
     currentWriteData_ += data;
     return true;
@@ -131,7 +131,7 @@ bool CurlWrapper::LoginRequestWithCookies()
     /* Check for errors */
     if (res != CURLE_OK)
     {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return false;
     }
     // 获取请求业务结果
@@ -150,7 +150,7 @@ bool CurlWrapper::LoginRequestWithCookies()
             retCookies += std::string(temp->data);
             temp = temp->next;
         }
-        std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
         curl_slist_free_all(curllist);
     }
     /* always cleanup */
@@ -185,23 +185,26 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
 
     struct curl_slist *headers = 0;
     headers = curl_slist_append(headers, "Connection: Keep-Alive");
-    headers = curl_slist_append(headers, "Accept - Language: zh - CN");
-    headers = curl_slist_append(headers, "Accept : text / html, application / xhtml + xml, */*");
+    headers = curl_slist_append(headers, "Accept-Language: zh-CN");
+    headers = curl_slist_append(headers, "Accept:*/*");
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    //curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
-    curl_easy_setopt(curl, CURLOPT_REFERER, "www.fanxing.kugou.com");
+    curl_easy_setopt(curl, CURLOPT_REFERER, "http://www.fanxing.kugou.com");
+    std::string postFields = R"(args=[")" + username + R"(",")" + password +
+        R"(","", "0"]&test=)";
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, postFields.size());
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields.c_str());
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
 
     //curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
     // 把请求返回来时设置的cookie保存起来
     std::string path = "d:/cookie_";
     path += MakeReasonablePath(__FUNCTION__) + ".txt";
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
-
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1L);
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
@@ -227,7 +230,7 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
             retCookies += std::string(temp->data);
             temp = temp->next;
         }
-        std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
         curl_slist_free_all(curllist);
     }
     /* always cleanup */
@@ -298,7 +301,7 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
     /* Check for errors */
     if (res != CURLE_OK)
     {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return false;
     }
     // 获取请求业务结果
@@ -317,7 +320,7 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
             retCookies += std::string(temp->data);
             temp = temp->next;
         }
-        std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
         curl_slist_free_all(curllist);
     }
     /* always cleanup */
@@ -384,7 +387,7 @@ bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
     /* Check for errors */
     if (res != CURLE_OK)
     {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return false;
     }
     // 获取请求业务结果
@@ -403,7 +406,7 @@ bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
             retCookies += std::string(temp->data);
             temp = temp->next;
         }
-        std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
         curl_slist_free_all(curllist);
     }
 
@@ -478,7 +481,7 @@ bool CurlWrapper::EnterRoom(uint32 roomid)
     /* Check for errors */
     if (res != CURLE_OK)
     {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return false;
     }
     // 获取请求业务结果
@@ -497,7 +500,7 @@ bool CurlWrapper::EnterRoom(uint32 roomid)
             retCookies += std::string(temp->data);
             temp = temp->next;
         }
-        std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
         curl_slist_free_all(curllist);
     }
 
@@ -574,7 +577,7 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
 	/* Check for errors */
 	if (res != CURLE_OK)
 	{
-		fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+		//fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 		return false;
 	}
 	// 获取请求业务结果
@@ -593,7 +596,7 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
 			retCookies += std::string(temp->data);
 			temp = temp->next;
 		}
-		std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+		//std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
 		curl_slist_free_all(curllist);
 	}
 
@@ -679,7 +682,7 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     /* Check for errors */
     if (res != CURLE_OK)
     {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return false;
     }
     // 获取请求业务结果
@@ -699,7 +702,7 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
             retCookies += std::string(temp->data);
             temp = temp->next;
         }
-        std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
         curl_slist_free_all(curllist);
     }
 
@@ -803,7 +806,7 @@ bool CurlWrapper::GiftService_GiftService(uint32 userid,
     /* Check for errors */
     if (res != CURLE_OK)
     {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return false;
     }
     // 获取请求业务结果
@@ -823,7 +826,7 @@ bool CurlWrapper::GiftService_GiftService(uint32 userid,
             retCookies += std::string(temp->data);
             temp = temp->next;
         }
-        std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
         curl_slist_free_all(curllist);
     }
 

@@ -71,11 +71,22 @@ GiftNotifyManager::~GiftNotifyManager()
 {
 
 }
+
+void GiftNotifyManager::Set601Notify(Notify601 notify601)
+{
+    notify601_ = notify601;
+}
+
+void GiftNotifyManager::SetNormalNotify(NormalNotify normalNotify)
+{
+    normalNotify_ = normalNotify;
+}
+
 void GiftNotifyManager::Notify(const std::vector<char>& data)
 {
     std::string str(data.begin(), data.end());
-    std::cout << str << std::endl;
     // 解析json数据，拿到命令号
+    normalNotify_(str);
 }
 
 bool GiftNotifyManager::Connect843()
@@ -112,5 +123,6 @@ bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
     data_8080.assign(data_for_send.begin(), data_for_send.end());
     data_8080.push_back(0);//这是必须加这个字节的
     tcpClient_8080_->Send(data_8080);
+    std::vector<char> data;
     return true;
 }

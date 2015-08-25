@@ -6,12 +6,32 @@
 #include "TcpClient.h"
 #include "CurlWrapper.h"
 #include "GiftNotifyManager.h"
-
+#include <iostream>
 #include <string>
 #include "third_party/chromium/base/files/file.h"
 #include "third_party/chromium/base/files/file_path.h"
-
+#include <mutex> 
+#include <condition_variable>
 #pragma comment(lib,"ws2_32.lib")
+
+
+uint32 g_userid;
+std::string g_key;
+std::string g_data;
+std::mutex g_mtx;
+std::mutex g_mtx_601;
+std::condition_variable g_cv;
+uint32 g_commandid;
+
+void Lock()
+{
+    g_mtx_601.lock();
+}
+
+void Unlock()
+{
+    g_mtx_601.unlock();
+}
 
 bool GlobalInit()
 {
@@ -28,13 +48,44 @@ bool GlobalCleanup()
     return true;
 }
 
+// 接收flash tcp线程收到的数据回调消息
+void globalNotifyFunction_601(uint32 userid, const std::string& key)
+{
+    Lock();
+    g_commandid = 601;
+    g_userid = userid;
+    g_key = key;
+    std::unique_lock<std::mutex> lck(g_mtx);
+    g_cv.notify_one();
+    Unlock();
+}
+
+void globalNotifyFunction(const std::string& data)
+{
+    Lock();
+    g_commandid = 0;
+    g_data = data;
+    std::unique_lock<std::mutex> lck(g_mtx);
+    g_cv.notify_one();
+    Unlock();
+}
+
+void Wait()
+{
+    std::unique_lock<std::mutex> lck(g_mtx);
+    g_cv.wait(lck);
+}
+
 bool RunTest()
 {
-    uint32 roomid = 1051837;
+    uint32 roomid = 1013785;
     bool ret = false;
     CurlWrapper curlWrapper;
 
     ret = curlWrapper.LoginRequestWithCookies();
+    //std::string username = "fanxingtest001";
+    //std::string password = "1233211234567";
+    //ret = curlWrapper.LoginRequestWithUsernameAndPassword(username, password);
     assert(ret);
     ret = curlWrapper.Services_UserService_UserService_getMyUserDataInfo();
     assert(ret);
@@ -61,25 +112,43 @@ bool RunTest()
     GiftNotifyManager giftNotifyManager;
     ret = giftNotifyManager.Connect843();
     assert(ret);
+    giftNotifyManager.Set601Notify(globalNotifyFunction_601);
+    giftNotifyManager.SetNormalNotify(globalNotifyFunction);
     ret = giftNotifyManager.Connect8080(roomid, userid, nickname, richlevel,
         ismaster, staruserid, key, ext);
     assert(ret);
-    while (1);
+    while (1)
+    {
+        Wait();
+        if (g_commandid == 601)
+        {
+            for (auto i = 0; i < 10; i++)
+            {
+                Sleep(1000);
+                curlWrapper.GiftService_GiftService(g_userid, g_key);
+            }
+        }
+        else if (g_commandid == 0)
+        {
+            std::cout << g_data << std::endl;
+        }
+        else
+        {
+            return false;
+        }
+        
+    }
     return ret;
 }
 
-// 接收flash tcp线程收到的数据回调消息
-void globalNotifyFunction_601(uint32 userid, const std::string& key)
-{
-    CurlWrapper curlWrapper;
-    curlWrapper.GiftService_GiftService(userid, key);
-}
+
 
 void RunUnitTest()
 {
     CurlWrapper curlWrapper;
     curlWrapper.GiftService_GiftService(123, "123456");
 }
+
 void test_get_key_data()
 {
     base::FilePath path(std::wstring(L"d:/response.txt"));
