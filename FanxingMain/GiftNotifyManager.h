@@ -5,6 +5,7 @@
 #include "third_party/chromium/base/basictypes.h"
 
 class TcpClient;
+class Thread;
 
 typedef void(*Notify601)(uint32 userid, const std::string& key);
 typedef void(*NormalNotify)(const std::string& data);
@@ -57,7 +58,11 @@ public:
         uint32 richlevel, uint32 ismaster, uint32 staruserid,
         const std::string& key,/*uint64 keytime, */const std::string& ext);
 
+    bool SendHeartBeat();
+
 private:
+    bool alive;
+    std::unique_ptr<Thread> thread_;
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
     Notify601 notify601_;

@@ -2,7 +2,7 @@
 #include <assert.h>
 #include "TcpClient.h"
 #include "EncodeHelper.h"
-
+#include "Thread.h"
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/json/json.h"
@@ -58,13 +58,23 @@ void TcpNotify(void* privatedata, const std::vector<char>& data)
     manager->Notify(data);
     return;
 }
+
+DWORD HeartBeatFunc(LPVOID lpParam)
+{
+    auto p = reinterpret_cast<GiftNotifyManager*>(lpParam);
+    p->SendHeartBeat();
+    return 0;
+}
+
 };
 GiftNotifyManager::GiftNotifyManager()
     :tcpClient_843_(new TcpClient),
     tcpClient_8080_(new TcpClient),
-    notify601_(nullptr)
+    notify601_(nullptr),
+    thread_(new Thread),
+    alive(false)
 {
-
+    thread_->Init((run_fn)(HeartBeatFunc), this);
 }
 
 GiftNotifyManager::~GiftNotifyManager()
@@ -84,6 +94,7 @@ void GiftNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 
 void GiftNotifyManager::Notify(const std::vector<char>& data)
 {
+    alive = true;
     std::string str(data.begin(), data.end());
     // 解析json数据，拿到命令号
     normalNotify_(str);
@@ -123,6 +134,26 @@ bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
     data_8080.assign(data_for_send.begin(), data_for_send.end());
     data_8080.push_back(0);//这是必须加这个字节的
     tcpClient_8080_->Send(data_8080);
-    std::vector<char> data;
+    thread_->Start();
     return true;
 }
+
+bool GiftNotifyManager::SendHeartBeat()
+{
+    std::string heartbeat = "HEARTBEAT_REQUEST";
+    heartbeat.append("\r\n");
+    std::vector<char> heardbeadvec;
+    heardbeadvec.assign(heartbeat.begin(), heartbeat.end());
+    while (1)
+    {
+        Sleep(10000);
+        if (alive)
+        {
+            tcpClient_8080_->Send(heardbeadvec);
+        }
+    }
+
+    return true;
+}
+
+
