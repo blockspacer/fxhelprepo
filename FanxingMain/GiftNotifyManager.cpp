@@ -97,6 +97,37 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
     alive = true;
     std::string str(data.begin(), data.end());
     // 解析json数据，拿到命令号
+    if (str.find(R"("cmd":601)")>0)
+    {
+        //解析json数据
+        Json::Reader reader;
+        Json::Value rootdata(Json::objectValue);
+        if (!reader.parse(str, rootdata, false))
+        {
+            return ;
+        }
+
+        // 暂时没有必要检测status的值
+        Json::Value jvCmd(Json::intValue);
+        int cmd = rootdata.get(std::string("cmd"), jvCmd).asInt();
+        Json::Value jvUserid(Json::stringValue);
+        std::string strUserid = rootdata.get(std::string("userid"), jvUserid).asString();
+        uint32 userid = 0;
+        base::StringToUint(strUserid, &userid);
+        Json::Value jvKey(Json::stringValue);
+        std::string key = rootdata.get(std::string("key"), jvKey).asString();
+        notify601_(userid, key);
+    }
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(str, rootdata, false))
+    {
+        return;
+    }
+    // 暂时没有必要检测status的值
+    Json::Value jvCmd(Json::intValue);
+    int cmd = rootdata.get(std::string("cmd"), jvCmd).asInt();
+
     normalNotify_(str);
 }
 
