@@ -134,7 +134,7 @@ bool RunTest()
         }
         else
         {
-            return false;
+            std::cout << g_data << std::endl;
         }
         
     }

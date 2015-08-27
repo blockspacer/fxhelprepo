@@ -97,7 +97,7 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
     alive = true;
     std::string str(data.begin(), data.end());
     // 解析json数据，拿到命令号
-    if (str.find(R"("cmd":601)")>0)
+    if (str.find(R"("cmd":601)")!=std::string::npos)
     {
         //解析json数据
         Json::Reader reader;
