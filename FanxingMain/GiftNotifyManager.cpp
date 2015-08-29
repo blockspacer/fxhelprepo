@@ -94,12 +94,10 @@ void GiftNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 
 void GiftNotifyManager::Notify(const std::vector<char>& data)
 {
-    alive = true;
-    std::string str(data.begin(), data.end());
-    // 解析json数据，拿到命令号
-    if (str.find(R"("cmd":601)")!=std::string::npos)
+    try
     {
-        //解析json数据
+        alive = true;
+        std::string str(data.begin(), data.end());
         Json::Reader reader;
         Json::Value rootdata(Json::objectValue);
         if (!reader.parse(str, rootdata, false))
@@ -108,27 +106,33 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
         }
 
         // 暂时没有必要检测status的值
-        Json::Value jvCmd(Json::intValue);
+        Json::Value jvCmd(Json::ValueType::intValue);
         int cmd = rootdata.get(std::string("cmd"), jvCmd).asInt();
-        Json::Value jvUserid(Json::stringValue);
-        std::string strUserid = rootdata.get(std::string("userid"), jvUserid).asString();
-        uint32 userid = 0;
-        base::StringToUint(strUserid, &userid);
-        Json::Value jvKey(Json::stringValue);
-        std::string key = rootdata.get(std::string("key"), jvKey).asString();
-        notify601_(userid, key);
-    }
-    Json::Reader reader;
-    Json::Value rootdata(Json::objectValue);
-    if (!reader.parse(str, rootdata, false))
-    {
-        return;
-    }
-    // 暂时没有必要检测status的值
-    Json::Value jvCmd(Json::intValue);
-    int cmd = rootdata.get(std::string("cmd"), jvCmd).asInt();
+        if (cmd==601)
+        {
+            // 这个数据包里面没有userid了
+            //Json::Value jvUserid(Json::stringValue);
+            //std::string strUserid = rootdata.get(std::string("userid"), jvUserid).asString();
+            //uint32 userid = 0;
+            //base::StringToUint(strUserid, &userid);
 
-    normalNotify_(str);
+            Json::Value jvContent(Json::ValueType::objectValue);
+            Json::Value  content = rootdata.get("content", jvContent);
+            if (!content.isNull())
+            {
+                Json::Value jvKey(Json::ValueType::stringValue);
+                std::string key = content.get(std::string("token"), jvKey).asString();
+                if (!key.empty())
+                {
+                    notify601_(key);
+                }
+            }
+        }
+        normalNotify_(str);
+    }
+    catch (...)
+    {
+    }
 }
 
 bool GiftNotifyManager::Connect843()

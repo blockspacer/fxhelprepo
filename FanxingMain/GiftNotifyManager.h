@@ -7,7 +7,7 @@
 class TcpClient;
 class Thread;
 
-typedef void(*Notify601)(uint32 userid, const std::string& key);
+typedef void(*Notify601)(const std::string& key);
 typedef void(*NormalNotify)(const std::string& data);
 class GiftNotifyManager
 {

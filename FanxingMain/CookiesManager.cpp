@@ -26,6 +26,7 @@ bool InternalInternetGetCookie(const std::string& url, std::string* cookie)
         
     if (!InternetGetCookieA(url.c_str(), cookiename.c_str(), nullptr, &dwSize))
     {
+        assert(false && L"请去掉IE浏览器的保护模式，才能获取到cookies");
         dwError = GetLastError();
         return false;
     }

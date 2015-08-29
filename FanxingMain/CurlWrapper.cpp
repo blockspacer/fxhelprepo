@@ -88,6 +88,7 @@ bool CurlWrapper::LoginRequestWithCookies()
     bool ret = false;
     if (!CookiesManager::GetCookies(fanxingurl, &cookies))
     {
+        assert(false);
         return false;
     }
 
@@ -107,9 +108,9 @@ bool CurlWrapper::LoginRequestWithCookies()
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 
     struct curl_slist *headers = 0;
-    headers = curl_slist_append(headers, "Connection: Keep-Alive");
-    headers = curl_slist_append(headers,  "Accept - Language: zh - CN");
-    headers = curl_slist_append(headers, "Accept : text / html, application / xhtml + xml, */*");
+    headers = curl_slist_append(headers, "Connection:Keep-Alive");
+    headers = curl_slist_append(headers,  "Accept-Language:zh-CN");
+    headers = curl_slist_append(headers, "Accept:text/html,application/xhtml+xml,*/*");
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
@@ -184,8 +185,8 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 
     struct curl_slist *headers = 0;
-    headers = curl_slist_append(headers, "Connection: Keep-Alive");
-    headers = curl_slist_append(headers, "Accept-Language: zh-CN");
+    headers = curl_slist_append(headers, "Connection:Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Language:zh-CN");
     headers = curl_slist_append(headers, "Accept:*/*");
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -249,6 +250,7 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
     bool ret = false;
     if (!CookiesManager::GetCookies(fanxingurl, &cookies))
     {
+        assert(false);
         return false;
     }
 
@@ -340,6 +342,7 @@ bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
     bool ret = false;
     if (!CookiesManager::GetCookies(fanxingurl, &cookies))
     {
+        assert(false);
         return false;
     }
 
@@ -428,11 +431,13 @@ bool CurlWrapper::EnterRoom(uint32 roomid)
     bool ret = false;
     if (!CookiesManager::GetCookies(fanxingurl, &temp))
     {
+        assert(false);
         return false;
     }
     cookies += temp;
     if (!CookiesManager::GetCookies(kugouurl, &temp))
     {
+        assert(false);
         return false;
     }
     cookies += ";"+temp;
@@ -522,11 +527,13 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
 	bool ret = false;
 	if (!CookiesManager::GetCookies(fanxingurl, &temp))
 	{
+        assert(false);
 		return false;
 	}
 	cookies += temp;
 	if (!CookiesManager::GetCookies(kugouurl, &temp))
 	{
+        assert(false);
 		return false;
 	}
 	cookies += ";" + temp;
@@ -619,11 +626,13 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     bool ret = false;
     if (!CookiesManager::GetCookies(fanxingurl, &temp))
     {
+        assert(false);
         return false;
     }
     cookies += temp;
     if (!CookiesManager::GetCookies(kugouurl, &temp))
     {
+        assert(false);
         return false;
     }
     cookies += ";" + temp;
@@ -736,11 +745,13 @@ bool CurlWrapper::GiftService_GiftService(uint32 userid,
     bool ret = false;
     if (!CookiesManager::GetCookies(fanxingurl, &temp))
     {
+        assert(false);
         return false;
     }
     cookies += temp;
     if (!CookiesManager::GetCookies(kugouurl, &temp))
     {
+        assert(false);
         return false;
     }
     cookies += ";" + temp;

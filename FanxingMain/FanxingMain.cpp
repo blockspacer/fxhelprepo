@@ -49,11 +49,10 @@ bool GlobalCleanup()
 }
 
 // 接收flash tcp线程收到的数据回调消息
-void globalNotifyFunction_601(uint32 userid, const std::string& key)
+void globalNotifyFunction_601(const std::string& key)
 {
     Lock();
     g_commandid = 601;
-    g_userid = userid;
     g_key = key;
     std::unique_lock<std::mutex> lck(g_mtx);
     g_cv.notify_one();
@@ -78,7 +77,7 @@ void Wait()
 
 bool RunTest()
 {
-    uint32 roomid = 1013785;
+    uint32 roomid = 1034291;
     bool ret = false;
     CurlWrapper curlWrapper;
 
@@ -108,6 +107,8 @@ bool RunTest()
 
     curlWrapper.ExtractUsefulInfo_RoomService_enterRoom(&userid,
         &nickname, &richlevel, &staruserid, &key, &ext);
+
+    g_userid = userid;
 
     GiftNotifyManager giftNotifyManager;
     ret = giftNotifyManager.Connect843();
@@ -147,6 +148,25 @@ void RunUnitTest()
 {
     CurlWrapper curlWrapper;
     curlWrapper.GiftService_GiftService(123, "123456");
+}
+
+void Parse601Test()
+{ 
+    base::FilePath path(std::wstring(L"d:/601.txt"));
+    base::File fileobject;
+    fileobject.Initialize(path, base::File::FLAG_READ | base::File::FLAG_OPEN);
+    bool valid = fileobject.IsValid();
+    fileobject.Seek(base::File::FROM_BEGIN, 0L);
+    auto len = fileobject.GetLength();
+    std::string responsedata;
+    responsedata.resize(len);
+    auto readsize = fileobject.ReadAtCurrentPos(&responsedata[0], len);
+
+    GiftNotifyManager giftNotifyManager;
+    giftNotifyManager.Set601Notify(globalNotifyFunction_601);
+    std::vector<char> data601;
+    data601.assign(responsedata.begin(), responsedata.end());
+    giftNotifyManager.Notify(data601);
 }
 
 void test_get_key_data()
