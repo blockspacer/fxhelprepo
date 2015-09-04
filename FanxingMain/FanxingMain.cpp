@@ -12,6 +12,8 @@
 #include "third_party/chromium/base/files/file_path.h"
 #include <mutex> 
 #include <condition_variable>
+#include "SearchHelper.h"
+
 #pragma comment(lib,"ws2_32.lib")
 
 
@@ -186,12 +188,19 @@ void test_get_key_data()
 }
 
 
+void GetAllExpiredUser();
 
 int _tmain(int argc, _TCHAR* argv[])
 {
     GlobalInit();
-    RunTest();
+    //RunTest();
+    GetAllExpiredUser();
     GlobalCleanup();
 	return 0;
 }
 
+void GetAllExpiredUser()
+{
+    SearchHelper searchHelper;
+    searchHelper.Run();
+}
