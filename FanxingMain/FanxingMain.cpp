@@ -202,5 +202,7 @@ int _tmain(int argc, _TCHAR* argv[])
 void GetAllExpiredUser()
 {
     SearchHelper searchHelper;
+    // 最后一次上播在20日以前，设置拿40页家族数据
+    searchHelper.SetFilter(20,20);
     searchHelper.Run();
 }
