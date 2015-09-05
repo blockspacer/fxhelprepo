@@ -18,6 +18,10 @@ public:
 // 对话框数据
 	enum { IDD = IDD_FANXING_DIALOG };
 
+    enum
+    {
+        WM_USER_01 = WM_USER + 1
+    };
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
@@ -35,6 +39,8 @@ protected:
     afx_msg void OnBnClickedButton1();
 
 private:
+    void Notify(const std::string& data);
+
     CExplorer1 web_;
     std::shared_ptr<NetworkHelper> network_;
 public:
@@ -45,4 +51,5 @@ public:
     afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
     afx_msg void OnBnClickedBtnGetmsg();
     afx_msg void OnBnClickedBtnTest();
+    LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
 };

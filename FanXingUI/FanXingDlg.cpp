@@ -54,6 +54,9 @@ CFanXingDlg::CFanXingDlg(std::shared_ptr<NetworkHelper> network,
 	: CDialogEx(CFanXingDlg::IDD, pParent)
     , network_(network)
 {
+    network_->SetNotify(
+        std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
+
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
 }
 
@@ -64,8 +67,8 @@ void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
-	ON_WM_SYSCOMMAND()
-	ON_WM_PAINT()
+    ON_WM_SYSCOMMAND()
+    ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BUTTON1, &CFanXingDlg::OnBnClickedButton1)
     ON_BN_CLICKED(IDC_BUTTON_CLICK, &CFanXingDlg::OnBnClickedButtonClick)
@@ -75,6 +78,7 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_WM_LBUTTONDOWN()
     ON_BN_CLICKED(IDC_BTN_GETMSG, &CFanXingDlg::OnBnClickedBtnGetmsg)
     ON_BN_CLICKED(IDC_BTN_TEST, &CFanXingDlg::OnBnClickedBtnTest)
+    ON_MESSAGE(WM_USER_01, &CFanXingDlg::OnNotifyMessage)
 END_MESSAGE_MAP()
 
 
@@ -298,5 +302,15 @@ void CFanXingDlg::OnBnClickedBtnTest()
             handler.GetChatMessage();
         }
     }
+}
 
+void CFanXingDlg::Notify(const std::string& data)
+{
+    // 发送数据给窗口
+    this->SendMessage(WM_USER_01, 0, 0);
+}
+
+LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
+{
+    return 0;
 }
