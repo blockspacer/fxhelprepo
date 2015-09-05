@@ -41,9 +41,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FanXing.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="FanXingDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -56,20 +53,23 @@
     <ClCompile Include="WebHandler.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="FanXingUI.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="FanXing.rc">
+    <Image Include="res\FanXingUI.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FanXingUI.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\FanXing.rc2">
+    <None Include="res\FanXingUI.rc2">
       <Filter>资源文件</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\FanXing.ico">
-      <Filter>资源文件</Filter>
-    </Image>
   </ItemGroup>
 </Project>

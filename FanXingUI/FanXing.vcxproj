@@ -112,7 +112,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="explorer1.cpp" />
-    <ClCompile Include="FanXing.cpp" />
+    <ClCompile Include="FanXingUI.cpp" />
     <ClCompile Include="FanXingDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -121,13 +121,13 @@
     <ClCompile Include="WebHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="FanXing.rc" />
+    <ResourceCompile Include="FanXingUI.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\FanXing.rc2" />
+    <None Include="res\FanXingUI.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\FanXing.ico" />
+    <Image Include="res\FanXingUI.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
