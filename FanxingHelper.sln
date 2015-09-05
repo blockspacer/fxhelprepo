@@ -39,7 +39,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zlib", "zlib", "{942CB7F3-B
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "third_party\chromium\third_party\zlib\zlib.vcxproj", "{57997958-0CDB-A2A6-B81A-C5CADFC6E484}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FanXing", "FanXingUI\FanXing.vcxproj", "{E9035218-3760-48C7-AC18-8FC5E5205BD0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FanXingUI", "FanXingUI\FanXing.vcxproj", "{E9035218-3760-48C7-AC18-8FC5E5205BD0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Network", "Network\Network.vcxproj", "{2147CB51-23F6-4022-8E4A-291B70570CB7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -113,6 +115,12 @@ Global
 		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Release|Win32.ActiveCfg = Release|Win32
 		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Release|Win32.Build.0 = Release|Win32
 		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Release|x64.ActiveCfg = Release|Win32
+		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Debug|Win32.Build.0 = Debug|Win32
+		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Debug|x64.ActiveCfg = Debug|Win32
+		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Release|Win32.ActiveCfg = Release|Win32
+		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Release|Win32.Build.0 = Release|Win32
+		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

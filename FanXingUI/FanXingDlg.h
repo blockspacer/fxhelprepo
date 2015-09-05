@@ -4,6 +4,8 @@
 
 #pragma once
 #include "explorer1.h"
+#include <memory>
+#include "NetworkHelper.h"
 
 
 // CFanXingDlg 对话框
@@ -11,7 +13,7 @@ class CFanXingDlg : public CDialogEx
 {
 // 构造
 public:
-	CFanXingDlg(CWnd* pParent = NULL);	// 标准构造函数
+    CFanXingDlg(std::shared_ptr<NetworkHelper> network, CWnd* pParent = NULL);
 
 // 对话框数据
 	enum { IDD = IDD_FANXING_DIALOG };
@@ -34,6 +36,7 @@ protected:
 
 private:
     CExplorer1 web_;
+    std::shared_ptr<NetworkHelper> network_;
 public:
     afx_msg void OnBnClickedButtonClick();
     afx_msg void OnBnClickedButtonRewarstar();

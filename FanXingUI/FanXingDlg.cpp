@@ -49,10 +49,12 @@ END_MESSAGE_MAP()
 
 
 
-CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
+CFanXingDlg::CFanXingDlg(std::shared_ptr<NetworkHelper> network, 
+    CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFanXingDlg::IDD, pParent)
+    , network_(network)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
 }
 
 void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
