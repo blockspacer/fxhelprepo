@@ -164,6 +164,42 @@ void WebHandler::Execute()
     }
 }
 
+void WebHandler::Login(const CString& userName, const CString& pwd)
+{
+    CComQIPtr<IHTMLElementCollection> spElementCollection;
+    HRESULT hr = htmlDocument_->get_all(&spElementCollection);	//取得表单集合
+    if (FAILED(hr))
+        return;
+
+    auto loginLabel = GetElement(spElementCollection, L"id", L"fxLogin");
+    if (!loginLabel)
+        return;
+
+    loginLabel->click();
+    WaitFor(50);
+
+    auto username = GetElement(spElementCollection, L"name", L"username");
+    if (username)
+    {
+        username->click();
+        CString temp = userName;
+        username->put_innerText(temp.GetBuffer());
+    }
+    auto password = GetElement(spElementCollection, L"name", L"password");
+    if (password)
+    {
+        password->click();
+        CString temp = pwd;
+        password->put_innerText(temp.GetBuffer());
+    }
+    auto login_btn = GetElement(spElementCollection, L"name", L"login_btn");
+    if (login_btn)
+    {
+        login_btn->click();
+    }
+}
+
+
 void WebHandler::ClickXY(HWND hwnd, int x, int y)
 {
     ::PostMessage(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(x, y));

@@ -98,6 +98,8 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
     {
         alive = true;
         std::string str(data.begin(), data.end());
+        normalNotify_(str);
+
         Json::Reader reader;
         Json::Value rootdata(Json::objectValue);
         if (!reader.parse(str, rootdata, false))
@@ -128,7 +130,6 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
                 }
             }
         }
-        normalNotify_(str);
     }
     catch (...)
     {

@@ -111,10 +111,9 @@ BOOL CFanXingDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
-    web_.Navigate(L"http://fanxing.kugou.com/1021987", NULL, NULL, NULL, NULL);
-    //web_.Navigate(L"http://www.baidu.com/", NULL, NULL, NULL, NULL);
+    web_.Navigate(L"http://fanxing.kugou.com", NULL, NULL, NULL, NULL);
 
-    SetDlgItemText(IDC_EDIT_NAV, L"http://fanxing.kugou.com/1021987");
+    SetDlgItemText(IDC_EDIT_NAV, L"1057284");
     SetDlgItemInt(IDC_EDIT_X, 0);
     SetDlgItemInt(IDC_EDIT_Y, 0);
     SetDlgItemText(IDC_EDIT_GIFT, L"普通,红心");
@@ -174,6 +173,10 @@ HCURSOR CFanXingDlg::OnQueryDragIcon()
 // 登录功能
 void CFanXingDlg::OnBnClickedButton1()
 {
+    CString username;
+    CString password;
+    GetDlgItemText(IDC_EDIT_Username, username);
+    GetDlgItemText(IDC_EDIT_Password, password);
     CComQIPtr<IDispatch> iDisp(web_.get_Document());
     if (iDisp)
     {
@@ -182,7 +185,8 @@ void CFanXingDlg::OnBnClickedButton1()
         if (!FAILED(hr))
         {
             WebHandler handler(iDocu);
-            handler.Execute();
+            //handler.Execute();
+            handler.Login(username, password);
         }
     }
 }
@@ -190,10 +194,14 @@ void CFanXingDlg::OnBnClickedButton1()
 //跳转页面功能
 void CFanXingDlg::OnBnClickedButtonNav()
 {
-    CString strUrl;
-    GetDlgItemText(IDC_EDIT_NAV, strUrl);
+    CString strRoomid;
+    GetDlgItemText(IDC_EDIT_NAV, strRoomid);
+    CString strUrl = L"http://fanxing.kugou.com/" + strRoomid;
     VARIANT vtNull = {};
     web_.Navigate(strUrl, &vtNull, &vtNull, &vtNull, &vtNull);
+
+    // 获取房间信息，启动功能
+    network_->EnterRoom(strRoomid.GetBuffer());
 }
 
 //指定位置点击功能

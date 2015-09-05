@@ -8,6 +8,7 @@ public:
     ~WebHandler();
 
     void Execute();
+    void Login(const CString& userName, const CString& pwd);
     void ClickXY(HWND hwnd, int x, int y);
     void RewardStar();
     void RewardGift(const std::wstring& giftNames);
