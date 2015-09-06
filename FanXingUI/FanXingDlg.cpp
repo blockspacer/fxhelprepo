@@ -167,6 +167,10 @@ void CFanXingDlg::OnPaint()
 	}
 }
 
+void CFanXingDlg::OnClose()
+{
+    network_->RemoveNotify();
+}
 //当用户拖动最小化窗口时系统调用此函数取得光标
 //显示。
 HCURSOR CFanXingDlg::OnQueryDragIcon()
@@ -307,10 +311,18 @@ void CFanXingDlg::OnBnClickedBtnTest()
 void CFanXingDlg::Notify(const std::string& data)
 {
     // 发送数据给窗口
-    this->SendMessage(WM_USER_01, 0, 0);
+    messageMutex_.lock();
+    messageQueen_.push_back(data);
+    messageMutex_.unlock();
+    this->PostMessage(WM_USER_01, 0, 0);
 }
 
 LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 {
+    std::vector<std::string> messages;
+    messageMutex_.lock();
+    messages.swap(messageQueen_);
+    messageMutex_.unlock();
+    
     return 0;
 }
