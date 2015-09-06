@@ -6,7 +6,7 @@
 
 class CurlWrapper;
 class GiftNotifyManager;
-typedef std::function<void(const std::string&)> notifyfn;
+typedef std::function<void(const std::wstring&)> notifyfn;
 class NetworkHelper
 {
 public:
@@ -20,7 +20,7 @@ public:
     void RemoveNotify();
     bool EnterRoom(const std::wstring& strroomid);
 private:
-    void NotifyCallback(const std::string& data);
+    void NotifyCallback(const std::wstring& message);
     void NotifyCallback601(const std::string& data);
 
     std::unique_ptr<CurlWrapper> curlWrapper_;

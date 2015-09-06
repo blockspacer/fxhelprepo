@@ -53,6 +53,7 @@ CFanXingDlg::CFanXingDlg(std::shared_ptr<NetworkHelper> network,
     CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFanXingDlg::IDD, pParent)
     , network_(network)
+    , count(0)
 {
     network_->SetNotify(
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
@@ -64,6 +65,7 @@ void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_EXPLORER1, web_);
+    DDX_Control(pDX, IDC_LIST1, InfoList_);
 }
 
 BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
@@ -117,7 +119,7 @@ BOOL CFanXingDlg::OnInitDialog()
 
     web_.Navigate(L"http://fanxing.kugou.com", NULL, NULL, NULL, NULL);
 
-    SetDlgItemText(IDC_EDIT_NAV, L"1057284");
+    SetDlgItemText(IDC_EDIT_NAV, L"1014619");
     SetDlgItemInt(IDC_EDIT_X, 0);
     SetDlgItemInt(IDC_EDIT_Y, 0);
     SetDlgItemText(IDC_EDIT_GIFT, L"普通,红心");
@@ -308,21 +310,26 @@ void CFanXingDlg::OnBnClickedBtnTest()
     }
 }
 
-void CFanXingDlg::Notify(const std::string& data)
+void CFanXingDlg::Notify(const std::wstring& message)
 {
     // 发送数据给窗口
     messageMutex_.lock();
-    messageQueen_.push_back(data);
+    messageQueen_.push_back(message);
     messageMutex_.unlock();
     this->PostMessage(WM_USER_01, 0, 0);
 }
 
 LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 {
-    std::vector<std::string> messages;
+    std::vector<std::wstring> messages;
     messageMutex_.lock();
     messages.swap(messageQueen_);
     messageMutex_.unlock();
+    
+    for (auto str : messages)
+    {
+        InfoList_.InsertString(count++, str.c_str());
+    }
     
     return 0;
 }

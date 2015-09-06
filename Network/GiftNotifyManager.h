@@ -9,7 +9,7 @@ class TcpClient;
 class Thread;
 
 typedef std::function<void(const std::string& key)> Notify601;
-typedef std::function<void(const std::string& data)> NormalNotify;
+typedef std::function<void(const std::wstring& data)> NormalNotify;
 class GiftNotifyManager
 {
 public:

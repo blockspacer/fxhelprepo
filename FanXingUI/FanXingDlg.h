@@ -8,6 +8,7 @@
 #include "explorer1.h"
 
 #include "NetworkHelper.h"
+#include "afxwin.h"
 
 
 // CFanXingDlg ¶Ô»°¿ò
@@ -49,13 +50,16 @@ protected:
     afx_msg void OnBnClickedButton1();
 
 private:
-    void Notify(const std::string& data);
+    void Notify(const std::wstring& message);
 
     CExplorer1 web_;
     std::shared_ptr<NetworkHelper> network_;
 
 
     std::mutex messageMutex_;
-    std::vector<std::string> messageQueen_;
+    std::vector<std::wstring> messageQueen_;
 
+public:
+    CListBox InfoList_;
+    int count;
 };

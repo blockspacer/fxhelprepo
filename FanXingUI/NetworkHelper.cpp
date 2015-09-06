@@ -91,14 +91,14 @@ bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
 }
 
 // giftNotifyManager_ 线程回调
-void NetworkHelper::NotifyCallback(const std::string& data)
+void NetworkHelper::NotifyCallback(const std::wstring& message)
 {
     // 解析数据包
 
 
     if (notify_)
     {
-        notify_(data);
+        notify_(message);
     }
 }
 

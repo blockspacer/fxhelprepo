@@ -7,6 +7,7 @@
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/json/json.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 
 
@@ -68,41 +69,44 @@ DWORD HeartBeatFunc(LPVOID lpParam)
 
 std::string Packet = "";
 int pos = 0;
-bool HandleMixPackage(std::string* package)
+// 在网络积压数据包的时候，可能返回多个完整的数据包
+std::vector<std::string> HandleMixPackage(const std::string& package)
 {
-    auto it = package->begin();
-    while (it!=package->end())
+    std::vector<std::string> retVec;
+    auto it = package.begin();
+    auto sentinel = it;
+    while (it!=package.end())
     { 
         switch (*it)
         {
         case '{':
             pos++;
+            if (pos==1)
+            {
+                sentinel = it;
+            }
             break;
         case '}':
             pos--;
+            if (pos == 0)
+            {
+                Packet += std::string(sentinel, it+1);
+                retVec.push_back(Packet);
+                Packet = "";
+            }
             break;
         default:
             break;
         }
-
-        it++;
-        if (pos==0)
-        {
-            break;// 一个完整的json数据
-        }        
+        it++;    
     }
 
     if(pos!=0) // 如果到结束还不是一个完整的json串，要等下一个数据包
     {
-        Packet += *package;
-        return false;
+        Packet = std::string(sentinel,it);
     }
 
-    Packet += std::string(package->begin(), it);
-    std::string temp(it, package->end());
-    *package = Packet;
-    Packet = temp;
-    return true;
+    return retVec;
 }
 
 };
@@ -134,50 +138,50 @@ void GiftNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 void GiftNotifyManager::Notify(const std::vector<char>& data)
 {
     // 需要处理粘包问题
-    std::string str(data.begin(), data.end());
-    if (!HandleMixPackage(&str))
+    std::string datastr(data.begin(), data.end());
+    std::vector<std::string> packages = HandleMixPackage(datastr);
+    //{
+    //    normalNotify_(L"Max package****************");
+    //    return;
+    //}
+
+    for (auto package : packages)
     {
-        normalNotify_("Max package****************");
-        return;
-    }
-
-    try
-    {
-        alive = true;
-        Json::Reader reader;
-        Json::Value rootdata(Json::objectValue);
-        if (!reader.parse(str, rootdata, false))
+        try
         {
-            return ;
-        }
-
-        // 暂时没有必要检测status的值
-        Json::Value jvCmd(Json::ValueType::intValue);
-        int cmd = rootdata.get(std::string("cmd"), jvCmd).asInt();
-        if (cmd==601)
-        {
-            // 这个数据包里面没有userid了
-            //Json::Value jvUserid(Json::stringValue);
-            //std::string strUserid = rootdata.get(std::string("userid"), jvUserid).asString();
-            //uint32 userid = 0;
-            //base::StringToUint(strUserid, &userid);
-
-            Json::Value jvContent(Json::ValueType::objectValue);
-            Json::Value  content = rootdata.get("content", jvContent);
-            if (!content.isNull())
+            alive = true;
+            Json::Reader reader;
+            Json::Value rootdata(Json::objectValue);
+            if (!reader.parse(package, rootdata, false))
             {
-                Json::Value jvKey(Json::ValueType::stringValue);
-                std::string key = content.get(std::string("token"), jvKey).asString();
-                if (!key.empty())
+                return;
+            }
+
+            // 暂时没有必要检测status的值
+            Json::Value jvCmd(Json::ValueType::intValue);
+            int cmd = rootdata.get(std::string("cmd"), jvCmd).asInt();
+            if (cmd == 601)
+            {
+                Json::Value jvContent(Json::ValueType::objectValue);
+                Json::Value  content = rootdata.get("content", jvContent);
+                if (!content.isNull())
                 {
-                    notify601_(key);
+                    Json::Value jvKey(Json::ValueType::stringValue);
+                    std::string key = content.get(std::string("token"), jvKey).asString();
+                    if (!key.empty())
+                    {
+                        notify601_(key);
+                    }
                 }
             }
+
+            // 处理数据包,转换成输出界面信息
+            std::wstring wstr = base::UTF8ToWide(package);
+            normalNotify_(wstr);
         }
-        normalNotify_(str);
-    }
-    catch (...)
-    {
+        catch (...)
+        {
+        }
     }
 }
 
@@ -199,7 +203,8 @@ bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
     const std::string& ext)
 {
     std::string decodestr = UrlDecode(ext);// 测试使用
-       
+    Packet = "";
+    pos = 0;
     tcpClient_8080_->SetNotify((NotifyFunction)TcpNotify, this);
     if (!tcpClient_8080_->Connect(targetip, port8080))
     {
