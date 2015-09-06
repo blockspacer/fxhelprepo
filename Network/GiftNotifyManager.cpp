@@ -66,6 +66,45 @@ DWORD HeartBeatFunc(LPVOID lpParam)
     return 0;
 }
 
+std::string Packet = "";
+int pos = 0;
+bool HandleMixPackage(std::string* package)
+{
+    auto it = package->begin();
+    while (it!=package->end())
+    { 
+        switch (*it)
+        {
+        case '{':
+            pos++;
+            break;
+        case '}':
+            pos--;
+            break;
+        default:
+            break;
+        }
+
+        it++;
+        if (pos==0)
+        {
+            break;// 一个完整的json数据
+        }        
+    }
+
+    if(pos!=0) // 如果到结束还不是一个完整的json串，要等下一个数据包
+    {
+        Packet += *package;
+        return false;
+    }
+
+    Packet += std::string(package->begin(), it);
+    std::string temp(it, package->end());
+    *package = Packet;
+    Packet = temp;
+    return true;
+}
+
 };
 GiftNotifyManager::GiftNotifyManager()
     :tcpClient_843_(new TcpClient),
@@ -94,10 +133,17 @@ void GiftNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 
 void GiftNotifyManager::Notify(const std::vector<char>& data)
 {
+    // 需要处理粘包问题
+    std::string str(data.begin(), data.end());
+    if (!HandleMixPackage(&str))
+    {
+        normalNotify_("Max package****************");
+        return;
+    }
+
     try
     {
         alive = true;
-        std::string str(data.begin(), data.end());
         Json::Reader reader;
         Json::Value rootdata(Json::objectValue);
         if (!reader.parse(str, rootdata, false))
@@ -137,7 +183,8 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
 
 bool GiftNotifyManager::Connect843()
 {
-    tcpClient_843_->SetNotify((NotifyFunction)TcpNotify, this);
+    // 843端口的连接数据没什么用
+    //tcpClient_843_->SetNotify((NotifyFunction)TcpNotify, this);
     tcpClient_843_->Connect(targetip, port843);
     std::string str = "<policy-file-request/>";
     std::vector<char> data;
