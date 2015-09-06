@@ -105,6 +105,12 @@ void NetworkHelper::NotifyCallback(const std::wstring& message)
 // giftNotifyManager_ 线程回调
 void NetworkHelper::NotifyCallback601(const std::string& data)
 {
-    bool ret = curlWrapper_->GiftService_GiftService(userid, data);
+    std::wstring responsedata;
+    for (int i = 0; i < 20; i++)
+    {
+        bool ret = curlWrapper_->GiftService_GiftService(
+            userid, data, &responsedata);
+    }
+    
     return;
 }

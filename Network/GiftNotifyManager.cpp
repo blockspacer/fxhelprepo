@@ -140,10 +140,6 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
     // 需要处理粘包问题
     std::string datastr(data.begin(), data.end());
     std::vector<std::string> packages = HandleMixPackage(datastr);
-    //{
-    //    normalNotify_(L"Max package****************");
-    //    return;
-    //}
 
     for (auto package : packages)
     {

@@ -738,7 +738,7 @@ bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom(
 // GET /Services.php?act=GiftService.GiftService&args=["1020846","1a392af9cd9a2c9276c956bbb09f9676_vs0601"]&mtd=tryGetHappyFreeCoin&ran=0.3374897129466474 HTTP/1.1
 // GET /Services.php?act=GiftService%2EGiftService&args=%5B%221020846%22%2C%221a392af9cd9a2c9276c956bbb09f9676_vs0601%22%5D&mtd=tryGetHappyFreeCoin&ran=0%2E3377602129466474 HTTP/1.1
 bool CurlWrapper::GiftService_GiftService(uint32 userid,
-    const std::string& key_601)
+    const std::string& key_601, std::wstring* responsedata)
 {
     std::string cookies = "";
     std::string temp = "";
@@ -846,6 +846,9 @@ bool CurlWrapper::GiftService_GiftService(uint32 userid,
 
     if (responsecode == 200)
     {
+        // 解析返回的数据通知
+        //response_of_GiftService_GiftService_;
+        *responsedata = L"抢币数据通知";
         return true;
     }
     return false;
