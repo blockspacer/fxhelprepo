@@ -26,3 +26,8 @@
 *.exe
 *.out
 *.app
+
+# Local database
+*.opensdf
+*.sdf
+*.suo
