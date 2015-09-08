@@ -109,6 +109,186 @@ std::vector<std::string> HandleMixPackage(const std::string& package)
     return retVec;
 }
 
+uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name)
+{
+    uint32 ret = 0;
+    Json::Value jvdefault(Json::ValueType::objectValue);
+    auto getdata = jvalue.get(name, jvdefault);
+    if (getdata.isInt())
+    {
+        ret = getdata.asInt();
+    }
+    else if (getdata.isString())
+    {
+        base::StringToUint(getdata.asString(), &ret);
+    }
+
+    return ret;
+}
+
+bool CommandHandle_100(const Json::Value& jvalue, std::string* outmsg)
+{
+    // 全站广播消息
+    try
+    {
+        Json::Value jvContent(Json::ValueType::objectValue);
+        Json::Value  content = jvalue.get("content", jvContent);
+        if (content.isNull())
+        {
+            return false;
+        }
+
+        Json::Value jvdata(Json::ValueType::objectValue);
+        Json::Value data = jvdata.get(std::string("data"), jvdata);
+        if (data.isNull())
+        {
+            return false;
+        }
+
+        uint32 roomid = GetInt32FromJsonValue(data, "roomId");
+        uint32 userid = GetInt32FromJsonValue(data, "userId");
+        Json::Value jvString("");
+        std::string  innercontent = data.get("content", jvString).asString();
+        std::string nickname = data.get("nickName", jvString).asString();
+        std::string starnickname = data.get("starNickName", jvString).asString();
+        *outmsg = nickname + base::WideToUTF8(L"在") + starnickname + base::WideToUTF8(L"的直播间发广播:") + innercontent;
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+
+bool CommandHandle_201(const Json::Value& jvalue, std::string* outmsg)
+{
+    try
+    {
+        Json::Value jvContent(Json::ValueType::objectValue);
+        Json::Value  content = jvalue.get("content", jvContent);
+        if (content.isNull())
+        {
+            return false;
+        }
+        Json::Value jvString("");
+        std::string nickname = content.get("nickName", jvString).asString();
+        uint32 richlevel = GetInt32FromJsonValue(content, "richlevel");
+        uint32 userid = GetInt32FromJsonValue(content, "userid");
+        *outmsg = base::WideToUTF8(L"用户信息通知");
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+// 房间歌曲信息，忽略
+bool CommandHandle_315(const Json::Value& jvalue, std::string* outmsg)
+{
+    return false;
+}
+
+bool CommandHandle_501(const Json::Value& jvalue, std::string* outmsg)
+{
+    // 房间聊天消息
+    try
+    {
+        Json::Value jvContent(Json::ValueType::objectValue);
+        Json::Value  content = jvalue.get("content", jvContent);
+        if (content.isNull())
+        {
+            return false;
+        }
+
+        Json::Value jvString("");
+        uint32 receiverid = GetInt32FromJsonValue(content, "receiverid");
+        uint32 senderid = GetInt32FromJsonValue(content, "senderid");
+        uint32 issecrect = GetInt32FromJsonValue(content, "issecrect");//是否私聊
+        std::string chatmsg = content.get("chatmsg", jvString).asString();
+        std::string sendername = content.get("sendername", jvString).asString();
+        std::string receivername = content.get("receivername", jvString).asString();
+        *outmsg = base::WideToUTF8(L"聊天消息:") + chatmsg;
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool CommandHandle_602(const Json::Value& jvalue, std::string* outmsg)
+{
+    // 头条信息和次头条信息
+    try
+    {
+        Json::Value jvContent(Json::ValueType::objectValue);
+        Json::Value  content = jvalue.get("content", jvContent);
+        if (content.isNull())
+        {
+            return false;
+        }
+
+        Json::Value jvString("");
+        uint32 roomid = GetInt32FromJsonValue(content, "roomId");     
+        std::string type = content.get("type", jvString).asString();
+        std::string sendername = content.get("sendername", jvString).asString();
+        std::string receivername = content.get("receivername", jvString).asString();
+        std::string giftname = content.get("giftname", jvString).asString();
+        uint32 num = GetInt32FromJsonValue(content, "num");
+        uint32 coin = GetInt32FromJsonValue(content, "coin");
+        uint32 addtime = GetInt32FromJsonValue(content, "addTime");
+        uint32 istop = GetInt32FromJsonValue(content, "istop");
+
+        *outmsg = base::WideToUTF8(L"头条信息和次头条信息");
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool CommandHandle_601(const Json::Value& jvalue, std::string* outmsg)
+{
+    // 房间礼物数据信息
+    try
+    {
+        Json::Value jvContent(Json::ValueType::objectValue);
+        Json::Value  content = jvalue.get("content", jvContent);
+        if (content.isNull())
+        {
+            return false;
+        }
+
+        Json::Value jvString("");
+        uint32 actionId = GetInt32FromJsonValue(content, "actionId");
+        std::string token = content.get("token", jvString).asString();
+        std::string sendername = content.get("sendername", jvString).asString();
+        std::string receivername = content.get("receivername", jvString).asString();
+
+        uint32 giftid = GetInt32FromJsonValue(content, "giftid");
+        std::string giftname = content.get("giftname", jvString).asString();
+        uint32 num = GetInt32FromJsonValue(content, "num");
+        std::string tips = content.get("tip",jvString).asString();
+
+        uint32 happyObj = GetInt32FromJsonValue(content, "happyObj");//是否是幸运礼物
+
+        *outmsg = base::WideToUTF8(L"房间大礼物数据 ") + tips;
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+// 房间抢座信息
+bool CommandHandle_606(const Json::Value& jvalue, std::string* outmsg)
+{
+    return false;
+}
+
 };
 GiftNotifyManager::GiftNotifyManager()
     :tcpClient_843_(new TcpClient),
@@ -155,7 +335,11 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
 
             // 暂时没有必要检测status的值
             Json::Value jvCmd(Json::ValueType::intValue);
-            int cmd = rootdata.get(std::string("cmd"), jvCmd).asInt();
+            uint32 cmd = GetInt32FromJsonValue(rootdata, "cmd");
+            uint32 roomid = GetInt32FromJsonValue(rootdata, "roomid");
+            uint32 senderid = GetInt32FromJsonValue(rootdata, "senderid");
+            uint32 receiverid = GetInt32FromJsonValue(rootdata, "receiverid");
+            uint32 time = GetInt32FromJsonValue(rootdata, "time");
             if (cmd == 601)
             {
                 Json::Value jvContent(Json::ValueType::objectValue);
@@ -171,9 +355,41 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
                 }
             }
 
+            std::string outmsg;
+            switch (cmd)
+            {
+            case 100:
+                break;
+            case 201:
+                CommandHandle_201(rootdata, &outmsg);
+                break;
+            case 315:
+                CommandHandle_315(rootdata, &outmsg);
+                break;
+            case 501:
+                CommandHandle_501(rootdata, &outmsg);
+                break;
+            case 601:
+                CommandHandle_601(rootdata, &outmsg);
+                break;
+            case 602:
+                CommandHandle_602(rootdata, &outmsg);
+                break;
+            case 606:
+                CommandHandle_606(rootdata, &outmsg);
+                break;
+            default:
+                break;
+            }
+
             // 处理数据包,转换成输出界面信息
             std::wstring wstr = base::UTF8ToWide(package);
             normalNotify_(wstr);
+            if (!outmsg.empty())
+            {
+                wstr = base::UTF8ToWide(outmsg);
+                normalNotify_(wstr);
+            }
         }
         catch (...)
         {
