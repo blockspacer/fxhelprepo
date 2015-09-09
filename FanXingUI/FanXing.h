@@ -27,6 +27,8 @@ public:
 // й╣ож
 
 	DECLARE_MESSAGE_MAP()
+private:
+    void InitAppLog();
 };
 
 extern CFanXingApp theApp;

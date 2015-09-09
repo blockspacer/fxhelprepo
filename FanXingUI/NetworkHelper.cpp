@@ -54,6 +54,7 @@ void NetworkHelper::RemoveNotify()
 
 bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
 {
+    LOG(INFO) << L"EnterRoom " << strroomid;
     uint32 roomid = 0;
     base::StringToUint(strroomid, &roomid);
 

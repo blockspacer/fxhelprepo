@@ -4,6 +4,14 @@
 
 #include "stdafx.h"
 #include <memory>
+
+#undef max
+#undef min
+#include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_util.h"
+#include "third_party/chromium/base/command_line.h"
+#include "third_party/chromium/base/at_exit.h"
+
 #include "FanXing.h"
 #include "FanXingDlg.h"
 #include "NetworkHelper.h"
@@ -29,6 +37,8 @@ CFanXingApp::CFanXingApp()
 
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
+    InitAppLog();
+    LOG(INFO) << __FUNCTION__;
 }
 
 
@@ -103,5 +113,21 @@ BOOL CFanXingApp::InitInstance()
 	// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
 	//  而不是启动应用程序的消息泵。
 	return FALSE;
+}
+
+void CFanXingApp::InitAppLog()
+{
+    base::AtExitManager atExit;
+    CommandLine::Init(0, NULL);
+    base::FilePath path;
+    PathService::Get(base::DIR_APP_DATA, &path);
+    path = path.Append(L"FanXingHelper").Append(L"fanxinghelper.log");
+    logging::LoggingSettings setting;
+    setting.logging_dest = logging::LOG_TO_ALL;
+    setting.lock_log = logging::LOCK_LOG_FILE;
+    setting.log_file = path.value().c_str();
+    setting.delete_old = logging::APPEND_TO_OLD_LOG_FILE;
+    logging::InitLogging(setting);
+    logging::SetLogItems(false, true, true, true);
 }
 

@@ -620,18 +620,21 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
 // 测试通过
 bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
 {
+    LOG(INFO) << __FUNCTION__ << L" roomid = " << base::UintToString(roomid);
     //GET /Services.php?act=RoomService.RoomService&mtd=enterRoom&args=["1017131","","","web"]&_=1439814776455 HTTP/1.1
     std::string cookies = "";
     std::string temp = "";
     bool ret = false;
     if (!CookiesManager::GetCookies(fanxingurl, &temp))
     {
+        LOG(INFO) << __FUNCTION__ << L" GetCookies Failed " << fanxingurl;
         assert(false);
         return false;
     }
     cookies += temp;
     if (!CookiesManager::GetCookies(kugouurl, &temp))
     {
+        LOG(INFO) << __FUNCTION__ << L" GetCookies Failed" << kugouurl;
         assert(false);
         return false;
     }
@@ -691,6 +694,7 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     /* Check for errors */
     if (res != CURLE_OK)
     {
+        LOG(INFO) << __FUNCTION__ << L" curl_easy_perform failed";
         //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return false;
     }
@@ -698,6 +702,8 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
     response_of_RoomService_RoomService_enterRoom_ = currentWriteData_;
+
+    LOG(INFO) << __FUNCTION__ << L" responsecode = " << base::IntToString(responsecode);
 
     // 获取本次请求cookies
     struct curl_slist* curllist = 0;
@@ -719,7 +725,7 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     curl_easy_cleanup(curl);
 
     if (responsecode == 200)
-    {
+    {       
         return true;
     }
     return false;

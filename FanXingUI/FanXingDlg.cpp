@@ -209,7 +209,7 @@ void CFanXingDlg::OnBnClickedButtonNav()
     CString strUrl = L"http://fanxing.kugou.com/" + strRoomid;
     VARIANT vtNull = {};
     web_.Navigate(strUrl, &vtNull, &vtNull, &vtNull, &vtNull);
-
+    LOG(INFO) << L"Navigate To " << strUrl;
     // 获取房间信息，启动功能
     network_->EnterRoom(strRoomid.GetBuffer());
 }
