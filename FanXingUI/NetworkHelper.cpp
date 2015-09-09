@@ -95,8 +95,7 @@ bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
 void NetworkHelper::NotifyCallback(const std::wstring& message)
 {
     // 解析数据包
-
-
+    LOG(INFO) << __FUNCTION__ << L" " << message;
     if (notify_)
     {
         notify_(message);

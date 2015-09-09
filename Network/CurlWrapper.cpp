@@ -780,6 +780,7 @@ bool CurlWrapper::GiftService_GiftService(uint32 userid,
     uint32 second = base::RandInt(10000000, 99999999);
     url += "0%2E" + base::UintToString(first) + base::UintToString(second);
 
+    LOG(INFO) << __FUNCTION__ << L" url = " << url;
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
