@@ -776,9 +776,9 @@ bool CurlWrapper::GiftService_GiftService(uint32 userid,
     url += key_601;
     url += "%22%5D&mtd=tryGetHappyFreeCoin&ran=";
     // 生成一个小数，小数16位，方式比较丑陋，实现就好
-    uint32 first = base::RandInt(10000000, 99999999);
-    uint32 second = base::RandInt(10000000, 99999999);
-    url += "0%2E" + base::UintToString(first) + base::UintToString(second);
+    //uint32 first = base::RandInt(10000000, 99999999);
+    //uint32 second = base::RandInt(10000000, 99999999);
+    url += "0%2E3374897129466474";
 
     LOG(INFO) << __FUNCTION__ << L" url = " << url;
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
