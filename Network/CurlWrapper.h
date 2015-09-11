@@ -9,6 +9,9 @@ class CurlWrapper
 public:
     CurlWrapper();
     ~CurlWrapper();
+    bool Initialize(){ return true; };//没有线程管理，直接返回true
+    void Finalize(){ return; };//没有线程管理，直接返回
+
     static void CurlInit();
     static void CurlCleanup();
     bool WriteCallback(const std::string& data);

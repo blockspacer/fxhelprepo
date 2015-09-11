@@ -23,22 +23,28 @@ NetworkHelper::NetworkHelper()
     :curlWrapper_(new CurlWrapper)
     , giftNotifyManager_(new GiftNotifyManager)
 {
-    CurlWrapper::CurlInit();
+    
 }
 
 
 NetworkHelper::~NetworkHelper()
 {
-    CurlWrapper::CurlCleanup();
+    
 }
-
 
 bool NetworkHelper::Initialize()
 {
-    return false;
+    CurlWrapper::CurlInit();
+    curlWrapper_->Initialize();
+    giftNotifyManager_->Initialize();
+    return true;
 }
+
 void NetworkHelper::Finalize()
 {
+    giftNotifyManager_->Finalize();
+    curlWrapper_->Finalize();
+    CurlWrapper::CurlCleanup();
     return;
 }
 

@@ -1,5 +1,6 @@
 #include "GiftNotifyManager.h"
 #include <assert.h>
+
 #include "TcpClient.h"
 #include "EncodeHelper.h"
 #include "Thread.h"
@@ -294,15 +295,44 @@ GiftNotifyManager::GiftNotifyManager()
     :tcpClient_843_(new TcpClient),
     tcpClient_8080_(new TcpClient),
     notify601_(nullptr),
-    thread_(new Thread),
+    //thread_(new Thread),
+    stdthread_(nullptr),
+    stdfuture_(nullptr),
+    stdpromise_(nullptr),
+    stdcv_(nullptr),
     alive(false)
 {
-    thread_->Init((run_fn)(HeartBeatFunc), this);
 }
 
 GiftNotifyManager::~GiftNotifyManager()
 {
-    thread_->Stop();
+    
+}
+
+bool GiftNotifyManager::Initialize()
+{
+    //thread_->Init((run_fn)(HeartBeatFunc), this);
+    tcpClient_843_->Initialize();
+    tcpClient_8080_->Initialize();
+
+    stdcv_.reset(new std::condition_variable);
+    stdpromise_.reset(new std::promise<bool>());
+    stdfuture_.reset(new std::future<bool>(stdpromise_->get_future()));
+    stdthread_.reset(new std::thread(std::bind(
+        &GiftNotifyManager::ThreadFunction, this, stdfuture_.get())));
+
+    return true;
+}
+void GiftNotifyManager::Finalize()
+{
+    //thread_->Stop();
+    tcpClient_843_->Finalize();
+    tcpClient_8080_->Finalize();
+
+    stdpromise_->set_value(true); // 如果心跳没开始，让其结束
+    std::unique_lock<std::mutex> lck(mtx);
+    stdcv_->notify_all(); // 通知结束线程
+    stdthread_->join();
 }
 
 void GiftNotifyManager::Set601Notify(Notify601 notify601)
@@ -433,7 +463,10 @@ bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
     data_8080.assign(data_for_send.begin(), data_for_send.end());
     data_8080.push_back(0);//这是必须加这个字节的
     tcpClient_8080_->Send(data_8080);
-    thread_->Start();
+    //thread_->Start();
+
+    stdpromise_->set_value(true);//启动线程
+
     return true;
 }
 
@@ -450,6 +483,30 @@ bool GiftNotifyManager::SendHeartBeat()
         {
             tcpClient_8080_->Send(heardbeadvec);
         }
+    }
+
+    return true;
+}
+
+bool GiftNotifyManager::ThreadFunction(std::future<bool>* fut)
+{
+    std::string heartbeat = "HEARTBEAT_REQUEST";
+    heartbeat.append("\r\n");
+    std::vector<char> heardbeadvec;
+    heardbeadvec.assign(heartbeat.begin(), heartbeat.end());
+
+    bool getvalue = fut->get();//等待开始线程的通知
+    if (!getvalue)
+    {
+        // 直接结束线程
+        return false;
+    }
+
+    std::unique_lock<std::mutex> lck(mtx);
+    while (stdcv_->wait_for(lck, std::chrono::seconds(10))
+           ==std::cv_status::timeout);
+    {
+        tcpClient_8080_->Send(heardbeadvec);
     }
 
     return true;

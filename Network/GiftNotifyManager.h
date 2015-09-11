@@ -2,6 +2,9 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <thread>
+#include <future>
+#include <condition_variable>
 #include <functional>
 #include "third_party/chromium/base/basictypes.h"
 
@@ -15,6 +18,9 @@ class GiftNotifyManager
 public:
     GiftNotifyManager();
     ~GiftNotifyManager();
+
+    bool Initialize();
+    void Finalize();
 
     void Set601Notify(Notify601 notify601);
     void SetNormalNotify(NormalNotify normalNotify);
@@ -61,9 +67,15 @@ public:
 
     bool SendHeartBeat();
 
+    bool ThreadFunction(std::future<bool>* fut);
 private:
     bool alive;
-    std::unique_ptr<Thread> thread_;
+    //std::unique_ptr<Thread> thread_;
+    std::unique_ptr<std::thread> stdthread_;
+    std::unique_ptr<std::future<bool>> stdfuture_;
+    std::unique_ptr<std::promise<bool>> stdpromise_;
+    std::unique_ptr<std::condition_variable> stdcv_;
+    std::mutex mtx;
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
     Notify601 notify601_;

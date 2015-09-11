@@ -49,16 +49,24 @@ END_MESSAGE_MAP()
 
 
 
-CFanXingDlg::CFanXingDlg(std::shared_ptr<NetworkHelper> network, 
-    CWnd* pParent /*=NULL*/)
+CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFanXingDlg::IDD, pParent)
-    , network_(network)
+    , network_(nullptr)
     , count(0)
 {
-    network_->SetNotify(
-        std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
+    //network_->Initialize();
+    //network_->SetNotify(
+    //    std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
 
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
+}
+
+CFanXingDlg::~CFanXingDlg()
+{
+    if (network_)
+    {
+        network_->Finalize();
+    }  
 }
 
 void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
@@ -171,7 +179,10 @@ void CFanXingDlg::OnPaint()
 
 void CFanXingDlg::OnClose()
 {
-    network_->RemoveNotify();
+    if (network_)
+    {
+        network_->RemoveNotify();
+    }  
 }
 //当用户拖动最小化窗口时系统调用此函数取得光标
 //显示。
@@ -211,6 +222,16 @@ void CFanXingDlg::OnBnClickedButtonNav()
     web_.Navigate(strUrl, &vtNull, &vtNull, &vtNull, &vtNull);
     LOG(INFO) << L"Navigate To " << strUrl;
     // 获取房间信息，启动功能
+
+    if (network_)
+    {
+        network_->Finalize();
+    }    
+    network_.reset(new NetworkHelper);
+    network_->Initialize();
+    network_->SetNotify(
+        std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
+
     network_->EnterRoom(strRoomid.GetBuffer());
 }
 

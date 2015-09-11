@@ -82,12 +82,9 @@ BOOL CFanXingApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-    std::shared_ptr<NetworkHelper> network(new NetworkHelper);
-    network->Initialize();
-    CFanXingDlg dlg(network);
+    CFanXingDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
-    network->Finalize();
 	if (nResponse == IDOK)
 	{
 		// TODO:  在此放置处理何时用

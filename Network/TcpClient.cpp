@@ -8,17 +8,28 @@ TcpClient::TcpClient()
     , notify_(nullptr)
     , privateData_(nullptr)
 {
-    thread_.reset(new Thread);
-    thread_->Init(TcpClient::Recv, this);
 }
 
 TcpClient::~TcpClient()
 {  
-    thread_->Stop();
+    
     notify_ = nullptr;
     privateData_ = nullptr;
     closesocket(socket_);
 }
+
+bool TcpClient::Initialize()
+{
+    thread_.reset(new Thread);
+    thread_->Init(TcpClient::Recv, this);
+    return true;
+}
+
+void TcpClient::Finalize()
+{
+    thread_->Stop();
+}
+
 
 void TcpClient::SetNotify(NotifyFunction notify, void* privatedata)
 {

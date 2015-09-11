@@ -17,6 +17,9 @@ public:
     TcpClient();
     ~TcpClient();
 
+    bool Initialize();
+    void Finalize();
+
     void SetNotify(NotifyFunction notify, void* privatedata);
     bool Connect(const std::string& ip, unsigned short port);
     bool Send(const std::vector<char>& data);

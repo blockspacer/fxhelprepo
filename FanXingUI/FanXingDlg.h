@@ -16,7 +16,8 @@ class CFanXingDlg : public CDialogEx
 {
 // 构造
 public:
-    CFanXingDlg(std::shared_ptr<NetworkHelper> network, CWnd* pParent = NULL);
+    CFanXingDlg(CWnd* pParent = NULL);
+    virtual ~CFanXingDlg();
 
 // 对话框数据
 	enum { IDD = IDD_FANXING_DIALOG };
@@ -53,9 +54,7 @@ private:
     void Notify(const std::wstring& message);
 
     CExplorer1 web_;
-    std::shared_ptr<NetworkHelper> network_;
-
-
+    std::unique_ptr<NetworkHelper> network_;
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;
 

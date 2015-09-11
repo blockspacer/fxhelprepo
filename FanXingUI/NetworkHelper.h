@@ -13,8 +13,8 @@ public:
     NetworkHelper();
     ~NetworkHelper();
 
-    bool Initialize();
-    void Finalize();
+    bool Initialize();// 启动线程
+    void Finalize();// 结束线程
 
     void SetNotify(notifyfn fn);
     void RemoveNotify();
