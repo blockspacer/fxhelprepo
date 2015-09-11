@@ -325,11 +325,12 @@ LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
     messageMutex_.lock();
     messages.swap(messageQueen_);
     messageMutex_.unlock();
-    
+
     for (auto str : messages)
     {
         InfoList_.InsertString(count++, str.c_str());
     }
     
+    InfoList_.SetCurSel(count-1);
     return 0;
 }
