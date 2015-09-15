@@ -483,6 +483,7 @@ bool GiftNotifyManager::SendHeartBeat()
         {
             tcpClient_8080_->Send(heardbeadvec);
         }
+        normalNotify_(L"Send Heartbeat");
     }
 
     return true;
