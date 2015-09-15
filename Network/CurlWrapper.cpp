@@ -855,11 +855,24 @@ bool CurlWrapper::GiftService_GiftService(uint32 userid,
     {
         // 解析返回的数据通知
         //response_of_GiftService_GiftService_;
+        std::wstring notifyinfo;
+        ParseGiftServiceResponse(response_of_GiftService_GiftService_,
+            &notifyinfo);
         *responsedata = L"抢币数据通知";
         return true;
     }
     return false;
 }
+
+bool CurlWrapper::ParseGiftServiceResponse(const std::string& responsedata,
+    std::wstring* notifyinfo)
+{
+
+    return false;
+}
+
+
+
 // 测试通过
 bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom_(
     const std::string& inputstr, uint32* userid,

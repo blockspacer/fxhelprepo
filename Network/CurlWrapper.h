@@ -47,6 +47,9 @@ private:
         std::string* nickname, uint32* richlevel, uint32* staruserid,
         std::string* key, std::string* ext);
 
+    bool ParseGiftServiceResponse(const std::string& responsedata,
+        std::wstring* notifyinfo);
+
     //base::File file_;
     std::string currentWriteData_;
     std::string response_of_RoomService_RoomService_enterRoom_;
