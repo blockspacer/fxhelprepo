@@ -37,7 +37,7 @@ public:
         std::string* key, std::string* ext);
 
     // 抢星币的重要请求, 时机由flash收到601包礼物通知数据，601包里有key_601值
-    bool GiftService_GiftService(uint32 userid,
+    bool GiftService_GiftService(uint32 roomid,
         const std::string& key_601, std::wstring* responsedata);
 
 private:

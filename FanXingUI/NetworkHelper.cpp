@@ -11,6 +11,7 @@
 namespace
 {
     uint32 userid;
+    uint32 roomid;
     std::string nickname;
     uint32 richlevel;
     uint32 ismaster;
@@ -61,7 +62,6 @@ void NetworkHelper::RemoveNotify()
 bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
 {
     LOG(INFO) << L"EnterRoom " << strroomid;
-    uint32 roomid = 0;
     base::StringToUint(strroomid, &roomid);
 
     bool ret = false;
@@ -115,7 +115,7 @@ void NetworkHelper::NotifyCallback601(const std::string& data)
     for (int i = 0; i < 20; i++)
     {
         bool ret = curlWrapper_->GiftService_GiftService(
-            userid, data, &responsedata);
+            roomid, data, &responsedata);
     }
     
     return;

@@ -743,7 +743,7 @@ bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom(
 
 // GET /Services.php?act=GiftService.GiftService&args=["1020846","1a392af9cd9a2c9276c956bbb09f9676_vs0601"]&mtd=tryGetHappyFreeCoin&ran=0.3374897129466474 HTTP/1.1
 // GET /Services.php?act=GiftService%2EGiftService&args=%5B%221020846%22%2C%221a392af9cd9a2c9276c956bbb09f9676_vs0601%22%5D&mtd=tryGetHappyFreeCoin&ran=0%2E3377602129466474 HTTP/1.1
-bool CurlWrapper::GiftService_GiftService(uint32 userid,
+bool CurlWrapper::GiftService_GiftService(uint32 roomid,
     const std::string& key_601, std::wstring* responsedata)
 {
     std::string cookies = "";
@@ -771,7 +771,7 @@ bool CurlWrapper::GiftService_GiftService(uint32 userid,
 
     std::string url = fanxingurl;
     url += "/Services.php?act=GiftService%2EGiftService&args=%5B%22";
-    url += base::UintToString(userid);
+    url += base::UintToString(roomid);
     url += "%22%2C%22";
     url += key_601;
     url += "%22%5D&mtd=tryGetHappyFreeCoin&ran=";
@@ -804,7 +804,7 @@ bool CurlWrapper::GiftService_GiftService(uint32 userid,
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     // 这里不要接受压缩的数据包，免得解压麻烦
     //curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
-    std::string referer = "http://fanxing.kugou.com/static/swf/award/CommonMoneyGift.swf?version=20140221";
+    std::string referer = "http://fanxing.kugou.com/static/swf/award/CommonMoneyGift.swf?version=20141113";
     curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
 
