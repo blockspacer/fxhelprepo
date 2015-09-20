@@ -116,6 +116,10 @@ void NetworkHelper::NotifyCallback601(const std::string& data)
     {
         bool ret = curlWrapper_->GiftService_GiftService(
             roomid, data, &responsedata);
+        if (notify_)
+        {
+            notify_(responsedata);
+        }
     }
     
     return;
