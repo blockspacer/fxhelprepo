@@ -1,8 +1,9 @@
 #pragma once
+
 #include <string>
 #include <vector>
 #include <memory>
-#include <WinSock2.h>
+#include <WinSock.h>
 
 // 提供TCP连接功能，发送数据，接收数据；
 // 需要关联一个线程进去，运行收发数据

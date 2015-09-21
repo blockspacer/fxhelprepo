@@ -7,17 +7,24 @@
 #include <condition_variable>
 #include <functional>
 #include "third_party/chromium/base/basictypes.h"
+#include "third_party/chromium/base/timer/timer.h"
+#include "third_party/chromium/base/threading/thread.h"
+
 
 class TcpClient;
 class Thread;
 
 typedef std::function<void(const std::string& key)> Notify601;
 typedef std::function<void(const std::wstring& data)> NormalNotify;
-class GiftNotifyManager
+class GiftNotifyManager 
+    : public std::enable_shared_from_this <GiftNotifyManager>
 {
 public:
     GiftNotifyManager();
     ~GiftNotifyManager();
+
+    static void AddRef() {}
+    static void Release() {}
 
     bool Initialize();
     void Finalize();
@@ -63,19 +70,26 @@ public:
     //}
     bool Connect8080(uint32 roomid, uint32 userid, const std::string& nickname, 
         uint32 richlevel, uint32 ismaster, uint32 staruserid,
-        const std::string& key,/*uint64 keytime, */const std::string& ext);
+        const std::string& key, const std::string& ext);
 
-    bool SendHeartBeat();
-
-    bool ThreadFunction(std::future<bool>* fut);
 private:
-    bool alive;
+
+    void DoConnect843();
+    void DoConnect8080(uint32 roomid, uint32 userid, const std::string& nickname,
+        uint32 richlevel, uint32 ismaster, uint32 staruserid,
+        const std::string& key, const std::string& ext);
+    void DoSendHeartBeat();
+
     //std::unique_ptr<Thread> thread_;
     std::unique_ptr<std::thread> stdthread_;
     std::unique_ptr<std::future<bool>> stdfuture_;
     std::unique_ptr<std::promise<bool>> stdpromise_;
     std::unique_ptr<std::condition_variable> stdcv_;
     std::mutex mtx;
+
+    base::Thread baseThread_;
+    base::RepeatingTimer<GiftNotifyManager> repeatingTimer_;
+
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
     Notify601 notify601_;

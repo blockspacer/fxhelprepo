@@ -9,7 +9,10 @@
 #include "third_party/json/json.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
-
+#include "third_party/chromium/base/message_loop/message_loop.h"
+#include "third_party/chromium/base/bind.h"
+#include "third_party/chromium/base/base64.h"
+#include "third_party/chromium/base/time/time.h"
 
 
 namespace
@@ -59,13 +62,6 @@ void TcpNotify(void* privatedata, const std::vector<char>& data)
     GiftNotifyManager* manager = static_cast<GiftNotifyManager*>(privatedata);
     manager->Notify(data);
     return;
-}
-
-DWORD HeartBeatFunc(LPVOID lpParam)
-{
-    auto p = reinterpret_cast<GiftNotifyManager*>(lpParam);
-    p->SendHeartBeat();
-    return 0;
 }
 
 std::string Packet = "";
@@ -296,11 +292,12 @@ GiftNotifyManager::GiftNotifyManager()
     tcpClient_8080_(new TcpClient),
     notify601_(nullptr),
     //thread_(new Thread),
-    stdthread_(nullptr),
-    stdfuture_(nullptr),
-    stdpromise_(nullptr),
-    stdcv_(nullptr),
-    alive(false)
+    //stdthread_(nullptr),
+    //stdfuture_(nullptr),
+    //stdpromise_(nullptr),
+    //stdcv_(nullptr),
+    //alive(false),
+    baseThread_("NetworkHelperThread")
 {
 }
 
@@ -315,12 +312,13 @@ bool GiftNotifyManager::Initialize()
     tcpClient_843_->Initialize();
     tcpClient_8080_->Initialize();
 
-    stdcv_.reset(new std::condition_variable);
-    stdpromise_.reset(new std::promise<bool>());
-    stdfuture_.reset(new std::future<bool>(stdpromise_->get_future()));
-    stdthread_.reset(new std::thread(std::bind(
-        &GiftNotifyManager::ThreadFunction, this, stdfuture_.get())));
+    //stdcv_.reset(new std::condition_variable);
+    //stdpromise_.reset(new std::promise<bool>());
+    //stdfuture_.reset(new std::future<bool>(stdpromise_->get_future()));
+    //stdthread_.reset(new std::thread(std::bind(
+    //    &GiftNotifyManager::ThreadFunction, this, stdfuture_.get())));
 
+    baseThread_.Start();
     return true;
 }
 void GiftNotifyManager::Finalize()
@@ -333,6 +331,8 @@ void GiftNotifyManager::Finalize()
     std::unique_lock<std::mutex> lck(mtx);
     stdcv_->notify_all(); // 通知结束线程
     stdthread_->join();
+
+    baseThread_.Stop();
 }
 
 void GiftNotifyManager::Set601Notify(Notify601 notify601)
@@ -355,7 +355,6 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
     {
         try
         {
-            alive = true;
             Json::Reader reader;
             Json::Value rootdata(Json::objectValue);
             if (!reader.parse(package, rootdata, false))
@@ -429,6 +428,14 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
 
 bool GiftNotifyManager::Connect843()
 {
+    return baseThread_.message_loop_proxy()->PostTask(
+        FROM_HERE, base::Bind(
+        &GiftNotifyManager::DoConnect843, this));
+    return true;
+}
+
+void GiftNotifyManager::DoConnect843()
+{
     // 843端口的连接数据没什么用
     //tcpClient_843_->SetNotify((NotifyFunction)TcpNotify, this);
     tcpClient_843_->Connect(targetip, port843);
@@ -436,10 +443,24 @@ bool GiftNotifyManager::Connect843()
     std::vector<char> data;
     data.assign(str.begin(), str.end());
     data.push_back(0);
-    return tcpClient_843_->Send(data);
+    tcpClient_843_->Send(data);
 }
 
-bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid, 
+bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
+    const std::string& nickname, uint32 richlevel, uint32 ismaster,
+    uint32 staruserid, const std::string& key,/* uint64 keytime, */
+    const std::string& ext)
+{
+    baseThread_.message_loop()->PostTask(FROM_HERE,
+        base::Bind(&GiftNotifyManager::DoConnect8080, this,
+                roomid,userid,nickname,richlevel,
+                ismaster,staruserid,key,ext));
+
+    return true;
+}
+
+
+void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid, 
     const std::string& nickname, uint32 richlevel, uint32 ismaster, 
     uint32 staruserid, const std::string& key,/* uint64 keytime, */
     const std::string& ext)
@@ -451,7 +472,7 @@ bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
     if (!tcpClient_8080_->Connect(targetip, port8080))
     {
         assert(false && L"socket连接失败");
-        return false;
+        return ;
     }
     uint32 keytime = static_cast<uint32>(base::Time::Now().ToDoubleT());
     std::vector<uint8> data_for_send;
@@ -463,54 +484,27 @@ bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
     data_8080.assign(data_for_send.begin(), data_for_send.end());
     data_8080.push_back(0);//这是必须加这个字节的
     tcpClient_8080_->Send(data_8080);
-    //thread_->Start();
 
-    stdpromise_->set_value(true);//启动线程
+    // 启动发送心跳的timer;
+    if (repeatingTimer_.IsRunning())
+        repeatingTimer_.Stop();
+    
+    // 默认是每10秒发送一次心跳
+    repeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10000), this,
+        &GiftNotifyManager::DoSendHeartBeat);
 
-    return true;
+    return ;
 }
 
-bool GiftNotifyManager::SendHeartBeat()
+void GiftNotifyManager::DoSendHeartBeat()
 {
     std::string heartbeat = "HEARTBEAT_REQUEST";
     heartbeat.append("\r\n");
     std::vector<char> heardbeadvec;
     heardbeadvec.assign(heartbeat.begin(), heartbeat.end());
-    while (1)
-    {
-        Sleep(10000);
-        if (alive)
-        {
-            tcpClient_8080_->Send(heardbeadvec);
-        }
-        normalNotify_(L"Send Heartbeat");
-    }
-
-    return true;
+    tcpClient_8080_->Send(heardbeadvec);
+    normalNotify_(L"Send Heartbeat");
 }
 
-bool GiftNotifyManager::ThreadFunction(std::future<bool>* fut)
-{
-    std::string heartbeat = "HEARTBEAT_REQUEST";
-    heartbeat.append("\r\n");
-    std::vector<char> heardbeadvec;
-    heardbeadvec.assign(heartbeat.begin(), heartbeat.end());
-
-    bool getvalue = fut->get();//等待开始线程的通知
-    if (!getvalue)
-    {
-        // 直接结束线程
-        return false;
-    }
-
-    std::unique_lock<std::mutex> lck(mtx);
-    while (stdcv_->wait_for(lck, std::chrono::seconds(10))
-           ==std::cv_status::timeout);
-    {
-        tcpClient_8080_->Send(heardbeadvec);
-    }
-
-    return true;
-}
 
 
