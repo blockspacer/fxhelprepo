@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "NetworkHelper.h"
+#include "third_party/chromium/base/strings/sys_string_conversions.h"
 
 #undef max // 因为微软这个二比在某些头文件定义了max宏
 #undef min // 因为微软这个二比在某些头文件定义了min宏
@@ -101,7 +102,7 @@ bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
 void NetworkHelper::NotifyCallback(const std::wstring& message)
 {
     // 解析数据包
-    LOG(INFO) << __FUNCTION__ << L" " << message;
+    LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(message, 936);
     if (notify_)
     {
         notify_(message);
