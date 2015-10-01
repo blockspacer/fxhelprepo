@@ -308,30 +308,15 @@ GiftNotifyManager::~GiftNotifyManager()
 
 bool GiftNotifyManager::Initialize()
 {
-    //thread_->Init((run_fn)(HeartBeatFunc), this);
     tcpClient_843_->Initialize();
     tcpClient_8080_->Initialize();
-
-    //stdcv_.reset(new std::condition_variable);
-    //stdpromise_.reset(new std::promise<bool>());
-    //stdfuture_.reset(new std::future<bool>(stdpromise_->get_future()));
-    //stdthread_.reset(new std::thread(std::bind(
-    //    &GiftNotifyManager::ThreadFunction, this, stdfuture_.get())));
-
     baseThread_.Start();
     return true;
 }
 void GiftNotifyManager::Finalize()
 {
-    //thread_->Stop();
     tcpClient_843_->Finalize();
     tcpClient_8080_->Finalize();
-
-    stdpromise_->set_value(true); // 如果心跳没开始，让其结束
-    std::unique_lock<std::mutex> lck(mtx);
-    stdcv_->notify_all(); // 通知结束线程
-    stdthread_->join();
-
     baseThread_.Stop();
 }
 
