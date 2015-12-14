@@ -30,7 +30,8 @@ public:
     bool HandleData(const std::vector<char>& data, int len);
 private:
     std::unique_ptr<Thread> thread_;
-    //std::unique_ptr<SocketWrapper> socketWrapper_;
+    HANDLE stopEvent_;
+    HANDLE recvEvent_;
     SOCKET socket_;
     NotifyFunction notify_;
     void* privateData_;

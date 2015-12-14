@@ -8,11 +8,14 @@ TcpClient::TcpClient()
     , notify_(nullptr)
     , privateData_(nullptr)
 {
+    stopEvent_ = CreateEvent(NULL, FALSE, FALSE, NULL);
+    recvEvent_ = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 TcpClient::~TcpClient()
 {  
-    
+    CloseHandle(stopEvent_);
+    CloseHandle(recvEvent_);
     notify_ = nullptr;
     privateData_ = nullptr;
     closesocket(socket_);
@@ -20,14 +23,24 @@ TcpClient::~TcpClient()
 
 bool TcpClient::Initialize()
 {
+    ResetEvent(stopEvent_);
     thread_.reset(new Thread);
     thread_->Init(TcpClient::Recv, this);
     return true;
 }
 
 void TcpClient::Finalize()
-{
-    thread_->Stop();
+ {
+    SetEvent(stopEvent_);
+    auto waitResult = WaitForSingleObject(recvEvent_, 5000);
+    if (WAIT_OBJECT_0 == waitResult)
+    {
+        thread_->Stop();
+    }
+    else
+    {
+        thread_->Stop();
+    }
 }
 
 
@@ -80,13 +93,18 @@ bool TcpClient::DoRecv()
     int len = 0;
     while (1)
     {
+        if (WAIT_OBJECT_0 == WaitForSingleObject(stopEvent_, 0))
+        {
+            break;
+        }
+        
         len = recv(socket_, &buffer[0], buffer.size(), 0);
         if (len>0)
         {
             HandleData(buffer, len);
         }
     }
-
+    SetEvent(recvEvent_);
     return true;
 }
 
