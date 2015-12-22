@@ -6,7 +6,8 @@
 #include <assert.h>
 #include "third_party/libcurl/curl/curl.h"
 #include "third_party/chromium/base/strings/sys_string_conversions.h"
-
+#include "third_party/chromium/base/md5.h"
+#include "third_party/chromium/base/strings/string_piece.h"
 
 static const wchar_t HEX[] = L"0123456789ABCDEF";
 std::wstring BinToHex(const void* bin, int len)
@@ -137,5 +138,24 @@ std::string WideToGBK(const std::wstring& text)
 std::wstring GBKToWide(const std::string& text)
 {
     return base::SysMultiByteToWide(text, 936);
+}
+
+std::string WideToUtf8(const std::wstring& text)
+{
+    return base::SysWideToUTF8(text);
+}
+std::wstring Utf8ToWide(const std::string& text)
+{
+    return base::SysUTF8ToWide(text);
+}
+
+std::string MakeMd5FromString(const std::string& text)
+{
+    base::MD5Context contex;
+    base::MD5Init(&contex);
+    base::MD5Digest md5;
+    base::MD5Update(&contex, base::StringPiece(text));
+    base::MD5Final(&md5, &contex);
+    return BinToAnsiHex(md5.a, sizeof(md5));
 }
 

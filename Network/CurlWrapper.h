@@ -55,6 +55,7 @@ private:
     std::string response_of_RoomService_RoomService_enterRoom_;
     std::string response_of_Services_UserService_UserService_getMyUserDataInfo_;
     std::string response_of_GiftService_GiftService_;
+    std::string response_of_LoginWithUsernameAndPassword_;
 };
 
 

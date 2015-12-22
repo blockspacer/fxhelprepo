@@ -20,3 +20,8 @@ std::string UrlDecode(const std::string& str);
 
 std::string WideToGBK(const std::wstring& text);
 std::wstring GBKToWide(const std::string& text);
+
+std::string WideToUtf8(const std::wstring& text);
+std::wstring Utf8ToWide(const std::string& text);
+
+std::string MakeMd5FromString(const std::string& text);

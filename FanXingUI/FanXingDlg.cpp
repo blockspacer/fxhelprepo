@@ -198,18 +198,12 @@ void CFanXingDlg::OnBnClickedButton1()
     CString password;
     GetDlgItemText(IDC_EDIT_Username, username);
     GetDlgItemText(IDC_EDIT_Password, password);
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            WebHandler handler(iDocu);
-            //handler.Execute();
-            handler.Login(username, password);
-        }
-    }
+
+    bool loginResult = LoginByWebAction(username, password);
+
+    // 测试通过的curl登录方式
+    // bool loginResult = LoginByRequest(username.GetBuffer(), password.GetBuffer());
+
 }
 
 //跳转页面功能
@@ -338,6 +332,39 @@ void CFanXingDlg::Notify(const std::wstring& message)
     messageQueen_.push_back(message);
     messageMutex_.unlock();
     this->PostMessage(WM_USER_01, 0, 0);
+}
+
+bool CFanXingDlg::LoginByWebAction(const CString& username, 
+                                   const CString& password)
+{
+    CComQIPtr<IDispatch> iDisp(web_.get_Document());
+    if (iDisp)
+    {
+        CComQIPtr<IHTMLDocument2> iDocu;
+        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
+        if (!FAILED(hr))
+        {
+            WebHandler handler(iDocu);
+            //handler.Execute();
+            handler.Login(username, password);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstring& password)
+{
+    if (network_)
+    {
+        network_->Finalize();
+    }
+    network_.reset(new NetworkHelper);
+    network_->Initialize();
+    network_->SetNotify(
+        std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
+
+    return network_->Login(username, password);
 }
 
 LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)

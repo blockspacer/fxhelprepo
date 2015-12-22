@@ -9,11 +9,14 @@
 #include "third_party/chromium/base/rand_util.h"
 #include "third_party/json/json.h"
 
+
+#include "../Network/EncodeHelper.h"
 #include "CookiesManager.h"
 
 namespace
 {
     const char* fanxingurl = "http://fanxing.kugou.com";
+    const char* loginuserurl = "http://login-user.kugou.com";
     const char* kugouurl = "http://kugou.com";
     const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
     const char* acceptencode = "gzip, deflate";//目前都不应该接收压缩数据，免得解压麻烦
@@ -176,36 +179,45 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
     if (!curl)
         return false;
 
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(curl, CURLOPT_URL, fanxingurl);
-
+    std::string url = loginuserurl;
+    url += "/v1/login/?appid=1010";
+    url += "&username=" + UrlEncode(username);
+    url += "&pwd=" + MakeMd5FromString(username);
+    url += "&code=";
+    uint32 nowtime = static_cast<uint32>(base::Time::Now().ToDoubleT());
+    url += "&clienttime=" + base::UintToString(nowtime);
+    url += "&expire_day=3";//这里先写死
+    url += "&autologin=false";
+    url += "&redirect_uri=";
+    url += "&state=";
+    url += "&callback=loginSuccessCallback";
+    url += "&login_ver=1";
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
-
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
     struct curl_slist *headers = 0;
     headers = curl_slist_append(headers, "Connection:Keep-Alive");
     headers = curl_slist_append(headers, "Accept-Language:zh-CN");
     headers = curl_slist_append(headers, "Accept:*/*");
-
+    headers = curl_slist_append(headers, "Host:login-user.kugou.com");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
-    //curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
-    curl_easy_setopt(curl, CURLOPT_REFERER, "http://www.fanxing.kugou.com");
-    std::string postFields = R"(args=[")" + username + R"(",")" + password +
-        R"(","", "0"]&test=)";
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, postFields.size());
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields.c_str());
-    curl_easy_setopt(curl, CURLOPT_POST, 1L);
-
-    //curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+    curl_easy_setopt(curl, CURLOPT_REFERER, fanxingurl);
     // 把请求返回来时设置的cookie保存起来
     std::string path = "d:/cookie_";
     path += MakeReasonablePath(__FUNCTION__) + ".txt";
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
+
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+    response_of_LoginWithUsernameAndPassword_ = currentWriteData_;
+
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);

@@ -7,6 +7,7 @@
 
 #include "../Network/GiftNotifyManager.h"
 #include "../Network/CurlWrapper.h"
+#include "../Network/EncodeHelper.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
 namespace
@@ -96,6 +97,13 @@ bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
         ismaster, staruserid, key, ext);
 
     return ret;
+}
+
+bool NetworkHelper::Login(const std::wstring& username, 
+    const std::wstring& password)
+{
+    return curlWrapper_->LoginRequestWithUsernameAndPassword(
+        WideToUtf8(username), WideToUtf8(password));
 }
 
 // giftNotifyManager_ 线程回调

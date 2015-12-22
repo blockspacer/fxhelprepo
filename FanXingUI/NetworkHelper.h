@@ -19,6 +19,7 @@ public:
     void SetNotify(notifyfn fn);
     void RemoveNotify();
     bool EnterRoom(const std::wstring& strroomid);
+    bool Login(const std::wstring& username, const std::wstring& password);
 private:
     void NotifyCallback(const std::wstring& message);
     void NotifyCallback601(const std::string& data);
