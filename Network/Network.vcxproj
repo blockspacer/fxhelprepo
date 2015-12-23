@@ -95,6 +95,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TcpClient.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="User.h" />
     <ClInclude Include="utf_help.h" />
   </ItemGroup>
   <ItemGroup>
@@ -117,6 +118,7 @@
     </ClCompile>
     <ClCompile Include="TcpClient.cpp" />
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="User.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
