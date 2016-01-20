@@ -37,8 +37,6 @@ CFanXingApp::CFanXingApp()
 
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
-    InitAppLog();
-    LOG(INFO) << __FUNCTION__;
 }
 
 
@@ -82,9 +80,14 @@ BOOL CFanXingApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
+    base::AtExitManager atExit;
+    InitAppLog();
+    LOG(INFO) << __FUNCTION__;
+
     CFanXingDlg dlg;
-	m_pMainWnd = &dlg;
-	INT_PTR nResponse = dlg.DoModal();
+    m_pMainWnd = &dlg;
+    INT_PTR nResponse = dlg.DoModal();
+
 	if (nResponse == IDOK)
 	{
 		// TODO:  在此放置处理何时用
@@ -114,7 +117,6 @@ BOOL CFanXingApp::InitInstance()
 
 void CFanXingApp::InitAppLog()
 {
-    base::AtExitManager atExit;
     CommandLine::Init(0, NULL);
     base::FilePath path;
     PathService::Get(base::DIR_APP_DATA, &path);

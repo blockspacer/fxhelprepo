@@ -89,6 +89,7 @@
     <ClInclude Include="CookiesManager.h" />
     <ClInclude Include="CurlWrapper.h" />
     <ClInclude Include="EncodeHelper.h" />
+    <ClInclude Include="FamilyDaily.h" />
     <ClInclude Include="GiftNotifyManager.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="stdafx.h" />
@@ -109,6 +110,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="EncodeHelper.cpp" />
+    <ClCompile Include="FamilyDaily.cpp" />
     <ClCompile Include="GiftNotifyManager.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="stdafx.cpp">

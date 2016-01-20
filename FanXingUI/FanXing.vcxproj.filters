@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="源文件\family_background">
+      <UniqueIdentifier>{5d16cf7f-9961-420d-88e8-469420a803bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -42,6 +45,9 @@
     <ClInclude Include="NetworkHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="family_background\FamilyBackground.h">
+      <Filter>源文件\family_background</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FanXingDlg.cpp">
@@ -61,6 +67,9 @@
     </ClCompile>
     <ClCompile Include="NetworkHelper.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="family_background\FamilyBackground.cpp">
+      <Filter>源文件\family_background</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -111,6 +111,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="explorer1.h" />
+    <ClInclude Include="family_background\FamilyBackground.h" />
     <ClInclude Include="FanXing.h" />
     <ClInclude Include="FanXingDlg.h" />
     <ClInclude Include="NetworkHelper.h" />
@@ -121,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="explorer1.cpp" />
+    <ClCompile Include="family_background\FamilyBackground.cpp" />
     <ClCompile Include="FanXingUI.cpp" />
     <ClCompile Include="FanXingDlg.cpp" />
     <ClCompile Include="NetworkHelper.cpp" />
