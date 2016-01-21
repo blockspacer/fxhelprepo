@@ -2,9 +2,6 @@
 #include "FanXingUI/family_background/FamilyBackground.h"
 #include "third_party/chromium/base/strings/sys_string_conversions.h"
 
-#undef max // 因为微软这个二比在某些头文件定义了max宏
-#undef min // 因为微软这个二比在某些头文件定义了min宏
-
 #include "Network/FamilyDaily.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
@@ -22,6 +19,24 @@ FamilyBackground::~FamilyBackground()
 
 }
 
+void FamilyBackground::Test()
+{
+    bool result = Init();
+    result = Login("globalstar001", "123!");
+
+    base::Time nowtime = base::Time::Now();
+    base::Time::Exploded exploded;
+    nowtime.LocalExplode(&exploded);
+    exploded.day_of_month = 1;
+    exploded.hour = 0;
+    exploded.minute = 0;
+    exploded.second = 1;
+    base::Time begintime = base::Time::FromLocalExploded(exploded);
+    base::Time endtime = base::Time::Now();
+
+    result = GetSummaryData(begintime, endtime);
+}
+
 bool FamilyBackground::Init()
 {
     FamilyDaily::CurlInit();
@@ -31,9 +46,17 @@ bool FamilyBackground::Init()
 }
 
 bool FamilyBackground::Login(const std::string& username, 
-    const std::string& password)
+                             const std::string& password)
 {
     bool result = familyDaily_->Login(username, password);
-    return false;
+    return result;
+}
+
+bool FamilyBackground::GetSummaryData(const base::Time& begintime,
+    const base::Time& endtime)
+{
+    std::vector<SingerSummaryData> summary;
+    bool result = familyDaily_->GetSummaryData(begintime, endtime, &summary);
+    return result;
 }
 

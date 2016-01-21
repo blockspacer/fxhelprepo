@@ -45,6 +45,15 @@ public:
     bool WriteCallback(const std::string& data);
 
 private:
+    bool GetSummaryDataByPage(const base::Time& begintime,
+        const base::Time& endtime, uint32 pagenumber,
+        std::string* pagedata);
+
+    // 从摘取的数据中获取主播数据信息以及所有分页数量
+    bool ParseSummaryData(const std::string& pagedata, 
+                          std::vector<SingerSummaryData>* summerydata,
+                          uint32* pagenumber);
+
     std::string cookies_;
     std::string cookiespath_;
 

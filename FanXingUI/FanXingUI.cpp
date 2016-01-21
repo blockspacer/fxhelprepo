@@ -15,6 +15,7 @@
 #include "FanXing.h"
 #include "FanXingDlg.h"
 #include "NetworkHelper.h"
+#include "family_background/FamilyBackground.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -83,6 +84,10 @@ BOOL CFanXingApp::InitInstance()
     base::AtExitManager atExit;
     InitAppLog();
     LOG(INFO) << __FUNCTION__;
+
+
+    FamilyBackground familyBackground;
+    familyBackground.Test();
 
     CFanXingDlg dlg;
     m_pMainWnd = &dlg;

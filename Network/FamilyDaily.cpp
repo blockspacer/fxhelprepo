@@ -225,8 +225,153 @@ bool FamilyDaily::GetDailyDataBySingerId(uint32 singerid,
     return false;
 }
 
+//GET /admin?act=sumStarDataList&startDay=2016-01-01&endDay=2016-01-21 HTTP/1.1
+//Host: family.fanxing.kugou.com
+//Connection: keep-alive
+//Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+//Upgrade-Insecure-Requests: 1
+//User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36
+//Referer: http://family.fanxing.kugou.com/admin?act=sumStarDataList
+//Accept-Encoding: gzip, deflate, sdch
+//Accept-Language: zh-CN,zh;q=0.8
+//Cookie: PHPSESSID=3dfg2i875s2p7hcousceilmag3; f_p=f_56a0f5ea31c3f7.88052429
+
 bool FamilyDaily::GetSummaryData(const base::Time& begintime, const base::Time& endtime,
     std::vector<SingerSummaryData>* summerydata)
+{
+    std::string pagedata;
+    bool result = GetSummaryDataByPage(begintime, endtime, 1, &pagedata);
+    assert(result);
+    if (!result)
+        return false;
+
+    std::vector<SingerSummaryData> pagesummary;
+    uint32 pagecount = 0;
+    result = ParseSummaryData(pagedata, &pagesummary, &pagecount);
+    assert(result);
+    if (!result)
+        return false;
+
+    assert(pagecount);
+    assert(!pagesummary.empty());
+
+    summerydata->assign(pagesummary.begin(), pagesummary.end());
+
+    for (uint32 page = 2; page <= pagecount; page++)
+    {
+        result = GetSummaryDataByPage(begintime, endtime, page, &pagedata);
+        assert(result);
+        if (!result)
+            return false;
+
+        pagesummary.clear();
+        result = ParseSummaryData(pagedata, &pagesummary, nullptr);
+        assert(result);
+        if (!result)
+            return false;
+
+        assert(!pagesummary.empty());
+        summerydata->insert(summerydata->end(), 
+            pagesummary.begin(), pagesummary.end());
+    }
+    return result;
+}
+
+bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
+    const base::Time& endtime, uint32 pagenumber,
+    std::string* pagedata)
+{
+    base::Time::Exploded exploded;
+    begintime.LocalExplode(&exploded);
+    std::string beginstring = base::IntToString(exploded.year) + "-" +
+        base::IntToString(exploded.month) + "-" +
+        base::IntToString(exploded.day_of_month);
+
+    endtime.LocalExplode(&exploded);
+    std::string endstring = base::IntToString(exploded.year) + "-" +
+        base::IntToString(exploded.month) + "-" +
+        base::IntToString(exploded.day_of_month);
+
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (!curl)
+        return false;
+
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+
+    std::string requesturl = std::string(familyurl) +
+        "/admin?act=sumStarDataList&startDay" +
+        beginstring + "&endDay=" + endstring;
+
+    // 第一页数据不需要加页码
+    if (pagenumber > 1)
+    {
+        requesturl += "&page=" + base::IntToString(pagenumber);
+    }
+
+    curl_easy_setopt(curl, CURLOPT_URL, requesturl.c_str());
+
+    // 设置Get方式
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+
+    // 这里如果跟下去,就无法判断目前结果
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+
+    struct curl_slist *headers = 0;
+    headers = curl_slist_append(headers, cookie_connection);
+    //headers = curl_slist_append(headers, "Cache-Control: max-age=0");
+    headers = curl_slist_append(headers, cookie_language);
+    //headers = curl_slist_append(headers, "Origin: http://family.fanxing.kugou.com");
+    headers = curl_slist_append(headers, cookie_accept);
+    headers = curl_slist_append(headers, cookie_upgrade);
+    headers = curl_slist_append(headers, cookie_useragent);
+    headers = curl_slist_append(headers, cookie_content);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    //curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+    //curl_easy_setopt(curl, CURLOPT_REFERER, "http://family.fanxing.kugou.com/admin?act=sumStarDataList");
+
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, cookiespath_.c_str());
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if (res != CURLE_OK)
+    {
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return false;
+    }
+    // 获取请求业务结果
+    long responsecode = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+
+    if (responsecode == 302)
+    {
+        assert(false && L"GetSummaryData must set CURLOPT_FOLLOWLOCATION to follow redirection");
+        return true;
+    }
+
+    if (responsecode == 200 && !currentWriteData_.empty())
+    {
+        *pagedata = currentWriteData_;
+        return true;
+    }
+    return false;
+}
+
+bool FamilyDaily::ParseSummaryData(const std::string& pagedata,    
+    std::vector<SingerSummaryData>* summerydata, 
+    uint32 *pagenumber)
 {
     return false;
 }
