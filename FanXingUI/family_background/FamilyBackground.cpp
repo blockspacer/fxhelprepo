@@ -27,10 +27,12 @@ void FamilyBackground::Test()
     base::Time nowtime = base::Time::Now();
     base::Time::Exploded exploded;
     nowtime.LocalExplode(&exploded);
+    int dayofmonth = exploded.day_of_month;
     exploded.day_of_month = 1;
     exploded.hour = 0;
     exploded.minute = 0;
     exploded.second = 1;
+    exploded.day_of_week = (exploded.day_of_week - dayofmonth%7 + 8) % 7;
     base::Time begintime = base::Time::FromLocalExploded(exploded);
     base::Time endtime = base::Time::Now();
 

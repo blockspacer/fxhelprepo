@@ -9,6 +9,7 @@
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/chromium/base/files/file_path.h"
+#include "third_party/chromium/base/files/file.h"
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/rand_util.h"
 #include "third_party/json/json.h"
@@ -31,8 +32,108 @@ namespace{
         std::string data;
         data.assign(ptr, ptr + size*nmemb);
         FamilyDaily* p = static_cast<FamilyDaily*>(userdata);
-        p->WriteCallback(data);
+        p->WriteResponseDataCallback(data);
         return size*nmemb;
+    }
+
+    static size_t header_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+    {
+        std::string data;
+        data.assign(ptr, ptr + size*nmemb);
+        FamilyDaily* p = static_cast<FamilyDaily*>(userdata);
+        p->WriteResponseHeaderCallback(data);
+        return size*nmemb;
+    }
+    
+    std::string MakeReasonablePath(const std::string& pathfile)
+    {
+        auto temp = pathfile;
+        auto pos = temp.find(':');
+        while (pos != std::string::npos)
+        {
+            temp.erase(pos, 1);
+            pos = temp.find(':');
+        }
+        return std::move(temp);
+    }
+
+    std::string MakeFormatDateString(const base::Time time)
+    {
+        base::Time::Exploded exploded;
+        time.LocalExplode(&exploded);
+        std::string month = base::IntToString(exploded.month);
+        if (month.length()<2)
+        {
+            month = "0" + month;
+        }
+        std::string day_of_month = base::IntToString(exploded.day_of_month);
+        if (day_of_month.length() < 2)
+        {
+            day_of_month = "0" + day_of_month;
+        }
+
+        std::string timestring = base::IntToString(exploded.year) + "-" +
+            month + "-" + day_of_month;
+        return std::move(timestring);
+    }
+
+
+    static const char* mark_table_begin = "<table";
+    static const char* mark_table_end = "</table>";
+    static const char* mark_tr_begin = "<tr>";
+    static const char* mark_tr_end = "</tr>";
+    static const char* mark_td_begin = "<td>";
+    static const char* mark_td_end = "</td>";
+
+    bool GetMarkData(const std::string& pagedata, std::string* targetdata,
+        size_t *targetpos, const std::string& beginmark, const std::string& endmark)
+    {
+        auto beginpos = pagedata.find(beginmark);
+        if (beginpos == std::string::npos)
+            return false;
+
+        auto endpos = pagedata.find(endmark);
+        if (endpos == std::string::npos)
+            return false;
+        *targetpos = endpos + endmark.size();
+        *targetdata = pagedata.substr(beginpos + beginmark.size(), 
+            endpos - beginpos - beginmark.size());
+        return true;
+    }
+
+    bool GetTableData(const std::string& pagedata, std::string* tabledata)
+    {
+        size_t tableendpos = 0;
+        return GetMarkData(pagedata, tabledata, &tableendpos, mark_table_begin, 
+            mark_table_end);
+    }
+    bool GetTrData(const std::string& pagedata, std::string* trdata, 
+        size_t* trendpos)
+    {
+        return GetMarkData(pagedata, trdata, trendpos, mark_tr_begin,
+            mark_tr_end);
+    }
+    bool GetTdData(const std::string& pagedata, std::string* tddata, 
+        size_t* tdendpos)
+    {
+        return GetMarkData(pagedata, tddata, tdendpos, mark_td_begin,
+            mark_td_end);
+    }
+
+    bool GetSingerIdAndRoomIdFromTdData(const std::string& tddata,
+        uint32* singerid, uint32* roomid)
+    {
+        static const char* roompre = "http://fanxing.kugou.com/";
+        auto beginpos = tddata.find(roompre);
+        if (beginpos == std::string::npos)
+            return false;
+
+        static const char* roompost = "</a>";
+        auto endpos = tddata.find(roompost);
+        if (endpos == std::string::npos)
+            return false;
+
+
     }
 }
 
@@ -54,9 +155,15 @@ void FamilyDaily::CurlCleanup()
     curl_global_cleanup();
 }
 
-bool FamilyDaily::WriteCallback(const std::string& data)
+bool FamilyDaily::WriteResponseDataCallback(const std::string& data)
 {
-    currentWriteData_ += data;
+    currentResponseData_ += data;
+    return true;
+}
+
+bool FamilyDaily::WriteResponseHeaderCallback(const std::string& data)
+{
+    currentResponseHeader_ += data;
     return true;
 }
 
@@ -88,6 +195,8 @@ bool FamilyDaily::Init()
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
 
@@ -102,13 +211,16 @@ bool FamilyDaily::Init()
     headers = curl_slist_append(headers, cookie_useragent);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, cookiespath_.c_str());
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
-
-
-    currentWriteData_.clear();
+    
+    currentResponseData_.clear();
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    // 为了获取cookies的数据
+    currentResponseHeader_.clear();
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
@@ -117,6 +229,35 @@ bool FamilyDaily::Init()
     {
         //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return false;
+    }
+
+    std::wstring filename = base::UTF8ToWide(MakeReasonablePath(__FUNCTION__) + ".txt");
+    base::FilePath logpath = dirPath.Append(filename);
+    base::File logfile(logpath,
+        base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    logfile.Write(0, currentResponseData_.c_str(), currentResponseData_.size());
+
+    auto pos = currentResponseHeader_.find("PHPSESSID=");
+    if (pos != std::string::npos)
+    {
+        auto begin = pos;
+        auto end = currentResponseHeader_.find(';', begin);
+        cookies_ = currentResponseHeader_.substr(begin, end - begin);
+    }
+    // 获取本次请求cookies
+    struct curl_slist* curllist = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
+    if (curllist)
+    {
+        struct curl_slist* temp = curllist;
+        std::string retCookies;
+        while (temp)
+        {
+            retCookies += std::string(temp->data);
+            temp = temp->next;
+        }
+        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        curl_slist_free_all(curllist);
     }
 
     // 获取请求业务结果
@@ -146,6 +287,10 @@ bool FamilyDaily::Init()
 //Cookie: PHPSESSID=lqbq66gtuv6rof4vb324112m94; f_p=f_569f993bd3f2c5.14993273; _family_login_time=1
 bool FamilyDaily::Login(const std::string& username, const std::string& password)
 {
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    assert(result);
+
     CURL *curl;
     CURLcode res;
     curl = curl_easy_init();
@@ -153,12 +298,14 @@ bool FamilyDaily::Login(const std::string& username, const std::string& password
     if (!curl)
         return false;
 
+    
+    std::string url = std::string(familyurl) + "/admin?act=login";
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(curl, CURLOPT_URL, familyurl);
 
     // 这里如果跟下去,就无法判断目前结果
     /* example.com is redirected, so we tell libcurl to follow redirection */
-    //curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
 
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 
@@ -174,11 +321,7 @@ bool FamilyDaily::Login(const std::string& username, const std::string& password
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     curl_easy_setopt(curl, CURLOPT_REFERER, "http://family.fanxing.kugou.com/admin?act=login");
-
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, cookiespath_.c_str());
-
-    // 设置post数据
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1L);
+    curl_easy_setopt(curl, CURLOPT_COOKIE, cookies_.c_str());
 
     std::string encodeusername = UrlEncode(username);
     std::string encodepassword = UrlEncode(password);
@@ -187,19 +330,56 @@ bool FamilyDaily::Login(const std::string& username, const std::string& password
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, postFields.size());
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields.c_str());
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
-
-    currentWriteData_.clear();
+    
+    currentResponseData_.clear();
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 
+    currentResponseHeader_.clear();
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
+
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
+
     /* Check for errors */
     if (res != CURLE_OK)
     {
         //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         return false;
     }
+
+    auto pos = currentResponseHeader_.find("f_p=");
+    if (pos != std::string::npos)
+    {
+        auto begin = pos;
+        auto end = currentResponseHeader_.find(';', begin);
+        std::string cookies = currentResponseHeader_.substr(begin, end - begin);
+        cookies_ += ";" + cookies;
+    }
+
+    // 获取本次请求cookies
+    struct curl_slist* curllist = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
+    if (curllist)
+    {
+        struct curl_slist* temp = curllist;
+        std::string retCookies;
+        while (temp)
+        {
+            retCookies += std::string(temp->data);
+            temp = temp->next;
+        }
+        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
+        curl_slist_free_all(curllist);
+    }
+
+    std::wstring filename = base::UTF8ToWide(MakeReasonablePath(__FUNCTION__) + ".txt");
+    base::FilePath logpath = dirPath.Append(filename);
+    base::File logfile(logpath,
+        base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    logfile.Write(0, currentResponseData_.c_str(), currentResponseData_.size());
+
     // 获取请求业务结果
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
@@ -212,7 +392,7 @@ bool FamilyDaily::Login(const std::string& username, const std::string& password
         return true;
     }
 
-    if (responsecode == 200 && currentWriteData_ =="0")
+    if (responsecode == 200 && currentResponseData_ =="0")
     {
         return true;
     }
@@ -247,7 +427,12 @@ bool FamilyDaily::GetSummaryData(const base::Time& begintime, const base::Time& 
 
     std::vector<SingerSummaryData> pagesummary;
     uint32 pagecount = 0;
-    result = ParseSummaryData(pagedata, &pagesummary, &pagecount);
+    result = ParsePageCount(pagedata, &pagecount);
+    assert(result);
+    if (!result)
+        return false;
+
+    result = ParseSummaryData(pagedata, &pagesummary);
     assert(result);
     if (!result)
         return false;
@@ -265,7 +450,7 @@ bool FamilyDaily::GetSummaryData(const base::Time& begintime, const base::Time& 
             return false;
 
         pagesummary.clear();
-        result = ParseSummaryData(pagedata, &pagesummary, nullptr);
+        result = ParseSummaryData(pagedata, &pagesummary);
         assert(result);
         if (!result)
             return false;
@@ -281,16 +466,8 @@ bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
     const base::Time& endtime, uint32 pagenumber,
     std::string* pagedata)
 {
-    base::Time::Exploded exploded;
-    begintime.LocalExplode(&exploded);
-    std::string beginstring = base::IntToString(exploded.year) + "-" +
-        base::IntToString(exploded.month) + "-" +
-        base::IntToString(exploded.day_of_month);
-
-    endtime.LocalExplode(&exploded);
-    std::string endstring = base::IntToString(exploded.year) + "-" +
-        base::IntToString(exploded.month) + "-" +
-        base::IntToString(exploded.day_of_month);
+    std::string beginstring = MakeFormatDateString(begintime);
+    std::string endstring = MakeFormatDateString(endtime);
 
     CURL *curl;
     CURLcode res;
@@ -302,7 +479,7 @@ bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
 
     std::string requesturl = std::string(familyurl) +
-        "/admin?act=sumStarDataList&startDay" +
+        "/admin?act=sumStarDataList&startDay=" +
         beginstring + "&endDay=" + endstring;
 
     // 第一页数据不需要加页码
@@ -335,8 +512,9 @@ bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
     //curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     //curl_easy_setopt(curl, CURLOPT_REFERER, "http://family.fanxing.kugou.com/admin?act=sumStarDataList");
 
-    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, cookiespath_.c_str());
-    currentWriteData_.clear();
+    //curl_easy_setopt(curl, CURLOPT_COOKIEFILE, cookiespath_.c_str());
+    curl_easy_setopt(curl, CURLOPT_COOKIE, cookies_.c_str());
+    currentResponseData_.clear();
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 
@@ -352,6 +530,14 @@ bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
 
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = base::UTF8ToWide(MakeReasonablePath(__FUNCTION__) + ".txt");
+    base::FilePath logpath = dirPath.Append(filename);
+    base::File logfile(logpath,
+        base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    logfile.Write(0, currentResponseData_.c_str(), currentResponseData_.size());
+
     /* always cleanup */
     curl_easy_cleanup(curl);
 
@@ -361,17 +547,117 @@ bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
         return true;
     }
 
-    if (responsecode == 200 && !currentWriteData_.empty())
+    if (responsecode == 200 && !currentResponseData_.empty())
     {
-        *pagedata = currentWriteData_;
+        *pagedata = currentResponseData_;
         return true;
     }
     return false;
 }
 
+// colspan
 bool FamilyDaily::ParseSummaryData(const std::string& pagedata,    
-    std::vector<SingerSummaryData>* summerydata, 
-    uint32 *pagenumber)
+    std::vector<SingerSummaryData>* summerydata)
 {
-    return false;
+    bool result = false;
+    std::string tabledata;
+    result = GetTableData(pagedata, &tabledata);
+    std::string trdata;
+    size_t trendpos = 0;
+    result = GetTrData(tabledata, &trdata, &trendpos);
+    tabledata = tabledata.substr(trendpos);
+
+    std::vector<std::string> trvector;
+    while (result)
+    {
+        result = GetTrData(tabledata, &trdata, &trendpos);
+        if (result)
+        {
+            trvector.push_back(trdata);
+            tabledata = tabledata.substr(trendpos);
+        }
+    }
+
+    
+    
+    for (const auto& it : trvector)
+    {
+        std::string trdata = it;
+        size_t endpos = 0;
+        std::string tddata;
+        std::vector<std::string> tdvector;
+
+        // <a href="http://fanxing.kugou.com/1060982" target="_blank">陌路shiley</a>(10215159)
+        result = GetTdData(trdata, &tddata, &endpos);
+        trdata = trdata.substr(endpos);
+        tdvector.push_back(tddata);
+
+
+        result = GetTdData(trdata, &tddata, &endpos);
+        trdata = trdata.substr(endpos);
+        tdvector.push_back(tddata);
+
+        result = GetTdData(trdata, &tddata, &endpos);
+        trdata = trdata.substr(endpos);
+        tdvector.push_back(tddata);
+
+        result = GetTdData(trdata, &tddata, &endpos);
+        trdata = trdata.substr(endpos);
+        tdvector.push_back(tddata);
+
+        result = GetTdData(trdata, &tddata, &endpos);
+        trdata = trdata.substr(endpos);
+        tdvector.push_back(tddata);
+
+        result = GetTdData(trdata, &tddata, &endpos);
+        trdata = trdata.substr(endpos);
+        tdvector.push_back(tddata);
+
+        result = GetTdData(trdata, &tddata, &endpos);
+        trdata = trdata.substr(endpos);
+        tdvector.push_back(tddata);
+
+        result = GetTdData(trdata, &tddata, &endpos);
+        trdata = trdata.substr(endpos);
+        tdvector.push_back(tddata);
+    }
+    return true;
+}
+
+bool FamilyDaily::ParsePageCount(const std::string& pagedata, uint32* pagenumber)
+{
+    static const char* colspan = R"(<tr><td colspan=")";
+    static const char* doublequote = R"(")";
+    std::string str = colspan;
+    auto pos = pagedata.find(str);
+    if (pos == pagedata.npos)
+        return false;
+
+    pos += strlen(colspan);
+    auto endpos = pagedata.find(doublequote, pos);
+    std::string count = pagedata.substr(pos, endpos - pos);
+    uint32 countperpage = 0;
+    if (!base::StringToUint(count, &countperpage))
+        return false;
+
+    if (!countperpage)
+        return false;
+
+    std::string totalbegin = base::WideToUTF8(L"<span>总共");
+    std::string totalend = base::WideToUTF8(L"条记录");
+
+    pos = pagedata.find(totalbegin);
+    if (pos == std::string::npos)
+        return false;
+
+    pos += totalbegin.size();
+    endpos = pagedata.find(totalend);
+    std::string strtotalcount = pagedata.substr(pos, endpos - pos);
+    uint32 totalcount = 0;
+    if (!base::StringToUint(strtotalcount, &totalcount))
+        return false;
+
+    *pagenumber = totalcount / countperpage;
+    *pagenumber += (totalcount % countperpage) > 0 ? 1 : 0;
+    return true;
 }

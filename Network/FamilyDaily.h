@@ -13,6 +13,7 @@ struct SingerDailyData
 struct SingerSummaryData
 {
     uint32 singerid;
+    uint32 roomid;
     std::string nickname;
     std::string singerlevel;    //主播等级
     uint32 onlinecount;         //开播次数
@@ -42,7 +43,8 @@ public:
     bool GetSummaryData(const base::Time& begintime, const base::Time& endtime,
                         std::vector<SingerSummaryData>* summerydata);
 
-    bool WriteCallback(const std::string& data);
+    bool WriteResponseDataCallback(const std::string& data);
+    bool WriteResponseHeaderCallback(const std::string& data);
 
 private:
     bool GetSummaryDataByPage(const base::Time& begintime,
@@ -51,11 +53,13 @@ private:
 
     // 从摘取的数据中获取主播数据信息以及所有分页数量
     bool ParseSummaryData(const std::string& pagedata, 
-                          std::vector<SingerSummaryData>* summerydata,
-                          uint32* pagenumber);
+                          std::vector<SingerSummaryData>* summerydata);
+
+    bool ParsePageCount(const std::string& pagedata, uint32* pagenumber);
 
     std::string cookies_;
     std::string cookiespath_;
 
-    std::string currentWriteData_;
+    std::string currentResponseData_;
+    std::string currentResponseHeader_;
 };
