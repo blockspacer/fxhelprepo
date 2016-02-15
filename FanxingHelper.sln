@@ -41,6 +41,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FanXingUI", "FanXingUI\FanX
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Network", "Network\Network.vcxproj", "{2147CB51-23F6-4022-8E4A-291B70570CB7}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FamilyDataCenterUI", "FamilyDataCenterUI\FamilyDataCenterUI.vcxproj", "{D5969595-E706-4D2C-9234-7C48C4604DE8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -113,6 +115,12 @@ Global
 		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Release|Win32.ActiveCfg = Release|Win32
 		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Release|Win32.Build.0 = Release|Win32
 		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Release|x64.ActiveCfg = Release|Win32
+		{D5969595-E706-4D2C-9234-7C48C4604DE8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{D5969595-E706-4D2C-9234-7C48C4604DE8}.Debug|Win32.Build.0 = Debug|Win32
+		{D5969595-E706-4D2C-9234-7C48C4604DE8}.Debug|x64.ActiveCfg = Debug|Win32
+		{D5969595-E706-4D2C-9234-7C48C4604DE8}.Release|Win32.ActiveCfg = Release|Win32
+		{D5969595-E706-4D2C-9234-7C48C4604DE8}.Release|Win32.Build.0 = Release|Win32
+		{D5969595-E706-4D2C-9234-7C48C4604DE8}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
