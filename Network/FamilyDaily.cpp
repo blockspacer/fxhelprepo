@@ -85,55 +85,71 @@ namespace{
     static const char* mark_td_begin = "<td>";
     static const char* mark_td_end = "</td>";
 
-    bool GetMarkData(const std::string& pagedata, std::string* targetdata,
-        size_t *targetpos, const std::string& beginmark, const std::string& endmark)
+    bool GetMarkData(const std::string& pagedata, size_t beginpos,
+        const std::string& beginmark, 
+        const std::string& endmark,
+        std::string* targetdata,
+        size_t *afterendmarkpos)
     {
-        auto beginpos = pagedata.find(beginmark);
+        beginpos = pagedata.find(beginmark, beginpos);
         if (beginpos == std::string::npos)
             return false;
+        beginpos += beginmark.size();
 
-        auto endpos = pagedata.find(endmark);
+        auto endpos = pagedata.find(endmark, beginpos);
         if (endpos == std::string::npos)
             return false;
-        *targetpos = endpos + endmark.size();
-        *targetdata = pagedata.substr(beginpos + beginmark.size(), 
-            endpos - beginpos - beginmark.size());
+
+        *afterendmarkpos = endpos + endmark.size();
+        *targetdata = pagedata.substr(beginpos, endpos - beginpos);
         return true;
     }
 
     bool GetTableData(const std::string& pagedata, std::string* tabledata)
     {
         size_t tableendpos = 0;
-        return GetMarkData(pagedata, tabledata, &tableendpos, mark_table_begin, 
-            mark_table_end);
-    }
-    bool GetTrData(const std::string& pagedata, std::string* trdata, 
-        size_t* trendpos)
-    {
-        return GetMarkData(pagedata, trdata, trendpos, mark_tr_begin,
-            mark_tr_end);
-    }
-    bool GetTdData(const std::string& pagedata, std::string* tddata, 
-        size_t* tdendpos)
-    {
-        return GetMarkData(pagedata, tddata, tdendpos, mark_td_begin,
-            mark_td_end);
+        return GetMarkData(pagedata, 0, mark_table_begin, mark_table_end, 
+            tabledata, &tableendpos);
     }
 
-    bool GetSingerIdAndRoomIdFromTdData(const std::string& tddata,
+    bool GetTrData(const std::string& pagedata, size_t beginpos, 
+        std::string* trdata, size_t* trendpos)
+    {
+        return GetMarkData(pagedata, beginpos, mark_tr_begin, mark_tr_end, trdata, trendpos);
+    }
+
+    bool GetTdData(const std::string& pagedata, size_t beginpos, size_t* tdendpos, std::string* tddata)
+    {
+        return GetMarkData(pagedata, beginpos, mark_td_begin, mark_td_end, tddata, tdendpos);
+    }
+
+    bool GetSingerInfoFromTdData(const std::string& tddata,
+        size_t beginpos, std::string* singername, 
         uint32* singerid, uint32* roomid)
     {
-        static const char* roompre = "http://fanxing.kugou.com/";
-        auto beginpos = tddata.find(roompre);
-        if (beginpos == std::string::npos)
+        std::string strroomid;
+        size_t pos = 0;
+        if (!GetMarkData(tddata, beginpos, "http://fanxing.kugou.com/", "\"", &strroomid, &pos))
             return false;
 
-        static const char* roompost = "</a>";
-        auto endpos = tddata.find(roompost);
-        if (endpos == std::string::npos)
+        std::string tempsingername;
+        beginpos = pos;
+        if (!GetMarkData(tddata, beginpos, R"(target="_blank">)", "</a>", &tempsingername, &pos))
             return false;
 
+        std::string strsingerid;
+        beginpos = pos;
+        if (!GetMarkData(tddata, beginpos, "(", ")", &strsingerid, &pos))
+            return false;
 
+        if (!base::StringToUint(strroomid, roomid))
+            return false;
+
+        if (!base::StringToUint(strsingerid, singerid))
+            return false;
+
+        *singername = tempsingername;
+        return true;
     }
 }
 
@@ -564,63 +580,149 @@ bool FamilyDaily::ParseSummaryData(const std::string& pagedata,
     result = GetTableData(pagedata, &tabledata);
     std::string trdata;
     size_t trendpos = 0;
-    result = GetTrData(tabledata, &trdata, &trendpos);
-    tabledata = tabledata.substr(trendpos);
+    size_t beginpos = 0;
+    // 第一个数据是表头
+    result = GetTrData(tabledata, beginpos, &trdata, &trendpos);
 
     std::vector<std::string> trvector;
     while (result)
     {
-        result = GetTrData(tabledata, &trdata, &trendpos);
+        beginpos = trendpos;
+        result = GetTrData(tabledata, beginpos, &trdata, &trendpos);
         if (result)
-        {
             trvector.push_back(trdata);
-            tabledata = tabledata.substr(trendpos);
-        }
     }
 
+    // 最后一个是表格下方页数数据
+    if (!trvector.empty())
+    {
+        trvector.erase(trvector.end()-1);
+    }
     
     
+    std::vector<SingerSummaryData> singerSummaryDataVector;
     for (const auto& it : trvector)
     {
         std::string trdata = it;
+        size_t beginpos = 0;
         size_t endpos = 0;
-        std::string tddata;
-        std::vector<std::string> tdvector;
+        std::string tddata;      
+        SingerSummaryData singerSummaryData;
 
+        // 主播字段
         // <a href="http://fanxing.kugou.com/1060982" target="_blank">陌路shiley</a>(10215159)
-        result = GetTdData(trdata, &tddata, &endpos);
-        trdata = trdata.substr(endpos);
-        tdvector.push_back(tddata);
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        uint32 singerid = 0;
+        uint32 roomid = 0;
+        std::string singername;
+        if (!GetSingerInfoFromTdData(tddata, beginpos, &singername, &singerid, &roomid))
+        {
+            assert(false);
+            continue;
+        }
 
+        singerSummaryData.singerid = singerid;
+        singerSummaryData.roomid = roomid;
+        singerSummaryData.nickname = singername;
 
-        result = GetTdData(trdata, &tddata, &endpos);
-        trdata = trdata.substr(endpos);
-        tdvector.push_back(tddata);
+        // 这个数据是直播海报字段，不使用
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
 
-        result = GetTdData(trdata, &tddata, &endpos);
-        trdata = trdata.substr(endpos);
-        tdvector.push_back(tddata);
+        // 主播等级
+        beginpos = endpos;
+        result = GetTdData(trdata, beginpos, &endpos, &tddata);
+        singerSummaryData.singerlevel = tddata;
 
-        result = GetTdData(trdata, &tddata, &endpos);
-        trdata = trdata.substr(endpos);
-        tdvector.push_back(tddata);
+        // 开播次数
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        uint32 onlinecount = 0;
+        if (!base::StringToUint(tddata, &onlinecount))
+        {
+            assert(false);
+            return false;
+        }
 
-        result = GetTdData(trdata, &tddata, &endpos);
-        trdata = trdata.substr(endpos);
-        tdvector.push_back(tddata);
+        singerSummaryData.onlinecount = onlinecount;
 
-        result = GetTdData(trdata, &tddata, &endpos);
-        trdata = trdata.substr(endpos);
-        tdvector.push_back(tddata);
+        // 累计直播时长（分钟）
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        
+        uint32 onlineminute = 0;
+        if (!base::StringToUint(tddata, &onlineminute))
+        {
+            assert(false);
+            return false;
+        }
 
-        result = GetTdData(trdata, &tddata, &endpos);
-        trdata = trdata.substr(endpos);
-        tdvector.push_back(tddata);
+        singerSummaryData.onlineminute = onlineminute;
 
-        result = GetTdData(trdata, &tddata, &endpos);
-        trdata = trdata.substr(endpos);
-        tdvector.push_back(tddata);
+        // 有效直播次数（大于1个小时）
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        uint32 effectivecount = 0;
+        if (!base::StringToUint(tddata, &effectivecount))
+        {
+            assert(false);
+            return false;
+        }
+        singerSummaryData.effectivecount = effectivecount;
+
+        // 直播间最高人气
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        uint32 maxusers = 0;
+        if (!base::StringToUint(tddata, &maxusers))
+        {
+            assert(false);
+            return false;
+        }
+        singerSummaryData.maxusers = maxusers;
+
+        // 星豆收入
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        double revenue = 0;
+        if (!base::StringToDouble(tddata, &revenue))
+        {
+            assert(false);
+            return false;
+        }
+        singerSummaryData.revenue = revenue;
+        singerSummaryDataVector.push_back(singerSummaryData);
     }
+
+    *summerydata = std::move(singerSummaryDataVector);
     return true;
 }
 
