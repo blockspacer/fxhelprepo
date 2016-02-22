@@ -3,9 +3,13 @@
 //
 
 #include "stdafx.h"
-#include "FamilyDataCenterUI.h"
-#include "FamilyDataCenterUIDlg.h"
+#include "FamilyDataCenterUI/FamilyDataCenterUI.h"
+#include "FamilyDataCenterUI/FamilyDataCenterUIDlg.h"
 
+#undef max
+#undef min
+
+#include "third_party/chromium/base/at_exit.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -27,6 +31,7 @@ CFamilyDataCenterUIApp::CFamilyDataCenterUIApp()
 
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
+
 }
 
 
@@ -69,6 +74,13 @@ BOOL CFamilyDataCenterUIApp::InitInstance()
 	// TODO:  应适当修改该字符串，
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
+
+    base::AtExitManager atExit;
+    if (!AfxOleInit())
+    {
+        AfxMessageBox(L"初始化OLE失败");
+        return FALSE;
+    }
 
 	CFamilyDataCenterUIDlg dlg;
 	m_pMainWnd = &dlg;

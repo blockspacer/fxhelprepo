@@ -3,17 +3,29 @@
 //
 
 #include "stdafx.h"
-#include "FamilyDataCenterUI.h"
-#include "FamilyDataCenterUIDlg.h"
 #include "afxdialogex.h"
+#include "FamilyDataCenterUI/FamilyDataCenterUI.h"
+#include "FamilyDataCenterUI/FamilyDataCenterUIDlg.h"
+#include "FamilyDataCenterUI/FamilyDataController.h"
+#include "FamilyDataCenterUI/FamilyDataModle.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-
+#undef max // 因为微软这个二比在某些头文件定义了max宏
+#undef min // 因为微软这个二比在某些头文件定义了min宏
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
+#include "third_party/chromium/base/time/time.h"
 
+namespace
+{
+    bool OleDateTimeToBaseTime(const COleDateTime& oletime, base::Time* basetime)
+    {
+        return false;
+    }
+}
 class CAboutDlg : public CDialogEx
 {
 public:
@@ -49,19 +61,33 @@ END_MESSAGE_MAP()
 
 CFamilyDataCenterUIDlg::CFamilyDataCenterUIDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFamilyDataCenterUIDlg::IDD, pParent)
+    , familyDataController_(nullptr)
+    , familyDataModle_(nullptr)
+    , m_oleDateTime_Begin(COleDateTime::GetCurrentTime())
+    , m_oleDateTime_End(COleDateTime::GetCurrentTime())
+    , m_username(_T(""))
+    , m_password(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 void CFamilyDataCenterUIDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+    CDialogEx::DoDataExchange(pDX);
+    DDX_Control(pDX, IDC_LIST_SUMMARY_DATA, m_ListCtrl_SummaryData);
+    DDX_DateTimeCtrl(pDX, IDC_DATETIMEPICKER_BEGIN, m_oleDateTime_Begin);
+    DDX_DateTimeCtrl(pDX, IDC_DATETIMEPICKER_END, m_oleDateTime_End);
+    DDX_Text(pDX, IDC_EDIT_USERNAME, m_username);
+    DDX_Text(pDX, IDC_EDIT_PASSWORD, m_password);
 }
 
 BEGIN_MESSAGE_MAP(CFamilyDataCenterUIDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+    ON_BN_CLICKED(IDC_BTN_GET_FAMILY_DATA, &CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData)
+    ON_BN_CLICKED(IDC_BTN_EXPORT_TO_EXCEL, &CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel)
+    ON_BN_CLICKED(IDC_BTN_LOGIN, &CFamilyDataCenterUIDlg::OnBnClickedBtnLogin)
 END_MESSAGE_MAP()
 
 
@@ -97,6 +123,9 @@ BOOL CFamilyDataCenterUIDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
+    m_ListCtrl_SummaryData.SetExtendedStyle(LVS_REPORT | LVS_EX_FULLROWSELECT);
+    familyDataController_.reset(new FamilyDataController);
+    familyDataModle_.reset(new FamilyDataModle);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -150,3 +179,29 @@ HCURSOR CFamilyDataCenterUIDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData()
+{
+    // TODO:  在此添加控件通知处理程序代码
+    base::Time beginTime;
+    base::Time endTime;
+    OleDateTimeToBaseTime(m_oleDateTime_Begin, &beginTime);
+    OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
+    GridData griddata;
+    familyDataController_->GetSingerFamilyData(beginTime, endTime, &griddata);
+}
+
+
+void CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFamilyDataCenterUIDlg::OnBnClickedBtnLogin()
+{
+    // TODO:  在此添加控件通知处理程序代码
+    UpdateData(FALSE);
+    familyDataController_->Login(m_username.GetString(), m_password.GetString());
+}

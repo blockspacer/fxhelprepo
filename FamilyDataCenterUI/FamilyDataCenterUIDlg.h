@@ -4,6 +4,12 @@
 
 #pragma once
 
+#include "afxcmn.h"
+#include <memory>
+
+#include "FamilyDataCenterUI/FamilyDataController.h"
+#include "FamilyDataCenterUI/FamilyDataModle.h"
+#include "ATLComTime.h"
 
 // CFamilyDataCenterUIDlg ¶Ô»°¿ò
 class CFamilyDataCenterUIDlg : public CDialogEx
@@ -29,4 +35,18 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+    CListCtrl m_ListCtrl_SummaryData;
+    afx_msg void OnBnClickedGetFamilyData();
+
+private:
+    std::unique_ptr<FamilyDataController> familyDataController_;
+    std::unique_ptr<FamilyDataModle> familyDataModle_;
+public:
+    afx_msg void OnBnClickedBtnExportToExcel();
+    COleDateTime m_oleDateTime_Begin;
+    COleDateTime m_oleDateTime_End;
+    afx_msg void OnBnClickedBtnLogin();
+    CString m_username;
+    CString m_password;
 };
