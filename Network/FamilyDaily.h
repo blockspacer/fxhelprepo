@@ -14,8 +14,9 @@ struct SingerDailyData
     uint32 singerid;
 };
 
-struct SingerSummaryData
+class SingerSummaryData
 {
+public:
     uint32 singerid;
     uint32 roomid;
     std::string nickname;

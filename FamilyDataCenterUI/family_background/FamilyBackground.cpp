@@ -36,7 +36,7 @@ void FamilyBackground::Test()
 
     std::vector<SingerSummaryData> summary;
 
-    result = GetSummaryData(begintime, endtime, &summary);
+    //result = GetSummaryData(begintime, endtime, &summary);
 }
 
 bool FamilyBackground::Init()
@@ -54,8 +54,9 @@ bool FamilyBackground::Login(const std::string& username,
     return result;
 }
 
-bool FamilyBackground::GetSummaryData(const base::Time& begintime,
-    const base::Time& endtime, std::vector<SingerSummaryData>* summary)
+bool FamilyBackground::GetSummaryData(const base::Time& begintime, 
+    const base::Time& endtime,
+    std::vector<SingerSummaryData>* summary)
 {
     if (!summary)
         return false;

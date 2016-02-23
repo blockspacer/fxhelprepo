@@ -23,9 +23,22 @@ namespace
 {
     bool OleDateTimeToBaseTime(const COleDateTime& oletime, base::Time* basetime)
     {
-        return false;
+        if (!basetime)
+            return false;
+
+        SYSTEMTIME systemtime;
+        if (!oletime.GetAsSystemTime(systemtime))
+            return false;
+        
+        FILETIME filetime;
+        if (!SystemTimeToFileTime(&systemtime, &filetime))
+            return false;
+        
+        *basetime = base::Time::FromFileTime(filetime);
+        return true;
     }
 }
+
 class CAboutDlg : public CDialogEx
 {
 public:
@@ -123,7 +136,28 @@ BOOL CFamilyDataCenterUIDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
-    m_ListCtrl_SummaryData.SetExtendedStyle(LVS_REPORT | LVS_EX_FULLROWSELECT);
+    DWORD dwStyle = m_ListCtrl_SummaryData.GetExtendedStyle();
+    dwStyle |= LVS_REPORT;
+    dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
+    dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
+    m_ListCtrl_SummaryData.SetExtendedStyle(dwStyle); //设置扩展风格
+
+    std::vector<std::wstring> columnlist = {
+        L"主播",
+        L"主播等级",
+        L"开播次数",
+        L"累计直播",
+        L"有效直播",
+        L"直播间最高人气",
+        L"星豆收入"
+    };
+
+    uint32 i = 0;
+    for (const auto& it : columnlist)
+    {
+        m_ListCtrl_SummaryData.InsertColumn(i++, it.c_str(), LVCFMT_LEFT, 140);//插入列
+    }
+
     familyDataController_.reset(new FamilyDataController);
     familyDataModle_.reset(new FamilyDataModle);
 
@@ -179,29 +213,41 @@ HCURSOR CFamilyDataCenterUIDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
 void CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData()
 {
     // TODO:  在此添加控件通知处理程序代码
+    UpdateData(TRUE);
     base::Time beginTime;
     base::Time endTime;
     OleDateTimeToBaseTime(m_oleDateTime_Begin, &beginTime);
     OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
     GridData griddata;
-    familyDataController_->GetSingerFamilyData(beginTime, endTime, &griddata);
+    if (!familyDataController_->GetSingerFamilyData(beginTime, endTime, &griddata))
+    {
+        // 输入日志信息
+        return;
+    }
+    DisplayDataToGrid(griddata);
 }
 
+void CFamilyDataCenterUIDlg::DisplayDataToGrid(const GridData& griddata)
+{  
+    // 这里要补充显示在界面表格里的数据功能
+
+    UpdateData(FALSE);
+    return;
+}
 
 void CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel()
 {
     // TODO:  在此添加控件通知处理程序代码
+    familyDataController_->ExportToExcel();
 }
 
 
 void CFamilyDataCenterUIDlg::OnBnClickedBtnLogin()
 {
     // TODO:  在此添加控件通知处理程序代码
-    UpdateData(FALSE);
+    UpdateData(TRUE);
     familyDataController_->Login(m_username.GetString(), m_password.GetString());
 }

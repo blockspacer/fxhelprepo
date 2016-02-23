@@ -63,16 +63,11 @@ FamilyDataController::FamilyDataController()
     base::FilePath path;
     PathService::Get(base::DIR_EXE, &path);
     exePath_ = path;
+    familyBackground_.reset(new FamilyBackground);
 }
 
 FamilyDataController::~FamilyDataController()
 {
-}
-
-bool FamilyDataController::Init()
-{
-    familyBackground_.reset(new FamilyBackground);
-    return false;
 }
 
 bool FamilyDataController::Login(const std::string& username, 
@@ -96,8 +91,17 @@ bool FamilyDataController::Login(const std::wstring& wusername,
     std::string password;
     base::WideToUTF8(wusername.c_str(), wusername.length(), &username);
     base::WideToUTF8(wpassword.c_str(), wpassword.length(), &password);
-    bool result = Login(username, password);
-    return result;
+    if (!familyBackground_)
+        return false;
+    if (!familyBackground_->Init())
+    {
+        return false;
+    }
+    if (!familyBackground_->Login(username, password))
+    {
+        return false;
+    }
+    return true;
 }
 
 bool FamilyDataController::GetSingerFamilyData(
@@ -110,14 +114,20 @@ bool FamilyDataController::GetSingerFamilyData(
 
     singerSummaryData_.reset(new std::vector<SingerSummaryData>);
     std::vector<SingerSummaryData> singerSummaryData;
-    bool result = familyBackground_->GetSummaryData(
-        begintime, endtime, &singerSummaryData);
-
-    //std::wstring filepath = L"d:/now.xlsx";
-    //return ExportToExcel(filepath);
+    if (!familyBackground_->GetSummaryData(begintime, endtime, &singerSummaryData))
+    {
+        return false;
+    }
+    
+    if (!SingerSummaryDataToGridData(singerSummaryData, griddata))
+    {
+        return false;
+    }
+    singerSummaryData_->assign(singerSummaryData.begin(), singerSummaryData.end());
+    return true;
 }
 
-bool FamilyDataController::ExportToExcel(const std::wstring& filepath)
+bool FamilyDataController::ExportToExcel()
 {
     CApplication ExcelApp;
     CWorkbooks books;
@@ -174,9 +184,6 @@ bool FamilyDataController::ExportToExcel(const std::wstring& filepath)
     }
     catch (...)
     {
-        /*增加一个新的工作簿*/
-        //lpDisp = books.Add(vtMissing);
-        //book.AttachDispatch(lpDisp);
         AfxMessageBox(_T("无法打开模板文件"));
         return false;
     }
@@ -202,10 +209,34 @@ bool FamilyDataController::ExportToExcel(const std::wstring& filepath)
         sheet.put_Name(strSheetName);
     }
 
-    /*向Sheet中写入多个单元格,规模为10*10 */
-    lpDisp = sheet.get_Range(_variant_t("A2"), _variant_t("G11"));
+    GridData griddata;
+    if (!SingerSummaryDataToGridData(*singerSummaryData_.get(), &griddata))
+    {
+        return false;
+    }
+
+    uint32 column = 0;
+    uint32 rowcount = griddata.size();
+    if (!griddata.empty())
+    {
+        column = griddata.begin()->size();
+    }
+
+    if ((column <= 0) || (rowcount <= 0))
+    {
+        return false;
+    }
+
+    //向Sheet中写入多个单元格
+    char c = 'A' + column - 1;
+    std::string rangeend;
+    rangeend.push_back(c);
+    rangeend += base::UintToString(rowcount+1);
+
+    lpDisp = sheet.get_Range(_variant_t("A2"), _variant_t(rangeend.c_str()));
     range.AttachDispatch(lpDisp);
 
+    // 下面全部都需要修改
     VARTYPE vt = VT_I4; /*数组元素的类型，long*/
     SAFEARRAYBOUND sabWrite[2]; /*用于定义数组的维数和下标的起始值*/
     sabWrite[0].cElements = 10;

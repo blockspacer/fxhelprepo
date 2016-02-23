@@ -17,14 +17,13 @@ public:
     FamilyDataController();
     virtual ~FamilyDataController();
 
-    bool Init();
     bool Login(const std::string& username, const std::string& password);
     bool Login(const std::wstring& wusername, const std::wstring& wpassword);
     bool GetSingerFamilyData(const base::Time& begintime,
                              const base::Time& endtime,
                              GridData* griddata);
 
-    bool ExportToExcel(const std::wstring& filepath);
+    bool ExportToExcel();
 
 private:
     base::FilePath exePath_;

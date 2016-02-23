@@ -11,6 +11,7 @@
 #include "FamilyDataCenterUI/FamilyDataModle.h"
 #include "ATLComTime.h"
 
+
 // CFamilyDataCenterUIDlg 对话框
 class CFamilyDataCenterUIDlg : public CDialogEx
 {
@@ -24,6 +25,9 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
+    afx_msg void OnBnClickedGetFamilyData();
+    afx_msg void OnBnClickedBtnExportToExcel();
+    afx_msg void OnBnClickedBtnLogin();
 
 // 实现
 protected:
@@ -35,18 +39,17 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
-public:
-    CListCtrl m_ListCtrl_SummaryData;
-    afx_msg void OnBnClickedGetFamilyData();
 
 private:
-    std::unique_ptr<FamilyDataController> familyDataController_;
-    std::unique_ptr<FamilyDataModle> familyDataModle_;
-public:
-    afx_msg void OnBnClickedBtnExportToExcel();
+
+    void DisplayDataToGrid(const GridData& griddata);
+
+    CListCtrl m_ListCtrl_SummaryData;
     COleDateTime m_oleDateTime_Begin;
     COleDateTime m_oleDateTime_End;
-    afx_msg void OnBnClickedBtnLogin();
     CString m_username;
     CString m_password;
+
+    std::unique_ptr<FamilyDataController> familyDataController_;
+    std::unique_ptr<FamilyDataModle> familyDataModle_;
 };

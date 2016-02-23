@@ -61,7 +61,7 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="family_background\FamilyBackground.h">
-      <Filter>源文件\family_background</Filter>
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -81,7 +81,7 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="family_background\FamilyBackground.cpp">
-      <Filter>源文件\family_background</Filter>
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
