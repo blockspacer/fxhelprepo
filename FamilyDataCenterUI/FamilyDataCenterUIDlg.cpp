@@ -241,7 +241,8 @@ void CFamilyDataCenterUIDlg::DisplayDataToGrid(const GridData& griddata)
 void CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel()
 {
     // TODO:  在此添加控件通知处理程序代码
-    familyDataController_->ExportToExcel();
+    //familyDataController_->ExportToExcel();
+    familyDataController_->ExportToTxt();
 }
 
 

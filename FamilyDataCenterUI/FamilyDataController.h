@@ -25,6 +25,7 @@ public:
 
     bool ExportToExcel();
 
+    bool ExportToTxt();
 private:
     base::FilePath exePath_;
     std::unique_ptr<FamilyBackground> familyBackground_;

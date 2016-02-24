@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <shellapi.h>
+
 #include "FamilyDataCenterUI/FamilyDataController.h"
 
 #include "FamilyDataCenterUI/Application.h"
@@ -14,6 +16,7 @@
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/files/file.h"
 
 //
 //struct SingerSummaryData
@@ -32,6 +35,7 @@
 
 namespace{
     const wchar_t* patternName = L"pattern.xlsx";
+    
 
     bool SingerSummaryDataToGridData(
         const std::vector<SingerSummaryData>& singerSummaryData,
@@ -297,5 +301,36 @@ bool FamilyDataController::ExportToExcel()
     books.ReleaseDispatch();
     ExcelApp.Quit();
     ExcelApp.ReleaseDispatch();
+    return true;
+}
+
+bool FamilyDataController::ExportToTxt()
+{
+    GridData griddata;
+    if (!SingerSummaryDataToGridData(*singerSummaryData_, &griddata))
+    {
+        return false;
+    }
+    base::FilePath txtpath;
+    txtpath = exePath_.Append(L"exportdata.txt");
+
+    std::string newline = "\n";
+    base::File file(txtpath, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    for (const auto& rowdata : griddata)
+    {
+        // 每一行数据
+        std::wstring wlinedata;
+        for (const auto& item : rowdata)
+        {
+            wlinedata += item + L"\t";
+        }
+        std::string linedata = base::WideToUTF8(wlinedata);
+        file.WriteAtCurrentPos(linedata.c_str(), linedata.size());
+        file.WriteAtCurrentPos(newline.c_str(), newline.size());
+    }
+    file.Close();
+    
+    std::wstring openPath = txtpath.value();
+    ShellExecuteW(0, L"open", L"NOTEPAD.EXE", openPath.c_str(), L"", SW_SHOWNORMAL);
     return true;
 }
