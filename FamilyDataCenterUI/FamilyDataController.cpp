@@ -60,6 +60,11 @@ namespace{
 
         return true;
     }
+
+    COleVariant
+        covtrue((short)TRUE),
+        covfalse((short)FALSE),
+        covoptional((long)DISP_E_PARAMNOTFOUND, VT_ERROR);
 }
 
 FamilyDataController::FamilyDataController()
@@ -177,21 +182,21 @@ bool FamilyDataController::ExportToExcel()
 
     /*打开一个工作簿，如不存在，则新增一个工作簿*/
     std::wstring patternPathFile = exePath_.Append(base::FilePath(patternName)).value();
-    try
-    {
-        /*打开一个工作簿*/
-        lpDisp = books.Open(patternPathFile.c_str(),
-            vtMissing, vtMissing, vtMissing, vtMissing, vtMissing,
-            vtMissing, vtMissing, vtMissing, vtMissing, vtMissing,
-            vtMissing, vtMissing, vtMissing, vtMissing);
-        book.AttachDispatch(lpDisp);
-    }
-    catch (...)
+    books.get_Count();
+
+    /*打开一个工作簿*/
+    lpDisp = books.Open(patternPathFile.c_str(),
+                        covoptional, covfalse, covoptional, covoptional, covoptional,
+                        covoptional, covoptional, covoptional, covoptional, covoptional,
+                        covoptional, covoptional, covoptional, covoptional);
+    
+    if (!lpDisp)
     {
         AfxMessageBox(_T("无法打开模板文件"));
         return false;
     }
 
+    book.AttachDispatch(lpDisp);
 
     /*得到工作簿中的Sheet的容器*/
     sheets.AttachDispatch(book.get_Sheets());
@@ -199,6 +204,20 @@ bool FamilyDataController::ExportToExcel()
     /*打开一个Sheet，如不存在，就新增一个Sheet*/
     CString strSheetName = _T("FamilyData");
 
+    LPDISPATCH lpdisp = nullptr;
+    int32 sheetcount = sheets.get_Count();
+    for (int32 index = 1; index < sheetcount; ++index)
+    {
+        COleVariant v((short)index);
+        lpdisp = sheets.get_Item(v);
+        sheet.AttachDispatch(lpdisp);
+        CString sheet_name = sheet.get_Name();
+        if (sheet_name.CompareNoCase(strSheetName) == 0)
+        {
+            return true;
+        }
+    }
+    
     try
     {
         /*打开一个已有的Sheet*/
