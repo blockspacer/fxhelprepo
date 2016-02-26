@@ -240,6 +240,11 @@ bool FamilyDaily::Init()
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
+    if (headers)
+    {
+        curl_slist_free_all(headers);
+    }
+
     /* Check for errors */
     if (res != CURLE_OK)
     {
@@ -357,6 +362,11 @@ bool FamilyDaily::Login(const std::string& username, const std::string& password
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
+
+    if (headers)
+    {
+        curl_slist_free_all(headers);
+    }
 
     /* Check for errors */
     if (res != CURLE_OK)
@@ -536,6 +546,11 @@ bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
 
     /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
+    if (headers)
+    {
+        curl_slist_free_all(headers);
+    }
+    
     /* Check for errors */
     if (res != CURLE_OK)
     {
