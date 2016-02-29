@@ -132,7 +132,7 @@ bool FamilyDataController::GetSingerFamilyData(
 
 bool FamilyDataController::ExportToExcel()
 {
-    base::FilePath templatepath = exePath_.Append(L"exportdata.xlsx");
+    base::FilePath templatepath = exePath_.Append(L"template.xlsx");
     uint64 time64 = base::Time::Now().ToInternalValue();
     std::wstring timestr = base::Uint64ToString16(time64);
     std::wstring filename = timestr + L".xlsx";
