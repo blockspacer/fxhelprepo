@@ -92,6 +92,7 @@ void CFamilyDataCenterUIDlg::DoDataExchange(CDataExchange* pDX)
     DDX_DateTimeCtrl(pDX, IDC_DATETIMEPICKER_END, m_oleDateTime_End);
     DDX_Text(pDX, IDC_EDIT_USERNAME, m_username);
     DDX_Text(pDX, IDC_EDIT_PASSWORD, m_password);
+    DDX_Control(pDX, IDC_LIST_MESSAGE, m_list_message);
 }
 
 BEGIN_MESSAGE_MAP(CFamilyDataCenterUIDlg, CDialogEx)
@@ -215,18 +216,21 @@ HCURSOR CFamilyDataCenterUIDlg::OnQueryDragIcon()
 
 void CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData()
 {
-    // TODO:  在此添加控件通知处理程序代码
     UpdateData(TRUE);
     base::Time beginTime;
     base::Time endTime;
     OleDateTimeToBaseTime(m_oleDateTime_Begin, &beginTime);
     OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
     GridData griddata;
-    if (!familyDataController_->GetSingerFamilyData(beginTime, endTime, &griddata))
+    DisplayMessage(std::wstring(m_username.GetString()) + L" GetFamilyData Begin!");
+    bool result = familyDataController_->GetSingerFamilyData(beginTime, endTime, &griddata);
+    if (!result)
     {
-        // 输入日志信息
+        DisplayMessage(std::wstring(m_username.GetString()) + L" GetFamilyData failed!");
         return;
     }
+
+    DisplayMessage(std::wstring(m_username.GetString()) + L" GetFamilyData success!");
     DisplayDataToGrid(griddata);
 }
 
@@ -238,17 +242,39 @@ void CFamilyDataCenterUIDlg::DisplayDataToGrid(const GridData& griddata)
     return;
 }
 
+void CFamilyDataCenterUIDlg::DisplayMessage(const std::wstring& message)
+{
+    m_list_message.AddString(message.c_str());
+    UpdateData(FALSE);
+}
+
 void CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel()
 {
-    // TODO:  在此添加控件通知处理程序代码
-    familyDataController_->ExportToExcel();
+    DisplayMessage(std::wstring(m_username.GetString()) + L" ExportToExcel Begin!");
+    bool result = familyDataController_->ExportToExcel();
     //familyDataController_->ExportToTxt();
+    if (result)
+    {
+        DisplayMessage(std::wstring(m_username.GetString()) + L" Export success!");
+    }
+    else
+    {
+        DisplayMessage(std::wstring(m_username.GetString()) + L" Export failed!");
+    }
 }
 
 
 void CFamilyDataCenterUIDlg::OnBnClickedBtnLogin()
 {
-    // TODO:  在此添加控件通知处理程序代码
     UpdateData(TRUE);
-    familyDataController_->Login(m_username.GetString(), m_password.GetString());
+    DisplayMessage(std::wstring(m_username.GetString()) + L" Login Begin!");
+    bool result = familyDataController_->Login(m_username.GetString(), m_password.GetString());
+    if (result)
+    {
+        DisplayMessage(std::wstring(m_username.GetString()) + L" Login success!");
+    }
+    else
+    {
+        DisplayMessage(std::wstring(m_username.GetString()) + L" Login failed!");
+    }
 }

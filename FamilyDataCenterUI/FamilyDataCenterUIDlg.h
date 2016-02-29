@@ -10,6 +10,7 @@
 #include "FamilyDataCenterUI/FamilyDataController.h"
 #include "FamilyDataCenterUI/FamilyDataModle.h"
 #include "ATLComTime.h"
+#include "afxwin.h"
 
 
 // CFamilyDataCenterUIDlg ¶Ô»°¿ò
@@ -43,8 +44,10 @@ protected:
 private:
 
     void DisplayDataToGrid(const GridData& griddata);
+    void DisplayMessage(const std::wstring& message);
 
     CListCtrl m_ListCtrl_SummaryData;
+    CListBox m_list_message;
     COleDateTime m_oleDateTime_Begin;
     COleDateTime m_oleDateTime_End;
     CString m_username;
