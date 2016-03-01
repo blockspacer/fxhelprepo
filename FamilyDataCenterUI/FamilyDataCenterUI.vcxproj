@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="Config.h" />
     <ClInclude Include="FamilyDataCenterUI.h" />
     <ClInclude Include="FamilyDataCenterUIDlg.h" />
     <ClInclude Include="FamilyDataController.h" />
@@ -123,6 +124,7 @@
     <ClInclude Include="Worksheets.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="FamilyDataCenterUI.cpp" />
     <ClCompile Include="FamilyDataCenterUIDlg.cpp" />
     <ClCompile Include="FamilyDataController.cpp" />

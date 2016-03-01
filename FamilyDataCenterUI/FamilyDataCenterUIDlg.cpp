@@ -81,6 +81,7 @@ CFamilyDataCenterUIDlg::CFamilyDataCenterUIDlg(CWnd* pParent /*=NULL*/)
     , m_username(_T(""))
     , m_password(_T(""))
     , index_(0)
+    , m_remember(FALSE)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -94,6 +95,7 @@ void CFamilyDataCenterUIDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_EDIT_USERNAME, m_username);
     DDX_Text(pDX, IDC_EDIT_PASSWORD, m_password);
     DDX_Control(pDX, IDC_LIST_MESSAGE, m_list_message);
+    DDX_Check(pDX, IDC_CHECK_REMEMBER, m_remember);
 }
 
 BEGIN_MESSAGE_MAP(CFamilyDataCenterUIDlg, CDialogEx)
@@ -237,6 +239,12 @@ void CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData()
     DisplayDataToGrid(griddata);
 }
 
+bool CFamilyDataCenterUIDlg::SaveUserInfo(const std::wstring& username, 
+    const std::wstring& password)
+{
+    return false;
+}
+
 void CFamilyDataCenterUIDlg::DisplayDataToGrid(const GridData& griddata)
 {
     if (griddata.empty())
@@ -282,13 +290,16 @@ void CFamilyDataCenterUIDlg::OnBnClickedBtnLogin()
     UpdateData(TRUE);
     DisplayMessage(std::wstring(m_username.GetString()) + L" Login Begin!");
     bool result = familyDataController_->Login(m_username.GetString(), m_password.GetString());
-    if (result)
-    {
-        DisplayMessage(std::wstring(m_username.GetString()) + L" Login success!");
-    }
-    else
+    if (!result)
     {
         DisplayMessage(std::wstring(m_username.GetString()) + L" Login failed!");
+        return;
+    }
+
+    DisplayMessage(std::wstring(m_username.GetString()) + L" Login success!");
+    if (m_remember)
+    {
+        SaveUserInfo(m_username.GetString(), m_password.GetString());
     }
 }
 

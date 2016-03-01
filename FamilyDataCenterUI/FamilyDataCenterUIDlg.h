@@ -44,6 +44,7 @@ protected:
 
 private:
 
+    bool SaveUserInfo(const std::wstring& username, const std::wstring& password);
     void DisplayDataToGrid(const GridData& griddata);
     void DisplayMessage(const std::wstring& message);
 
@@ -58,4 +59,6 @@ private:
     std::unique_ptr<FamilyDataController> familyDataController_;
     std::unique_ptr<FamilyDataModle> familyDataModle_;
     uint32 index_;
+public:
+    BOOL m_remember;
 };
