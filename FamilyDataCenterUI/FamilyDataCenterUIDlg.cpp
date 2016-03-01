@@ -80,6 +80,7 @@ CFamilyDataCenterUIDlg::CFamilyDataCenterUIDlg(CWnd* pParent /*=NULL*/)
     , m_oleDateTime_End(COleDateTime::GetCurrentTime())
     , m_username(_T(""))
     , m_password(_T(""))
+    , index_(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -102,6 +103,7 @@ BEGIN_MESSAGE_MAP(CFamilyDataCenterUIDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_GET_FAMILY_DATA, &CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData)
     ON_BN_CLICKED(IDC_BTN_EXPORT_TO_EXCEL, &CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel)
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CFamilyDataCenterUIDlg::OnBnClickedBtnLogin)
+    ON_NOTIFY(LVN_GETDISPINFO, IDC_LIST_SUMMARY_DATA, &CFamilyDataCenterUIDlg::OnLvnGetdispinfoListSummaryData)
 END_MESSAGE_MAP()
 
 
@@ -141,6 +143,8 @@ BOOL CFamilyDataCenterUIDlg::OnInitDialog()
     dwStyle |= LVS_REPORT;
     dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
     dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
+    dwStyle |= LVS_OWNERDATA;
+    dwStyle |= LVS_AUTOARRANGE;
     m_ListCtrl_SummaryData.SetExtendedStyle(dwStyle); //设置扩展风格
 
     std::vector<std::wstring> columnlist = {
@@ -156,9 +160,8 @@ BOOL CFamilyDataCenterUIDlg::OnInitDialog()
     uint32 i = 0;
     for (const auto& it : columnlist)
     {
-        m_ListCtrl_SummaryData.InsertColumn(i++, it.c_str(), LVCFMT_LEFT, 140);//插入列
+        m_ListCtrl_SummaryData.InsertColumn(i++, it.c_str(), LVCFMT_LEFT, 100);//插入列
     }
-
     familyDataController_.reset(new FamilyDataController);
     familyDataModle_.reset(new FamilyDataModle);
 
@@ -222,44 +225,54 @@ void CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData()
     OleDateTimeToBaseTime(m_oleDateTime_Begin, &beginTime);
     OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
     GridData griddata;
-    DisplayMessage(std::wstring(m_username.GetString()) + L" GetFamilyData Begin!");
+    DisplayMessage(L" GetFamilyData Begin!");
     bool result = familyDataController_->GetSingerFamilyData(beginTime, endTime, &griddata);
     if (!result)
     {
-        DisplayMessage(std::wstring(m_username.GetString()) + L" GetFamilyData failed!");
+        DisplayMessage(L" GetFamilyData failed!");
         return;
     }
 
-    DisplayMessage(std::wstring(m_username.GetString()) + L" GetFamilyData success!");
+    DisplayMessage(L" GetFamilyData success!");
     DisplayDataToGrid(griddata);
 }
 
 void CFamilyDataCenterUIDlg::DisplayDataToGrid(const GridData& griddata)
-{  
-    // 这里要补充显示在界面表格里的数据功能
+{
+    if (griddata.empty())
+        return;
+    m_griddata = griddata;
 
-    UpdateData(FALSE);
-    return;
+    //删除之前的数据
+    m_ListCtrl_SummaryData.SetItemCountEx(0);
+    m_ListCtrl_SummaryData.Invalidate();
+    m_ListCtrl_SummaryData.UpdateWindow();
+
+    //生成新的数据缓冲区
+    int nItemCount = griddata.size();
+    m_ListCtrl_SummaryData.SetItemCountEx(nItemCount);
+    m_ListCtrl_SummaryData.Invalidate();
+   
 }
 
 void CFamilyDataCenterUIDlg::DisplayMessage(const std::wstring& message)
 {
-    m_list_message.AddString(message.c_str());
+    m_list_message.InsertString(index_++, message.c_str());
     UpdateData(FALSE);
 }
 
 void CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel()
 {
-    DisplayMessage(std::wstring(m_username.GetString()) + L" ExportToExcel Begin!");
+    DisplayMessage(L" ExportToExcel Begin!");
     bool result = familyDataController_->ExportToExcel();
     //familyDataController_->ExportToTxt();
     if (result)
     {
-        DisplayMessage(std::wstring(m_username.GetString()) + L" Export success!");
+        DisplayMessage(L" Export success!");
     }
     else
     {
-        DisplayMessage(std::wstring(m_username.GetString()) + L" Export failed!");
+        DisplayMessage(L" Export failed!");
     }
 }
 
@@ -277,4 +290,17 @@ void CFamilyDataCenterUIDlg::OnBnClickedBtnLogin()
     {
         DisplayMessage(std::wstring(m_username.GetString()) + L" Login failed!");
     }
+}
+
+void CFamilyDataCenterUIDlg::OnLvnGetdispinfoListSummaryData(NMHDR *pNMHDR, LRESULT *pResult)
+{
+    LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
+    LV_ITEM *pItem = &(pDispInfo)->item;
+    if (pItem->mask & LVIF_TEXT)
+    {
+        //使缓冲区数据与表格子项对应
+        pItem->pszText = (LPWSTR)m_griddata[pItem->iItem][pItem->iSubItem].c_str();
+    }
+
+    *pResult = 0;
 }

@@ -29,6 +29,7 @@ public:
     afx_msg void OnBnClickedGetFamilyData();
     afx_msg void OnBnClickedBtnExportToExcel();
     afx_msg void OnBnClickedBtnLogin();
+    afx_msg void OnLvnGetdispinfoListSummaryData(NMHDR *pNMHDR, LRESULT *pResult);
 
 // й╣ож
 protected:
@@ -52,7 +53,9 @@ private:
     COleDateTime m_oleDateTime_End;
     CString m_username;
     CString m_password;
+    GridData m_griddata;
 
     std::unique_ptr<FamilyDataController> familyDataController_;
     std::unique_ptr<FamilyDataModle> familyDataModle_;
+    uint32 index_;
 };
