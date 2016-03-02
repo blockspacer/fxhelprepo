@@ -133,8 +133,8 @@ bool ExcelHelper::Export(std::vector<std::vector<std::wstring>> data)
     // 填写数据
     for (auto rowdata = data.begin(); rowdata != data.end(); rowdata++)
     {
-        // excel里面的行下标从1开始
-        uint32 rowid = std::distance(data.begin(), rowdata)+1;
+        // excel里面的行下标从1开始,还要跳过列头，所以是+2
+        uint32 rowid = std::distance(data.begin(), rowdata)+2;
         std::wstring wlinedata;
         for (auto columndata = rowdata->begin(); columndata!=rowdata->end();
             columndata++)
