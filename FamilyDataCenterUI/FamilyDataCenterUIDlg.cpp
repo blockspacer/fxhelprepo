@@ -271,9 +271,11 @@ void CFamilyDataCenterUIDlg::DisplayMessage(const std::wstring& message)
 
 void CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel()
 {
+    familyDataController_->ExportToTxt();
+
     DisplayMessage(L" ExportToExcel Begin!");
     bool result = familyDataController_->ExportToExcel();
-    //familyDataController_->ExportToTxt();
+    
     if (result)
     {
         DisplayMessage(L" Export success!");
