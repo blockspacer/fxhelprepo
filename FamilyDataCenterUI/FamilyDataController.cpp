@@ -130,6 +130,15 @@ bool FamilyDataController::GetSingerFamilyData(
     return true;
 }
 
+
+bool FamilyDataController::GetDailyDataBySingerId(uint32 singerid,
+    const base::Time& begintime,
+    const base::Time& endtime, GridData* griddata)
+{
+    return false;
+}
+
+
 bool FamilyDataController::ExportToExcel()
 {
     base::FilePath templatepath = exePath_.Append(L"template.xlsx");

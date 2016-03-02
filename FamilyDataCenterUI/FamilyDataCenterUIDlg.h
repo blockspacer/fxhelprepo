@@ -44,7 +44,8 @@ protected:
 
 private:
 
-    void DisplayDataToGrid(const GridData& griddata);
+    void DisplayDataToGrid(const std::vector<std::wstring> columnlist, 
+        const GridData& griddata);
     void DisplayMessage(const std::wstring& message);
 
     CListCtrl m_ListCtrl_SummaryData;

@@ -23,6 +23,9 @@ public:
                              const base::Time& endtime,
                              GridData* griddata);
 
+    bool GetDailyDataBySingerId(uint32 singerid, const base::Time& begintime,
+        const base::Time& endtime, GridData* griddata);
+
     bool ExportToExcel();
 
     bool ExportToTxt();

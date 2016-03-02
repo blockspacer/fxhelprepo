@@ -264,19 +264,6 @@ void CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData()
     }
 
     DisplayMessage(L" GetFamilyData success!");
-    DisplayDataToGrid(griddata);
-}
-
-void CFamilyDataCenterUIDlg::DisplayDataToGrid(const GridData& griddata)
-{
-    if (griddata.empty())
-        return;
-    m_griddata = griddata;
-
-    //删除之前的数据
-    m_ListCtrl_SummaryData.SetItemCountEx(0);
-    m_ListCtrl_SummaryData.Invalidate();
-    m_ListCtrl_SummaryData.UpdateWindow();
 
     std::vector<std::wstring> columnlist = {
         L"主播",
@@ -287,6 +274,22 @@ void CFamilyDataCenterUIDlg::DisplayDataToGrid(const GridData& griddata)
         L"直播间最高人气",
         L"星豆收入"
     };
+
+    DisplayDataToGrid(columnlist, griddata);
+}
+
+void CFamilyDataCenterUIDlg::DisplayDataToGrid(
+    const std::vector<std::wstring> columnlist, 
+    const GridData& griddata)
+{
+    if (griddata.empty())
+        return;
+    m_griddata = griddata;
+
+    //删除之前的数据
+    m_ListCtrl_SummaryData.SetItemCountEx(0);
+    m_ListCtrl_SummaryData.Invalidate();
+    m_ListCtrl_SummaryData.UpdateWindow();
 
     int nColumnCount = m_ListCtrl_SummaryData.GetHeaderCtrl()->GetItemCount();
     for (int i = nColumnCount - 1; i >= 0; i--)
@@ -363,10 +366,61 @@ void CFamilyDataCenterUIDlg::OnLvnGetdispinfoListSummaryData(NMHDR *pNMHDR, LRES
     *pResult = 0;
 }
 
-
+//struct SingerDailyData
+//{
+//    uint32 singerid;
+//    std::string date;
+//    uint32 onlinecount;         //开播次数
+//    uint32 onlineminute;        //累计直播时长（分钟）
+//    uint32 effectivecount;      //有效直播次数（大于1个小时）
+//    uint32 maxusers;            //直播间最高人气
+//    double revenue;             // 星豆收入
+//    uint32 blame;               // 周期累计扣分
+//};
 void CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerData()
 {
     // TODO:  在此添加控件通知处理程序代码
+    UpdateData(TRUE);
+    if (!m_singer_id)
+    {
+        AfxMessageBox(L"请输入正确的主播繁星号");
+        return;
+    }
+    base::Time beginTime;
+    base::Time endTime;
+    OleDateTimeToBaseTime(m_oleDateTime_Begin, &beginTime);
+    OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
+    GridData griddata;
+    DisplayMessage(L" GetDailyDataBySingerId Begin!");
+
+    bool result = familyDataController_->GetDailyDataBySingerId(m_singer_id, beginTime, 
+        endTime, &griddata);
+
+    if (!result)
+    {
+        DisplayMessage(L" GetDailyDataBySingerId failed!");
+        return;
+    }
+    DisplayMessage(L" GetDailyDataBySingerId success!");
+
+    //    std::string date;
+    //    uint32 onlinecount;         //开播次数
+    //    uint32 onlineminute;        //累计直播时长（分钟）
+    //    uint32 effectivecount;      //有效直播次数（大于1个小时）
+    //    uint32 maxusers;            //直播间最高人气
+    //    double revenue;             // 星豆收入
+    //    uint32 blame;               // 周期累计扣分
+
+    std::vector<std::wstring> columnlist = {
+        L"开播次数",
+        L"累计直播时长",
+        L"有效直播次数",
+        L"直播间最高人气",
+        L"星豆收入",
+        L"周期累计扣分"
+    };
+
+    DisplayDataToGrid(columnlist,griddata);
 }
 
 

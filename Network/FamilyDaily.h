@@ -11,7 +11,13 @@
 
 struct SingerDailyData
 {
-    uint32 singerid;
+    std::string date;
+    uint32 onlinecount;         //开播次数
+    uint32 onlineminute;        //累计直播时长（分钟）
+    uint32 effectivecount;      //有效直播次数（大于1个小时）
+    uint32 maxusers;            //直播间最高人气
+    double revenue;             // 星豆收入
+    uint32 blame;               // 周期累计扣分
 };
 
 class SingerSummaryData
