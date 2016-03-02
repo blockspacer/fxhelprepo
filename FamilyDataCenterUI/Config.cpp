@@ -3,7 +3,35 @@
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/path_service.h"
 
+namespace{
 
+    std::wstring Encrypt(const std::wstring& plain)
+    {
+        if (plain.empty())
+            return L"";
+
+        std::wstring cipher;
+        for (const auto& it : plain)
+        {
+            wchar_t c = it + 1;
+            cipher.push_back(c);
+        }
+        return cipher;
+    }
+    std::wstring Decrypt(const std::wstring& cipher)
+    {
+        if (cipher.empty())
+            return L"";
+
+        std::wstring plain;
+        for (const auto& it : cipher)
+        {
+            wchar_t c = it - 1;
+            plain.push_back(c);
+        }
+        return plain;
+    }
+}
 Config::Config()
 {
     base::FilePath path;
@@ -25,7 +53,9 @@ bool Config::GetUserName(std::wstring* username) const
     {
         return false;
     }
-    username->assign(temp, temp + count);
+    std::wstring tempstr;
+    tempstr.assign(temp, temp + count);
+    *username = Decrypt(tempstr);
     return true;
 }
 bool Config::GetPassword(std::wstring* password) const
@@ -37,7 +67,9 @@ bool Config::GetPassword(std::wstring* password) const
     {
         return false;
     }
-    password->assign(temp, temp + count);
+    std::wstring tempstr;
+    tempstr.assign(temp, temp + count);
+    *password = Decrypt(tempstr);
     return true;
 }
 
@@ -51,9 +83,10 @@ bool Config::GetRemember() const
 bool Config::Save(const std::wstring& username,
     const std::wstring& password, bool remember) const
 {
-    WritePrivateProfileString(L"UserInfo", L"UserName", username.c_str(),
+    
+    WritePrivateProfileString(L"UserInfo", L"UserName", Encrypt(username).c_str(),
         filepath_.c_str());
-    WritePrivateProfileString(L"UserInfo", L"Password", password.c_str(),
+    WritePrivateProfileString(L"UserInfo", L"Password", Encrypt(password).c_str(),
         filepath_.c_str());
 
     std::wstring str = remember ? L"1" : L"0";
