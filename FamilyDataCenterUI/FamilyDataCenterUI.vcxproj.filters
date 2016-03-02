@@ -60,11 +60,11 @@
     <ClInclude Include="FamilyDataController.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="family_background\FamilyBackground.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Config.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="family_background\FamilyBackground.h">
+      <Filter>源文件\family_background</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -83,11 +83,11 @@
     <ClCompile Include="FamilyDataController.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="family_background\FamilyBackground.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Config.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="family_background\FamilyBackground.cpp">
+      <Filter>源文件\family_background</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
