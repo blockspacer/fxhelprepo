@@ -8,6 +8,7 @@
 #include "FamilyDataCenterUI/FamilyDataCenterUIDlg.h"
 #include "FamilyDataCenterUI/FamilyDataController.h"
 #include "FamilyDataCenterUI/FamilyDataModle.h"
+#include "FamilyDataCenterUI/Config.h"
 
 
 #ifdef _DEBUG
@@ -36,6 +37,22 @@ namespace
         
         *basetime = base::Time::FromFileTime(filetime);
         return true;
+    }
+
+    bool SaveUserInfo(const std::wstring& username, const std::wstring& password,
+        bool remember)
+    {
+        Config config;
+        return config.Save(username, password, remember);
+    }
+
+    bool LoadUserInfo(std::wstring* username, std::wstring* password,bool* remeber)
+    {
+        Config config;
+        bool result = config.GetUserName(username);
+        config.GetPassword(password);
+        *remeber = config.GetRemember();
+        return result;
     }
 }
 
@@ -167,6 +184,17 @@ BOOL CFamilyDataCenterUIDlg::OnInitDialog()
     familyDataController_.reset(new FamilyDataController);
     familyDataModle_.reset(new FamilyDataModle);
 
+    std::wstring username;
+    std::wstring password;
+    bool remember = false;
+    if (LoadUserInfo(&username, &password,&remember))
+    {
+        m_remember = static_cast<int>(remember);
+        m_username = username.c_str();
+        m_password = password.c_str();
+        UpdateData(FALSE);
+    }
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -239,12 +267,6 @@ void CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData()
     DisplayDataToGrid(griddata);
 }
 
-bool CFamilyDataCenterUIDlg::SaveUserInfo(const std::wstring& username, 
-    const std::wstring& password)
-{
-    return false;
-}
-
 void CFamilyDataCenterUIDlg::DisplayDataToGrid(const GridData& griddata)
 {
     if (griddata.empty())
@@ -301,7 +323,11 @@ void CFamilyDataCenterUIDlg::OnBnClickedBtnLogin()
     DisplayMessage(std::wstring(m_username.GetString()) + L" Login success!");
     if (m_remember)
     {
-        SaveUserInfo(m_username.GetString(), m_password.GetString());
+        SaveUserInfo(m_username.GetString(), m_password.GetString(), !!m_remember);
+    }
+    else
+    {
+        SaveUserInfo(L"", L"", !!m_remember);
     }
 }
 

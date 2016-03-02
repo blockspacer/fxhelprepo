@@ -44,7 +44,6 @@ protected:
 
 private:
 
-    bool SaveUserInfo(const std::wstring& username, const std::wstring& password);
     void DisplayDataToGrid(const GridData& griddata);
     void DisplayMessage(const std::wstring& message);
 

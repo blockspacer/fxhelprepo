@@ -5,12 +5,11 @@ class Config
 public:
     Config();
     ~Config();
-
-    bool Load();
-    bool GetUserName() const;
-    bool GetPassword() const;
-    bool Save();
-
+    bool GetUserName(std::wstring* username) const;
+    bool GetPassword(std::wstring* password) const;
+    bool Save(const std::wstring& username, const std::wstring& password,
+        bool remember) const;
+    bool GetRemember() const;
 private:
     std::wstring filepath_;
 };
