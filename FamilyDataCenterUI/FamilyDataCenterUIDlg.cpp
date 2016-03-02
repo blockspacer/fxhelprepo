@@ -31,11 +31,16 @@ namespace
         if (!oletime.GetAsSystemTime(systemtime))
             return false;
         
-        FILETIME filetime;
-        if (!SystemTimeToFileTime(&systemtime, &filetime))
-            return false;
-        
-        *basetime = base::Time::FromFileTime(filetime);
+        base::Time::Exploded exploded;
+        exploded.year = systemtime.wYear;
+        exploded.month = systemtime.wMonth;
+        exploded.day_of_month = systemtime.wDay;
+        exploded.day_of_week = systemtime.wDayOfWeek;
+        exploded.hour = systemtime.wHour;
+        exploded.minute = systemtime.wMinute;
+        exploded.second = systemtime.wSecond;
+        exploded.millisecond = systemtime.wMilliseconds;
+        *basetime = base::Time::FromLocalExploded(exploded);
         return true;
     }
 
