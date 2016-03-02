@@ -99,6 +99,10 @@ CFamilyDataCenterUIDlg::CFamilyDataCenterUIDlg(CWnd* pParent /*=NULL*/)
     , m_password(_T(""))
     , index_(0)
     , m_remember(FALSE)
+    , m_singer_id(0)
+    , m_total_income(0)
+    , m_total_hours(0)
+    , m_new_count(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -113,6 +117,10 @@ void CFamilyDataCenterUIDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_EDIT_PASSWORD, m_password);
     DDX_Control(pDX, IDC_LIST_MESSAGE, m_list_message);
     DDX_Check(pDX, IDC_CHECK_REMEMBER, m_remember);
+    DDX_Text(pDX, IDC_EDIT_SINGER_ID, m_singer_id);
+    DDX_Text(pDX, IDC_EDIT_TOTAL_INCOME, m_total_income);
+    DDX_Text(pDX, IDC_EDIT_TOTAL_HOURS, m_total_hours);
+    DDX_Text(pDX, IDC_EDIT_NEW_COUNT, m_new_count);
 }
 
 BEGIN_MESSAGE_MAP(CFamilyDataCenterUIDlg, CDialogEx)
@@ -123,6 +131,8 @@ BEGIN_MESSAGE_MAP(CFamilyDataCenterUIDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_EXPORT_TO_EXCEL, &CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel)
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CFamilyDataCenterUIDlg::OnBnClickedBtnLogin)
     ON_NOTIFY(LVN_GETDISPINFO, IDC_LIST_SUMMARY_DATA, &CFamilyDataCenterUIDlg::OnLvnGetdispinfoListSummaryData)
+    ON_BN_CLICKED(IDC_BTN_GET_SINGER_DATA, &CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerData)
+    ON_BN_CLICKED(IDC_BTN_GET_NEW_SINGER, &CFamilyDataCenterUIDlg::OnBnClickedBtnGetNewSinger)
 END_MESSAGE_MAP()
 
 
@@ -166,21 +176,6 @@ BOOL CFamilyDataCenterUIDlg::OnInitDialog()
     dwStyle |= LVS_AUTOARRANGE;
     m_ListCtrl_SummaryData.SetExtendedStyle(dwStyle); //设置扩展风格
 
-    std::vector<std::wstring> columnlist = {
-        L"主播",
-        L"主播等级",
-        L"开播次数",
-        L"累计直播",
-        L"有效直播",
-        L"直播间最高人气",
-        L"星豆收入"
-    };
-
-    uint32 i = 0;
-    for (const auto& it : columnlist)
-    {
-        m_ListCtrl_SummaryData.InsertColumn(i++, it.c_str(), LVCFMT_LEFT, 100);//插入列
-    }
     familyDataController_.reset(new FamilyDataController);
     familyDataModle_.reset(new FamilyDataModle);
 
@@ -278,11 +273,30 @@ void CFamilyDataCenterUIDlg::DisplayDataToGrid(const GridData& griddata)
     m_ListCtrl_SummaryData.Invalidate();
     m_ListCtrl_SummaryData.UpdateWindow();
 
+    std::vector<std::wstring> columnlist = {
+        L"主播",
+        L"主播等级",
+        L"开播次数",
+        L"累计直播",
+        L"有效直播",
+        L"直播间最高人气",
+        L"星豆收入"
+    };
+
+    int nColumnCount = m_ListCtrl_SummaryData.GetHeaderCtrl()->GetItemCount();
+    for (int i = nColumnCount - 1; i >= 0; i--)
+        m_ListCtrl_SummaryData.DeleteColumn(i);
+
+    uint32 i = 0;
+    for (const auto& it : columnlist)
+    {
+        m_ListCtrl_SummaryData.InsertColumn(i++, it.c_str(), LVCFMT_LEFT, 100);//插入列
+    }
+
     //生成新的数据缓冲区
     int nItemCount = griddata.size();
     m_ListCtrl_SummaryData.SetItemCountEx(nItemCount);
     m_ListCtrl_SummaryData.Invalidate();
-   
 }
 
 void CFamilyDataCenterUIDlg::DisplayMessage(const std::wstring& message)
@@ -342,4 +356,16 @@ void CFamilyDataCenterUIDlg::OnLvnGetdispinfoListSummaryData(NMHDR *pNMHDR, LRES
     }
 
     *pResult = 0;
+}
+
+
+void CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerData()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFamilyDataCenterUIDlg::OnBnClickedBtnGetNewSinger()
+{
+    // TODO:  在此添加控件通知处理程序代码
 }

@@ -60,4 +60,10 @@ private:
     uint32 index_;
 public:
     BOOL m_remember;
+    int m_singer_id;
+    double m_total_income;
+    double m_total_hours;
+    int m_new_count;
+    afx_msg void OnBnClickedBtnGetSingerData();
+    afx_msg void OnBnClickedBtnGetNewSinger();
 };
