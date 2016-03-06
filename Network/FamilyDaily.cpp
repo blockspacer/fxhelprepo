@@ -19,13 +19,13 @@ namespace{
     const char* familyurl = "http://family.fanxing.kugou.com";
 
     // cookies 
-    const char* cookie_connection = "Connection:Keep-Alive";
-    const char* cookie_host = "Host: family.fanxing.kugou.com";
-    const char* cookie_accept = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
-    const char* cookie_upgrade = "Upgrade-Insecure-Requests: 1";
-    const char* cookie_useragent = "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36";
-    const char* cookie_language = "Accept-Language: zh-CN,zh;q=0.8";
-    const char* cookie_content = "Content-Type: application/x-www-form-urlencoded";
+    const char* header_connection = "Connection:Keep-Alive";
+    const char* header_host = "Host: family.fanxing.kugou.com";
+    const char* header_accept = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+    const char* header_upgrade = "Upgrade-Insecure-Requests: 1";
+    const char* header_useragent = "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36";
+    const char* header_language = "Accept-Language: zh-CN,zh;q=0.8";
+    const char* header_content = "Content-Type: application/x-www-form-urlencoded";
 
     static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     {
@@ -76,7 +76,6 @@ namespace{
             month + "-" + day_of_month;
         return std::move(timestring);
     }
-
 
     static const char* mark_table_begin = "<table";
     static const char* mark_table_end = "</table>";
@@ -219,12 +218,12 @@ bool FamilyDaily::Init()
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 
     struct curl_slist *headers = 0;
-    headers = curl_slist_append(headers, cookie_host);
-    headers = curl_slist_append(headers, cookie_connection);
-    headers = curl_slist_append(headers, cookie_language);
-    headers = curl_slist_append(headers, cookie_accept);
-    headers = curl_slist_append(headers, cookie_upgrade);
-    headers = curl_slist_append(headers, cookie_useragent);
+    headers = curl_slist_append(headers, header_host);
+    headers = curl_slist_append(headers, header_connection);
+    headers = curl_slist_append(headers, header_language);
+    headers = curl_slist_append(headers, header_accept);
+    headers = curl_slist_append(headers, header_upgrade);
+    headers = curl_slist_append(headers, header_useragent);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
@@ -318,8 +317,7 @@ bool FamilyDaily::Login(const std::string& username, const std::string& password
 
     if (!curl)
         return false;
-
-    
+   
     std::string url = std::string(familyurl) + "/admin?act=login";
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
@@ -331,14 +329,14 @@ bool FamilyDaily::Login(const std::string& username, const std::string& password
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 
     struct curl_slist *headers = 0;
-    headers = curl_slist_append(headers, cookie_connection);
+    headers = curl_slist_append(headers, header_connection);
     headers = curl_slist_append(headers, "Cache-Control: max-age=0");
-    headers = curl_slist_append(headers, cookie_language);
+    headers = curl_slist_append(headers, header_language);
     headers = curl_slist_append(headers, "Origin: http://family.fanxing.kugou.com");
-    headers = curl_slist_append(headers, cookie_accept);
-    headers = curl_slist_append(headers, cookie_upgrade);
-    headers = curl_slist_append(headers, cookie_useragent);
-    headers = curl_slist_append(headers, cookie_content);
+    headers = curl_slist_append(headers, header_accept);
+    headers = curl_slist_append(headers, header_upgrade);
+    headers = curl_slist_append(headers, header_useragent);
+    headers = curl_slist_append(headers, header_content);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     curl_easy_setopt(curl, CURLOPT_REFERER, "http://family.fanxing.kugou.com/admin?act=login");
@@ -425,10 +423,61 @@ bool FamilyDaily::Login(const std::string& username, const std::string& password
     return false;
 }
 
+//GET http://family.fanxing.kugou.com/admin?act=dayStarDataList&startDay=2016-03-01&endDay=2016-03-06&starId=116432085 HTTP/1.1
+//Host: family.fanxing.kugou.com
+//Connection: keep-alive
+//Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+//Upgrade-Insecure-Requests: 1
+//User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36
+//Referer: http://family.fanxing.kugou.com/admin?act=dayStarDataList
+//Accept-Encoding: gzip, deflate, sdch
+//Accept-Language: zh-CN,zh;q=0.8
+//Cookie: PHPSESSID=828t48vhi1u433g06hgtgk1g00; f_p=f_56d1c9af5aea30.63869374; 
+//_fx_r_follow=%5B142314756%2C169907997%2C169000775%2C165996638%2C165025636%2C163083252%2C162498721%2C165754417%2C159616776%2C159531158%2C158459161%2C147385523%2C148041628%2C149259681%2C150377024%2C141023689%2C136981235%2C145901830%2C142879819%2C142078347%2C146052549%2C127624914%2C127618396%2C136883471%2C139839374%2C137880598%2C137180088%2C127277529%2C127277337%2C131405036%2C127277804%2C127277690%2C126280898%2C126014190%2C125360917%2C116432085%2C136625872%2C117438839%2C115609206%2C114721789%2C120357891%2C118257208%2C115043602%2C107301439%2C105209005%2C112791202%2C112569182%2C110469751%2C106559459%2C110384212%2C97362569%2C91428332%2C78125705%2C66239107%2C118774682%2C61517977%2C53722204%2C50999842%2C69260016%2C60843845%2C49592188%2C43385401%2C114748626%2C41028958%2C39310466%2C37713273%2C33986382%2C99241150%2C31889265%2C165569900%2C33313091%2C20081096%2C124625434%2C95259291%2C159730972%5D; pgv_pvi=2486706176; pgv_si=s2470812672; 800057627mid=730_44; 800057627slid=slid_396_77%7C; 800057627slid_396_77=1456921767738; 800057627mh=1456921768746; FANXING=%257B%2522kugouId%2522%253A%2522615887139%2522%252C%2522coin%2522%253A%252226815.00%2522%252C%2522atime%2522%253A1457013595%252C%2522isRemember%2522%253A0%252C%2522sign%2522%253A%2522be974c32cd8401a6ea9fab56d1fb213e%2522%257D; KuGoo=KugooID=615887139&KugooPwd=E54BCC78DA033CB1B0402B4E339757C5&NickName=%u0067%u006c%u006f%u0062%u0061%u006c%u0073%u0074%u0061%u0072%u0030%u0030%u0035&Pic=http://imge.kugou.com/kugouicon/165/20100101/20100101192931478054.jpg&RegState=1&RegFrom=&t=430081cafd2e0d8c1f046744235a50c0bfe64e2f7dcbd2e1a74a8c9b489cb072&a_id=1010&ct=1457152785&UserName=%u0067%u006c%u006f%u0062%u0061%u006c%u0073%u0074%u0061%u0072%u0030%u0030%u0035; fxClientInfo=%7B%22userId%22%3A%22105039763%22%2C%22kugouId%22%3A%22615887139%22%2C%22ip%22%3A%22119.131.77.190%22%7D; Hm_lvt_52e69492bce68bf637c6f3a2f099ae08=1456405260; Hm_lpvt_52e69492bce68bf637c6f3a2f099ae08=1457273231; Hm_lvt_e0a7c5eaf6994884c4376a64da96825a=1456405286; Hm_lpvt_e0a7c5eaf6994884c4376a64da96825a=1457273231
 bool FamilyDaily::GetDailyDataBySingerId(uint32 singerid,
-    std::vector<SingerDailyData> dailydata)
+    const base::Time& begintime, const base::Time& endtime,
+    std::vector<SingerDailyData>* singerdailydata)
 {
-    return false;
+    // 不支持超过30天的查询
+    base::TimeDelta delta = endtime - begintime;
+    auto days = delta.InDays();
+    if (days > 30)
+        return false;
+    
+    std::string pagedata;
+    if (!GetDailyDataBySingerIdAndPage(singerid, begintime, endtime, 1, &pagedata))
+    {
+        return false;
+    }
+
+    uint32 pagecount = 0;
+    if (!ParsePageCount(pagedata, &pagecount))
+    {
+        return false;
+    }
+    assert(pagecount);
+
+    std::vector<SingerDailyData> tempSingerDailyData;
+    if (!ParseSingerDailyData(pagedata, &tempSingerDailyData))
+    {
+        return false;
+    }
+
+    singerdailydata->assign(tempSingerDailyData.begin(), tempSingerDailyData.end());
+
+    for (uint32 page = 2; page <= pagecount; page++)
+    {
+        if (!GetDailyDataBySingerIdAndPage(singerid, begintime, endtime, page, &pagedata))
+            return false;
+
+        tempSingerDailyData.clear();
+        if (!ParseSingerDailyData(pagedata, &tempSingerDailyData))
+            return false;
+        assert(!tempSingerDailyData.empty());
+        singerdailydata->insert(singerdailydata->end(),
+            tempSingerDailyData.begin(), tempSingerDailyData.end());
+    }
+    return true;
 }
 
 //GET /admin?act=sumStarDataList&startDay=2016-01-01&endDay=2016-01-21 HTTP/1.1
@@ -526,14 +575,14 @@ bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 
     struct curl_slist *headers = 0;
-    headers = curl_slist_append(headers, cookie_connection);
+    headers = curl_slist_append(headers, header_connection);
     //headers = curl_slist_append(headers, "Cache-Control: max-age=0");
-    headers = curl_slist_append(headers, cookie_language);
+    headers = curl_slist_append(headers, header_language);
     //headers = curl_slist_append(headers, "Origin: http://family.fanxing.kugou.com");
-    headers = curl_slist_append(headers, cookie_accept);
-    headers = curl_slist_append(headers, cookie_upgrade);
-    headers = curl_slist_append(headers, cookie_useragent);
-    headers = curl_slist_append(headers, cookie_content);
+    headers = curl_slist_append(headers, header_accept);
+    headers = curl_slist_append(headers, header_upgrade);
+    headers = curl_slist_append(headers, header_useragent);
+    headers = curl_slist_append(headers, header_content);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     //curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     //curl_easy_setopt(curl, CURLOPT_REFERER, "http://family.fanxing.kugou.com/admin?act=sumStarDataList");
@@ -586,9 +635,112 @@ bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
     return false;
 }
 
+bool FamilyDaily::GetDailyDataBySingerIdAndPage(uint32 singerid,
+    const base::Time& begintime,
+    const base::Time& endtime, uint32 pagenumber,
+    std::string* pagedata)
+{
+    std::string beginstring = MakeFormatDateString(begintime);
+    std::string endstring = MakeFormatDateString(endtime);
+
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (!curl)
+        return false;
+
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+
+    std::string requesturl = std::string(familyurl) +
+        "/admin?act=dayStarDataList&startDay=" +
+        beginstring + "&endDay=" + endstring + "&starId="
+        + base::UintToString(singerid);
+
+    // 第一页数据不需要加页码
+    if (pagenumber > 1)
+    {
+        requesturl += "&page=" + base::IntToString(pagenumber);
+    }
+
+    curl_easy_setopt(curl, CURLOPT_URL, requesturl.c_str());
+
+    // 设置Get方式
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+
+    // 这里如果跟下去,就无法判断目前结果
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+
+    struct curl_slist *headers = 0;
+    headers = curl_slist_append(headers, header_connection);
+    //headers = curl_slist_append(headers, "Cache-Control: max-age=0");
+    headers = curl_slist_append(headers, header_language);
+    //headers = curl_slist_append(headers, "Origin: http://family.fanxing.kugou.com");
+    headers = curl_slist_append(headers, header_accept);
+    headers = curl_slist_append(headers, header_upgrade);
+    headers = curl_slist_append(headers, header_useragent);
+    headers = curl_slist_append(headers, header_content);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    //curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+    // 先别用referer，也有可能需要
+    //curl_easy_setopt(curl, CURLOPT_REFERER, "http://family.fanxing.kugou.com/admin?act=sumStarDataList");
+
+    //curl_easy_setopt(curl, CURLOPT_COOKIEFILE, cookiespath_.c_str());
+    curl_easy_setopt(curl, CURLOPT_COOKIE, cookies_.c_str());
+    currentResponseData_.clear();
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    if (headers)
+    {
+        curl_slist_free_all(headers);
+    }
+
+    /* Check for errors */
+    if (res != CURLE_OK)
+    {
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return false;
+    }
+
+    // 获取请求业务结果
+    long responsecode = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = base::UTF8ToWide(MakeReasonablePath(__FUNCTION__) + ".txt");
+    base::FilePath logpath = dirPath.Append(filename);
+    base::File logfile(logpath,
+        base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    logfile.Write(0, currentResponseData_.c_str(), currentResponseData_.size());
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+
+    if (responsecode == 302)
+    {
+        assert(false && L"GetDailyDataBySingerIdAndPage must set CURLOPT_FOLLOWLOCATION to follow redirection");
+        return true;
+    }
+
+    if (responsecode == 200 && !currentResponseData_.empty())
+    {
+        *pagedata = currentResponseData_;
+        return true;
+    }
+
+    return false;
+}
+
 // colspan
 bool FamilyDaily::ParseSummaryData(const std::string& pagedata,    
-    std::vector<SingerSummaryData>* summerydata)
+    std::vector<SingerSummaryData>* summerydata) const
 {
     bool result = false;
     std::string tabledata;
@@ -740,6 +892,145 @@ bool FamilyDaily::ParseSummaryData(const std::string& pagedata,
     *summerydata = std::move(singerSummaryDataVector);
     return true;
 }
+
+bool FamilyDaily::ParseSingerDailyData(const std::string& pagedata,
+    std::vector<SingerDailyData>* singerdailydatavector) const
+{
+    bool result = false;
+    std::string tabledata;
+    result = GetTableData(pagedata, &tabledata);
+    std::string trdata;
+    size_t trendpos = 0;
+    size_t beginpos = 0;
+    // 第一个数据是表头
+    result = GetTrData(tabledata, beginpos, &trdata, &trendpos);
+
+    std::vector<std::string> trvector;
+    while (result)
+    {
+        beginpos = trendpos;
+        result = GetTrData(tabledata, beginpos, &trdata, &trendpos);
+        if (result)
+            trvector.push_back(trdata);
+    }
+
+    // 最后一个是表格下方页数数据
+    if (!trvector.empty())
+    {
+        trvector.erase(trvector.end() - 1);
+    }
+
+    std::vector<SingerDailyData> tempvector;
+    for (const auto& it : trvector)
+    {
+        std::string trdata = it;
+        size_t beginpos = 0;
+        size_t endpos = 0;
+        std::string tddata;
+        SingerDailyData singerdailydata;
+
+        // 日期
+        beginpos = endpos;
+        result = GetTdData(trdata, beginpos, &endpos, &tddata);
+        singerdailydata.date = tddata;
+
+        // 开播次数
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        uint32 onlinecount = 0;
+        if (!base::StringToUint(tddata, &onlinecount))
+        {
+            assert(false);
+            return false;
+        }
+        singerdailydata.onlinecount = onlinecount;
+
+        // 累计直播时长（分钟）
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+
+        uint32 onlineminute = 0;
+        if (!base::StringToUint(tddata, &onlineminute))
+        {
+            assert(false);
+            return false;
+        }
+        singerdailydata.onlineminute = onlineminute;
+
+        // 有效直播次数（大于1个小时）
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        uint32 effectivecount = 0;
+        if (!base::StringToUint(tddata, &effectivecount))
+        {
+            assert(false);
+            return false;
+        }
+        singerdailydata.effectivecount = effectivecount;
+
+        // 直播间最高人气
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        uint32 maxusers = 0;
+        if (!base::StringToUint(tddata, &maxusers))
+        {
+            assert(false);
+            return false;
+        }
+        singerdailydata.maxusers = maxusers;
+
+        // 星豆收入
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        double revenue = 0;
+        if (!base::StringToDouble(tddata, &revenue))
+        {
+            assert(false);
+            return false;
+        }
+        singerdailydata.revenue = revenue;
+
+        // 周期累计扣分
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        {
+            assert(false);
+            continue;
+        }
+        uint32 blame = 0;
+        if (!base::StringToUint(tddata, &blame))
+        {
+            assert(false);
+            return false;
+        }
+        singerdailydata.blame = blame;
+        tempvector.push_back(singerdailydata);
+    }
+
+    *singerdailydatavector = std::move(tempvector);
+    return true;
+}
+
 
 bool FamilyDaily::ParsePageCount(const std::string& pagedata, uint32* pagenumber)
 {

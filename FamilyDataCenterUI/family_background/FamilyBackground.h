@@ -13,6 +13,7 @@
 // °üÀ¨£ºµÇÂ¼
 
 class FamilyDaily;
+
 class FamilyBackground
 {
 public:
@@ -24,6 +25,8 @@ public:
     bool Login(const std::string& username, const std::string& password);
     bool GetSummaryData(const base::Time& begintime, const base::Time& endtime, 
         std::vector<SingerSummaryData>* summary);
+    bool GetDailyDataBySingerId(uint32 singerid, const base::Time& begintime,
+        const base::Time& endtime, std::vector<SingerDailyData>* singerdata);
 
 private:
     std::unique_ptr<FamilyDaily> familyDaily_;

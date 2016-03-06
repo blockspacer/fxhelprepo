@@ -65,3 +65,16 @@ bool FamilyBackground::GetSummaryData(const base::Time& begintime,
     return result;
 }
 
+bool FamilyBackground::GetDailyDataBySingerId(uint32 singerid, 
+    const base::Time& begintime, const base::Time& endtime, 
+    std::vector<SingerDailyData>* singerdata)
+{
+    if (!singerdata)
+        return false;
+
+    bool result = familyDaily_->GetDailyDataBySingerId(singerid, begintime,
+        endtime, singerdata);
+
+    return result;
+}
+

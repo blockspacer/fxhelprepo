@@ -49,7 +49,9 @@ public:
     bool Login(const std::string& username, const std::string& password);
 
     bool GetDailyDataBySingerId(uint32 singerid,
-                                std::vector<SingerDailyData> dailydata);
+                                const base::Time& begintime, 
+                                const base::Time& endtime,
+                                std::vector<SingerDailyData>* dailydata);
 
     bool GetSummaryData(const base::Time& begintime, const base::Time& endtime,
                         std::vector<SingerSummaryData>* summerydata);
@@ -62,9 +64,17 @@ private:
         const base::Time& endtime, uint32 pagenumber,
         std::string* pagedata);
 
+    bool GetDailyDataBySingerIdAndPage(uint32 singerid,
+        const base::Time& begintime,
+        const base::Time& endtime, uint32 pagenumber,
+        std::string* pagedata);
+
     // 从摘取的数据中获取主播数据信息以及所有分页数量
     bool ParseSummaryData(const std::string& pagedata, 
-                          std::vector<SingerSummaryData>* summerydata);
+                          std::vector<SingerSummaryData>* summerydata) const;
+
+    bool ParseSingerDailyData(const std::string& pagedata,
+        std::vector<SingerDailyData>* singerdailydata) const;
 
     bool ParsePageCount(const std::string& pagedata, uint32* pagenumber);
 

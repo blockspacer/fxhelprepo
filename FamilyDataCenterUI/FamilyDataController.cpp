@@ -55,6 +55,30 @@ namespace{
         return true;
     }
 
+    bool SingerDailyDataToGridData(
+        const std::vector<SingerDailyData>& singerDailyData,
+        GridData* griddata)
+    {
+        if (!griddata)
+            return false;
+
+        for (const auto& it : singerDailyData)
+        {
+            RowData rowdata;
+            rowdata.push_back(base::UTF8ToWide(it.date));
+            rowdata.push_back(base::UintToString16(it.onlinecount));
+            rowdata.push_back(base::UintToString16(it.onlineminute));
+            rowdata.push_back(base::UintToString16(it.effectivecount));
+            rowdata.push_back(base::UintToString16(it.maxusers));
+            std::wstring revenue = base::UTF8ToWide(base::DoubleToString(it.revenue));            
+            rowdata.push_back(revenue);
+            rowdata.push_back(base::UintToString16(it.blame));
+            griddata->push_back(rowdata);
+        }
+
+        return true;
+    }
+
     COleVariant
         covtrue((short)TRUE),
         covfalse((short)FALSE),
@@ -135,7 +159,19 @@ bool FamilyDataController::GetDailyDataBySingerId(uint32 singerid,
     const base::Time& begintime,
     const base::Time& endtime, GridData* griddata)
 {
-    return false;
+    std::vector<SingerDailyData> singerDailyData;
+    if (!familyBackground_->GetDailyDataBySingerId(singerid, begintime, endtime,
+        &singerDailyData))
+    {
+        return false;
+    }
+
+    if (!SingerDailyDataToGridData(singerDailyData, griddata))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 
@@ -164,6 +200,11 @@ bool FamilyDataController::ExportToExcel()
 
 bool FamilyDataController::ExportToTxt()
 {
+    if (!singerSummaryData_)
+    {
+        return false;
+    }
+    
     GridData griddata;
     if (!SingerSummaryDataToGridData(*singerSummaryData_, &griddata))
     {

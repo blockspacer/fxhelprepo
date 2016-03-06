@@ -412,6 +412,7 @@ void CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerData()
     //    uint32 blame;               // 周期累计扣分
 
     std::vector<std::wstring> columnlist = {
+        L"日期",
         L"开播次数",
         L"累计直播时长",
         L"有效直播次数",
