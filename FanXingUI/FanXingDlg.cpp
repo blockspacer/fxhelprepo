@@ -199,10 +199,10 @@ void CFanXingDlg::OnBnClickedButton1()
     GetDlgItemText(IDC_EDIT_Username, username);
     GetDlgItemText(IDC_EDIT_Password, password);
 
-    bool loginResult = LoginByWebAction(username, password);
+    //bool loginResult = LoginByWebAction(username, password);
 
     // 测试通过的curl登录方式
-    // bool loginResult = LoginByRequest(username.GetBuffer(), password.GetBuffer());
+    bool loginResult = LoginByRequest(username.GetBuffer(), password.GetBuffer());
 
 }
 

@@ -1,0 +1,2391 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="aes">
+      <UniqueIdentifier>{8aba737a-bf91-462e-8306-eb79331d45cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="asn1">
+      <UniqueIdentifier>{f8b4908c-ac3a-4a8c-ae1e-a0872a60ff90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bf">
+      <UniqueIdentifier>{6c904d67-adb4-4b89-98b6-c1ecf271288d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bio">
+      <UniqueIdentifier>{3c9a5700-589f-496c-9035-925651e8c689}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bn">
+      <UniqueIdentifier>{e96b4879-1a64-4bbd-b3e5-ee1601a8fd69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="buffer">
+      <UniqueIdentifier>{70e9e855-4bd6-42ef-a21e-41129e517899}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="camellia">
+      <UniqueIdentifier>{3155e3f4-9e15-4005-830b-56875f7e52a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cast">
+      <UniqueIdentifier>{4128d54e-22d9-446c-b96f-9e37507101b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cmac">
+      <UniqueIdentifier>{87a508fe-9657-4e4a-a3cd-e65a9b56cf10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cms">
+      <UniqueIdentifier>{2dbcb449-0a3b-47fd-a840-96612cf7439a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="comp">
+      <UniqueIdentifier>{a9dc88fa-1d9d-4841-93eb-bb69d096ee43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="conf">
+      <UniqueIdentifier>{8e2cbf63-1246-4e88-b62a-7cf84033d1fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="des">
+      <UniqueIdentifier>{57f662ff-344c-4527-987a-ace1f0f4c2c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dh">
+      <UniqueIdentifier>{8ae7fdea-c02f-4dcb-ac99-a0a5b001be52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dsa">
+      <UniqueIdentifier>{c732203c-1c7b-463a-b4bc-8236845c5418}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dso">
+      <UniqueIdentifier>{cfa5ed31-65fb-4796-a4d5-140c4ab3f253}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ec">
+      <UniqueIdentifier>{70ac6176-fbab-414c-912b-4d21801a7c36}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ecdh">
+      <UniqueIdentifier>{b48bf674-0d23-43dd-aae4-d77391681b75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ecdsa">
+      <UniqueIdentifier>{d6a918c7-0e8c-4f2e-818b-d87c5718e22e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engine">
+      <UniqueIdentifier>{a44017df-24f6-4bd1-8c7b-13ccc4e6a45f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engines">
+      <UniqueIdentifier>{f9fd6565-c178-4c3a-97f0-7cacebfde854}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="err">
+      <UniqueIdentifier>{d618c016-0590-4ae7-861d-2909800c3be5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="evp">
+      <UniqueIdentifier>{fce3d8dd-5adb-4e1a-84bd-ce1aea02a511}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="hmac">
+      <UniqueIdentifier>{83b49651-8add-4a9c-8943-a77749dafbaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="idea">
+      <UniqueIdentifier>{a6da979c-0477-4442-b9c3-dd51f139a4f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="krb5">
+      <UniqueIdentifier>{80e8eb2c-6d94-4506-8391-e37100d1fbff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="lhash">
+      <UniqueIdentifier>{c8e4ff4a-46f2-45f3-adbf-891aec3fea4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="md4">
+      <UniqueIdentifier>{87299166-e53a-4127-b422-7e64f4c007c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="md5">
+      <UniqueIdentifier>{c43d2c1e-7803-4b0a-800f-ddbe6c297caf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mdc2">
+      <UniqueIdentifier>{e1f91195-ff5c-4dfc-9066-ce7b6f79eae8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="modes">
+      <UniqueIdentifier>{12e829d2-156e-40eb-aa2a-3d3c31d0e0e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ms">
+      <UniqueIdentifier>{1e5998e1-9058-4220-92c5-06458feca0e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="objects">
+      <UniqueIdentifier>{1bec0aa6-8900-425c-b274-ea25549f09f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ocsp">
+      <UniqueIdentifier>{df2baf73-355d-47aa-ae24-06eb2c9c5387}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pem">
+      <UniqueIdentifier>{5849b7d7-a604-47b7-875b-a3046c824461}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pkcs7">
+      <UniqueIdentifier>{485150d3-ceaf-4506-b989-5c255bdfa41b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pkcs12">
+      <UniqueIdentifier>{f65b2dbd-fbb9-44ea-a2ed-2981c4435b05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pqueue">
+      <UniqueIdentifier>{7909be64-161a-4f2a-95c0-8cb19bc13964}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rand">
+      <UniqueIdentifier>{5e1bb762-a792-4e1a-87ca-298f582635d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rc2">
+      <UniqueIdentifier>{63d25245-1e34-4ee0-a2a4-54a19ccd727b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rc4">
+      <UniqueIdentifier>{69f3f09d-0398-4271-ab6a-6088ae9ff127}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ripemd">
+      <UniqueIdentifier>{215e44e3-a0db-456d-a3a5-ab449e91b6f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="rsa">
+      <UniqueIdentifier>{0b7f2d6e-b60e-479d-bb53-905407de8161}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="seed">
+      <UniqueIdentifier>{550bf844-c28c-46ca-8054-b879421ea932}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sha">
+      <UniqueIdentifier>{927579c6-a68e-4d01-ad23-acc175abef8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="srp">
+      <UniqueIdentifier>{162957d4-d913-47c0-83da-58d0b718a6d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="stack">
+      <UniqueIdentifier>{f938eded-a5b7-4201-93a0-9d1bc274e2f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="threads">
+      <UniqueIdentifier>{98d2fd75-7900-4e51-86ea-b808ae9e9e85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ts">
+      <UniqueIdentifier>{62e4d279-c43e-4040-bff9-c32a24ec19a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="txt_db">
+      <UniqueIdentifier>{f39647ed-11eb-40a9-824a-3191a3515e83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{937e021a-40ab-469b-9ea1-110cb53c2081}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="whrlpool">
+      <UniqueIdentifier>{a7c2b73b-74e1-4dde-a46d-a3e98669e7e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="x509">
+      <UniqueIdentifier>{c9b6f7c2-9c47-4592-a3d4-e3115bcb4168}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="x509v3">
+      <UniqueIdentifier>{24860ae4-8a85-4c32-b929-0a89020048cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="engines\ccgost">
+      <UniqueIdentifier>{e1c0d43e-44a5-42b3-81f1-7ccbe1364c30}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="aes\aes.h">
+      <Filter>aes</Filter>
+    </ClInclude>
+    <ClInclude Include="aes\aes_locl.h">
+      <Filter>aes</Filter>
+    </ClInclude>
+    <ClInclude Include="asn1\asn1.h">
+      <Filter>asn1</Filter>
+    </ClInclude>
+    <ClInclude Include="asn1\asn1t.h">
+      <Filter>asn1</Filter>
+    </ClInclude>
+    <ClInclude Include="asn1\asn1_locl.h">
+      <Filter>asn1</Filter>
+    </ClInclude>
+    <ClInclude Include="asn1\asn1_mac.h">
+      <Filter>asn1</Filter>
+    </ClInclude>
+    <ClInclude Include="asn1\charmap.h">
+      <Filter>asn1</Filter>
+    </ClInclude>
+    <ClInclude Include="bf\bf_locl.h">
+      <Filter>bf</Filter>
+    </ClInclude>
+    <ClInclude Include="bf\bf_pi.h">
+      <Filter>bf</Filter>
+    </ClInclude>
+    <ClInclude Include="bf\blowfish.h">
+      <Filter>bf</Filter>
+    </ClInclude>
+    <ClInclude Include="bio\bio.h">
+      <Filter>bio</Filter>
+    </ClInclude>
+    <ClInclude Include="bio\bio_lcl.h">
+      <Filter>bio</Filter>
+    </ClInclude>
+    <ClInclude Include="bn\bn.h">
+      <Filter>bn</Filter>
+    </ClInclude>
+    <ClInclude Include="bn\bn_lcl.h">
+      <Filter>bn</Filter>
+    </ClInclude>
+    <ClInclude Include="bn\bn_prime.h">
+      <Filter>bn</Filter>
+    </ClInclude>
+    <ClInclude Include="buffer\buffer.h">
+      <Filter>buffer</Filter>
+    </ClInclude>
+    <ClInclude Include="camellia\camellia.h">
+      <Filter>camellia</Filter>
+    </ClInclude>
+    <ClInclude Include="camellia\cmll_locl.h">
+      <Filter>camellia</Filter>
+    </ClInclude>
+    <ClInclude Include="cast\cast.h">
+      <Filter>cast</Filter>
+    </ClInclude>
+    <ClInclude Include="cast\cast_lcl.h">
+      <Filter>cast</Filter>
+    </ClInclude>
+    <ClInclude Include="cast\cast_s.h">
+      <Filter>cast</Filter>
+    </ClInclude>
+    <ClInclude Include="cmac\cmac.h">
+      <Filter>cmac</Filter>
+    </ClInclude>
+    <ClInclude Include="cms\cms.h">
+      <Filter>cms</Filter>
+    </ClInclude>
+    <ClInclude Include="cms\cms_lcl.h">
+      <Filter>cms</Filter>
+    </ClInclude>
+    <ClInclude Include="comp\comp.h">
+      <Filter>comp</Filter>
+    </ClInclude>
+    <ClInclude Include="conf\conf.h">
+      <Filter>conf</Filter>
+    </ClInclude>
+    <ClInclude Include="conf\conf_api.h">
+      <Filter>conf</Filter>
+    </ClInclude>
+    <ClInclude Include="conf\conf_def.h">
+      <Filter>conf</Filter>
+    </ClInclude>
+    <ClInclude Include="des\des.h">
+      <Filter>des</Filter>
+    </ClInclude>
+    <ClInclude Include="des\des_locl.h">
+      <Filter>des</Filter>
+    </ClInclude>
+    <ClInclude Include="des\des_old.h">
+      <Filter>des</Filter>
+    </ClInclude>
+    <ClInclude Include="des\des_ver.h">
+      <Filter>des</Filter>
+    </ClInclude>
+    <ClInclude Include="des\rpc_des.h">
+      <Filter>des</Filter>
+    </ClInclude>
+    <ClInclude Include="des\spr.h">
+      <Filter>des</Filter>
+    </ClInclude>
+    <ClInclude Include="dh\dh.h">
+      <Filter>dh</Filter>
+    </ClInclude>
+    <ClInclude Include="dsa\dsa.h">
+      <Filter>dsa</Filter>
+    </ClInclude>
+    <ClInclude Include="dsa\dsa_locl.h">
+      <Filter>dsa</Filter>
+    </ClInclude>
+    <ClInclude Include="dso\dso.h">
+      <Filter>dso</Filter>
+    </ClInclude>
+    <ClInclude Include="ec\ec.h">
+      <Filter>ec</Filter>
+    </ClInclude>
+    <ClInclude Include="ec\ec_lcl.h">
+      <Filter>ec</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdh\ecdh.h">
+      <Filter>ecdh</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdh\ech_locl.h">
+      <Filter>ecdh</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdsa\ecdsa.h">
+      <Filter>ecdsa</Filter>
+    </ClInclude>
+    <ClInclude Include="ecdsa\ecs_locl.h">
+      <Filter>ecdsa</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\engine.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\eng_int.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_4758cca_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_aep_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_atalla_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_capi_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_chil_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_cswift_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_gmp_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_nuron_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_sureware_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\e_ubsec_err.h">
+      <Filter>engines</Filter>
+    </ClInclude>
+    <ClInclude Include="err\err.h">
+      <Filter>err</Filter>
+    </ClInclude>
+    <ClInclude Include="evp\evp.h">
+      <Filter>evp</Filter>
+    </ClInclude>
+    <ClInclude Include="evp\evp_locl.h">
+      <Filter>evp</Filter>
+    </ClInclude>
+    <ClInclude Include="hmac\hmac.h">
+      <Filter>hmac</Filter>
+    </ClInclude>
+    <ClInclude Include="idea\idea.h">
+      <Filter>idea</Filter>
+    </ClInclude>
+    <ClInclude Include="idea\idea_lcl.h">
+      <Filter>idea</Filter>
+    </ClInclude>
+    <ClInclude Include="krb5\krb5_asn.h">
+      <Filter>krb5</Filter>
+    </ClInclude>
+    <ClInclude Include="lhash\lhash.h">
+      <Filter>lhash</Filter>
+    </ClInclude>
+    <ClInclude Include="md4\md4.h">
+      <Filter>md4</Filter>
+    </ClInclude>
+    <ClInclude Include="md4\md4_locl.h">
+      <Filter>md4</Filter>
+    </ClInclude>
+    <ClInclude Include="md5\md5.h">
+      <Filter>md5</Filter>
+    </ClInclude>
+    <ClInclude Include="md5\md5_locl.h">
+      <Filter>md5</Filter>
+    </ClInclude>
+    <ClInclude Include="mdc2\mdc2.h">
+      <Filter>mdc2</Filter>
+    </ClInclude>
+    <ClInclude Include="modes\modes.h">
+      <Filter>modes</Filter>
+    </ClInclude>
+    <ClInclude Include="modes\modes_lcl.h">
+      <Filter>modes</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\objects.h">
+      <Filter>objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\obj_dat.h">
+      <Filter>objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\obj_mac.h">
+      <Filter>objects</Filter>
+    </ClInclude>
+    <ClInclude Include="objects\obj_xref.h">
+      <Filter>objects</Filter>
+    </ClInclude>
+    <ClInclude Include="ocsp\ocsp.h">
+      <Filter>ocsp</Filter>
+    </ClInclude>
+    <ClInclude Include="pem\pem.h">
+      <Filter>pem</Filter>
+    </ClInclude>
+    <ClInclude Include="pem\pem2.h">
+      <Filter>pem</Filter>
+    </ClInclude>
+    <ClInclude Include="pkcs7\pkcs7.h">
+      <Filter>pkcs7</Filter>
+    </ClInclude>
+    <ClInclude Include="pkcs12\pkcs12.h">
+      <Filter>pkcs12</Filter>
+    </ClInclude>
+    <ClInclude Include="pqueue\pqueue.h">
+      <Filter>pqueue</Filter>
+    </ClInclude>
+    <ClInclude Include="rand\rand.h">
+      <Filter>rand</Filter>
+    </ClInclude>
+    <ClInclude Include="rand\rand_lcl.h">
+      <Filter>rand</Filter>
+    </ClInclude>
+    <ClInclude Include="rc2\rc2.h">
+      <Filter>rc2</Filter>
+    </ClInclude>
+    <ClInclude Include="rc2\rc2_locl.h">
+      <Filter>rc2</Filter>
+    </ClInclude>
+    <ClInclude Include="rc4\rc4.h">
+      <Filter>rc4</Filter>
+    </ClInclude>
+    <ClInclude Include="rc4\rc4_locl.h">
+      <Filter>rc4</Filter>
+    </ClInclude>
+    <ClInclude Include="ripemd\ripemd.h">
+      <Filter>ripemd</Filter>
+    </ClInclude>
+    <ClInclude Include="ripemd\rmdconst.h">
+      <Filter>ripemd</Filter>
+    </ClInclude>
+    <ClInclude Include="ripemd\rmd_locl.h">
+      <Filter>ripemd</Filter>
+    </ClInclude>
+    <ClInclude Include="rsa\rsa.h">
+      <Filter>rsa</Filter>
+    </ClInclude>
+    <ClInclude Include="rsa\rsa_locl.h">
+      <Filter>rsa</Filter>
+    </ClInclude>
+    <ClInclude Include="seed\seed.h">
+      <Filter>seed</Filter>
+    </ClInclude>
+    <ClInclude Include="seed\seed_locl.h">
+      <Filter>seed</Filter>
+    </ClInclude>
+    <ClInclude Include="sha\sha.h">
+      <Filter>sha</Filter>
+    </ClInclude>
+    <ClInclude Include="sha\sha_locl.h">
+      <Filter>sha</Filter>
+    </ClInclude>
+    <ClInclude Include="srp\srp.h">
+      <Filter>srp</Filter>
+    </ClInclude>
+    <ClInclude Include="srp\srp_grps.h">
+      <Filter>srp</Filter>
+    </ClInclude>
+    <ClInclude Include="srp\srp_lcl.h">
+      <Filter>srp</Filter>
+    </ClInclude>
+    <ClInclude Include="stack\safestack.h">
+      <Filter>stack</Filter>
+    </ClInclude>
+    <ClInclude Include="stack\stack.h">
+      <Filter>stack</Filter>
+    </ClInclude>
+    <ClInclude Include="ts\ts.h">
+      <Filter>ts</Filter>
+    </ClInclude>
+    <ClInclude Include="txt_db\txt_db.h">
+      <Filter>txt_db</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\ui.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\ui_compat.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\ui_locl.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="whrlpool\whrlpool.h">
+      <Filter>whrlpool</Filter>
+    </ClInclude>
+    <ClInclude Include="whrlpool\wp_locl.h">
+      <Filter>whrlpool</Filter>
+    </ClInclude>
+    <ClInclude Include="x509\x509.h">
+      <Filter>x509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509\x509_vfy.h">
+      <Filter>x509</Filter>
+    </ClInclude>
+    <ClInclude Include="x509v3\ext_dat.h">
+      <Filter>x509v3</Filter>
+    </ClInclude>
+    <ClInclude Include="x509v3\pcy_int.h">
+      <Filter>x509v3</Filter>
+    </ClInclude>
+    <ClInclude Include="x509v3\x509v3.h">
+      <Filter>x509v3</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\ccgost\e_gost_err.h">
+      <Filter>engines\ccgost</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\ccgost\gost2001_keyx.h">
+      <Filter>engines\ccgost</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\ccgost\gost89.h">
+      <Filter>engines\ccgost</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\ccgost\gosthash.h">
+      <Filter>engines\ccgost</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\ccgost\gost_keywrap.h">
+      <Filter>engines\ccgost</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\ccgost\gost_lcl.h">
+      <Filter>engines\ccgost</Filter>
+    </ClInclude>
+    <ClInclude Include="engines\ccgost\gost_params.h">
+      <Filter>engines\ccgost</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aes\aes_cbc.c">
+      <Filter>aes</Filter>
+    </ClCompile>
+    <ClCompile Include="aes\aes_cfb.c">
+      <Filter>aes</Filter>
+    </ClCompile>
+    <ClCompile Include="aes\aes_core.c">
+      <Filter>aes</Filter>
+    </ClCompile>
+    <ClCompile Include="aes\aes_ctr.c">
+      <Filter>aes</Filter>
+    </ClCompile>
+    <ClCompile Include="aes\aes_ecb.c">
+      <Filter>aes</Filter>
+    </ClCompile>
+    <ClCompile Include="aes\aes_ige.c">
+      <Filter>aes</Filter>
+    </ClCompile>
+    <ClCompile Include="aes\aes_misc.c">
+      <Filter>aes</Filter>
+    </ClCompile>
+    <ClCompile Include="aes\aes_ofb.c">
+      <Filter>aes</Filter>
+    </ClCompile>
+    <ClCompile Include="aes\aes_wrap.c">
+      <Filter>aes</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\ameth_lib.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\asn1_err.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\asn1_gen.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\asn1_lib.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\asn1_par.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\asn_mime.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\asn_moid.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\asn_pack.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_bitstr.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_bool.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_bytes.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_d2i_fp.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_digest.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_dup.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_enum.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_gentm.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_i2d_fp.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_int.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_mbstr.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_object.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_octet.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_print.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_set.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_sign.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_strex.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_strnid.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_time.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_type.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_utctm.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_utf8.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\a_verify.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\bio_asn1.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\bio_ndef.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\d2i_pr.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\d2i_pu.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\evp_asn1.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\f_enum.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\f_int.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\f_string.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\i2d_pr.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\i2d_pu.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\nsseq.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\n_pkey.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\p5_pbe.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\p5_pbev2.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\p8_pkey.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\tasn_dec.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\tasn_enc.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\tasn_fre.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\tasn_new.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\tasn_prn.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\tasn_typ.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\tasn_utl.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\t_bitst.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\t_crl.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\t_pkey.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\t_req.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\t_spki.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\t_x509.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\t_x509a.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_algor.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_attrib.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_bignum.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_crl.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_exten.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_info.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_long.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_name.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_nx509.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_pkey.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_pubkey.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_req.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_sig.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_spki.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_val.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_x509.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="asn1\x_x509a.c">
+      <Filter>asn1</Filter>
+    </ClCompile>
+    <ClCompile Include="bf\bf_cfb64.c">
+      <Filter>bf</Filter>
+    </ClCompile>
+    <ClCompile Include="bf\bf_ecb.c">
+      <Filter>bf</Filter>
+    </ClCompile>
+    <ClCompile Include="bf\bf_enc.c">
+      <Filter>bf</Filter>
+    </ClCompile>
+    <ClCompile Include="bf\bf_ofb64.c">
+      <Filter>bf</Filter>
+    </ClCompile>
+    <ClCompile Include="bf\bf_skey.c">
+      <Filter>bf</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bf_buff.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bf_lbuf.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bf_nbio.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bf_null.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bio_cb.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bio_err.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bio_lib.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_acpt.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_bio.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_conn.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_dgram.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_fd.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_file.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_log.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_mem.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_null.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\bss_sock.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\b_dump.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\b_print.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bio\b_sock.c">
+      <Filter>bio</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_add.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_asm.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_blind.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_const.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_ctx.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_depr.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_div.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_err.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_exp.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_exp2.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_gcd.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_gf2m.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_kron.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_lib.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_mod.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_mont.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_mpi.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_mul.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_nist.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_prime.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_print.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_rand.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_recp.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_shift.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_sqr.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_sqrt.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_word.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\bn_x931p.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="bn\vms-helper.c">
+      <Filter>bn</Filter>
+    </ClCompile>
+    <ClCompile Include="buffer\buffer.c">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="buffer\buf_err.c">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="buffer\buf_str.c">
+      <Filter>buffer</Filter>
+    </ClCompile>
+    <ClCompile Include="camellia\camellia.c">
+      <Filter>camellia</Filter>
+    </ClCompile>
+    <ClCompile Include="camellia\cmll_cbc.c">
+      <Filter>camellia</Filter>
+    </ClCompile>
+    <ClCompile Include="camellia\cmll_cfb.c">
+      <Filter>camellia</Filter>
+    </ClCompile>
+    <ClCompile Include="camellia\cmll_ctr.c">
+      <Filter>camellia</Filter>
+    </ClCompile>
+    <ClCompile Include="camellia\cmll_ecb.c">
+      <Filter>camellia</Filter>
+    </ClCompile>
+    <ClCompile Include="camellia\cmll_misc.c">
+      <Filter>camellia</Filter>
+    </ClCompile>
+    <ClCompile Include="camellia\cmll_ofb.c">
+      <Filter>camellia</Filter>
+    </ClCompile>
+    <ClCompile Include="camellia\cmll_utl.c">
+      <Filter>camellia</Filter>
+    </ClCompile>
+    <ClCompile Include="cast\c_cfb64.c">
+      <Filter>cast</Filter>
+    </ClCompile>
+    <ClCompile Include="cast\c_ecb.c">
+      <Filter>cast</Filter>
+    </ClCompile>
+    <ClCompile Include="cast\c_enc.c">
+      <Filter>cast</Filter>
+    </ClCompile>
+    <ClCompile Include="cast\c_ofb64.c">
+      <Filter>cast</Filter>
+    </ClCompile>
+    <ClCompile Include="cast\c_skey.c">
+      <Filter>cast</Filter>
+    </ClCompile>
+    <ClCompile Include="cmac\cmac.c">
+      <Filter>cmac</Filter>
+    </ClCompile>
+    <ClCompile Include="cmac\cm_ameth.c">
+      <Filter>cmac</Filter>
+    </ClCompile>
+    <ClCompile Include="cmac\cm_pmeth.c">
+      <Filter>cmac</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_asn1.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_att.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_cd.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_dd.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_enc.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_env.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_err.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_ess.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_io.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_lib.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_pwri.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_sd.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="cms\cms_smime.c">
+      <Filter>cms</Filter>
+    </ClCompile>
+    <ClCompile Include="comp\comp_err.c">
+      <Filter>comp</Filter>
+    </ClCompile>
+    <ClCompile Include="comp\comp_lib.c">
+      <Filter>comp</Filter>
+    </ClCompile>
+    <ClCompile Include="comp\c_rle.c">
+      <Filter>comp</Filter>
+    </ClCompile>
+    <ClCompile Include="comp\c_zlib.c">
+      <Filter>comp</Filter>
+    </ClCompile>
+    <ClCompile Include="conf\conf_api.c">
+      <Filter>conf</Filter>
+    </ClCompile>
+    <ClCompile Include="conf\conf_def.c">
+      <Filter>conf</Filter>
+    </ClCompile>
+    <ClCompile Include="conf\conf_err.c">
+      <Filter>conf</Filter>
+    </ClCompile>
+    <ClCompile Include="conf\conf_lib.c">
+      <Filter>conf</Filter>
+    </ClCompile>
+    <ClCompile Include="conf\conf_mall.c">
+      <Filter>conf</Filter>
+    </ClCompile>
+    <ClCompile Include="conf\conf_mod.c">
+      <Filter>conf</Filter>
+    </ClCompile>
+    <ClCompile Include="conf\conf_sap.c">
+      <Filter>conf</Filter>
+    </ClCompile>
+    <ClCompile Include="des\cbc3_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\cbc_cksm.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\cbc_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\cfb64ede.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\cfb64enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\cfb_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\des_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\des_old.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\des_old2.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\ecb3_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\ecb_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\ede_cbcm_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\enc_read.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\enc_writ.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\fcrypt.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\fcrypt_b.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\ofb64ede.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\ofb64enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\ofb_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\pcbc_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\qud_cksm.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\rand_key.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\read2pwd.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\rpc_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\set_key.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\str2key.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="des\xcbc_enc.c">
+      <Filter>des</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_ameth.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_asn1.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_check.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_depr.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_err.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_gen.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_key.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_lib.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_pmeth.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dh\dh_prn.c">
+      <Filter>dh</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_ameth.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_asn1.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_depr.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_err.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_gen.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_key.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_lib.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_ossl.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_pmeth.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_prn.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_sign.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dsa\dsa_vrf.c">
+      <Filter>dsa</Filter>
+    </ClCompile>
+    <ClCompile Include="dso\dso_beos.c">
+      <Filter>dso</Filter>
+    </ClCompile>
+    <ClCompile Include="dso\dso_dl.c">
+      <Filter>dso</Filter>
+    </ClCompile>
+    <ClCompile Include="dso\dso_dlfcn.c">
+      <Filter>dso</Filter>
+    </ClCompile>
+    <ClCompile Include="dso\dso_err.c">
+      <Filter>dso</Filter>
+    </ClCompile>
+    <ClCompile Include="dso\dso_lib.c">
+      <Filter>dso</Filter>
+    </ClCompile>
+    <ClCompile Include="dso\dso_null.c">
+      <Filter>dso</Filter>
+    </ClCompile>
+    <ClCompile Include="dso\dso_openssl.c">
+      <Filter>dso</Filter>
+    </ClCompile>
+    <ClCompile Include="dso\dso_vms.c">
+      <Filter>dso</Filter>
+    </ClCompile>
+    <ClCompile Include="dso\dso_win32.c">
+      <Filter>dso</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec2_mult.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec2_oct.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec2_smpl.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\eck_prn.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ecp_mont.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ecp_nist.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ecp_nistp224.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ecp_nistp256.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ecp_nistp521.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ecp_nistputil.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ecp_oct.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ecp_smpl.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_ameth.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_asn1.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_check.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_curve.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_cvt.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_err.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_key.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_lib.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_mult.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_oct.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_pmeth.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ec\ec_print.c">
+      <Filter>ec</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdh\ech_err.c">
+      <Filter>ecdh</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdh\ech_key.c">
+      <Filter>ecdh</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdh\ech_lib.c">
+      <Filter>ecdh</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdh\ech_ossl.c">
+      <Filter>ecdh</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsa\ecs_asn1.c">
+      <Filter>ecdsa</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsa\ecs_err.c">
+      <Filter>ecdsa</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsa\ecs_lib.c">
+      <Filter>ecdsa</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsa\ecs_ossl.c">
+      <Filter>ecdsa</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsa\ecs_sign.c">
+      <Filter>ecdsa</Filter>
+    </ClCompile>
+    <ClCompile Include="ecdsa\ecs_vrf.c">
+      <Filter>ecdsa</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_all.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_cnf.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_cryptodev.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_ctrl.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_dyn.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_err.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_fat.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_init.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_lib.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_list.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_openssl.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_pkey.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_rdrand.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_rsax.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\eng_table.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_asnmth.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_cipher.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_dh.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_digest.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_dsa.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_ecdh.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_ecdsa.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_pkmeth.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_rand.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_rsa.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\tb_store.c">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_4758cca.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_4758cca_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_aep.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_aep_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_atalla.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_atalla_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_capi.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_capi_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_chil.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_chil_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_cswift.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_cswift_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_gmp.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_gmp_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_nuron.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_nuron_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_padlock.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_sureware.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_sureware_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_ubsec.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\e_ubsec_err.c">
+      <Filter>engines</Filter>
+    </ClCompile>
+    <ClCompile Include="err\err.c">
+      <Filter>err</Filter>
+    </ClCompile>
+    <ClCompile Include="err\err_all.c">
+      <Filter>err</Filter>
+    </ClCompile>
+    <ClCompile Include="err\err_prn.c">
+      <Filter>err</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\bio_b64.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\bio_enc.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\bio_md.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\bio_ok.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\c_all.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\c_allc.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\c_alld.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\digest.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\encode.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\evp_acnf.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\evp_cnf.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\evp_enc.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\evp_err.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\evp_fips.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\evp_key.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\evp_lib.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\evp_pbe.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\evp_pkey.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_aes.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_aes_cbc_hmac_sha1.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_bf.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_camellia.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_cast.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_des.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_des3.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_idea.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_null.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_old.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_rc2.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_rc4.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_rc4_hmac_md5.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_rc5.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_seed.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\e_xcbc_d.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_dss.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_dss1.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_ecdsa.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_md2.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_md4.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_md5.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_mdc2.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_null.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_ripemd.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_sha.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_sha1.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_sigver.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\m_wp.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\names.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\openbsd_hw.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\p5_crpt.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\p5_crpt2.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\pmeth_fn.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\pmeth_gn.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\pmeth_lib.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\p_dec.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\p_enc.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\p_lib.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\p_open.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\p_seal.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\p_sign.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="evp\p_verify.c">
+      <Filter>evp</Filter>
+    </ClCompile>
+    <ClCompile Include="hmac\hmac.c">
+      <Filter>hmac</Filter>
+    </ClCompile>
+    <ClCompile Include="hmac\hm_ameth.c">
+      <Filter>hmac</Filter>
+    </ClCompile>
+    <ClCompile Include="hmac\hm_pmeth.c">
+      <Filter>hmac</Filter>
+    </ClCompile>
+    <ClCompile Include="idea\i_cbc.c">
+      <Filter>idea</Filter>
+    </ClCompile>
+    <ClCompile Include="idea\i_cfb64.c">
+      <Filter>idea</Filter>
+    </ClCompile>
+    <ClCompile Include="idea\i_ecb.c">
+      <Filter>idea</Filter>
+    </ClCompile>
+    <ClCompile Include="idea\i_ofb64.c">
+      <Filter>idea</Filter>
+    </ClCompile>
+    <ClCompile Include="idea\i_skey.c">
+      <Filter>idea</Filter>
+    </ClCompile>
+    <ClCompile Include="krb5\krb5_asn.c">
+      <Filter>krb5</Filter>
+    </ClCompile>
+    <ClCompile Include="lhash\lhash.c">
+      <Filter>lhash</Filter>
+    </ClCompile>
+    <ClCompile Include="md4\md4_dgst.c">
+      <Filter>md4</Filter>
+    </ClCompile>
+    <ClCompile Include="md4\md4_one.c">
+      <Filter>md4</Filter>
+    </ClCompile>
+    <ClCompile Include="md5\md5_dgst.c">
+      <Filter>md5</Filter>
+    </ClCompile>
+    <ClCompile Include="md5\md5_one.c">
+      <Filter>md5</Filter>
+    </ClCompile>
+    <ClCompile Include="mdc2\mdc2dgst.c">
+      <Filter>mdc2</Filter>
+    </ClCompile>
+    <ClCompile Include="mdc2\mdc2_one.c">
+      <Filter>mdc2</Filter>
+    </ClCompile>
+    <ClCompile Include="modes\cbc128.c">
+      <Filter>modes</Filter>
+    </ClCompile>
+    <ClCompile Include="modes\ccm128.c">
+      <Filter>modes</Filter>
+    </ClCompile>
+    <ClCompile Include="modes\cfb128.c">
+      <Filter>modes</Filter>
+    </ClCompile>
+    <ClCompile Include="modes\ctr128.c">
+      <Filter>modes</Filter>
+    </ClCompile>
+    <ClCompile Include="modes\cts128.c">
+      <Filter>modes</Filter>
+    </ClCompile>
+    <ClCompile Include="modes\gcm128.c">
+      <Filter>modes</Filter>
+    </ClCompile>
+    <ClCompile Include="modes\ofb128.c">
+      <Filter>modes</Filter>
+    </ClCompile>
+    <ClCompile Include="modes\xts128.c">
+      <Filter>modes</Filter>
+    </ClCompile>
+    <ClCompile Include="ms\uplink.c">
+      <Filter>ms</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\obj_dat.c">
+      <Filter>objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\obj_err.c">
+      <Filter>objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\obj_lib.c">
+      <Filter>objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\obj_xref.c">
+      <Filter>objects</Filter>
+    </ClCompile>
+    <ClCompile Include="objects\o_names.c">
+      <Filter>objects</Filter>
+    </ClCompile>
+    <ClCompile Include="ocsp\ocsp_asn.c">
+      <Filter>ocsp</Filter>
+    </ClCompile>
+    <ClCompile Include="ocsp\ocsp_cl.c">
+      <Filter>ocsp</Filter>
+    </ClCompile>
+    <ClCompile Include="ocsp\ocsp_err.c">
+      <Filter>ocsp</Filter>
+    </ClCompile>
+    <ClCompile Include="ocsp\ocsp_ext.c">
+      <Filter>ocsp</Filter>
+    </ClCompile>
+    <ClCompile Include="ocsp\ocsp_ht.c">
+      <Filter>ocsp</Filter>
+    </ClCompile>
+    <ClCompile Include="ocsp\ocsp_lib.c">
+      <Filter>ocsp</Filter>
+    </ClCompile>
+    <ClCompile Include="ocsp\ocsp_prn.c">
+      <Filter>ocsp</Filter>
+    </ClCompile>
+    <ClCompile Include="ocsp\ocsp_srv.c">
+      <Filter>ocsp</Filter>
+    </ClCompile>
+    <ClCompile Include="ocsp\ocsp_vfy.c">
+      <Filter>ocsp</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_all.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_err.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_info.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_lib.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_oth.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_pk8.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_pkey.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_seal.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_sign.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_x509.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pem_xaux.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pem\pvkfmt.c">
+      <Filter>pem</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\bio_pk7.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\pk7_asn1.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\pk7_attr.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\pk7_dgst.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\pk7_doit.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\pk7_enc.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\pk7_lib.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\pk7_mime.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\pk7_smime.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs7\pkcs7err.c">
+      <Filter>pkcs7</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_add.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_asn.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_attr.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_crpt.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_crt.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_decr.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_init.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_key.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_kiss.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_mutl.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_npas.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_p8d.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_p8e.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\p12_utl.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pkcs12\pk12err.c">
+      <Filter>pkcs12</Filter>
+    </ClCompile>
+    <ClCompile Include="pqueue\pqueue.c">
+      <Filter>pqueue</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\md_rand.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\randfile.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\rand_egd.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\rand_err.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\rand_lib.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\rand_nw.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\rand_os2.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\rand_unix.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\rand_vms.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rand\rand_win.c">
+      <Filter>rand</Filter>
+    </ClCompile>
+    <ClCompile Include="rc2\rc2cfb64.c">
+      <Filter>rc2</Filter>
+    </ClCompile>
+    <ClCompile Include="rc2\rc2ofb64.c">
+      <Filter>rc2</Filter>
+    </ClCompile>
+    <ClCompile Include="rc2\rc2_cbc.c">
+      <Filter>rc2</Filter>
+    </ClCompile>
+    <ClCompile Include="rc2\rc2_ecb.c">
+      <Filter>rc2</Filter>
+    </ClCompile>
+    <ClCompile Include="rc2\rc2_skey.c">
+      <Filter>rc2</Filter>
+    </ClCompile>
+    <ClCompile Include="rc4\rc4_enc.c">
+      <Filter>rc4</Filter>
+    </ClCompile>
+    <ClCompile Include="rc4\rc4_skey.c">
+      <Filter>rc4</Filter>
+    </ClCompile>
+    <ClCompile Include="rc4\rc4_utl.c">
+      <Filter>rc4</Filter>
+    </ClCompile>
+    <ClCompile Include="ripemd\rmd_dgst.c">
+      <Filter>ripemd</Filter>
+    </ClCompile>
+    <ClCompile Include="ripemd\rmd_one.c">
+      <Filter>ripemd</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_ameth.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_asn1.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_chk.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_crpt.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_depr.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_eay.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_err.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_gen.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_lib.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_none.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_null.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_oaep.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_pk1.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_pmeth.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_prn.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_pss.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_saos.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_sign.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_ssl.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa_x931.c">
+      <Filter>rsa</Filter>
+    </ClCompile>
+    <ClCompile Include="seed\seed.c">
+      <Filter>seed</Filter>
+    </ClCompile>
+    <ClCompile Include="seed\seed_cbc.c">
+      <Filter>seed</Filter>
+    </ClCompile>
+    <ClCompile Include="seed\seed_cfb.c">
+      <Filter>seed</Filter>
+    </ClCompile>
+    <ClCompile Include="seed\seed_ecb.c">
+      <Filter>seed</Filter>
+    </ClCompile>
+    <ClCompile Include="seed\seed_ofb.c">
+      <Filter>seed</Filter>
+    </ClCompile>
+    <ClCompile Include="sha\sha1dgst.c">
+      <Filter>sha</Filter>
+    </ClCompile>
+    <ClCompile Include="sha\sha1_one.c">
+      <Filter>sha</Filter>
+    </ClCompile>
+    <ClCompile Include="sha\sha512.c">
+      <Filter>sha</Filter>
+    </ClCompile>
+    <ClCompile Include="sha\sha_dgst.c">
+      <Filter>sha</Filter>
+    </ClCompile>
+    <ClCompile Include="sha\sha_one.c">
+      <Filter>sha</Filter>
+    </ClCompile>
+    <ClCompile Include="srp\srp_lib.c">
+      <Filter>srp</Filter>
+    </ClCompile>
+    <ClCompile Include="srp\srp_vfy.c">
+      <Filter>srp</Filter>
+    </ClCompile>
+    <ClCompile Include="stack\stack.c">
+      <Filter>stack</Filter>
+    </ClCompile>
+    <ClCompile Include="threads\th-lock.c">
+      <Filter>threads</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_asn1.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_conf.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_err.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_lib.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_req_print.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_req_utils.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_rsp_print.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_rsp_sign.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_rsp_utils.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_rsp_verify.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="ts\ts_verify_ctx.c">
+      <Filter>ts</Filter>
+    </ClCompile>
+    <ClCompile Include="txt_db\txt_db.c">
+      <Filter>txt_db</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\ui_compat.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\ui_err.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\ui_lib.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\ui_openssl.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\ui_util.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="whrlpool\wp_block.c">
+      <Filter>whrlpool</Filter>
+    </ClCompile>
+    <ClCompile Include="whrlpool\wp_dgst.c">
+      <Filter>whrlpool</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\by_dir.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\by_file.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509cset.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509name.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509rset.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509spki.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509type.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_att.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_cmp.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_d2.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_def.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_err.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_ext.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_lu.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_obj.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_r2x.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_req.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_set.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_trs.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_txt.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_v3.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_vfy.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x509_vpm.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509\x_all.c">
+      <Filter>x509</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\pcy_cache.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\pcy_data.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\pcy_lib.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\pcy_map.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\pcy_node.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\pcy_tree.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\tabtest.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3err.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_addr.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_akey.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_akeya.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_alt.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_asid.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_bcons.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_bitst.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_conf.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_cpols.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_crld.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_enum.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_extku.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_genn.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_ia5.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_info.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_int.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_lib.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_ncons.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_ocsp.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_pci.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_pcia.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_pcons.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_pku.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_pmaps.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_prn.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_purp.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_skey.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_sxnet.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="x509v3\v3_utl.c">
+      <Filter>x509v3</Filter>
+    </ClCompile>
+    <ClCompile Include="cryptlib.c" />
+    <ClCompile Include="cversion.c" />
+    <ClCompile Include="ebcdic.c" />
+    <ClCompile Include="ex_data.c" />
+    <ClCompile Include="mem.c" />
+    <ClCompile Include="mem_dbg.c" />
+    <ClCompile Include="o_dir.c" />
+    <ClCompile Include="o_init.c" />
+    <ClCompile Include="o_str.c" />
+    <ClCompile Include="o_time.c" />
+    <ClCompile Include="uid.c" />
+    <ClCompile Include="cpt_err.c" />
+    <ClCompile Include="sha\sha256.c">
+      <Filter>sha</Filter>
+    </ClCompile>
+    <ClCompile Include="lhash\lh_stats.c">
+      <Filter>lhash</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\e_gost_err.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost2001.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost2001_keyx.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost89.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost94_keyx.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gosthash.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_ameth.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_asn1.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_crypt.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_ctl.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_eng.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_keywrap.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_md.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_params.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_pmeth.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+    <ClCompile Include="engines\ccgost\gost_sign.c">
+      <Filter>engines\ccgost</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

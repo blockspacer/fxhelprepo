@@ -155,6 +155,12 @@
     <ProjectReference Include="..\third_party\libcurl\curl\lib\libcurl.vcxproj">
       <Project>{a9b789e9-ca2d-4b2f-b5fb-6d515ecfb31e}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\libeay32\libeay32.vcxproj">
+      <Project>{ac33ff8e-59e7-4e1e-8111-f446e9fb0231}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\ssleay32\ssleay32.vcxproj">
+      <Project>{057ea5b8-8c47-4519-b5fc-9b28191d6843}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -16,7 +16,7 @@
 namespace
 {
     const char* fanxingurl = "http://fanxing.kugou.com";
-    const char* loginuserurl = "http://login-user.kugou.com";
+    const char* loginuserurl = "https://login-user.kugou.com";
     const char* kugouurl = "http://kugou.com";
     const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
     const char* acceptencode = "gzip, deflate";//目前都不应该接收压缩数据，免得解压麻烦
@@ -193,6 +193,8 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
     url += "&callback=loginSuccessCallback";
     url += "&login_ver=1";
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     /* example.com is redirected, so we tell libcurl to follow redirection */
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);

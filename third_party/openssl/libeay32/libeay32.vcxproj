@@ -1,0 +1,904 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="aes\aes.h" />
+    <ClInclude Include="aes\aes_locl.h" />
+    <ClInclude Include="asn1\asn1.h" />
+    <ClInclude Include="asn1\asn1t.h" />
+    <ClInclude Include="asn1\asn1_locl.h" />
+    <ClInclude Include="asn1\asn1_mac.h" />
+    <ClInclude Include="asn1\charmap.h" />
+    <ClInclude Include="bf\bf_locl.h" />
+    <ClInclude Include="bf\bf_pi.h" />
+    <ClInclude Include="bf\blowfish.h" />
+    <ClInclude Include="bio\bio.h" />
+    <ClInclude Include="bio\bio_lcl.h" />
+    <ClInclude Include="bn\bn.h" />
+    <ClInclude Include="bn\bn_lcl.h" />
+    <ClInclude Include="bn\bn_prime.h" />
+    <ClInclude Include="buffer\buffer.h" />
+    <ClInclude Include="camellia\camellia.h" />
+    <ClInclude Include="camellia\cmll_locl.h" />
+    <ClInclude Include="cast\cast.h" />
+    <ClInclude Include="cast\cast_lcl.h" />
+    <ClInclude Include="cast\cast_s.h" />
+    <ClInclude Include="cmac\cmac.h" />
+    <ClInclude Include="cms\cms.h" />
+    <ClInclude Include="cms\cms_lcl.h" />
+    <ClInclude Include="comp\comp.h" />
+    <ClInclude Include="conf\conf.h" />
+    <ClInclude Include="conf\conf_api.h" />
+    <ClInclude Include="conf\conf_def.h" />
+    <ClInclude Include="des\des.h" />
+    <ClInclude Include="des\des_locl.h" />
+    <ClInclude Include="des\des_old.h" />
+    <ClInclude Include="des\des_ver.h" />
+    <ClInclude Include="des\rpc_des.h" />
+    <ClInclude Include="des\spr.h" />
+    <ClInclude Include="dh\dh.h" />
+    <ClInclude Include="dsa\dsa.h" />
+    <ClInclude Include="dsa\dsa_locl.h" />
+    <ClInclude Include="dso\dso.h" />
+    <ClInclude Include="ecdh\ecdh.h" />
+    <ClInclude Include="ecdh\ech_locl.h" />
+    <ClInclude Include="ecdsa\ecdsa.h" />
+    <ClInclude Include="ecdsa\ecs_locl.h" />
+    <ClInclude Include="ec\ec.h" />
+    <ClInclude Include="ec\ec_lcl.h" />
+    <ClInclude Include="engines\ccgost\e_gost_err.h" />
+    <ClInclude Include="engines\ccgost\gost2001_keyx.h" />
+    <ClInclude Include="engines\ccgost\gost89.h" />
+    <ClInclude Include="engines\ccgost\gosthash.h" />
+    <ClInclude Include="engines\ccgost\gost_keywrap.h" />
+    <ClInclude Include="engines\ccgost\gost_lcl.h" />
+    <ClInclude Include="engines\ccgost\gost_params.h" />
+    <ClInclude Include="engines\e_4758cca_err.h" />
+    <ClInclude Include="engines\e_aep_err.h" />
+    <ClInclude Include="engines\e_atalla_err.h" />
+    <ClInclude Include="engines\e_capi_err.h" />
+    <ClInclude Include="engines\e_chil_err.h" />
+    <ClInclude Include="engines\e_cswift_err.h" />
+    <ClInclude Include="engines\e_gmp_err.h" />
+    <ClInclude Include="engines\e_nuron_err.h" />
+    <ClInclude Include="engines\e_sureware_err.h" />
+    <ClInclude Include="engines\e_ubsec_err.h" />
+    <ClInclude Include="engine\engine.h" />
+    <ClInclude Include="engine\eng_int.h" />
+    <ClInclude Include="err\err.h" />
+    <ClInclude Include="evp\evp.h" />
+    <ClInclude Include="evp\evp_locl.h" />
+    <ClInclude Include="hmac\hmac.h" />
+    <ClInclude Include="idea\idea.h" />
+    <ClInclude Include="idea\idea_lcl.h" />
+    <ClInclude Include="krb5\krb5_asn.h" />
+    <ClInclude Include="lhash\lhash.h" />
+    <ClInclude Include="md4\md4.h" />
+    <ClInclude Include="md4\md4_locl.h" />
+    <ClInclude Include="md5\md5.h" />
+    <ClInclude Include="md5\md5_locl.h" />
+    <ClInclude Include="mdc2\mdc2.h" />
+    <ClInclude Include="modes\modes.h" />
+    <ClInclude Include="modes\modes_lcl.h" />
+    <ClInclude Include="objects\objects.h" />
+    <ClInclude Include="objects\obj_dat.h" />
+    <ClInclude Include="objects\obj_mac.h" />
+    <ClInclude Include="objects\obj_xref.h" />
+    <ClInclude Include="ocsp\ocsp.h" />
+    <ClInclude Include="pem\pem.h" />
+    <ClInclude Include="pem\pem2.h" />
+    <ClInclude Include="pkcs12\pkcs12.h" />
+    <ClInclude Include="pkcs7\pkcs7.h" />
+    <ClInclude Include="pqueue\pqueue.h" />
+    <ClInclude Include="rand\rand.h" />
+    <ClInclude Include="rand\rand_lcl.h" />
+    <ClInclude Include="rc2\rc2.h" />
+    <ClInclude Include="rc2\rc2_locl.h" />
+    <ClInclude Include="rc4\rc4.h" />
+    <ClInclude Include="rc4\rc4_locl.h" />
+    <ClInclude Include="ripemd\ripemd.h" />
+    <ClInclude Include="ripemd\rmdconst.h" />
+    <ClInclude Include="ripemd\rmd_locl.h" />
+    <ClInclude Include="rsa\rsa.h" />
+    <ClInclude Include="rsa\rsa_locl.h" />
+    <ClInclude Include="seed\seed.h" />
+    <ClInclude Include="seed\seed_locl.h" />
+    <ClInclude Include="sha\sha.h" />
+    <ClInclude Include="sha\sha_locl.h" />
+    <ClInclude Include="srp\srp.h" />
+    <ClInclude Include="srp\srp_grps.h" />
+    <ClInclude Include="srp\srp_lcl.h" />
+    <ClInclude Include="stack\safestack.h" />
+    <ClInclude Include="stack\stack.h" />
+    <ClInclude Include="ts\ts.h" />
+    <ClInclude Include="txt_db\txt_db.h" />
+    <ClInclude Include="ui\ui.h" />
+    <ClInclude Include="ui\ui_compat.h" />
+    <ClInclude Include="ui\ui_locl.h" />
+    <ClInclude Include="whrlpool\whrlpool.h" />
+    <ClInclude Include="whrlpool\wp_locl.h" />
+    <ClInclude Include="x509v3\ext_dat.h" />
+    <ClInclude Include="x509v3\pcy_int.h" />
+    <ClInclude Include="x509v3\x509v3.h" />
+    <ClInclude Include="x509\x509.h" />
+    <ClInclude Include="x509\x509_vfy.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="aes\aes_cbc.c" />
+    <ClCompile Include="aes\aes_cfb.c" />
+    <ClCompile Include="aes\aes_core.c" />
+    <ClCompile Include="aes\aes_ctr.c" />
+    <ClCompile Include="aes\aes_ecb.c" />
+    <ClCompile Include="aes\aes_ige.c" />
+    <ClCompile Include="aes\aes_misc.c" />
+    <ClCompile Include="aes\aes_ofb.c" />
+    <ClCompile Include="aes\aes_wrap.c" />
+    <ClCompile Include="asn1\ameth_lib.c" />
+    <ClCompile Include="asn1\asn1_err.c" />
+    <ClCompile Include="asn1\asn1_gen.c" />
+    <ClCompile Include="asn1\asn1_lib.c" />
+    <ClCompile Include="asn1\asn1_par.c" />
+    <ClCompile Include="asn1\asn_mime.c" />
+    <ClCompile Include="asn1\asn_moid.c" />
+    <ClCompile Include="asn1\asn_pack.c" />
+    <ClCompile Include="asn1\a_bitstr.c" />
+    <ClCompile Include="asn1\a_bool.c" />
+    <ClCompile Include="asn1\a_bytes.c" />
+    <ClCompile Include="asn1\a_d2i_fp.c" />
+    <ClCompile Include="asn1\a_digest.c" />
+    <ClCompile Include="asn1\a_dup.c" />
+    <ClCompile Include="asn1\a_enum.c" />
+    <ClCompile Include="asn1\a_gentm.c" />
+    <ClCompile Include="asn1\a_i2d_fp.c" />
+    <ClCompile Include="asn1\a_int.c" />
+    <ClCompile Include="asn1\a_mbstr.c" />
+    <ClCompile Include="asn1\a_object.c" />
+    <ClCompile Include="asn1\a_octet.c" />
+    <ClCompile Include="asn1\a_print.c" />
+    <ClCompile Include="asn1\a_set.c" />
+    <ClCompile Include="asn1\a_sign.c" />
+    <ClCompile Include="asn1\a_strex.c" />
+    <ClCompile Include="asn1\a_strnid.c" />
+    <ClCompile Include="asn1\a_time.c" />
+    <ClCompile Include="asn1\a_type.c" />
+    <ClCompile Include="asn1\a_utctm.c" />
+    <ClCompile Include="asn1\a_utf8.c" />
+    <ClCompile Include="asn1\a_verify.c" />
+    <ClCompile Include="asn1\bio_asn1.c" />
+    <ClCompile Include="asn1\bio_ndef.c" />
+    <ClCompile Include="asn1\d2i_pr.c" />
+    <ClCompile Include="asn1\d2i_pu.c" />
+    <ClCompile Include="asn1\evp_asn1.c" />
+    <ClCompile Include="asn1\f_enum.c" />
+    <ClCompile Include="asn1\f_int.c" />
+    <ClCompile Include="asn1\f_string.c" />
+    <ClCompile Include="asn1\i2d_pr.c" />
+    <ClCompile Include="asn1\i2d_pu.c" />
+    <ClCompile Include="asn1\nsseq.c" />
+    <ClCompile Include="asn1\n_pkey.c" />
+    <ClCompile Include="asn1\p5_pbe.c" />
+    <ClCompile Include="asn1\p5_pbev2.c" />
+    <ClCompile Include="asn1\p8_pkey.c" />
+    <ClCompile Include="asn1\tasn_dec.c" />
+    <ClCompile Include="asn1\tasn_enc.c" />
+    <ClCompile Include="asn1\tasn_fre.c" />
+    <ClCompile Include="asn1\tasn_new.c" />
+    <ClCompile Include="asn1\tasn_prn.c" />
+    <ClCompile Include="asn1\tasn_typ.c" />
+    <ClCompile Include="asn1\tasn_utl.c" />
+    <ClCompile Include="asn1\t_bitst.c" />
+    <ClCompile Include="asn1\t_crl.c" />
+    <ClCompile Include="asn1\t_pkey.c" />
+    <ClCompile Include="asn1\t_req.c" />
+    <ClCompile Include="asn1\t_spki.c" />
+    <ClCompile Include="asn1\t_x509.c" />
+    <ClCompile Include="asn1\t_x509a.c" />
+    <ClCompile Include="asn1\x_algor.c" />
+    <ClCompile Include="asn1\x_attrib.c" />
+    <ClCompile Include="asn1\x_bignum.c" />
+    <ClCompile Include="asn1\x_crl.c" />
+    <ClCompile Include="asn1\x_exten.c" />
+    <ClCompile Include="asn1\x_info.c" />
+    <ClCompile Include="asn1\x_long.c" />
+    <ClCompile Include="asn1\x_name.c" />
+    <ClCompile Include="asn1\x_nx509.c" />
+    <ClCompile Include="asn1\x_pkey.c" />
+    <ClCompile Include="asn1\x_pubkey.c" />
+    <ClCompile Include="asn1\x_req.c" />
+    <ClCompile Include="asn1\x_sig.c" />
+    <ClCompile Include="asn1\x_spki.c" />
+    <ClCompile Include="asn1\x_val.c" />
+    <ClCompile Include="asn1\x_x509.c" />
+    <ClCompile Include="asn1\x_x509a.c" />
+    <ClCompile Include="bf\bf_cfb64.c" />
+    <ClCompile Include="bf\bf_ecb.c" />
+    <ClCompile Include="bf\bf_enc.c" />
+    <ClCompile Include="bf\bf_ofb64.c" />
+    <ClCompile Include="bf\bf_skey.c" />
+    <ClCompile Include="bio\bf_buff.c" />
+    <ClCompile Include="bio\bf_lbuf.c" />
+    <ClCompile Include="bio\bf_nbio.c" />
+    <ClCompile Include="bio\bf_null.c" />
+    <ClCompile Include="bio\bio_cb.c" />
+    <ClCompile Include="bio\bio_err.c" />
+    <ClCompile Include="bio\bio_lib.c" />
+    <ClCompile Include="bio\bss_acpt.c" />
+    <ClCompile Include="bio\bss_bio.c" />
+    <ClCompile Include="bio\bss_conn.c" />
+    <ClCompile Include="bio\bss_dgram.c" />
+    <ClCompile Include="bio\bss_fd.c" />
+    <ClCompile Include="bio\bss_file.c" />
+    <ClCompile Include="bio\bss_log.c" />
+    <ClCompile Include="bio\bss_mem.c" />
+    <ClCompile Include="bio\bss_null.c" />
+    <ClCompile Include="bio\bss_sock.c" />
+    <ClCompile Include="bio\b_dump.c" />
+    <ClCompile Include="bio\b_print.c" />
+    <ClCompile Include="bio\b_sock.c" />
+    <ClCompile Include="bn\bn_add.c" />
+    <ClCompile Include="bn\bn_asm.c" />
+    <ClCompile Include="bn\bn_blind.c" />
+    <ClCompile Include="bn\bn_const.c" />
+    <ClCompile Include="bn\bn_ctx.c" />
+    <ClCompile Include="bn\bn_depr.c" />
+    <ClCompile Include="bn\bn_div.c" />
+    <ClCompile Include="bn\bn_err.c" />
+    <ClCompile Include="bn\bn_exp.c" />
+    <ClCompile Include="bn\bn_exp2.c" />
+    <ClCompile Include="bn\bn_gcd.c" />
+    <ClCompile Include="bn\bn_gf2m.c" />
+    <ClCompile Include="bn\bn_kron.c" />
+    <ClCompile Include="bn\bn_lib.c" />
+    <ClCompile Include="bn\bn_mod.c" />
+    <ClCompile Include="bn\bn_mont.c" />
+    <ClCompile Include="bn\bn_mpi.c" />
+    <ClCompile Include="bn\bn_mul.c" />
+    <ClCompile Include="bn\bn_nist.c" />
+    <ClCompile Include="bn\bn_prime.c" />
+    <ClCompile Include="bn\bn_print.c" />
+    <ClCompile Include="bn\bn_rand.c" />
+    <ClCompile Include="bn\bn_recp.c" />
+    <ClCompile Include="bn\bn_shift.c" />
+    <ClCompile Include="bn\bn_sqr.c" />
+    <ClCompile Include="bn\bn_sqrt.c" />
+    <ClCompile Include="bn\bn_word.c" />
+    <ClCompile Include="bn\bn_x931p.c" />
+    <ClCompile Include="bn\vms-helper.c" />
+    <ClCompile Include="buffer\buffer.c" />
+    <ClCompile Include="buffer\buf_err.c" />
+    <ClCompile Include="buffer\buf_str.c" />
+    <ClCompile Include="camellia\camellia.c" />
+    <ClCompile Include="camellia\cmll_cbc.c" />
+    <ClCompile Include="camellia\cmll_cfb.c" />
+    <ClCompile Include="camellia\cmll_ctr.c" />
+    <ClCompile Include="camellia\cmll_ecb.c" />
+    <ClCompile Include="camellia\cmll_misc.c" />
+    <ClCompile Include="camellia\cmll_ofb.c" />
+    <ClCompile Include="camellia\cmll_utl.c" />
+    <ClCompile Include="cast\c_cfb64.c" />
+    <ClCompile Include="cast\c_ecb.c" />
+    <ClCompile Include="cast\c_enc.c" />
+    <ClCompile Include="cast\c_ofb64.c" />
+    <ClCompile Include="cast\c_skey.c" />
+    <ClCompile Include="cmac\cmac.c" />
+    <ClCompile Include="cmac\cm_ameth.c" />
+    <ClCompile Include="cmac\cm_pmeth.c" />
+    <ClCompile Include="cms\cms_asn1.c" />
+    <ClCompile Include="cms\cms_att.c" />
+    <ClCompile Include="cms\cms_cd.c" />
+    <ClCompile Include="cms\cms_dd.c" />
+    <ClCompile Include="cms\cms_enc.c" />
+    <ClCompile Include="cms\cms_env.c" />
+    <ClCompile Include="cms\cms_err.c" />
+    <ClCompile Include="cms\cms_ess.c" />
+    <ClCompile Include="cms\cms_io.c" />
+    <ClCompile Include="cms\cms_lib.c" />
+    <ClCompile Include="cms\cms_pwri.c" />
+    <ClCompile Include="cms\cms_sd.c" />
+    <ClCompile Include="cms\cms_smime.c" />
+    <ClCompile Include="comp\comp_err.c" />
+    <ClCompile Include="comp\comp_lib.c" />
+    <ClCompile Include="comp\c_rle.c" />
+    <ClCompile Include="comp\c_zlib.c" />
+    <ClCompile Include="conf\conf_api.c" />
+    <ClCompile Include="conf\conf_def.c" />
+    <ClCompile Include="conf\conf_err.c" />
+    <ClCompile Include="conf\conf_lib.c" />
+    <ClCompile Include="conf\conf_mall.c" />
+    <ClCompile Include="conf\conf_mod.c" />
+    <ClCompile Include="conf\conf_sap.c" />
+    <ClCompile Include="cpt_err.c" />
+    <ClCompile Include="cryptlib.c" />
+    <ClCompile Include="cversion.c" />
+    <ClCompile Include="des\cbc3_enc.c" />
+    <ClCompile Include="des\cbc_cksm.c" />
+    <ClCompile Include="des\cbc_enc.c" />
+    <ClCompile Include="des\cfb64ede.c" />
+    <ClCompile Include="des\cfb64enc.c" />
+    <ClCompile Include="des\cfb_enc.c" />
+    <ClCompile Include="des\des_enc.c" />
+    <ClCompile Include="des\des_old.c" />
+    <ClCompile Include="des\des_old2.c" />
+    <ClCompile Include="des\ecb3_enc.c" />
+    <ClCompile Include="des\ecb_enc.c" />
+    <ClCompile Include="des\ede_cbcm_enc.c" />
+    <ClCompile Include="des\enc_read.c" />
+    <ClCompile Include="des\enc_writ.c" />
+    <ClCompile Include="des\fcrypt.c" />
+    <ClCompile Include="des\fcrypt_b.c" />
+    <ClCompile Include="des\ofb64ede.c" />
+    <ClCompile Include="des\ofb64enc.c" />
+    <ClCompile Include="des\ofb_enc.c" />
+    <ClCompile Include="des\pcbc_enc.c" />
+    <ClCompile Include="des\qud_cksm.c" />
+    <ClCompile Include="des\rand_key.c" />
+    <ClCompile Include="des\read2pwd.c" />
+    <ClCompile Include="des\rpc_enc.c" />
+    <ClCompile Include="des\set_key.c" />
+    <ClCompile Include="des\str2key.c" />
+    <ClCompile Include="des\xcbc_enc.c" />
+    <ClCompile Include="dh\dh_ameth.c" />
+    <ClCompile Include="dh\dh_asn1.c" />
+    <ClCompile Include="dh\dh_check.c" />
+    <ClCompile Include="dh\dh_depr.c" />
+    <ClCompile Include="dh\dh_err.c" />
+    <ClCompile Include="dh\dh_gen.c" />
+    <ClCompile Include="dh\dh_key.c" />
+    <ClCompile Include="dh\dh_lib.c" />
+    <ClCompile Include="dh\dh_pmeth.c" />
+    <ClCompile Include="dh\dh_prn.c" />
+    <ClCompile Include="dsa\dsa_ameth.c" />
+    <ClCompile Include="dsa\dsa_asn1.c" />
+    <ClCompile Include="dsa\dsa_depr.c" />
+    <ClCompile Include="dsa\dsa_err.c" />
+    <ClCompile Include="dsa\dsa_gen.c" />
+    <ClCompile Include="dsa\dsa_key.c" />
+    <ClCompile Include="dsa\dsa_lib.c" />
+    <ClCompile Include="dsa\dsa_ossl.c" />
+    <ClCompile Include="dsa\dsa_pmeth.c" />
+    <ClCompile Include="dsa\dsa_prn.c" />
+    <ClCompile Include="dsa\dsa_sign.c" />
+    <ClCompile Include="dsa\dsa_vrf.c" />
+    <ClCompile Include="dso\dso_beos.c" />
+    <ClCompile Include="dso\dso_dl.c" />
+    <ClCompile Include="dso\dso_dlfcn.c" />
+    <ClCompile Include="dso\dso_err.c" />
+    <ClCompile Include="dso\dso_lib.c" />
+    <ClCompile Include="dso\dso_null.c" />
+    <ClCompile Include="dso\dso_openssl.c" />
+    <ClCompile Include="dso\dso_vms.c" />
+    <ClCompile Include="dso\dso_win32.c" />
+    <ClCompile Include="ebcdic.c" />
+    <ClCompile Include="ecdh\ech_err.c" />
+    <ClCompile Include="ecdh\ech_key.c" />
+    <ClCompile Include="ecdh\ech_lib.c" />
+    <ClCompile Include="ecdh\ech_ossl.c" />
+    <ClCompile Include="ecdsa\ecs_asn1.c" />
+    <ClCompile Include="ecdsa\ecs_err.c" />
+    <ClCompile Include="ecdsa\ecs_lib.c" />
+    <ClCompile Include="ecdsa\ecs_ossl.c" />
+    <ClCompile Include="ecdsa\ecs_sign.c" />
+    <ClCompile Include="ecdsa\ecs_vrf.c" />
+    <ClCompile Include="ec\ec2_mult.c" />
+    <ClCompile Include="ec\ec2_oct.c" />
+    <ClCompile Include="ec\ec2_smpl.c" />
+    <ClCompile Include="ec\eck_prn.c" />
+    <ClCompile Include="ec\ecp_mont.c" />
+    <ClCompile Include="ec\ecp_nist.c" />
+    <ClCompile Include="ec\ecp_nistp224.c" />
+    <ClCompile Include="ec\ecp_nistp256.c" />
+    <ClCompile Include="ec\ecp_nistp521.c" />
+    <ClCompile Include="ec\ecp_nistputil.c" />
+    <ClCompile Include="ec\ecp_oct.c" />
+    <ClCompile Include="ec\ecp_smpl.c" />
+    <ClCompile Include="ec\ec_ameth.c" />
+    <ClCompile Include="ec\ec_asn1.c" />
+    <ClCompile Include="ec\ec_check.c" />
+    <ClCompile Include="ec\ec_curve.c" />
+    <ClCompile Include="ec\ec_cvt.c" />
+    <ClCompile Include="ec\ec_err.c" />
+    <ClCompile Include="ec\ec_key.c" />
+    <ClCompile Include="ec\ec_lib.c" />
+    <ClCompile Include="ec\ec_mult.c" />
+    <ClCompile Include="ec\ec_oct.c" />
+    <ClCompile Include="ec\ec_pmeth.c" />
+    <ClCompile Include="ec\ec_print.c" />
+    <ClCompile Include="engines\ccgost\e_gost_err.c" />
+    <ClCompile Include="engines\ccgost\gost2001.c" />
+    <ClCompile Include="engines\ccgost\gost2001_keyx.c" />
+    <ClCompile Include="engines\ccgost\gost89.c" />
+    <ClCompile Include="engines\ccgost\gost94_keyx.c" />
+    <ClCompile Include="engines\ccgost\gosthash.c" />
+    <ClCompile Include="engines\ccgost\gost_ameth.c" />
+    <ClCompile Include="engines\ccgost\gost_asn1.c" />
+    <ClCompile Include="engines\ccgost\gost_crypt.c" />
+    <ClCompile Include="engines\ccgost\gost_ctl.c" />
+    <ClCompile Include="engines\ccgost\gost_eng.c" />
+    <ClCompile Include="engines\ccgost\gost_keywrap.c" />
+    <ClCompile Include="engines\ccgost\gost_md.c" />
+    <ClCompile Include="engines\ccgost\gost_params.c" />
+    <ClCompile Include="engines\ccgost\gost_pmeth.c" />
+    <ClCompile Include="engines\ccgost\gost_sign.c" />
+    <ClCompile Include="engines\e_4758cca.c" />
+    <ClCompile Include="engines\e_4758cca_err.c" />
+    <ClCompile Include="engines\e_aep.c" />
+    <ClCompile Include="engines\e_aep_err.c" />
+    <ClCompile Include="engines\e_atalla.c" />
+    <ClCompile Include="engines\e_atalla_err.c" />
+    <ClCompile Include="engines\e_capi.c" />
+    <ClCompile Include="engines\e_capi_err.c" />
+    <ClCompile Include="engines\e_chil.c" />
+    <ClCompile Include="engines\e_chil_err.c" />
+    <ClCompile Include="engines\e_cswift.c" />
+    <ClCompile Include="engines\e_cswift_err.c" />
+    <ClCompile Include="engines\e_gmp.c" />
+    <ClCompile Include="engines\e_gmp_err.c" />
+    <ClCompile Include="engines\e_nuron.c" />
+    <ClCompile Include="engines\e_nuron_err.c" />
+    <ClCompile Include="engines\e_padlock.c" />
+    <ClCompile Include="engines\e_sureware.c" />
+    <ClCompile Include="engines\e_sureware_err.c" />
+    <ClCompile Include="engines\e_ubsec.c" />
+    <ClCompile Include="engines\e_ubsec_err.c" />
+    <ClCompile Include="engine\eng_all.c" />
+    <ClCompile Include="engine\eng_cnf.c" />
+    <ClCompile Include="engine\eng_cryptodev.c" />
+    <ClCompile Include="engine\eng_ctrl.c" />
+    <ClCompile Include="engine\eng_dyn.c" />
+    <ClCompile Include="engine\eng_err.c" />
+    <ClCompile Include="engine\eng_fat.c" />
+    <ClCompile Include="engine\eng_init.c" />
+    <ClCompile Include="engine\eng_lib.c" />
+    <ClCompile Include="engine\eng_list.c" />
+    <ClCompile Include="engine\eng_openssl.c" />
+    <ClCompile Include="engine\eng_pkey.c" />
+    <ClCompile Include="engine\eng_rdrand.c" />
+    <ClCompile Include="engine\eng_rsax.c" />
+    <ClCompile Include="engine\eng_table.c" />
+    <ClCompile Include="engine\tb_asnmth.c" />
+    <ClCompile Include="engine\tb_cipher.c" />
+    <ClCompile Include="engine\tb_dh.c" />
+    <ClCompile Include="engine\tb_digest.c" />
+    <ClCompile Include="engine\tb_dsa.c" />
+    <ClCompile Include="engine\tb_ecdh.c" />
+    <ClCompile Include="engine\tb_ecdsa.c" />
+    <ClCompile Include="engine\tb_pkmeth.c" />
+    <ClCompile Include="engine\tb_rand.c" />
+    <ClCompile Include="engine\tb_rsa.c" />
+    <ClCompile Include="engine\tb_store.c" />
+    <ClCompile Include="err\err.c" />
+    <ClCompile Include="err\err_all.c" />
+    <ClCompile Include="err\err_prn.c" />
+    <ClCompile Include="evp\bio_b64.c" />
+    <ClCompile Include="evp\bio_enc.c" />
+    <ClCompile Include="evp\bio_md.c" />
+    <ClCompile Include="evp\bio_ok.c" />
+    <ClCompile Include="evp\c_all.c" />
+    <ClCompile Include="evp\c_allc.c" />
+    <ClCompile Include="evp\c_alld.c" />
+    <ClCompile Include="evp\digest.c" />
+    <ClCompile Include="evp\encode.c" />
+    <ClCompile Include="evp\evp_acnf.c" />
+    <ClCompile Include="evp\evp_cnf.c" />
+    <ClCompile Include="evp\evp_enc.c" />
+    <ClCompile Include="evp\evp_err.c" />
+    <ClCompile Include="evp\evp_fips.c" />
+    <ClCompile Include="evp\evp_key.c" />
+    <ClCompile Include="evp\evp_lib.c" />
+    <ClCompile Include="evp\evp_pbe.c" />
+    <ClCompile Include="evp\evp_pkey.c" />
+    <ClCompile Include="evp\e_aes.c" />
+    <ClCompile Include="evp\e_aes_cbc_hmac_sha1.c" />
+    <ClCompile Include="evp\e_bf.c" />
+    <ClCompile Include="evp\e_camellia.c" />
+    <ClCompile Include="evp\e_cast.c" />
+    <ClCompile Include="evp\e_des.c" />
+    <ClCompile Include="evp\e_des3.c" />
+    <ClCompile Include="evp\e_idea.c" />
+    <ClCompile Include="evp\e_null.c" />
+    <ClCompile Include="evp\e_old.c" />
+    <ClCompile Include="evp\e_rc2.c" />
+    <ClCompile Include="evp\e_rc4.c" />
+    <ClCompile Include="evp\e_rc4_hmac_md5.c" />
+    <ClCompile Include="evp\e_rc5.c" />
+    <ClCompile Include="evp\e_seed.c" />
+    <ClCompile Include="evp\e_xcbc_d.c" />
+    <ClCompile Include="evp\m_dss.c" />
+    <ClCompile Include="evp\m_dss1.c" />
+    <ClCompile Include="evp\m_ecdsa.c" />
+    <ClCompile Include="evp\m_md2.c" />
+    <ClCompile Include="evp\m_md4.c" />
+    <ClCompile Include="evp\m_md5.c" />
+    <ClCompile Include="evp\m_mdc2.c" />
+    <ClCompile Include="evp\m_null.c" />
+    <ClCompile Include="evp\m_ripemd.c" />
+    <ClCompile Include="evp\m_sha.c" />
+    <ClCompile Include="evp\m_sha1.c" />
+    <ClCompile Include="evp\m_sigver.c" />
+    <ClCompile Include="evp\m_wp.c" />
+    <ClCompile Include="evp\names.c" />
+    <ClCompile Include="evp\openbsd_hw.c" />
+    <ClCompile Include="evp\p5_crpt.c" />
+    <ClCompile Include="evp\p5_crpt2.c" />
+    <ClCompile Include="evp\pmeth_fn.c" />
+    <ClCompile Include="evp\pmeth_gn.c" />
+    <ClCompile Include="evp\pmeth_lib.c" />
+    <ClCompile Include="evp\p_dec.c" />
+    <ClCompile Include="evp\p_enc.c" />
+    <ClCompile Include="evp\p_lib.c" />
+    <ClCompile Include="evp\p_open.c" />
+    <ClCompile Include="evp\p_seal.c" />
+    <ClCompile Include="evp\p_sign.c" />
+    <ClCompile Include="evp\p_verify.c" />
+    <ClCompile Include="ex_data.c" />
+    <ClCompile Include="hmac\hmac.c" />
+    <ClCompile Include="hmac\hm_ameth.c" />
+    <ClCompile Include="hmac\hm_pmeth.c" />
+    <ClCompile Include="idea\i_cbc.c" />
+    <ClCompile Include="idea\i_cfb64.c" />
+    <ClCompile Include="idea\i_ecb.c" />
+    <ClCompile Include="idea\i_ofb64.c" />
+    <ClCompile Include="idea\i_skey.c" />
+    <ClCompile Include="krb5\krb5_asn.c" />
+    <ClCompile Include="lhash\lhash.c" />
+    <ClCompile Include="lhash\lh_stats.c" />
+    <ClCompile Include="md4\md4_dgst.c" />
+    <ClCompile Include="md4\md4_one.c" />
+    <ClCompile Include="md5\md5_dgst.c" />
+    <ClCompile Include="md5\md5_one.c" />
+    <ClCompile Include="mdc2\mdc2dgst.c" />
+    <ClCompile Include="mdc2\mdc2_one.c" />
+    <ClCompile Include="mem.c" />
+    <ClCompile Include="mem_dbg.c" />
+    <ClCompile Include="modes\cbc128.c" />
+    <ClCompile Include="modes\ccm128.c" />
+    <ClCompile Include="modes\cfb128.c" />
+    <ClCompile Include="modes\ctr128.c" />
+    <ClCompile Include="modes\cts128.c" />
+    <ClCompile Include="modes\gcm128.c" />
+    <ClCompile Include="modes\ofb128.c" />
+    <ClCompile Include="modes\xts128.c" />
+    <ClCompile Include="ms\uplink.c" />
+    <ClCompile Include="objects\obj_dat.c" />
+    <ClCompile Include="objects\obj_err.c" />
+    <ClCompile Include="objects\obj_lib.c" />
+    <ClCompile Include="objects\obj_xref.c" />
+    <ClCompile Include="objects\o_names.c" />
+    <ClCompile Include="ocsp\ocsp_asn.c" />
+    <ClCompile Include="ocsp\ocsp_cl.c" />
+    <ClCompile Include="ocsp\ocsp_err.c" />
+    <ClCompile Include="ocsp\ocsp_ext.c" />
+    <ClCompile Include="ocsp\ocsp_ht.c" />
+    <ClCompile Include="ocsp\ocsp_lib.c" />
+    <ClCompile Include="ocsp\ocsp_prn.c" />
+    <ClCompile Include="ocsp\ocsp_srv.c" />
+    <ClCompile Include="ocsp\ocsp_vfy.c" />
+    <ClCompile Include="o_dir.c" />
+    <ClCompile Include="o_init.c" />
+    <ClCompile Include="o_str.c" />
+    <ClCompile Include="o_time.c" />
+    <ClCompile Include="pem\pem_all.c" />
+    <ClCompile Include="pem\pem_err.c" />
+    <ClCompile Include="pem\pem_info.c" />
+    <ClCompile Include="pem\pem_lib.c" />
+    <ClCompile Include="pem\pem_oth.c" />
+    <ClCompile Include="pem\pem_pk8.c" />
+    <ClCompile Include="pem\pem_pkey.c" />
+    <ClCompile Include="pem\pem_seal.c" />
+    <ClCompile Include="pem\pem_sign.c" />
+    <ClCompile Include="pem\pem_x509.c" />
+    <ClCompile Include="pem\pem_xaux.c" />
+    <ClCompile Include="pem\pvkfmt.c" />
+    <ClCompile Include="pkcs12\p12_add.c" />
+    <ClCompile Include="pkcs12\p12_asn.c" />
+    <ClCompile Include="pkcs12\p12_attr.c" />
+    <ClCompile Include="pkcs12\p12_crpt.c" />
+    <ClCompile Include="pkcs12\p12_crt.c" />
+    <ClCompile Include="pkcs12\p12_decr.c" />
+    <ClCompile Include="pkcs12\p12_init.c" />
+    <ClCompile Include="pkcs12\p12_key.c" />
+    <ClCompile Include="pkcs12\p12_kiss.c" />
+    <ClCompile Include="pkcs12\p12_mutl.c" />
+    <ClCompile Include="pkcs12\p12_npas.c" />
+    <ClCompile Include="pkcs12\p12_p8d.c" />
+    <ClCompile Include="pkcs12\p12_p8e.c" />
+    <ClCompile Include="pkcs12\p12_utl.c" />
+    <ClCompile Include="pkcs12\pk12err.c" />
+    <ClCompile Include="pkcs7\bio_pk7.c" />
+    <ClCompile Include="pkcs7\pk7_asn1.c" />
+    <ClCompile Include="pkcs7\pk7_attr.c" />
+    <ClCompile Include="pkcs7\pk7_dgst.c" />
+    <ClCompile Include="pkcs7\pk7_doit.c" />
+    <ClCompile Include="pkcs7\pk7_enc.c" />
+    <ClCompile Include="pkcs7\pk7_lib.c" />
+    <ClCompile Include="pkcs7\pk7_mime.c" />
+    <ClCompile Include="pkcs7\pk7_smime.c" />
+    <ClCompile Include="pkcs7\pkcs7err.c" />
+    <ClCompile Include="pqueue\pqueue.c" />
+    <ClCompile Include="rand\md_rand.c" />
+    <ClCompile Include="rand\randfile.c" />
+    <ClCompile Include="rand\rand_egd.c" />
+    <ClCompile Include="rand\rand_err.c" />
+    <ClCompile Include="rand\rand_lib.c" />
+    <ClCompile Include="rand\rand_nw.c" />
+    <ClCompile Include="rand\rand_os2.c" />
+    <ClCompile Include="rand\rand_unix.c" />
+    <ClCompile Include="rand\rand_vms.c" />
+    <ClCompile Include="rand\rand_win.c" />
+    <ClCompile Include="rc2\rc2cfb64.c" />
+    <ClCompile Include="rc2\rc2ofb64.c" />
+    <ClCompile Include="rc2\rc2_cbc.c" />
+    <ClCompile Include="rc2\rc2_ecb.c" />
+    <ClCompile Include="rc2\rc2_skey.c" />
+    <ClCompile Include="rc4\rc4_enc.c" />
+    <ClCompile Include="rc4\rc4_skey.c" />
+    <ClCompile Include="rc4\rc4_utl.c" />
+    <ClCompile Include="ripemd\rmd_dgst.c" />
+    <ClCompile Include="ripemd\rmd_one.c" />
+    <ClCompile Include="rsa\rsa_ameth.c" />
+    <ClCompile Include="rsa\rsa_asn1.c" />
+    <ClCompile Include="rsa\rsa_chk.c" />
+    <ClCompile Include="rsa\rsa_crpt.c" />
+    <ClCompile Include="rsa\rsa_depr.c" />
+    <ClCompile Include="rsa\rsa_eay.c" />
+    <ClCompile Include="rsa\rsa_err.c" />
+    <ClCompile Include="rsa\rsa_gen.c" />
+    <ClCompile Include="rsa\rsa_lib.c" />
+    <ClCompile Include="rsa\rsa_none.c" />
+    <ClCompile Include="rsa\rsa_null.c" />
+    <ClCompile Include="rsa\rsa_oaep.c" />
+    <ClCompile Include="rsa\rsa_pk1.c" />
+    <ClCompile Include="rsa\rsa_pmeth.c" />
+    <ClCompile Include="rsa\rsa_prn.c" />
+    <ClCompile Include="rsa\rsa_pss.c" />
+    <ClCompile Include="rsa\rsa_saos.c" />
+    <ClCompile Include="rsa\rsa_sign.c" />
+    <ClCompile Include="rsa\rsa_ssl.c" />
+    <ClCompile Include="rsa\rsa_x931.c" />
+    <ClCompile Include="seed\seed.c" />
+    <ClCompile Include="seed\seed_cbc.c" />
+    <ClCompile Include="seed\seed_cfb.c" />
+    <ClCompile Include="seed\seed_ecb.c" />
+    <ClCompile Include="seed\seed_ofb.c" />
+    <ClCompile Include="sha\sha1dgst.c" />
+    <ClCompile Include="sha\sha1_one.c" />
+    <ClCompile Include="sha\sha256.c" />
+    <ClCompile Include="sha\sha512.c" />
+    <ClCompile Include="sha\sha_dgst.c" />
+    <ClCompile Include="sha\sha_one.c" />
+    <ClCompile Include="srp\srp_lib.c" />
+    <ClCompile Include="srp\srp_vfy.c" />
+    <ClCompile Include="stack\stack.c" />
+    <ClCompile Include="threads\th-lock.c" />
+    <ClCompile Include="ts\ts_asn1.c" />
+    <ClCompile Include="ts\ts_conf.c" />
+    <ClCompile Include="ts\ts_err.c" />
+    <ClCompile Include="ts\ts_lib.c" />
+    <ClCompile Include="ts\ts_req_print.c" />
+    <ClCompile Include="ts\ts_req_utils.c" />
+    <ClCompile Include="ts\ts_rsp_print.c" />
+    <ClCompile Include="ts\ts_rsp_sign.c" />
+    <ClCompile Include="ts\ts_rsp_utils.c" />
+    <ClCompile Include="ts\ts_rsp_verify.c" />
+    <ClCompile Include="ts\ts_verify_ctx.c" />
+    <ClCompile Include="txt_db\txt_db.c" />
+    <ClCompile Include="uid.c" />
+    <ClCompile Include="ui\ui_compat.c" />
+    <ClCompile Include="ui\ui_err.c" />
+    <ClCompile Include="ui\ui_lib.c" />
+    <ClCompile Include="ui\ui_openssl.c" />
+    <ClCompile Include="ui\ui_util.c" />
+    <ClCompile Include="whrlpool\wp_block.c" />
+    <ClCompile Include="whrlpool\wp_dgst.c" />
+    <ClCompile Include="x509v3\pcy_cache.c" />
+    <ClCompile Include="x509v3\pcy_data.c" />
+    <ClCompile Include="x509v3\pcy_lib.c" />
+    <ClCompile Include="x509v3\pcy_map.c" />
+    <ClCompile Include="x509v3\pcy_node.c" />
+    <ClCompile Include="x509v3\pcy_tree.c" />
+    <ClCompile Include="x509v3\tabtest.c" />
+    <ClCompile Include="x509v3\v3err.c" />
+    <ClCompile Include="x509v3\v3_addr.c" />
+    <ClCompile Include="x509v3\v3_akey.c" />
+    <ClCompile Include="x509v3\v3_akeya.c" />
+    <ClCompile Include="x509v3\v3_alt.c" />
+    <ClCompile Include="x509v3\v3_asid.c" />
+    <ClCompile Include="x509v3\v3_bcons.c" />
+    <ClCompile Include="x509v3\v3_bitst.c" />
+    <ClCompile Include="x509v3\v3_conf.c" />
+    <ClCompile Include="x509v3\v3_cpols.c" />
+    <ClCompile Include="x509v3\v3_crld.c" />
+    <ClCompile Include="x509v3\v3_enum.c" />
+    <ClCompile Include="x509v3\v3_extku.c" />
+    <ClCompile Include="x509v3\v3_genn.c" />
+    <ClCompile Include="x509v3\v3_ia5.c" />
+    <ClCompile Include="x509v3\v3_info.c" />
+    <ClCompile Include="x509v3\v3_int.c" />
+    <ClCompile Include="x509v3\v3_lib.c" />
+    <ClCompile Include="x509v3\v3_ncons.c" />
+    <ClCompile Include="x509v3\v3_ocsp.c" />
+    <ClCompile Include="x509v3\v3_pci.c" />
+    <ClCompile Include="x509v3\v3_pcia.c" />
+    <ClCompile Include="x509v3\v3_pcons.c" />
+    <ClCompile Include="x509v3\v3_pku.c" />
+    <ClCompile Include="x509v3\v3_pmaps.c" />
+    <ClCompile Include="x509v3\v3_prn.c" />
+    <ClCompile Include="x509v3\v3_purp.c" />
+    <ClCompile Include="x509v3\v3_skey.c" />
+    <ClCompile Include="x509v3\v3_sxnet.c" />
+    <ClCompile Include="x509v3\v3_utl.c" />
+    <ClCompile Include="x509\by_dir.c" />
+    <ClCompile Include="x509\by_file.c" />
+    <ClCompile Include="x509\x509cset.c" />
+    <ClCompile Include="x509\x509name.c" />
+    <ClCompile Include="x509\x509rset.c" />
+    <ClCompile Include="x509\x509spki.c" />
+    <ClCompile Include="x509\x509type.c" />
+    <ClCompile Include="x509\x509_att.c" />
+    <ClCompile Include="x509\x509_cmp.c" />
+    <ClCompile Include="x509\x509_d2.c" />
+    <ClCompile Include="x509\x509_def.c" />
+    <ClCompile Include="x509\x509_err.c" />
+    <ClCompile Include="x509\x509_ext.c" />
+    <ClCompile Include="x509\x509_lu.c" />
+    <ClCompile Include="x509\x509_obj.c" />
+    <ClCompile Include="x509\x509_r2x.c" />
+    <ClCompile Include="x509\x509_req.c" />
+    <ClCompile Include="x509\x509_set.c" />
+    <ClCompile Include="x509\x509_trs.c" />
+    <ClCompile Include="x509\x509_txt.c" />
+    <ClCompile Include="x509\x509_v3.c" />
+    <ClCompile Include="x509\x509_vfy.c" />
+    <ClCompile Include="x509\x509_vpm.c" />
+    <ClCompile Include="x509\x_all.c" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <SccProjectName />
+    <SccLocalPath />
+    <ProjectGuid>{AC33FF8E-59E7-4E1E-8111-F446E9FB0231}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\obj\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\obj\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <Optimization>MaxSpeed</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>../include;..;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBEAY32_EXPORTS;OPENSSL_NO_DYNAMIC_ENGINE;OPENSSL_SYS_MSDOS;WIN32_LEAN_AND_MEAN;MK1MF_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <BrowseInformation>false</BrowseInformation>
+    </ClCompile>
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>.\../../out32dll/Release\libeay32.tlb</TypeLibraryName>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(IntDir)/libeay32.bsc</OutputFile>
+    </Bscmake>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <LinkDLL>true</LinkDLL>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>
+      </ImportLibrary>
+      <AdditionalDependencies>Crypt32.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;$(OutDir)x86cpuid.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>libeay32.def</ModuleDefinitionFile>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <PreBuildEvent>
+      <Command>ml /nologo /Cp /coff /c /Cx /Zi  /Fo$(OutDir) $(ProjectDir)../x86cpuid.asm</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <Optimization>Disabled</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>../include;..;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBEAY32_EXPORTS;MK1MF_BUILD;OPENSSL_USE_APPLINK;WIN32_LEAN_AND_MEAN;OPENSSL_SYS_MSDOS;OPENSSL_NO_DYNAMIC_ENGINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <BrowseInformation>false</BrowseInformation>
+    </ClCompile>
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>.\../../out32dll/Debug\libeay32.tlb</TypeLibraryName>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0804</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>$(IntDir)/libeay32.bsc</OutputFile>
+    </Bscmake>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <LinkDLL>true</LinkDLL>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <ImportLibrary>
+      </ImportLibrary>
+      <AdditionalDependencies>Crypt32.lib;odbc32.lib;odbccp32.lib;ws2_32.lib;$(OutDir)x86cpuid.obj;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>libeay32.def</ModuleDefinitionFile>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <PreBuildEvent>
+      <Command>ml /nologo /Cp /coff /c /Cx /Zi  /Fo$(OutDir) $(ProjectDir)../x86cpuid.asm</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
