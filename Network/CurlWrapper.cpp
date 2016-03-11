@@ -5,7 +5,7 @@
 #include "third_party/libcurl/curl/curl.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/time/time.h"
-//#include "third_party/chromium/base/files/file_path.h"
+#include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/rand_util.h"
 #include "third_party/json/json.h"
 
@@ -76,7 +76,7 @@ CurlWrapper::~CurlWrapper()
 
 void CurlWrapper::CurlInit()
 {
-    curl_global_init(CURL_GLOBAL_WIN32);
+    curl_global_init(CURL_GLOBAL_ALL);
 }
 
 void CurlWrapper::CurlCleanup()
