@@ -182,7 +182,7 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
     std::string url = loginuserurl;
     url += "/v1/login/?appid=1010";
     url += "&username=" + UrlEncode(username);
-    url += "&pwd=" + MakeMd5FromString(username);
+    url += "&pwd=" + MakeMd5FromString(password);
     url += "&code=";
     uint32 nowtime = static_cast<uint32>(base::Time::Now().ToDoubleT());
     url += "&clienttime=" + base::UintToString(nowtime);
