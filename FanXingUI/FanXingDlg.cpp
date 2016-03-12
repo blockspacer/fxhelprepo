@@ -202,8 +202,9 @@ void CFanXingDlg::OnBnClickedButton1()
     //bool loginResult = LoginByWebAction(username, password);
 
     // 测试通过的curl登录方式
-    bool loginResult = LoginByRequest(username.GetBuffer(), password.GetBuffer());
-
+    bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
+    std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
+    Notify(message);
 }
 
 //跳转页面功能
@@ -217,12 +218,12 @@ void CFanXingDlg::OnBnClickedButtonNav()
     LOG(INFO) << L"Navigate To " << strUrl;
     // 获取房间信息，启动功能
 
-    if (network_)
-    {
-        network_->Finalize();
-    }    
-    network_.reset(new NetworkHelper);
-    network_->Initialize();
+    //if (network_)
+    //{
+    //    network_->Finalize();
+    //}    
+    //network_.reset(new NetworkHelper);
+    //network_->Initialize();
     network_->SetNotify(
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
 

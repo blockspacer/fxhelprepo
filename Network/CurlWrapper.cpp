@@ -4,10 +4,13 @@
 #include <iostream>
 #include "third_party/libcurl/curl/curl.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/rand_util.h"
 #include "third_party/json/json.h"
+#include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_path.h"
 
 
 #include "../Network/EncodeHelper.h"
@@ -19,7 +22,7 @@ namespace
     const char* loginuserurl = "https://login-user.kugou.com";
     const char* kugouurl = "http://kugou.com";
     const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
-    const char* acceptencode = "gzip, deflate";//目前都不应该接收压缩数据，免得解压麻烦
+    const char* acceptencode = "deflate";//目前都不应该接收压缩数据，免得解压麻烦
 
     static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     {
@@ -27,6 +30,15 @@ namespace
         data.assign(ptr, ptr + size*nmemb);
         CurlWrapper* p = static_cast<CurlWrapper*>(userdata);
         p->WriteCallback(data);
+        return size*nmemb;
+    }
+
+    static size_t header_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
+    {
+        std::string data;
+        data.assign(ptr, ptr + size*nmemb);
+        CurlWrapper* p = static_cast<CurlWrapper*>(userdata);
+        p->WriteResponseHeaderCallback(data);
         return size*nmemb;
     }
 
@@ -48,30 +60,143 @@ namespace
         }
         return std::move(temp);
     }
+
+    bool ExtractUsefulInfo_RoomService_enterRoom_(const std::string&inputstr,
+        uint32* userid, std::string* nickname, uint32* richlevel)
+    {
+        if (inputstr.empty())
+        {
+            return false;
+        }
+
+        const std::string& data = inputstr;
+        //解析json数据
+        Json::Reader reader;
+        Json::Value rootdata(Json::objectValue);
+        if (!reader.parse(data, rootdata, false))
+        {
+            return false;
+        }
+
+        // 暂时没有必要检测status的值
+        Json::Value dataObject(Json::objectValue);
+        dataObject = rootdata.get(std::string("data"), dataObject);
+        if (dataObject.empty())
+        {
+            return false;
+        }
+
+        Json::Value fxUserInfoObject(Json::objectValue);
+        fxUserInfoObject = dataObject.get("fxUserInfo", fxUserInfoObject);
+        if (fxUserInfoObject.empty())
+        {
+            return false;
+        }
+
+        std::string struserid = fxUserInfoObject["userId"].asString();
+        if (!base::StringToUint(struserid, userid))
+        {
+            return false;
+        }
+
+        *nickname = fxUserInfoObject["nickName"].asString();
+        std::string strrichLevel = fxUserInfoObject["richLevel"].asString();
+        if (!base::StringToUint(strrichLevel, richlevel))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    // 测试通过
+    bool ExtractStarfulInfo_RoomService_enterRoom_(
+        const std::string& inputstr, uint32* staruserid,
+        std::string* key, std::string* ext)
+    {
+        if (inputstr.empty())
+        {
+            return false;
+        }
+
+        const std::string& data = inputstr;
+        //解析json数据
+        Json::Reader reader;
+        Json::Value rootdata(Json::objectValue);
+        if (!reader.parse(data, rootdata, false))
+        {
+            return false;
+        }
+
+        // 暂时没有必要检测status的值
+        Json::Value dataObject(Json::objectValue);
+        dataObject = rootdata.get(std::string("data"), dataObject);
+        if (dataObject.empty())
+        {
+            return false;
+        }
+
+        Json::Value liveDataObject(Json::objectValue);
+        liveDataObject = dataObject.get("liveData", liveDataObject);
+        if (liveDataObject.empty())
+        {
+            return false;
+        }
+
+        std::string recInfo = liveDataObject["recInfo"].asString();
+        auto beginPos = recInfo.find(R"("userId":")");
+        if (beginPos == std::string::npos)
+        {
+            assert(false);
+            return false;
+        }
+        beginPos += strlen(R"("userId":")");
+        auto endPos = recInfo.find(R"(",)", beginPos);
+        std::string strstarUserId = recInfo.substr(beginPos, endPos - beginPos);
+        if (!base::StringToUint(strstarUserId, staruserid))
+        {
+            return false;
+        }
+
+        Json::Value socketConfigObject(Json::objectValue);
+        socketConfigObject = dataObject.get("socketConfig", socketConfigObject);
+        if (socketConfigObject.empty())
+        {
+            return false;
+        }
+
+        // 这是flash的tcp连接的服务器的ip(由url解析出来)和端口信息，后续可能用到，目前不解析
+        std::string strsokt = socketConfigObject["sokt"].asString();
+
+        // 重要数据，进入房间后连接tcp所使用的key
+        *key = socketConfigObject["enter"].asString();
+        *ext = socketConfigObject["ext"].asString();
+
+        return true;
+    }
 }
 
 bool CurlWrapper::WriteCallback(const std::string& data)
 {
-    //std::cout << data <<std::endl;
-    //int count = file_.WriteAtCurrentPos(data.c_str(), data.length());
     currentWriteData_ += data;
     return true;
 }
+
+bool CurlWrapper::WriteResponseHeaderCallback(const std::string& data)
+{
+    currentResponseHeader_ += data;
+    return true;
+}
+
 
 CurlWrapper::CurlWrapper()
     :currentWriteData_(""),
     response_of_RoomService_RoomService_enterRoom_(""),
     response_of_Services_UserService_UserService_getMyUserDataInfo_("")
 {
-    //base::FilePath path(L"d:/response.txt");
-    //file_.Initialize(path, base::File::FLAG_OPEN_ALWAYS | base::File::FLAG_WRITE);
-    //bool valid = file_.IsValid();
-    //file_.Seek(base::File::FROM_BEGIN,0L);
 }
 
 CurlWrapper::~CurlWrapper()
 {
-    //file_.Close();
 }
 
 void CurlWrapper::CurlInit()
@@ -84,16 +209,10 @@ void CurlWrapper::CurlCleanup()
     curl_global_cleanup();
 }
 
-// 测试成功
 bool CurlWrapper::LoginRequestWithCookies()
 {
     std::string cookies = "";
     bool ret = false;
-    if (!CookiesManager::GetCookies(fanxingurl, &cookies))
-    {
-        assert(false);
-        return false;
-    }
 
     CURL *curl;
     CURLcode res;
@@ -167,6 +286,7 @@ bool CurlWrapper::LoginRequestWithCookies()
     return false;
 }
 
+// 测试成功
 bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& username,
     const std::string& password)
 {
@@ -217,8 +337,11 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
     currentWriteData_.clear();
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-    response_of_LoginWithUsernameAndPassword_ = currentWriteData_;
+    
 
+    currentResponseHeader_.clear();
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
     /* Perform the request, res will get the return code */
@@ -232,6 +355,27 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
     // 获取请求业务结果
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+
+
+    response_of_LoginWithUsernameAndPassword_ = currentWriteData_;
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = base::UTF8ToWide(MakeReasonablePath(__FUNCTION__) + ".txt");
+    base::FilePath logpath = dirPath.Append(filename);
+    base::File logfile(logpath,
+        base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    logfile.Write(0, response_of_LoginWithUsernameAndPassword_.c_str(), response_of_LoginWithUsernameAndPassword_.size());
+
+    auto pos = currentResponseHeader_.find("KuGoo");
+    if (pos != std::string::npos)
+    {
+        auto begin = pos;
+        auto end = currentResponseHeader_.find(';', begin);
+        if (end != std::string::npos)
+        {
+            cookiesmanager_.SetCookies("KuGoo", currentResponseHeader_.substr(begin, end - begin));
+        }
+    }
 
     // 获取本次请求cookies
     struct curl_slist* curllist = 0;
@@ -257,16 +401,13 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
     }
     return false;
 }
-// 测试成功
+
+// 测试通过
 bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
 {
-    std::string cookies = "";
-    bool ret = false;
-    if (!CookiesManager::GetCookies(fanxingurl, &cookies))
-    {
-        assert(false);
-        return false;
-    }
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    std::string cookies = cookiesmanager_.GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -308,7 +449,10 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
     currentWriteData_.clear();
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-    response_of_Services_UserService_UserService_getMyUserDataInfo_ = currentWriteData_;
+    
+    currentResponseHeader_.clear();
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
 
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
@@ -323,6 +467,16 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
     // 获取请求业务结果
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+
+    response_of_Services_UserService_UserService_getMyUserDataInfo_ = currentWriteData_;
+
+    auto pos = currentResponseHeader_.find("fxClientInfo");
+    if (pos != std::string::npos)
+    {
+        auto begin = pos;
+        auto end = currentResponseHeader_.find(';', begin);
+        cookiesmanager_.SetCookies("fxClientInfo",currentResponseHeader_.substr(begin, end - begin));
+    }
     
     // 获取本次请求cookies
     struct curl_slist* curllist = 0;
@@ -349,16 +503,12 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
     return false;
 }
 
-// 测试成功
+// 测试通过
 bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
 {
-    std::string cookies = "";
-    bool ret = false;
-    if (!CookiesManager::GetCookies(fanxingurl, &cookies))
-    {
-        assert(false);
-        return false;
-    }
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    std::string cookies = cookiesmanager_.GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -397,6 +547,13 @@ bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
     path += MakeReasonablePath(__FUNCTION__) + ".txt";
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
 
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    currentResponseHeader_.clear();
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
     /* Perform the request, res will get the return code */
@@ -411,6 +568,16 @@ bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
 
+
+    bool result = true;
+    result &= SetCookieFromString("FANXING", currentResponseHeader_);
+    result &= SetCookieFromString("FANXING_COIN", currentResponseHeader_);
+    result &= SetCookieFromString("_fx_coin", currentResponseHeader_);
+    result &= SetCookieFromString("_fxNickName", currentResponseHeader_);
+    result &= SetCookieFromString("_fxRichLevel", currentResponseHeader_);
+    result &= SetCookieFromString("_fx_user", currentResponseHeader_);
+
+    assert(result);
     // 获取本次请求cookies
     struct curl_slist* curllist = 0;
     res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
@@ -443,18 +610,16 @@ bool CurlWrapper::EnterRoom(uint32 roomid)
     std::string cookies = "";
     std::string temp = "";
     bool ret = false;
-    if (!CookiesManager::GetCookies(fanxingurl, &temp))
-    {
-        assert(false);
-        return false;
-    }
-    cookies += temp;
-    if (!CookiesManager::GetCookies(kugouurl, &temp))
-    {
-        assert(false);
-        return false;
-    }
-    cookies += ";"+temp;
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fx_user");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    cookies = cookiesmanager_.GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -533,24 +698,14 @@ bool CurlWrapper::EnterRoom(uint32 roomid)
     return false;
 }
 
-// 测试通过
-bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
+bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid,
+    uint32* userid, std::string* nickname, uint32* richlevel)
 {
-	std::string cookies = "";
-	std::string temp = "";
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    std::string cookies = cookiesmanager_.GetCookies(keys);
+
 	bool ret = false;
-	if (!CookiesManager::GetCookies(fanxingurl, &temp))
-	{
-        assert(false);
-		return false;
-	}
-	cookies += temp;
-	if (!CookiesManager::GetCookies(kugouurl, &temp))
-	{
-        assert(false);
-		return false;
-	}
-	cookies += ";" + temp;
 
 	CURL *curl;
 	CURLcode res;
@@ -572,11 +727,10 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
 
 	struct curl_slist *headers = 0;
 	headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
-	//headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+	headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
 	headers = curl_slist_append(headers, "Connection: Keep-Alive");
 	headers = curl_slist_append(headers, "Accept-Language: zh-CN");
 	headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
-
 
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 	curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
@@ -590,6 +744,11 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
     std::string path = "d:/cookie_";
     path += MakeReasonablePath(__FUNCTION__) + ".txt";
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
+
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
 
 	curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
@@ -605,6 +764,11 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid)
 	long responsecode = 0;
 	res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
 
+    if (!ExtractUsefulInfo_RoomService_enterRoom_(currentWriteData_, userid, nickname, richlevel))
+    {
+        return false;
+    }
+    
 	// 获取本次请求cookies
 	struct curl_slist* curllist = 0;
 	res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
@@ -636,23 +800,10 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
 {
     LOG(INFO) << __FUNCTION__ << L" roomid = " << base::UintToString(roomid);
     //GET /Services.php?act=RoomService.RoomService&mtd=enterRoom&args=["1017131","","","web"]&_=1439814776455 HTTP/1.1
-    std::string cookies = "";
-    std::string temp = "";
-    bool ret = false;
-    if (!CookiesManager::GetCookies(fanxingurl, &temp))
-    {
-        LOG(INFO) << __FUNCTION__ << L" GetCookies Failed " << fanxingurl;
-        assert(false);
-        return false;
-    }
-    cookies += temp;
-    if (!CookiesManager::GetCookies(kugouurl, &temp))
-    {
-        LOG(INFO) << __FUNCTION__ << L" GetCookies Failed" << kugouurl;
-        assert(false);
-        return false;
-    }
-    cookies += ";" + temp;
+
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    std::string cookies = cookiesmanager_.GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -745,14 +896,11 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     return false;
 }
 
-bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom(
-    uint32* userid,
-    std::string* nickname, uint32* richlevel, uint32* staruserid,
+bool CurlWrapper::ExtractStarfulInfo_RoomService_enterRoom(uint32* staruserid,
     std::string* key, std::string* ext)
 {
-    return ExtractUsefulInfo_RoomService_enterRoom_(
-        response_of_RoomService_RoomService_enterRoom_,
-        userid, nickname, richlevel, staruserid, key, ext);
+    return ExtractStarfulInfo_RoomService_enterRoom_(
+        response_of_RoomService_RoomService_enterRoom_, staruserid, key, ext);
 }
 
 // GET /Services.php?act=GiftService.GiftService&args=["1020846","1a392af9cd9a2c9276c956bbb09f9676_vs0601"]&mtd=tryGetHappyFreeCoin&ran=0.3374897129466474 HTTP/1.1
@@ -760,21 +908,11 @@ bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom(
 bool CurlWrapper::GiftService_GiftService(uint32 roomid,
     const std::string& key_601, std::wstring* responsedata)
 {
-    std::string cookies = "";
-    std::string temp = "";
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    std::string cookies = cookiesmanager_.GetCookies(keys);
     bool ret = false;
-    if (!CookiesManager::GetCookies(fanxingurl, &temp))
-    {
-        assert(false);
-        return false;
-    }
-    cookies += temp;
-    if (!CookiesManager::GetCookies(kugouurl, &temp))
-    {
-        assert(false);
-        return false;
-    }
-    cookies += ";" + temp;
+
 
     CURL *curl;
     CURLcode res;
@@ -886,90 +1024,17 @@ bool CurlWrapper::ParseGiftServiceResponse(const std::string& responsedata,
 }
 
 
-
-// 测试通过
-bool CurlWrapper::ExtractUsefulInfo_RoomService_enterRoom_(
-    const std::string& inputstr, uint32* userid,
-    std::string* nickname, uint32* richlevel, uint32* staruserid,
-    std::string* key, std::string* ext)
+bool CurlWrapper::SetCookieFromString(const std::string& key, const std::string& cookiestring)
 {
-    if (inputstr.empty())
+    std::string tempkey = key + "=";
+    auto pos = cookiestring.find(tempkey);
+    if (pos == std::string::npos)
     {
         return false;
     }
-    
-    const std::string& data = inputstr;
-    //解析json数据
-    Json::Reader reader;
-    Json::Value rootdata(Json::objectValue);
-    if (!reader.parse(data, rootdata, false))
-    {
-        return false;
-    }
-    
-    // 暂时没有必要检测status的值
-    Json::Value dataObject(Json::objectValue);
-    dataObject = rootdata.get(std::string("data"), dataObject);
-    if (dataObject.empty())
-    {
-        return false;
-    }
-
-    Json::Value fxUserInfoObject(Json::objectValue);
-    fxUserInfoObject = dataObject.get("fxUserInfo", fxUserInfoObject);
-    if (fxUserInfoObject.empty())
-    {
-        return false;
-    }
-
-    std::string struserid = fxUserInfoObject["userId"].asString();
-    if (!base::StringToUint(struserid, userid))
-    {
-        return false;
-    }
-
-    *nickname = fxUserInfoObject["nickName"].asString();
-    std::string strrichLevel = fxUserInfoObject["richLevel"].asString();
-    if (!base::StringToUint(strrichLevel, richlevel))
-    {
-        return false;
-    }
-
-    Json::Value liveDataObject(Json::objectValue);
-    liveDataObject = dataObject.get("liveData", liveDataObject);
-    if (liveDataObject.empty())
-    {
-        return false;
-    }
-
-    std::string recInfo = liveDataObject["recInfo"].asString();
-    auto beginPos = recInfo.find(R"("userId":")");
-    if (beginPos == std::string::npos)
-    {
-        assert(false);
-        return false;
-    }
-    beginPos += strlen(R"("userId":")");
-    auto endPos = recInfo.find(R"(",)", beginPos);
-    std::string strstarUserId = recInfo.substr(beginPos, endPos - beginPos);
-    if (!base::StringToUint(strstarUserId, staruserid))
-    {
-        return false;
-    }
-
-    Json::Value socketConfigObject(Json::objectValue);
-    socketConfigObject = dataObject.get("socketConfig", socketConfigObject);
-    if (socketConfigObject.empty())
-    {
-        return false;
-    }
-
-    // 这是flash的tcp连接的服务器的ip(由url解析出来)和端口信息，后续可能用到，目前不解析
-    std::string strsokt = socketConfigObject["sokt"].asString();
-
-    // 重要数据，进入房间后连接tcp所使用的key
-    *key = socketConfigObject["enter"].asString();
-    *ext = socketConfigObject["ext"].asString();
-
-    return true;
+    auto begin = pos;
+    auto end = cookiestring.find(';', begin);
+    bool result = cookiesmanager_.SetCookies(key, cookiestring.substr(begin, end - begin));
+    return result;
 }
+

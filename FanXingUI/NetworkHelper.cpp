@@ -67,6 +67,13 @@ bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
     base::StringToUint(strroomid, &roomid);
 
     bool ret = false;
+
+    if (!curlWrapper_->Servies_Uservice_UserService_getCurrentUserInfo(
+        roomid, &userid, &nickname, &richlevel))
+    {
+        return false;
+    }
+
     ret = curlWrapper_->RoomService_RoomService_enterRoom(
         static_cast<uint32>(roomid));
     assert(ret);
@@ -75,8 +82,7 @@ bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
         return false;
     }
 
-    ret = curlWrapper_->ExtractUsefulInfo_RoomService_enterRoom(&userid,
-        &nickname, &richlevel, &staruserid, &key, &ext);
+    ret = curlWrapper_->ExtractStarfulInfo_RoomService_enterRoom(&staruserid, &key, &ext);
 
     if (!ret)
     {
@@ -102,8 +108,23 @@ bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
 bool NetworkHelper::Login(const std::wstring& username, 
     const std::wstring& password)
 {
-    return curlWrapper_->LoginRequestWithUsernameAndPassword(
-        WideToUtf8(username), WideToUtf8(password));
+    if (!curlWrapper_->LoginRequestWithUsernameAndPassword(WideToUtf8(username), WideToUtf8(password)))
+    {
+        return false;
+    }
+
+    // 获取cookie部分内容
+    if (!curlWrapper_->Services_UserService_UserService_getMyUserDataInfo())
+    {
+        return false;
+    }
+
+    // 获取cookie部分内容
+    if (!curlWrapper_->Services_IndexService_IndexService_getUserCenter())
+    {
+        return false;
+    }
+    return true;
 }
 
 // giftNotifyManager_ 线程回调
