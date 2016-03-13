@@ -495,7 +495,7 @@ void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid,
         repeatingTimer_.Stop();
     
     // 默认是每10秒发送一次心跳
-    repeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10000), this,
+    repeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10), this,
         &GiftNotifyManager::DoSendHeartBeat);
 
     return ;

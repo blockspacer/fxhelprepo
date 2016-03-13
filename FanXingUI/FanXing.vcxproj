@@ -115,7 +115,7 @@
     <ClInclude Include="FanXingDlg.h" />
     <ClInclude Include="NetworkHelper.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="room_controller.h" />
+    <ClInclude Include="RoomController.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WebHandler.h" />
@@ -125,7 +125,7 @@
     <ClCompile Include="FanXingUI.cpp" />
     <ClCompile Include="FanXingDlg.cpp" />
     <ClCompile Include="NetworkHelper.cpp" />
-    <ClCompile Include="room_controller.cpp" />
+    <ClCompile Include="RoomController.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

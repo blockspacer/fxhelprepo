@@ -42,7 +42,7 @@
     <ClInclude Include="NetworkHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="room_controller.h">
+    <ClInclude Include="RoomController.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -65,7 +65,7 @@
     <ClCompile Include="NetworkHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="room_controller.cpp">
+    <ClCompile Include="RoomController.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
