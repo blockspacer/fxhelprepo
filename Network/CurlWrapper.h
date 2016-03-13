@@ -3,6 +3,13 @@
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/files/file.h"
 #include "Network/CookiesManager.h"
+#include "Network/GiftNotifyManager.h"
+
+enum class KICK_TYPE
+{
+    KICK_TYPE_HOUR = 0,
+    KICK_TYPE_MONTH = 1,
+};
 
 // 提供方便的使用curl接口的执行请求函数。
 class CurlWrapper
@@ -42,6 +49,8 @@ public:
     // 抢星币的重要请求, 时机由flash收到601包礼物通知数据，601包里有key_601值
     bool GiftService_GiftService(uint32 roomid,
         const std::string& key_601, std::wstring* responsedata);
+
+    bool KickoutUser(uint32 singerid, KICK_TYPE kicktype, const EnterRoomUserInfo& enterRoomUserInfo);
 
 private:
 

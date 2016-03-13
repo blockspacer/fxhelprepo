@@ -194,6 +194,12 @@ void NetworkHelper::NotifyCallback(const std::wstring& message)
     }
 }
 
+bool NetworkHelper::KickoutUsers(uint32 singerid, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    curlWrapper_->KickoutUser(singerid, KICK_TYPE::KICK_TYPE_HOUR, enterRoomUserInfo);
+    return false;
+}
+
 // giftNotifyManager_ 线程回调
 void NetworkHelper::NotifyCallback601(const std::string& data)
 {

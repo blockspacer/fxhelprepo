@@ -273,6 +273,12 @@ void CFanXingDlg::OnBnClickedBtnGetmsg()
 // 用来做测试的函数
 void CFanXingDlg::OnBnClickedBtnTest()
 {
+    EnterRoomUserInfo enterRoomUserInfo;
+    enterRoomUserInfo.roomid = 1053637;
+    enterRoomUserInfo.richlevel = 1;
+    enterRoomUserInfo.nickname = "fanxingtest111";
+    enterRoomUserInfo.userid = 120831944;
+    network_->KickoutUsers(110468466, enterRoomUserInfo);
 }
 
 void CFanXingDlg::Notify(const std::wstring& message)
