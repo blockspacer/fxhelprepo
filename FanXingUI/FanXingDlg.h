@@ -52,10 +52,8 @@ protected:
 
 private:
     void Notify(const std::wstring& message);
-    bool LoginByWebAction(const CString& username, const CString& password);
     bool LoginByRequest(const std::wstring& username, const std::wstring& password);
 
-    CExplorer1 web_;
     std::unique_ptr<NetworkHelper> network_;
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;

@@ -72,7 +72,6 @@ CFanXingDlg::~CFanXingDlg()
 void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_EXPLORER1, web_);
     DDX_Control(pDX, IDC_LIST1, InfoList_);
 }
 
@@ -118,19 +117,14 @@ BOOL CFanXingDlg::OnInitDialog()
 		}
 	}
 
-    web_.put_Silent(TRUE);// 禁止弹出360升级浏览器提示
-
 	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
-    web_.Navigate(L"http://fanxing.kugou.com", NULL, NULL, NULL, NULL);
-
     SetDlgItemText(IDC_EDIT_NAV, L"1014619");
     SetDlgItemInt(IDC_EDIT_X, 0);
     SetDlgItemInt(IDC_EDIT_Y, 0);
-    SetDlgItemText(IDC_EDIT_GIFT, L"普通,红心");
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -199,8 +193,6 @@ void CFanXingDlg::OnBnClickedButton1()
     GetDlgItemText(IDC_EDIT_Username, username);
     GetDlgItemText(IDC_EDIT_Password, password);
 
-    //bool loginResult = LoginByWebAction(username, password);
-
     // 测试通过的curl登录方式
     bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
     std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
@@ -212,18 +204,6 @@ void CFanXingDlg::OnBnClickedButtonNav()
 {
     CString strRoomid;
     GetDlgItemText(IDC_EDIT_NAV, strRoomid);
-    CString strUrl = L"http://fanxing.kugou.com/" + strRoomid;
-    VARIANT vtNull = {};
-    web_.Navigate(strUrl, &vtNull, &vtNull, &vtNull, &vtNull);
-    LOG(INFO) << L"Navigate To " << strUrl;
-    // 获取房间信息，启动功能
-
-    //if (network_)
-    //{
-    //    network_->Finalize();
-    //}    
-    //network_.reset(new NetworkHelper);
-    //network_->Initialize();
     network_->SetNotify(
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
 
@@ -233,97 +213,32 @@ void CFanXingDlg::OnBnClickedButtonNav()
 //指定位置点击功能
 void CFanXingDlg::OnBnClickedButtonClick()
 {
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            int x = GetDlgItemInt(IDC_EDIT_X);
-            int y = GetDlgItemInt(IDC_EDIT_Y);           
 
-            HWND explorerHWND = nullptr;
-
-            HWND hwnd = ::FindWindowEx(web_.m_hWnd, 0, L"Shell DocObject View", NULL);
-            if (hwnd)
-                explorerHWND = ::FindWindowEx(hwnd, 0, L"Internet Explorer_Server", NULL);
-            
-            if (explorerHWND)
-            {
-                WebHandler handler(iDocu);
-                handler.ClickXY(explorerHWND, x, y);
-            }
-        }
-    }
 }
 
 // 送星星功能
 void CFanXingDlg::OnBnClickedButtonRewarstar()
 {
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            WebHandler handler(iDocu);
-            handler.RewardStar();
-        }
-    }
 }
 
 // 送礼物功能
 void CFanXingDlg::OnBnClickedButtonRewardgift()
 {
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            CString strGift;
-            GetDlgItemText(IDC_EDIT_GIFT, strGift);
-
-            WebHandler handler(iDocu);
-            handler.RewardGift((LPCTSTR)strGift);
-        }
-    }
 }
-
-
 
 void CFanXingDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
-    // TODO:  在此添加消息处理程序代码和/或调用默认值
-
     CDialogEx::OnLButtonDown(nFlags, point);
 }
 
 // 获取公屏信息
 void CFanXingDlg::OnBnClickedBtnGetmsg()
 {
-    // TODO:  在此添加控件通知处理程序代码
 }
 
 // 用来做测试的函数
 void CFanXingDlg::OnBnClickedBtnTest()
 {
-    // TODO:  在此添加控件通知处理程序代码
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            //处理数据
-            WebHandler handler(iDocu);
-            handler.GetChatMessage();
-        }
-    }
 }
 
 void CFanXingDlg::Notify(const std::wstring& message)
@@ -333,25 +248,6 @@ void CFanXingDlg::Notify(const std::wstring& message)
     messageQueen_.push_back(message);
     messageMutex_.unlock();
     this->PostMessage(WM_USER_01, 0, 0);
-}
-
-bool CFanXingDlg::LoginByWebAction(const CString& username, 
-                                   const CString& password)
-{
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            WebHandler handler(iDocu);
-            //handler.Execute();
-            handler.Login(username, password);
-            return true;
-        }
-    }
-    return false;
 }
 
 bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstring& password)
