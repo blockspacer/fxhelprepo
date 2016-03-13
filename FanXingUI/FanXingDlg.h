@@ -9,6 +9,7 @@
 
 #include "NetworkHelper.h"
 #include "afxwin.h"
+#include "afxcmn.h"
 
 
 // CFanXingDlg 对话框
@@ -24,7 +25,8 @@ public:
 
     enum
     {
-        WM_USER_01 = WM_USER + 1
+        WM_USER_01 = WM_USER + 1,
+        WM_USER_ADD_ENTER_ROOM_INFO = WM_USER + 2,
     };
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
@@ -36,7 +38,7 @@ public:
     afx_msg void OnBnClickedBtnGetmsg();
     afx_msg void OnBnClickedBtnTest();
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
-
+    LRESULT OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam);
 // 实现
 protected:
 	HICON m_hIcon;
@@ -52,13 +54,21 @@ protected:
 
 private:
     void Notify(const std::wstring& message);
+    void Notify201(const RowData& rowdata);
     bool LoginByRequest(const std::wstring& username, const std::wstring& password);
 
     std::unique_ptr<NetworkHelper> network_;
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;
 
+    std::mutex rowdataMutex_;
+    std::vector<RowData> rowdataQueue_;
+
+    uint32 rowcount_;
+
 public:
     CListBox InfoList_;
     int count;
+    CListCtrl m_ListCtrl_UserStatus;
+    afx_msg void OnLvnGetdispinfoListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
 };

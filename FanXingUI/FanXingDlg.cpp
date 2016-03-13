@@ -6,7 +6,7 @@
 #include "FanXing.h"
 #include "FanXingDlg.h"
 #include "afxdialogex.h"
-
+#include "NetworkHelper.h"
 #include "WebHandler.h"
 
 #ifdef _DEBUG
@@ -53,6 +53,7 @@ CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFanXingDlg::IDD, pParent)
     , network_(nullptr)
     , count(0)
+    , rowcount_(0)
 {
     //network_->Initialize();
     //network_->SetNotify(
@@ -73,12 +74,13 @@ void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_LIST1, InfoList_);
+    DDX_Control(pDX, IDC_LIST_USER_STATUS, m_ListCtrl_UserStatus);
 }
 
 BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_WM_SYSCOMMAND()
     ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
+    ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BUTTON1, &CFanXingDlg::OnBnClickedButton1)
     ON_BN_CLICKED(IDC_BUTTON_CLICK, &CFanXingDlg::OnBnClickedButtonClick)
     ON_BN_CLICKED(IDC_BUTTON_REWARSTAR, &CFanXingDlg::OnBnClickedButtonRewarstar)
@@ -88,6 +90,8 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_GETMSG, &CFanXingDlg::OnBnClickedBtnGetmsg)
     ON_BN_CLICKED(IDC_BTN_TEST, &CFanXingDlg::OnBnClickedBtnTest)
     ON_MESSAGE(WM_USER_01, &CFanXingDlg::OnNotifyMessage)
+    ON_MESSAGE(WM_USER_ADD_ENTER_ROOM_INFO, &CFanXingDlg::OnDisplayDataToGrid)
+    ON_NOTIFY(LVN_GETDISPINFO, IDC_LIST_USER_STATUS, &CFanXingDlg::OnLvnGetdispinfoListUserStatus)
 END_MESSAGE_MAP()
 
 
@@ -121,6 +125,15 @@ BOOL CFanXingDlg::OnInitDialog()
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
+
+    DWORD dwStyle = m_ListCtrl_UserStatus.GetExtendedStyle();
+    dwStyle |= LVS_REPORT;
+    dwStyle |= LVS_EX_CHECKBOXES;
+    dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
+    dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
+    dwStyle |= LVS_OWNERDATA;
+    dwStyle |= LVS_AUTOARRANGE;
+    m_ListCtrl_UserStatus.SetExtendedStyle(dwStyle); //设置扩展风格
 
     SetDlgItemText(IDC_EDIT_NAV, L"1014619");
     SetDlgItemInt(IDC_EDIT_X, 0);
@@ -202,10 +215,31 @@ void CFanXingDlg::OnBnClickedButton1()
 //跳转页面功能
 void CFanXingDlg::OnBnClickedButtonNav()
 {
+    std::vector<std::wstring> columnlist = {
+        L"昵称",
+        L"财富等级",
+        L"用户id",
+        L"进房时间",
+        L"房间号"
+    };
+
+    int nColumnCount = m_ListCtrl_UserStatus.GetHeaderCtrl()->GetItemCount();
+    for (int i = nColumnCount - 1; i >= 0; i--)
+        m_ListCtrl_UserStatus.DeleteColumn(i);
+
+    uint32 i = 0;
+    for (const auto& it : columnlist)
+    {
+        m_ListCtrl_UserStatus.InsertColumn(i++, it.c_str(), LVCFMT_LEFT, 100);//插入列
+    }
+
     CString strRoomid;
     GetDlgItemText(IDC_EDIT_NAV, strRoomid);
     network_->SetNotify(
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
+
+    network_->SetNotify201(
+        std::bind(&CFanXingDlg::Notify201, this, std::placeholders::_1));
 
     network_->EnterRoom(strRoomid.GetBuffer());
 }
@@ -250,6 +284,18 @@ void CFanXingDlg::Notify(const std::wstring& message)
     this->PostMessage(WM_USER_01, 0, 0);
 }
 
+void CFanXingDlg::Notify201(const RowData& rowdata)
+{
+    // 发送数据给窗口
+    rowdataMutex_.lock();
+    rowdataQueue_.push_back(rowdata);
+    rowdataMutex_.unlock();
+
+    rowcount_++;
+    m_ListCtrl_UserStatus.SetItemCountEx(rowcount_);
+    m_ListCtrl_UserStatus.Invalidate();
+}
+
 bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstring& password)
 {
     if (network_)
@@ -262,6 +308,28 @@ bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstrin
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
 
     return network_->Login(username, password);
+}
+
+LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
+{
+    if (rowdataQueue_.empty())
+        return 0;
+    
+    std::vector<RowData> rowdatas;
+    rowdataMutex_.lock();
+    rowdatas.swap(rowdataQueue_);
+    rowdataMutex_.unlock();
+
+    // 获取之前的数据
+
+    // 如果不存在,插入新的通知数据
+
+    // 如果存在相同的userid项,则更新数据
+
+
+    // 先统一全部插入数据
+
+    return 0;
 }
 
 LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
@@ -278,4 +346,21 @@ LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
     
     InfoList_.SetCurSel(count-1);
     return 0;
+}
+
+
+void CFanXingDlg::OnLvnGetdispinfoListUserStatus(NMHDR *pNMHDR, LRESULT *pResult)
+{
+    LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
+    LV_ITEM *pItem = &(pDispInfo)->item;
+
+    rowdataMutex_.lock();
+    if (pItem->mask & LVIF_TEXT)
+    {
+        //使缓冲区数据与表格子项对应
+        pItem->pszText = (LPWSTR)rowdataQueue_[pItem->iItem][pItem->iSubItem].c_str();
+    }
+    rowdataMutex_.unlock();
+
+    *pResult = 0;
 }

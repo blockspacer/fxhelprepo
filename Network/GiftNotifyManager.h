@@ -14,7 +14,20 @@
 class TcpClient;
 class Thread;
 
+// 201消息回来解析后出去的数据包
+struct EnterRoomUserInfo 
+{
+    std::string nickname;
+    uint32 richlevel;
+    uint32 roomid;
+    uint32 unixtime;
+    uint32 userid;
+    
+};
+
 typedef std::function<void(const std::string& key)> Notify601;
+typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify201;
+
 typedef std::function<void(const std::wstring& data)> NormalNotify;
 class GiftNotifyManager 
     : public std::enable_shared_from_this <GiftNotifyManager>
@@ -29,7 +42,8 @@ public:
     bool Initialize();
     void Finalize();
 
-    void Set601Notify(Notify601 notify601);
+    void SetNotify201(Notify201 notify201);
+    void SetNotify601(Notify601 notify601);
     void SetNormalNotify(NormalNotify normalNotify);
     void Notify(const std::vector<char>& data);
     // 固定的请求，不需要带其他参数
@@ -92,6 +106,7 @@ private:
 
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
+    Notify201 notify201_;
     Notify601 notify601_;
     NormalNotify normalNotify_;
 };

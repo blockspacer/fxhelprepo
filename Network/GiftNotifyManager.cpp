@@ -169,10 +169,10 @@ bool CommandHandle_201(const Json::Value& jvalue, std::string* outmsg)
             return false;
         }
         Json::Value jvString("");
-        std::string nickname = content.get("nickName", jvString).asString();
+        std::string nickname = content.get("nickname", jvString).asString();
         uint32 richlevel = GetInt32FromJsonValue(content, "richlevel");
         uint32 userid = GetInt32FromJsonValue(content, "userid");
-        *outmsg = base::WideToUTF8(L"用户信息通知");
+        *outmsg = base::WideToUTF8(L"用户信息通知") + nickname;
     }
     catch (...)
     {
@@ -290,13 +290,8 @@ bool CommandHandle_606(const Json::Value& jvalue, std::string* outmsg)
 GiftNotifyManager::GiftNotifyManager()
     :tcpClient_843_(new TcpClient),
     tcpClient_8080_(new TcpClient),
+    notify201_(nullptr),
     notify601_(nullptr),
-    //thread_(new Thread),
-    //stdthread_(nullptr),
-    //stdfuture_(nullptr),
-    //stdpromise_(nullptr),
-    //stdcv_(nullptr),
-    //alive(false),
     baseThread_("NetworkHelperThread")
 {
 }
@@ -320,7 +315,12 @@ void GiftNotifyManager::Finalize()
     baseThread_.Stop();
 }
 
-void GiftNotifyManager::Set601Notify(Notify601 notify601)
+void GiftNotifyManager::SetNotify201(Notify201 notify201)
+{
+    notify201_ = notify201;
+}
+
+void GiftNotifyManager::SetNotify601(Notify601 notify601)
 {
     notify601_ = notify601;
 }
@@ -366,6 +366,26 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
                     {
                         notify601_(key);
                     }
+                }
+            }
+            else if (cmd == 201)
+            {
+                EnterRoomUserInfo enterRoomUserInfo;
+                Json::Value jvContent(Json::ValueType::objectValue);
+                enterRoomUserInfo.roomid = GetInt32FromJsonValue(rootdata,"roomid");
+                enterRoomUserInfo.unixtime = GetInt32FromJsonValue(rootdata, "time");
+                Json::Value  content = rootdata.get("content", jvContent);
+                
+                if (!content.isNull())
+                {
+                    Json::Value jvString("");
+                    enterRoomUserInfo.nickname = content.get("nickname", jvString).asString();
+                    enterRoomUserInfo.richlevel = GetInt32FromJsonValue(content, "richlevel");
+                    enterRoomUserInfo.userid = GetInt32FromJsonValue(content, "userid");
+                }
+                if (notify201_)
+                {
+                    notify201_(enterRoomUserInfo);
                 }
             }
 
