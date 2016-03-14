@@ -15,6 +15,7 @@
 #include "FanXing.h"
 #include "FanXingDlg.h"
 #include "NetworkHelper.h"
+#include "DlgGiftNotify.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -82,9 +83,11 @@ BOOL CFanXingApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-    CFanXingDlg dlg;
+    //CFanXingDlg dlg;
+    CDlgGiftNotify dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
+
 	if (nResponse == IDOK)
 	{
 		// TODO:  在此放置处理何时用

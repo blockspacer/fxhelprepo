@@ -112,13 +112,24 @@ void NetworkHelper::RemoveNotify201()
     notify201_ = nullptr;
 }
 
+void NetworkHelper::SetNotify502(notify502 fn)
+{
+    notify502_ = fn;
+}
+void NetworkHelper::RemoveNotify502()
+{
+    notify502_ = nullptr;
+}
+
 bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
 {
-    LOG(INFO) << L"EnterRoom " << strroomid;
     base::StringToUint(strroomid, &roomid);
+    return EnterRoom(roomid);
+}
 
+bool NetworkHelper::EnterRoom(uint32 roomid)
+{
     bool ret = false;
-
     if (!curlWrapper_->Servies_Uservice_UserService_getCurrentUserInfo(
         roomid, &userid, &nickname, &richlevel))
     {

@@ -55,10 +55,6 @@ CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
     , count(0)
     , rowcount_(0)
 {
-    //network_->Initialize();
-    //network_->SetNotify(
-    //    std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
-
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
 }
 
