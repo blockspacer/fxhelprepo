@@ -36,7 +36,7 @@ public:
     afx_msg void OnBnClickedButtonNav();
     afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
     afx_msg void OnBnClickedBtnGetmsg();
-    afx_msg void OnBnClickedBtnTest();
+    afx_msg void OnBnClickedBtnAdd();
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam);
 // й╣ож
@@ -50,7 +50,7 @@ protected:
     afx_msg void OnClose();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
-    afx_msg void OnBnClickedButton1();
+    afx_msg void OnBnClickedButtonLogin();
 
 private:
     void Notify(const std::wstring& message);
@@ -64,11 +64,25 @@ private:
     std::mutex rowdataMutex_;
     std::vector<RowData> rowdataQueue_;
 
-    uint32 rowcount_;
+    uint32 listCtrlRowIndex_;
 
 public:
     CListBox InfoList_;
-    int count;
+    int infoListCount_;
     CListCtrl m_ListCtrl_UserStatus;
-    afx_msg void OnLvnGetdispinfoListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnBnClickedButton2();
+    afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
+
+    static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+    afx_msg void OnBnClickedButtonRemove();
+    afx_msg void OnBnClickedBtnModify();
+    afx_msg void OnBnClickedBtnQuery();
+    afx_msg void OnBnClickedBtnSelectAll();
+    afx_msg void OnBnClickedBtnSelectReverse();
+    afx_msg void OnBnClickedBtnKickoutMonth();
+    afx_msg void OnBnClickedBtnKickoutHour();
+    afx_msg void OnBnClickedBtnSilent();
+    afx_msg void OnBnClickedBtnUnsilent();
+    CString m_query_key;
+    afx_msg void OnBnClickedBtnClear();
 };
