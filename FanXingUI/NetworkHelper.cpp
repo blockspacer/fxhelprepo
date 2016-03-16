@@ -112,6 +112,17 @@ void NetworkHelper::RemoveNotify502()
     notify502_ = nullptr;
 }
 
+
+void NetworkHelper::SetNotify601(notify601 fn)
+{
+    notify601_ = fn;
+}
+
+void NetworkHelper::RemoveNotify610()
+{
+    notify601_ = nullptr;
+}
+
 bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
 {
     uint32 roomid = 0;
@@ -130,28 +141,6 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
     std::string ext = "";
 
     bool ret = false;
-    //if (!curlWrapper_->Servies_Uservice_UserService_getCurrentUserInfo(
-    //    roomid, &userid, &nickname, &richlevel))
-    //{
-    //    return false;
-    //}
-
-    //ret = curlWrapper_->RoomService_RoomService_enterRoom(
-    //    static_cast<uint32>(roomid));
-    //assert(ret);
-    //if (!ret)
-    //{
-    //    return false;
-    //}
-
-    //ret = curlWrapper_->ExtractStarfulInfo_RoomService_enterRoom(
-    //    &staruserid, &key, &ext);
-
-    //if (!ret)
-    //{
-    //    return false;
-    //}
-
     ret = curlWrapper_->EnterRoom(roomid, &staruserid);
     assert(ret);
     if (!ret)
@@ -193,7 +182,7 @@ bool NetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
 
     giftNotifyManager_->SetNotify601(
         std::bind(&NetworkHelper::NotifyCallback601,
-        this, std::placeholders::_1, std::placeholders::_2));
+        this, std::placeholders::_1));
 
     giftNotifyManager_->SetNormalNotify(
         std::bind(&NetworkHelper::NotifyCallback,
@@ -244,20 +233,14 @@ bool NetworkHelper::KickoutUsers(uint32 singerid, const EnterRoomUserInfo& enter
 }
 
 // giftNotifyManager_ 线程回调
-void NetworkHelper::NotifyCallback601(uint32 roomid, const std::string& data)
+void NetworkHelper::NotifyCallback601(const RoomGiftInfo601& roomgiftinfo601)
 {
     std::wstring responsedata;
-    for (int i = 0; i < 20; i++)
+    if (!roomgiftinfo601.token.empty())
     {
-        bool ret = curlWrapper_->GiftService_GiftService(
-            roomid, data, &responsedata);
-        if (notify_)
-        {
-            notify_(responsedata);
-        }
+        // 原本是抢币的动作，目前不做这类功能
     }
-    
-    return;
+    notify601_(roomgiftinfo601);
 }
 
 void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo)

@@ -57,17 +57,15 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
     // 分别进入房间
     networkLeft_->SetNotify(
         std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
-    networkLeft_->SetNotify502(
-        std::bind(&CDlgGiftNotify::Notify502Left, this, std::placeholders::_1,
-        std::placeholders::_2));
+    networkLeft_->SetNotify601(
+        std::bind(&CDlgGiftNotify::Notify601Left, this, std::placeholders::_1));
 
     networkLeft_->EnterRoom(m_room_left);
 
     //networkRight_->SetNotify(
     //    std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
-    //networkRight_->SetNotify502(
-    //    std::bind(&CDlgGiftNotify::Notify502Right, this, std::placeholders::_1,
-    //    std::placeholders::_2));
+    //networkRight_->SetNotify601(
+    //    std::bind(&CDlgGiftNotify::Notify601Right, this, std::placeholders::_1));
     //networkRight_->EnterRoom(m_room_right);
 }
 
@@ -76,12 +74,12 @@ void CDlgGiftNotify::Notify(const std::wstring& message)
     return;
 }
 
-void CDlgGiftNotify::Notify502Left(uint32 coin, const std::wstring& message)
+void CDlgGiftNotify::Notify601Left(const RoomGiftInfo601& roomgiftinfo)
 {
     return;
 }
 
-void CDlgGiftNotify::Notify502Right(uint32 coin, const std::wstring& message)
+void CDlgGiftNotify::Notify601Right(const RoomGiftInfo601& roomgiftinfo)
 {
     return;
 }

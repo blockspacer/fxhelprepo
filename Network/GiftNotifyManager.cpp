@@ -331,6 +331,27 @@ void GiftNotifyManager::SetNormalNotify(NormalNotify normalNotify)
     normalNotify_ = normalNotify;
 }
 
+//"cmd" : 601,
+//"roomid" : "1096718",
+//"senderid" : "22202340",
+//"receiverid" : 0,
+//"time" : "1458141348",
+//"content" : {
+//    "actionId" : 0,
+//        "roomid" : "1096718",
+//        "token" : "",
+//        "giftname" : "\u6cd5\u62c9\u5229",
+//        "senderid" : "22202340",
+//        "senderkgid" : "12013116",
+//        "sendername" : "\u4e0d\u5e0c\u671b\u88ab\u4eba\u8bb0\u4f4f",
+//        "senderrichlevel" : "16",
+//        "receiverid" : "197471408",
+//        "receiverkgid" : 781510668,
+//        "receivername" : "\u6843\u5b50_ing",
+//        "receiverrichlevel" : "2",
+//        "giftid" : "41",
+//        "num" : "1",
+//        "type" : 2,
 void GiftNotifyManager::Notify(const std::vector<char>& data)
 {
     // 需要处理粘包问题
@@ -353,7 +374,7 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
             uint32 cmd = GetInt32FromJsonValue(rootdata, "cmd");
             uint32 roomid = GetInt32FromJsonValue(rootdata, "roomid");
             uint32 senderid = GetInt32FromJsonValue(rootdata, "senderid");
-            uint32 receiverid = GetInt32FromJsonValue(rootdata, "receiverid");
+            
             uint32 time = GetInt32FromJsonValue(rootdata, "time");
             if (cmd == 601)
             {
@@ -361,12 +382,21 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
                 Json::Value  content = rootdata.get("content", jvContent);
                 if (!content.isNull())
                 {
-                    Json::Value jvKey(Json::ValueType::stringValue);
-                    std::string key = content.get(std::string("token"), jvKey).asString();
-                    if (!key.empty())
-                    {
-                        notify601_(roomid, key);
-                    }
+                    RoomGiftInfo601 roomgiftinfo;
+                    roomgiftinfo.time = time;
+                    roomgiftinfo.roomid = roomid;
+                    roomgiftinfo.senderid = GetInt32FromJsonValue(content, "senderid");
+                    roomgiftinfo.sendername = content.get("sendername", "").asString();
+                    roomgiftinfo.receiverid = GetInt32FromJsonValue(content, "receiverid");
+                    roomgiftinfo.receivername = content.get("receivername", "").asString();
+                    roomgiftinfo.giftid = GetInt32FromJsonValue(content, "giftid");
+                    roomgiftinfo.giftname = content.get("giftname", "").asString();
+                    roomgiftinfo.gitfnumber = GetInt32FromJsonValue(content, "num");
+                    roomgiftinfo.tips = content.get("tip", "").asString();
+                    roomgiftinfo.happyobj = GetInt32FromJsonValue(content, "happyobj");
+                    roomgiftinfo.happytype = GetInt32FromJsonValue(content, "happytype");
+                    roomgiftinfo.token = content.get("token", "").asString();
+                    notify601_(roomgiftinfo);
                 }
             }
             else if (cmd == 201)

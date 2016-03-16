@@ -26,8 +26,8 @@ public:
     afx_msg void OnBnClickedBtnBegin();
 
     void Notify(const std::wstring& message);
-    void Notify502Left(uint32 coin, const std::wstring& message);
-    void Notify502Right(uint32 coin, const std::wstring& message);
+    void Notify601Left(const RoomGiftInfo601& roomgiftinfo);
+    void Notify601Right(const RoomGiftInfo601& roomgiftinfo);
 private:
     std::unique_ptr<NetworkHelper> networkLeft_;
     std::unique_ptr<NetworkHelper> networkRight_;

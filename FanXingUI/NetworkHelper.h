@@ -16,6 +16,7 @@ typedef std::vector<std::wstring> RowData;
 typedef std::vector<RowData> GridData;
 typedef std::function<void(const RowData&)> notify201;
 typedef std::function<void(uint32,const std::wstring&)> notify502;
+typedef std::function<void(const RoomGiftInfo601&)> notify601;
 
 class NetworkHelper
 {
@@ -35,6 +36,9 @@ public:
     void SetNotify502(notify502 fn);
     void RemoveNotify502();
 
+    void SetNotify601(notify601 fn);
+    void RemoveNotify610();
+
     bool EnterRoom(uint32 strroomid);
     bool EnterRoom(const std::wstring& strroomid);
 
@@ -51,7 +55,7 @@ public:
 
 private:
     void NotifyCallback(const std::wstring& message);
-    void NotifyCallback601(uint32 roomid, const std::string& data);
+    void NotifyCallback601(const RoomGiftInfo601& roomgiftinfo);
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
 
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
@@ -67,5 +71,6 @@ private:
     notifyfn notify_;
     notify201 notify201_;
     notify502 notify502_;
+    notify601 notify601_;
 };
 
