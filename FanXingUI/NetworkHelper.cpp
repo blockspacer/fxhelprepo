@@ -13,15 +13,6 @@
 
 namespace
 {
-    uint32 userid;
-    uint32 roomid;
-    std::string nickname;
-    uint32 richlevel;
-    uint32 ismaster;
-    uint32 staruserid;
-    std::string key;
-    std::string ext;
-
     std::string MakeFormatTimeString(const base::Time time)
     {
         base::Time::Exploded exploded;
@@ -123,34 +114,76 @@ void NetworkHelper::RemoveNotify502()
 
 bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
 {
+    uint32 roomid = 0;
     base::StringToUint(strroomid, &roomid);
     return EnterRoom(roomid);
 }
 
 bool NetworkHelper::EnterRoom(uint32 roomid)
 {
-    bool ret = false;
-    if (!curlWrapper_->Servies_Uservice_UserService_getCurrentUserInfo(
-        roomid, &userid, &nickname, &richlevel))
-    {
-        return false;
-    }
+    uint32 userid = 0;
+    std::string nickname = "";
+    uint32 richlevel = 0;
+    uint32 ismaster = 0;
+    uint32 staruserid = 0;
+    std::string key = "";
+    std::string ext = "";
 
-    ret = curlWrapper_->RoomService_RoomService_enterRoom(
-        static_cast<uint32>(roomid));
+    bool ret = false;
+    //if (!curlWrapper_->Servies_Uservice_UserService_getCurrentUserInfo(
+    //    roomid, &userid, &nickname, &richlevel))
+    //{
+    //    return false;
+    //}
+
+    //ret = curlWrapper_->RoomService_RoomService_enterRoom(
+    //    static_cast<uint32>(roomid));
+    //assert(ret);
+    //if (!ret)
+    //{
+    //    return false;
+    //}
+
+    //ret = curlWrapper_->ExtractStarfulInfo_RoomService_enterRoom(
+    //    &staruserid, &key, &ext);
+
+    //if (!ret)
+    //{
+    //    return false;
+    //}
+
+    ret = curlWrapper_->EnterRoom(roomid, &staruserid);
     assert(ret);
     if (!ret)
     {
         return false;
     }
 
-    ret = curlWrapper_->ExtractStarfulInfo_RoomService_enterRoom(&staruserid, &key, &ext);
+    ret = ConnectToNotifyServer_(roomid, userid, nickname, richlevel, ismaster, 
+                                 staruserid, key, ext);
 
-    if (!ret)
-    {
-        return false;
-    }
+    return ret;
+}
 
+bool NetworkHelper::ConnectToNotifyServer(uint32 roomid, uint32 userid, 
+                                          const std::string& nickname, 
+                                          uint32 richlevel, uint32 ismaster, 
+                                          uint32 staruserid, 
+                                          const std::string& key, 
+                                          const std::string& ext)
+{
+    return ConnectToNotifyServer_(roomid, userid, nickname, richlevel, 
+                                  ismaster, staruserid, key, ext);
+}
+
+bool NetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
+                                           const std::string& nickname,
+                                           uint32 richlevel, uint32 ismaster,
+                                           uint32 staruserid,
+                                           const std::string& key,
+                                           const std::string& ext)
+{
+    bool ret = false;
     ret = giftNotifyManager_->Connect843();
     assert(ret);
 
@@ -159,16 +192,15 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
         this, std::placeholders::_1));
 
     giftNotifyManager_->SetNotify601(
-        std::bind(&NetworkHelper::NotifyCallback601, 
-        this, std::placeholders::_1));
+        std::bind(&NetworkHelper::NotifyCallback601,
+        this, std::placeholders::_1, std::placeholders::_2));
 
     giftNotifyManager_->SetNormalNotify(
-        std::bind(&NetworkHelper::NotifyCallback, 
+        std::bind(&NetworkHelper::NotifyCallback,
         this, std::placeholders::_1));
 
     ret = giftNotifyManager_->Connect8080(roomid, userid, nickname, richlevel,
-        ismaster, staruserid, key, ext);
-
+                                          ismaster, staruserid, key, ext);
     return ret;
 }
 
@@ -212,7 +244,7 @@ bool NetworkHelper::KickoutUsers(uint32 singerid, const EnterRoomUserInfo& enter
 }
 
 // giftNotifyManager_ 线程回调
-void NetworkHelper::NotifyCallback601(const std::string& data)
+void NetworkHelper::NotifyCallback601(uint32 roomid, const std::string& data)
 {
     std::wstring responsedata;
     for (int i = 0; i < 20; i++)

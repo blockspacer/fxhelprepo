@@ -32,8 +32,9 @@ public:
                                              const std::string& password);
     bool Services_UserService_UserService_getMyUserDataInfo();
     bool Services_IndexService_IndexService_getUserCenter();
-
-    bool EnterRoom(uint32 roomid);
+    
+    // 在未登录状态下进入房间，并获取艺人id,供发起tcp连接使用
+    bool EnterRoom(uint32 roomid, uint32* singerid);
 
 	// 在进入房间以后，获取用户信息
 	bool Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid,
@@ -68,6 +69,7 @@ private:
     std::string response_of_Services_UserService_UserService_getMyUserDataInfo_;
     std::string response_of_GiftService_GiftService_;
     std::string response_of_LoginWithUsernameAndPassword_;
+    std::string response_of_EnterRoom_;
 
     CookiesManager cookiesmanager_;
 };

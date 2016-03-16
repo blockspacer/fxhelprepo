@@ -78,7 +78,13 @@ namespace
             return false;
         }
 
-        // 暂时没有必要检测status的值
+        // 有必要检测status的值
+        uint32 status = rootdata.get(std::string("status"), 0).asInt();
+        if (status == 0)
+        {
+            return false;
+        }
+
         Json::Value dataObject(Json::objectValue);
         dataObject = rootdata.get(std::string("data"), dataObject);
         if (dataObject.empty())
@@ -171,6 +177,33 @@ namespace
         *key = socketConfigObject["enter"].asString();
         *ext = socketConfigObject["ext"].asString();
 
+        return true;
+    }
+
+    bool ExtraSingerIdFrom_EnterRoom_Response_(const std::string& inputstr,
+                                             uint32* starId)
+    {
+        auto pos = inputstr.find("isClanRoom");
+        if (pos == std::string::npos)
+            return false;
+
+        pos = inputstr.find("starId", pos);
+        if (pos == std::string::npos)
+            return false;
+
+        pos = inputstr.find("\"", pos);
+        if (pos == std::string::npos)
+            return false;
+
+        auto begin = pos + 1;
+        auto end = inputstr.find("\"", begin);
+        if (pos == std::string::npos)
+            return false;
+        std::string temp = inputstr.substr(begin, end - begin);
+        if (!base::StringToUint(temp, starId))
+        {
+            return false;
+        }
         return true;
     }
 }
@@ -605,10 +638,9 @@ bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
 }
 
 // 测试成功
-bool CurlWrapper::EnterRoom(uint32 roomid)
+bool CurlWrapper::EnterRoom(uint32 roomid, uint32* singerid)
 {
     std::string cookies = "";
-    std::string temp = "";
     bool ret = false;
     std::vector<std::string> keys;
     keys.push_back("KuGoo");
@@ -652,12 +684,20 @@ bool CurlWrapper::EnterRoom(uint32 roomid)
     curl_easy_setopt(curl, CURLOPT_REFERER, "http://fanxing.kugou.com/");
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
 
-    curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+    if (!cookies.empty())
+    {
+        curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+    }
+
     // 把请求返回来时设置的cookie保存起来
     std::string path = "d:/cookie_";
     path += MakeReasonablePath(__FUNCTION__) + ".txt";
     curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
 
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
     curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
 
     /* Perform the request, res will get the return code */
@@ -671,6 +711,11 @@ bool CurlWrapper::EnterRoom(uint32 roomid)
     // 获取请求业务结果
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+
+    response_of_EnterRoom_ = currentWriteData_;
+
+    uint32 starId = 0;
+    ExtraSingerIdFrom_EnterRoom_Response_(response_of_EnterRoom_, singerid);
 
     // 获取本次请求cookies
     struct curl_slist* curllist = 0;

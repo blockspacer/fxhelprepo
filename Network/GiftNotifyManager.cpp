@@ -52,6 +52,7 @@ bool GetFirstPackage(const cmd201package& package,
     root["key"] = package.key;
     root["keytime"] = package.keytime;
     root["ext"] = package.ext;
+    root["appid"] = 1010;
     std::string data = writer.write(root);
     packagedata->assign(data.begin(), data.end());
 
@@ -364,7 +365,7 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
                     std::string key = content.get(std::string("token"), jvKey).asString();
                     if (!key.empty())
                     {
-                        notify601_(key);
+                        notify601_(roomid, key);
                     }
                 }
             }

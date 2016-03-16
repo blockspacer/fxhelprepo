@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "DlgGiftNotify.h"
 #include "afxdialogex.h"
-
+#include "third_party/chromium/base/basictypes.h"
 
 // CDlgGiftNotify ¶Ô»°¿ò
 
@@ -60,14 +60,15 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
     networkLeft_->SetNotify502(
         std::bind(&CDlgGiftNotify::Notify502Left, this, std::placeholders::_1,
         std::placeholders::_2));
+
     networkLeft_->EnterRoom(m_room_left);
 
-    networkRight_->SetNotify(
-        std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
-    networkRight_->SetNotify502(
-        std::bind(&CDlgGiftNotify::Notify502Right, this, std::placeholders::_1,
-        std::placeholders::_2));
-    networkRight_->EnterRoom(m_room_right);
+    //networkRight_->SetNotify(
+    //    std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
+    //networkRight_->SetNotify502(
+    //    std::bind(&CDlgGiftNotify::Notify502Right, this, std::placeholders::_1,
+    //    std::placeholders::_2));
+    //networkRight_->EnterRoom(m_room_right);
 }
 
 void CDlgGiftNotify::Notify(const std::wstring& message)

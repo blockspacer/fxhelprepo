@@ -25,7 +25,7 @@ struct EnterRoomUserInfo
     
 };
 
-typedef std::function<void(const std::string& key)> Notify601;
+typedef std::function<void(uint32 roomid, const std::string& key)> Notify601;
 typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify201;
 
 typedef std::function<void(const std::wstring& data)> NormalNotify;

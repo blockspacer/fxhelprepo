@@ -37,14 +37,29 @@ public:
 
     bool EnterRoom(uint32 strroomid);
     bool EnterRoom(const std::wstring& strroomid);
+
+    bool ConnectToNotifyServer(uint32 roomid, uint32 userid,
+        const std::string& nickname,
+        uint32 richlevel, uint32 ismaster,
+        uint32 staruserid,
+        const std::string& key,
+        const std::string& ext);
+
     bool Login(const std::wstring& username, const std::wstring& password);
 
     bool KickoutUsers(uint32 singerid, const EnterRoomUserInfo& enterRoomUserInfo);
 
 private:
     void NotifyCallback(const std::wstring& message);
-    void NotifyCallback601(const std::string& data);
+    void NotifyCallback601(uint32 roomid, const std::string& data);
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
+
+    bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
+                               const std::string& nickname,
+                               uint32 richlevel, uint32 ismaster,
+                               uint32 staruserid,
+                               const std::string& key,
+                               const std::string& ext);
 
     std::unique_ptr<CurlWrapper> curlWrapper_;
     std::unique_ptr<GiftNotifyManager> giftNotifyManager_;
