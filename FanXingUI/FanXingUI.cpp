@@ -32,12 +32,14 @@ END_MESSAGE_MAP()
 // CFanXingApp 构造
 
 CFanXingApp::CFanXingApp()
+    :atExitManager_(nullptr)
 {
 	// 支持重新启动管理器
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
 
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
+    atExitManager_.reset(new base::AtExitManager);
     InitAppLog();
     LOG(INFO) << __FUNCTION__;
 }
@@ -117,7 +119,6 @@ BOOL CFanXingApp::InitInstance()
 
 void CFanXingApp::InitAppLog()
 {
-    base::AtExitManager atExit;
     CommandLine::Init(0, NULL);
     base::FilePath path;
     PathService::Get(base::DIR_APP_DATA, &path);
