@@ -5,6 +5,7 @@
 
 class GiftInfo
 {
+public:
     GiftInfo()
         :giftid(0)
         , giftname("")

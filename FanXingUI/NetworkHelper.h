@@ -11,7 +11,7 @@
 class CurlWrapper;
 class GiftNotifyManager;
 class GiftInfoHelper;
-struct GiftInfo;
+class GiftInfo;
 typedef std::function<void(const std::wstring&)> notifyfn;
 
 typedef std::vector<std::wstring> RowData;
