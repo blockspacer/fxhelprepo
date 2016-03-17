@@ -159,3 +159,36 @@ std::string MakeMd5FromString(const std::string& text)
     return BinToAnsiHex(md5.a, sizeof(md5));
 }
 
+bool UnicodeToUtf8(const std::string& unicode, std::string* utf8)
+{
+    std::string temp = unicode;
+    auto pos = temp.find("\\u");
+    while (pos!=std::string::npos)
+    {
+        temp.replace(pos, 2, "");
+        pos = temp.find("\\u");
+    }
+    std::wstring wstr = Utf8ToWide(temp);
+    int len = wstr.length();
+    char* str = new char[len];
+    bool result = HexToBin(wstr.c_str(), wstr.length(), str, &len);
+    if (!result)
+    {
+        return false;
+    }
+
+    std::wstring w;
+    int d = 0;
+    while (d < len)
+    {
+        char wc[2] = { 0 };
+        wc[1] = str[d];
+        wc[0] = str[d + 1];
+        w.push_back(*(wchar_t*)(wc));
+        d += 2;
+    }
+    
+    *utf8 = WideToUtf8(w);
+    return true;
+}
+

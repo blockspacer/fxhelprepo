@@ -16,6 +16,7 @@
 #include "FanXingDlg.h"
 #include "NetworkHelper.h"
 #include "DlgGiftNotify.h"
+#include "../Network/EncodeHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

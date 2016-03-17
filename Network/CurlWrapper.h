@@ -53,6 +53,8 @@ public:
 
     bool KickoutUser(uint32 singerid, KICK_TYPE kicktype, const EnterRoomUserInfo& enterRoomUserInfo);
 
+    // 获取礼物列表信息，为降低耦合，这里不解析数据
+    bool GetGiftList(uint32 roomid, std::string* outputstr);
 private:
 
     //bool ExtractStarfulInfo_RoomService_enterRoom_(const std::string& inputstr,

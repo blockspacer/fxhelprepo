@@ -6,6 +6,7 @@
 #undef min // 因为微软这个二比在某些头文件定义了min宏
 
 #include "../Network/GiftNotifyManager.h"
+#include "GiftInfoHelper.h"
 #include "../Network/CurlWrapper.h"
 #include "../Network/EncodeHelper.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
@@ -57,6 +58,7 @@ namespace
 NetworkHelper::NetworkHelper()
     :curlWrapper_(new CurlWrapper)
     , giftNotifyManager_(new GiftNotifyManager)
+    , giftInfoHelper_(new GiftInfoHelper)
 {
     
 }
@@ -118,7 +120,7 @@ void NetworkHelper::SetNotify601(notify601 fn)
     notify601_ = fn;
 }
 
-void NetworkHelper::RemoveNotify610()
+void NetworkHelper::RemoveNotify601()
 {
     notify601_ = nullptr;
 }
@@ -182,7 +184,7 @@ bool NetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
 
     giftNotifyManager_->SetNotify601(
         std::bind(&NetworkHelper::NotifyCallback601,
-        this, std::placeholders::_1));
+        this, roomid, staruserid, std::placeholders::_1));
 
     giftNotifyManager_->SetNormalNotify(
         std::bind(&NetworkHelper::NotifyCallback,
@@ -232,15 +234,34 @@ bool NetworkHelper::KickoutUsers(uint32 singerid, const EnterRoomUserInfo& enter
     return false;
 }
 
-// giftNotifyManager_ 线程回调
-void NetworkHelper::NotifyCallback601(const RoomGiftInfo601& roomgiftinfo601)
+bool NetworkHelper::GetGiftList(uint32 roomid)
 {
-    std::wstring responsedata;
+    std::string responsedata;
+    if (!curlWrapper_->GetGiftList(roomid, &responsedata))
+    {
+        return false;
+    }
+
+    return giftInfoHelper_->Initialize(responsedata);
+}
+
+// giftNotifyManager_ 线程回调
+void NetworkHelper::NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo601)
+{
+    // 如果不是在本房间送给主播的消息，过滤掉不回调
+    if ((roomid!=roomgiftinfo601.roomid)
+        ||(singerid != roomgiftinfo601.receiverid))
+    {
+        return;
+    }
+
     if (!roomgiftinfo601.token.empty())
     {
         // 原本是抢币的动作，目前不做这类功能
     }
-    notify601_(roomgiftinfo601);
+    GiftInfo giftinfo;
+    bool result = giftInfoHelper_->GetGiftInfo(roomgiftinfo601.giftid, &giftinfo);
+    notify601_(roomgiftinfo601, giftinfo);
 }
 
 void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo)

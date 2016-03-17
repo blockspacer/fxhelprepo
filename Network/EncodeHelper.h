@@ -25,3 +25,9 @@ std::string WideToUtf8(const std::wstring& text);
 std::wstring Utf8ToWide(const std::string& text);
 
 std::string MakeMd5FromString(const std::string& text);
+
+////提供带\u样式的转换函数 例如：\u5929\u795e\u8d50\u8d22 转为 天神赐财 的utf8编码
+//std::string str = R"(\u5929\u795e\u8d50\u8d22)";
+//std::string result;
+//UnicodeToUtf8(str, &result);
+bool UnicodeToUtf8(const std::string& unicode, std::string* utf8);

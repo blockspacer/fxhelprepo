@@ -114,6 +114,7 @@
     <ClInclude Include="explorer1.h" />
     <ClInclude Include="FanXing.h" />
     <ClInclude Include="FanXingDlg.h" />
+    <ClInclude Include="GiftInfoHelper.h" />
     <ClInclude Include="NetworkHelper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RoomController.h" />
@@ -126,6 +127,7 @@
     <ClCompile Include="explorer1.cpp" />
     <ClCompile Include="FanXingUI.cpp" />
     <ClCompile Include="FanXingDlg.cpp" />
+    <ClCompile Include="GiftInfoHelper.cpp" />
     <ClCompile Include="NetworkHelper.cpp" />
     <ClCompile Include="RoomController.cpp" />
     <ClCompile Include="stdafx.cpp">
