@@ -142,9 +142,13 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
     m_btn_begin.EnableWindow(FALSE);
  
     // 获取房间礼物列表
-    std::string giftliststr;
-    bool result = networkLeft_->GetGiftList(m_room_left);
-    if (!result)
+    if (!networkLeft_->GetGiftList(m_room_left))
+    {
+        ::MessageBoxW(0, L"获取房间礼物种类失败", L"错误", 0);
+        m_btn_begin.EnableWindow(TRUE);
+        return;
+    }
+    if (!networkRight_->GetGiftList(m_room_right))
     {
         ::MessageBoxW(0, L"获取房间礼物种类失败", L"错误", 0);
         m_btn_begin.EnableWindow(TRUE);
