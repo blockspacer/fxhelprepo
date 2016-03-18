@@ -180,18 +180,18 @@ void CDlgGiftNotify::Notify601(ROOM_TYPE roomtype,
     giftAccumulative.userid = roomgiftinfo.senderid;
     giftAccumulative.nickname = roomgiftinfo.sendername;
     giftAccumulative.giftcoin = income;
+    giftAccumulative.displaymsg = std::string("[") +
+        base::UintToString(income) + std::string("] ");
     if (!roomgiftinfo.tips.empty())
     {
-        giftAccumulative.displaymsg = roomgiftinfo.tips;
+        giftAccumulative.displaymsg += roomgiftinfo.tips;
     }
     else
     {
-        giftAccumulative.displaymsg = std::string("[") + 
-            base::UintToString(income)+ std::string("] ") + 
-            roomgiftinfo.sendername + std::string("送给") + 
-            roomgiftinfo.receivername +
+        giftAccumulative.displaymsg += roomgiftinfo.sendername + 
+            base::WideToUTF8(L"送给艺人") +
             base::UintToString(roomgiftinfo.gitfnumber) + 
-            std::string("个") + roomgiftinfo.giftname;
+            base::WideToUTF8(L"个") + roomgiftinfo.giftname;
     }
     
     giftAccumulative.accumulative = 0;//暂时不使用
