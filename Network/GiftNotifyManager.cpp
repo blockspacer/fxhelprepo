@@ -16,7 +16,8 @@
 
 
 namespace
-{   
+{
+static int threadindex = 0;
 const char* targetip = "42.62.68.50";
 const uint16 port843 = 843;
 const uint16 port8080 = 8080;
@@ -293,7 +294,7 @@ GiftNotifyManager::GiftNotifyManager()
     tcpClient_8080_(new TcpClient),
     notify201_(nullptr),
     notify601_(nullptr),
-    baseThread_("NetworkHelperThread")
+    baseThread_("NetworkHelperThread" + base::IntToString(threadindex))
 {
 }
 
@@ -311,6 +312,9 @@ bool GiftNotifyManager::Initialize()
 }
 void GiftNotifyManager::Finalize()
 {
+    if (repeatingTimer_.IsRunning())
+        repeatingTimer_.Stop();
+    
     tcpClient_843_->Finalize();
     tcpClient_8080_->Finalize();
     baseThread_.Stop();
