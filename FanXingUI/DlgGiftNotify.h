@@ -83,7 +83,11 @@ private:
     int m_coin_left;
     int m_coin_right;
     CString m_static_time;
-public:
     CButton m_btn_begin;
     CStatic m_static_now_time;
+    CEdit m_edit_coin_left;
+    CEdit m_edit_coin_right;
+    CEdit m_edit_time_left;
+    CEdit m_edit_time_all;
+    CStatic m_static_notice;
 };

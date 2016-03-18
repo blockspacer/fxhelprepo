@@ -22,11 +22,11 @@ CDlgGiftNotify::CDlgGiftNotify(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CDlgGiftNotify::IDD, pParent)
     , m_room_left(0)
     , m_room_right(0)
-    , m_time_all(0)
+    , m_time_all(600)
     , m_time_left(0)
     , m_coin_left(0)
     , m_coin_right(0)
-    , m_static_time(_T(""))
+    , m_static_time(_T("00:00:00"))
     , display_(false)
 {
     networkLeft_.reset(new NetworkHelper);
@@ -55,6 +55,11 @@ void CDlgGiftNotify::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_STATIC_TIME, m_static_time);
     DDX_Control(pDX, IDC_BTN_BEGIN, m_btn_begin);
     DDX_Control(pDX, IDC_STATIC_TIME, m_static_now_time);
+    DDX_Control(pDX, IDC_EDIT_LEFT_GIFT, m_edit_coin_left);
+    DDX_Control(pDX, IDC_EDIT_RIGHT_GIFT, m_edit_coin_right);
+    DDX_Control(pDX, IDC_EDIT_TIME_LEFT, m_edit_time_left);
+    DDX_Control(pDX, IDC_EDIT_TIME_ALL, m_edit_time_all);
+    DDX_Control(pDX, IDC_STATIC_NOTICE, m_static_notice);
 }
 
 
@@ -68,7 +73,63 @@ END_MESSAGE_MAP()
 BOOL CDlgGiftNotify::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
-    // 设置控件数据不可手工修改
+
+    scoped_ptr<CFont> font16(new CFont);
+    font16->CreateFont(16,                        // nHeight
+        30,                         // nWidth
+        0,                         // nEscapement
+        0,                         // nOrientation
+        FW_BOLD,                   // nWeight
+        FALSE,                     // bItalic
+        FALSE,                     // bUnderline
+        0,                         // cStrikeOut
+        DEFAULT_CHARSET,           // nCharSet
+        OUT_CHARACTER_PRECIS,        // nOutPrecision
+        CLIP_DEFAULT_PRECIS,       // nClipPrecision
+        DEFAULT_QUALITY,           // nQuality
+        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+        TEXT("黑体"));             // lpszFacename
+
+    scoped_ptr<CFont> font40(new CFont);
+    font40->CreateFont(140,                        // nHeight
+        400,                         // nWidth
+        60,                         // nEscapement
+        0,                         // nOrientation
+        FW_BOLD,                   // nWeight
+        FALSE,                     // bItalic
+        FALSE,                     // bUnderline
+        0,                         // cStrikeOut
+        DEFAULT_CHARSET,           // nCharSet
+        OUT_DEFAULT_PRECIS,        // nOutPrecision
+        CLIP_DEFAULT_PRECIS,       // nClipPrecision
+        DEFAULT_QUALITY,           // nQuality
+        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+        TEXT("黑体"));
+
+    scoped_ptr<CFont> font60(new CFont);
+    font60->CreateFont(60,                        // nHeight
+        50,                         // nWidth
+        0,                         // nEscapement
+        0,                         // nOrientation
+        FW_BOLD,                   // nWeight
+        FALSE,                     // bItalic
+        FALSE,                     // bUnderline
+        0,                         // cStrikeOut
+        DEFAULT_CHARSET,           // nCharSet
+        OUT_DEFAULT_PRECIS,        // nOutPrecision
+        CLIP_DEFAULT_PRECIS,       // nClipPrecision
+        DEFAULT_QUALITY,           // nQuality
+        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+        TEXT("黑体"));
+    m_btn_begin.SetFont(font16.get());;
+    m_static_now_time.SetFont(font16.get());;
+    m_edit_coin_left.SetFont(font40.get());;
+    m_edit_coin_right.SetFont(font40.get());;
+    m_edit_time_left.SetFont(font60.get());;
+    m_edit_time_all.SetFont(font16.get());;
+    m_static_notice.SetFont(font16.get());;
+
+    m_static_notice.SetWindowTextW(L"说明：本工具处于测试阶段，目前暂不支持幸运类礼物以及女神酒店类礼物统计,如果房间人数过多，会出现无法进入房间的问题。后续新版本会完善功能。");
 
     SetTimer(TIME_SHOW, 1000, NULL);
     return TRUE;
@@ -79,14 +140,14 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
     UpdateData(TRUE);  
     ClearList();
     m_btn_begin.EnableWindow(FALSE);
-    SetTimer(TIME_SKIP, 1000, NULL);
-    
-    
+ 
     // 获取房间礼物列表
     std::string giftliststr;
     bool result = networkLeft_->GetGiftList(m_room_left);
     if (!result)
     {
+        ::MessageBoxW(0, L"获取房间礼物种类失败", L"错误", 0);
+        m_btn_begin.EnableWindow(TRUE);
         return;
     }
 
@@ -99,8 +160,9 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
 
     if (!networkLeft_->EnterRoom(m_room_left))
     {
-        ::MessageBoxW(0, L"错误",L"进入房间失败", 0);
+        ::MessageBoxW(0, L"进入房间失败", L"错误", 0);
         assert(false && L"进入房间失败");
+        m_btn_begin.EnableWindow(TRUE);
         return;
     }
 
@@ -113,10 +175,12 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
 
     if (!networkRight_->EnterRoom(m_room_right))
     {
-        ::MessageBoxW(0, L"错误", L"进入房间失败", 0);
+        ::MessageBoxW(0, L"进入房间失败", L"错误", 0);
         assert(false && L"进入房间失败");
+        m_btn_begin.EnableWindow(TRUE);
         return;
     }
+    SetTimer(TIME_SKIP, 1000, NULL);
 }
 
 void CDlgGiftNotify::OnTimer(UINT_PTR nIDEvent)
