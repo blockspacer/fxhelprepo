@@ -22,7 +22,7 @@ namespace
     const char* loginuserurl = "https://login-user.kugou.com";
     const char* kugouurl = "http://kugou.com";
     const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
-    const char* acceptencode = "deflate";//目前都不应该接收压缩数据，免得解压麻烦
+    const char* acceptencode = "gzip";//目前都不应该接收压缩数据，免得解压麻烦
 
     static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     {
@@ -266,6 +266,7 @@ bool CurlWrapper::LoginRequestWithCookies()
     headers = curl_slist_append(headers, "Connection:Keep-Alive");
     headers = curl_slist_append(headers,  "Accept-Language:zh-CN");
     headers = curl_slist_append(headers, "Accept:text/html,application/xhtml+xml,*/*");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
@@ -355,6 +356,7 @@ bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& usernam
     struct curl_slist *headers = 0;
     headers = curl_slist_append(headers, "Connection:Keep-Alive");
     headers = curl_slist_append(headers, "Accept-Language:zh-CN");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
     headers = curl_slist_append(headers, "Accept:*/*");
     headers = curl_slist_append(headers, "Host:login-user.kugou.com");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
@@ -462,6 +464,7 @@ bool CurlWrapper::Services_UserService_UserService_getMyUserDataInfo()
     struct curl_slist *headers = 0;
     headers = curl_slist_append(headers, "Accept: application/json, text/javascript, */*; q=0.01");
     headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
     headers = curl_slist_append(headers, "Connection: Keep-Alive");
     headers = curl_slist_append(headers, "Accept-Language: zh-CN");
     headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
@@ -563,6 +566,7 @@ bool CurlWrapper::Services_IndexService_IndexService_getUserCenter()
     struct curl_slist *headers = 0;
     headers = curl_slist_append(headers, "Accept: application/json, text/javascript, */*; q=0.01");
     headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
     headers = curl_slist_append(headers, "Connection: Keep-Alive");
     headers = curl_slist_append(headers, "Accept-Language: zh-CN");
     headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
@@ -673,6 +677,7 @@ bool CurlWrapper::EnterRoom(uint32 roomid, uint32* singerid)
     struct curl_slist *headers = 0;
     headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
     //headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
     headers = curl_slist_append(headers, "Connection: Keep-Alive");
     headers = curl_slist_append(headers, "Accept-Language: zh-CN");
     headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
@@ -772,6 +777,7 @@ bool CurlWrapper::Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid,
 	struct curl_slist *headers = 0;
 	headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
 	headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
 	headers = curl_slist_append(headers, "Connection: Keep-Alive");
 	headers = curl_slist_append(headers, "Accept-Language: zh-CN");
 	headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
@@ -874,6 +880,7 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
     headers = curl_slist_append(headers, "Connection: Keep-Alive");
     headers = curl_slist_append(headers, "Accept-Language: zh-CN,en,*");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
     headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
     headers = curl_slist_append(headers, "Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3");
     headers = curl_slist_append(headers, "Accept: application/json;text/javascript,*/*;q=0.01");
@@ -882,7 +889,7 @@ bool CurlWrapper::RoomService_RoomService_enterRoom(uint32 roomid)
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     // 这里不要接受压缩的数据包，免得解压麻烦
-    //curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
     std::string referer = "http://fanxing.kugou.com/" + strroomid;
     curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
@@ -989,6 +996,7 @@ bool CurlWrapper::GiftService_GiftService(uint32 roomid,
     //headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
     //headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
     headers = curl_slist_append(headers, "Connection: Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
     headers = curl_slist_append(headers, "Accept-Language: zh-CN");
     headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
     //headers = curl_slist_append(headers, "Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3");
@@ -999,7 +1007,7 @@ bool CurlWrapper::GiftService_GiftService(uint32 roomid,
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     // 这里不要接受压缩的数据包，免得解压麻烦
-    //curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
     std::string referer = "http://fanxing.kugou.com/static/swf/award/CommonMoneyGift.swf?version=20141113";
     curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
@@ -1120,6 +1128,7 @@ bool CurlWrapper::KickoutUser(uint32 singerid,
     struct curl_slist *headers = 0;
     //headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
     headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
     headers = curl_slist_append(headers, "Connection: Keep-Alive");
     headers = curl_slist_append(headers, "Accept-Language: zh-CN,en,*");
     headers = curl_slist_append(headers, "Host: fanxing.kugou.com");
@@ -1130,7 +1139,7 @@ bool CurlWrapper::KickoutUser(uint32 singerid,
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     // 这里不要接受压缩的数据包，免得解压麻烦
-    //curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
     std::string referer = "http://fanxing.kugou.com/" + strroomid;
     curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
@@ -1225,6 +1234,7 @@ bool CurlWrapper::GetGiftList(uint32 roomid, std::string* outputstr)
     struct curl_slist *headers = 0;
     //headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
     headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
     headers = curl_slist_append(headers, "Connection: Keep-Alive");
     headers = curl_slist_append(headers, "Accept-Language: zh-CN,en,*");
     headers = curl_slist_append(headers, "Host: visitor.fanxing.kugou.com");//这个值与别的不一样
@@ -1235,7 +1245,7 @@ bool CurlWrapper::GetGiftList(uint32 roomid, std::string* outputstr)
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     // 这里不要接受压缩的数据包，免得解压麻烦
-    //curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
     std::string referer = "http://fanxing.kugou.com/" + strroomid;
     curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);

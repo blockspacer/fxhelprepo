@@ -64,8 +64,8 @@
     <ClCompile>
       <Optimization>Full</Optimization>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
-      <AdditionalIncludeDirectories>,;..\include;$(SolutionDir)\third_party\openssl\include\openssl;$(SolutionDir)\third_party\openssl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;NDEBUG;_WINDOWS;_USRDLL;USE_SSLEAY;USE_OPENSSL;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>,;..\include;$(SolutionDir)\third_party\openssl\include\openssl;$(SolutionDir)\third_party\openssl\include;$(SolutionDir)\third_party\chromium\third_party\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;NDEBUG;_WINDOWS;_USRDLL;USE_SSLEAY;USE_OPENSSL;CURL_STATICLIB;HAVE_ZLIB_H;HAVE_LIBZ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -105,8 +105,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>,;..\include;$(SolutionDir)\third_party\openssl\include\openssl;$(SolutionDir)\third_party\openssl\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;_DEBUG;_WINDOWS;_USRDLL;CURL_STATICLIB;USE_SSLEAY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>,;..\include;$(SolutionDir)\third_party\openssl\include\openssl;$(SolutionDir)\third_party\openssl\include;$(SolutionDir)\third_party\chromium\third_party\zlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;_DEBUG;_WINDOWS;_USRDLL;CURL_STATICLIB;USE_SSLEAY;HAVE_ZLIB_H;HAVE_LIBZ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -338,6 +338,9 @@
     <ClInclude Include="wildcard.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\chromium\third_party\zlib\zlib.vcxproj">
+      <Project>{57997958-0cdb-a2a6-b81a-c5cadfc6e484}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\openssl\libeay32\libeay32.vcxproj">
       <Project>{ac33ff8e-59e7-4e1e-8111-f446e9fb0231}</Project>
     </ProjectReference>
