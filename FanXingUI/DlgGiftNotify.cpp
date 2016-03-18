@@ -53,6 +53,8 @@ void CDlgGiftNotify::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_EDIT_LEFT_GIFT, m_coin_left);
     DDX_Text(pDX, IDC_EDIT_RIGHT_GIFT, m_coin_right);
     DDX_Text(pDX, IDC_STATIC_TIME, m_static_time);
+    DDX_Control(pDX, IDC_BTN_BEGIN, m_btn_begin);
+    DDX_Control(pDX, IDC_STATIC_TIME, m_static_now_time);
 }
 
 
@@ -66,17 +68,20 @@ END_MESSAGE_MAP()
 BOOL CDlgGiftNotify::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
+    // 设置控件数据不可手工修改
+
     SetTimer(TIME_SHOW, 1000, NULL);
     return TRUE;
 }
 // CDlgGiftNotify 消息处理程序
 void CDlgGiftNotify::OnBnClickedBtnBegin()
 {
-    UpdateData(TRUE);
-    display_ = true;
+    UpdateData(TRUE);  
     ClearList();
+    m_btn_begin.EnableWindow(FALSE);
     SetTimer(TIME_SKIP, 1000, NULL);
-
+    
+    
     // 获取房间礼物列表
     std::string giftliststr;
     bool result = networkLeft_->GetGiftList(m_room_left);
@@ -94,15 +99,24 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
 
     if (!networkLeft_->EnterRoom(m_room_left))
     {
+        ::MessageBoxW(0, L"错误",L"进入房间失败", 0);
         assert(false && L"进入房间失败");
         return;
     }
 
-    //networkRight_->SetNotify(
-    //    std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
-    //networkRight_->SetNotify601(
-    //    std::bind(&CDlgGiftNotify::Notify601, this, ROOM_TYPE::ROOM_RIGHT,  std::placeholders::_1));
-    //networkRight_->EnterRoom(m_room_right);
+    // 分别进入房间
+    networkRight_->SetNotify(
+        std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
+    networkRight_->SetNotify601(
+        std::bind(&CDlgGiftNotify::Notify601, this, ROOM_TYPE::ROOM_RIGHT,
+        std::placeholders::_1, std::placeholders::_2));
+
+    if (!networkRight_->EnterRoom(m_room_right))
+    {
+        ::MessageBoxW(0, L"错误", L"进入房间失败", 0);
+        assert(false && L"进入房间失败");
+        return;
+    }
 }
 
 void CDlgGiftNotify::OnTimer(UINT_PTR nIDEvent)
@@ -121,6 +135,7 @@ void CDlgGiftNotify::OnTimer(UINT_PTR nIDEvent)
         {
             KillTimer(TIME_SKIP);
             StopAccumulative();
+            m_btn_begin.EnableWindow(TRUE);
         }
         break;
     default:
@@ -224,6 +239,8 @@ void CDlgGiftNotify::ClearList()
     messageQueue_.clear();
     messageLock_.unlock();
 
+    display_ = true;
+    m_time_left = m_time_all;
     m_coin_left = 0;
     m_coin_right = 0;
     int leftcount = m_list_left.GetCount();

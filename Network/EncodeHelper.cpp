@@ -214,8 +214,8 @@ std::string MakeFormatTimeString(const base::Time time)
         second = "0" + second;
     }
 
-    std::string millisecond = base::IntToString(exploded.millisecond);
-    std::string timestring = hour + ":" + minute + ":" + second + "." + millisecond;
+    //std::string millisecond = base::IntToString(exploded.millisecond);
+    std::string timestring = hour + ":" + minute + ":" + second;
 
     return std::move(timestring);
 }
