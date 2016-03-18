@@ -59,7 +59,7 @@ private:
         uint32 giftcoin;
         std::string nickname;
         uint32 accumulative; // 暂时先不使用
-        std::string tips;
+        std::string displaymsg;
     };
 
     void ClearList();

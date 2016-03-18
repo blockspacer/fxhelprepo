@@ -714,9 +714,8 @@ bool CurlWrapper::EnterRoom(uint32 roomid, uint32* singerid)
 
     response_of_EnterRoom_ = currentWriteData_;
 
-    uint32 starId = 0;
-    ExtraSingerIdFrom_EnterRoom_Response_(response_of_EnterRoom_, singerid);
-
+    bool result = ExtraSingerIdFrom_EnterRoom_Response_(response_of_EnterRoom_, singerid);
+    assert(*singerid);
     // 获取本次请求cookies
     struct curl_slist* curllist = 0;
     res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
@@ -736,7 +735,7 @@ bool CurlWrapper::EnterRoom(uint32 roomid, uint32* singerid)
     /* always cleanup */
     curl_easy_cleanup(curl);
 
-    if (responsecode == 200)
+    if (responsecode == 200 && result && *singerid)
     {
         return true;
     }

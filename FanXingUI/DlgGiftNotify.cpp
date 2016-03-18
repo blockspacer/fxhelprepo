@@ -92,7 +92,11 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
         std::bind(&CDlgGiftNotify::Notify601, this, ROOM_TYPE::ROOM_LEFT, 
         std::placeholders::_1, std::placeholders::_2));
 
-    networkLeft_->EnterRoom(m_room_left);
+    if (!networkLeft_->EnterRoom(m_room_left))
+    {
+        assert(false && L"进入房间失败");
+        return;
+    }
 
     //networkRight_->SetNotify(
     //    std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
@@ -136,7 +140,7 @@ LRESULT CDlgGiftNotify::OnAddGiftInfo(WPARAM wParam, LPARAM lParam)
 
     for (const auto&it : newmessage)
     {
-        std::wstring wstr = base::UTF8ToUTF16(it.tips);
+        std::wstring wstr = base::UTF8ToWide(it.displaymsg);
         switch (it.roomtype)
         {
         case ROOM_TYPE::ROOM_LEFT:
@@ -176,6 +180,20 @@ void CDlgGiftNotify::Notify601(ROOM_TYPE roomtype,
     giftAccumulative.userid = roomgiftinfo.senderid;
     giftAccumulative.nickname = roomgiftinfo.sendername;
     giftAccumulative.giftcoin = income;
+    if (!roomgiftinfo.tips.empty())
+    {
+        giftAccumulative.displaymsg = roomgiftinfo.tips;
+    }
+    else
+    {
+        giftAccumulative.displaymsg = std::string("[") + 
+            base::UintToString(income)+ std::string("] ") + 
+            roomgiftinfo.sendername + std::string("送给") + 
+            roomgiftinfo.receivername +
+            base::UintToString(roomgiftinfo.gitfnumber) + 
+            std::string("个") + roomgiftinfo.giftname;
+    }
+    
     giftAccumulative.accumulative = 0;//暂时不使用
     messageLock_.lock();
     messageQueue_.push_back(giftAccumulative);
