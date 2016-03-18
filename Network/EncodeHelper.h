@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#undef max // 因为微软这个二比在某些头文件定义了max宏
+#undef min // 因为微软这个二比在某些头文件定义了min宏
+#include "third_party/chromium/base/time/time.h"
 
 std::wstring BinToHex(const void* bin, int len);
 std::string BinToAnsiHex(const void* bin, int len);
@@ -31,3 +34,5 @@ std::string MakeMd5FromString(const std::string& text);
 //std::string result;
 //UnicodeToUtf8(str, &result);
 bool UnicodeToUtf8(const std::string& unicode, std::string* utf8);
+
+std::string MakeFormatTimeString(const base::Time time);

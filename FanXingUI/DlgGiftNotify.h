@@ -31,12 +31,19 @@ public:
         ROOM_RIGHT = 1
     };
 
+    enum TIMMER_ENUM
+    {
+        TIME_SHOW = 0,
+        TIME_SKIP = 1,
+    };
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
-
+    virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
 public:
     afx_msg void OnBnClickedBtnBegin();
+    afx_msg void OnTimer(UINT_PTR nIDEvent);
     LRESULT OnAddGiftInfo(WPARAM wParam, LPARAM lParam);
     LRESULT OnUpdateTotalCount(WPARAM wParam, LPARAM lParam);
 
@@ -56,6 +63,8 @@ private:
     };
 
     void ClearList();
+    // 时间跑尽的时候，要终结统计，不更新后续数据。
+    void StopAccumulative();
 
     std::unique_ptr<NetworkHelper> networkLeft_;
     std::unique_ptr<NetworkHelper> networkRight_;
@@ -63,7 +72,7 @@ private:
     std::mutex messageLock_;
     std::vector<UserGiftAccumulative> messageQueue_;
 
-
+    bool display_;
     int m_room_left;
     int m_room_right;
     int m_time_all;
@@ -73,4 +82,5 @@ private:
 
     int m_coin_left;
     int m_coin_right;
+    CString m_static_time;
 };

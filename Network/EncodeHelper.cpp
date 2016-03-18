@@ -8,6 +8,7 @@
 #include "third_party/chromium/base/strings/sys_string_conversions.h"
 #include "third_party/chromium/base/md5.h"
 #include "third_party/chromium/base/strings/string_piece.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 
 static const wchar_t HEX[] = L"0123456789ABCDEF";
 std::wstring BinToHex(const void* bin, int len)
@@ -192,3 +193,29 @@ bool UnicodeToUtf8(const std::string& unicode, std::string* utf8)
     return true;
 }
 
+std::string MakeFormatTimeString(const base::Time time)
+{
+    base::Time::Exploded exploded;
+    time.LocalExplode(&exploded);
+    std::string hour = base::IntToString(exploded.hour);
+    if (hour.length() < 2)
+    {
+        hour = "0" + hour;
+    }
+    std::string minute = base::IntToString(exploded.minute);
+    if (minute.length() < 2)
+    {
+        minute = "0" + minute;
+    }
+
+    std::string second = base::IntToString(exploded.second);
+    if (second.length() < 2)
+    {
+        second = "0" + second;
+    }
+
+    std::string millisecond = base::IntToString(exploded.millisecond);
+    std::string timestring = hour + ":" + minute + ":" + second + "." + millisecond;
+
+    return std::move(timestring);
+}

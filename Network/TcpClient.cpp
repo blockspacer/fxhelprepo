@@ -32,7 +32,7 @@ bool TcpClient::Initialize()
 void TcpClient::Finalize()
  {
     SetEvent(stopEvent_);
-    auto waitResult = WaitForSingleObject(recvEvent_, 5000);
+    auto waitResult = WaitForSingleObject(recvEvent_, 1000);
     if (WAIT_OBJECT_0 == waitResult)
     {
         thread_->Stop();

@@ -14,33 +14,6 @@
 
 namespace
 {
-    std::string MakeFormatTimeString(const base::Time time)
-    {
-        base::Time::Exploded exploded;
-        time.LocalExplode(&exploded);
-        std::string hour = base::IntToString(exploded.hour);
-        if (hour.length() < 2)
-        {
-            hour = "0" + hour;
-        }
-        std::string minute = base::IntToString(exploded.minute);
-        if (minute.length() < 2)
-        {
-            minute = "0" + minute;
-        }
-
-        std::string second = base::IntToString(exploded.second);
-        if (second.length() < 2)
-        {
-            second = "0" + second;
-        }
-
-        std::string millisecond = base::IntToString(exploded.millisecond);
-        std::string timestring = hour + ":" + minute + ":" + second+ "." + millisecond;
-
-        return std::move(timestring);
-    }
-
     RowData EnterRoomUserInfoToRowdata(const EnterRoomUserInfo& enterRoomUserInfo)
     {
         RowData rowdata;
@@ -145,7 +118,8 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
     bool ret = false;
     ret = curlWrapper_->EnterRoom(roomid, &staruserid);
     assert(ret);
-    if (!ret)
+    assert(staruserid);
+    if (!ret || !staruserid)
     {
         return false;
     }

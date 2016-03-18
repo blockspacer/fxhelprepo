@@ -5,8 +5,14 @@
 #include "DlgGiftNotify.h"
 #include "afxdialogex.h"
 #include "GiftInfoHelper.h"
+#include "../Network/EncodeHelper.h"
 #include "third_party/chromium/base/basictypes.h"
+
+#undef max // 因为微软这个二比在某些头文件定义了max宏
+#undef min // 因为微软这个二比在某些头文件定义了min宏
+#include "third_party/chromium/base/time/time.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 
 // CDlgGiftNotify 对话框
 
@@ -20,6 +26,8 @@ CDlgGiftNotify::CDlgGiftNotify(CWnd* pParent /*=NULL*/)
     , m_time_left(0)
     , m_coin_left(0)
     , m_coin_right(0)
+    , m_static_time(_T(""))
+    , display_(false)
 {
     networkLeft_.reset(new NetworkHelper);
     networkLeft_->Initialize();
@@ -44,20 +52,30 @@ void CDlgGiftNotify::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_RIGHT, m_list_right);
     DDX_Text(pDX, IDC_EDIT_LEFT_GIFT, m_coin_left);
     DDX_Text(pDX, IDC_EDIT_RIGHT_GIFT, m_coin_right);
+    DDX_Text(pDX, IDC_STATIC_TIME, m_static_time);
 }
 
 
 BEGIN_MESSAGE_MAP(CDlgGiftNotify, CDialogEx)
+    ON_WM_TIMER()
     ON_BN_CLICKED(IDC_BTN_BEGIN, &CDlgGiftNotify::OnBnClickedBtnBegin)
     ON_MESSAGE(WM_USER_ADD_GIFT_INFO, &CDlgGiftNotify::OnAddGiftInfo)
     ON_MESSAGE(WM_USER_UPDATE_TOTAL_COUNT, &CDlgGiftNotify::OnUpdateTotalCount)
 END_MESSAGE_MAP()
 
-
+BOOL CDlgGiftNotify::OnInitDialog()
+{
+    CDialogEx::OnInitDialog();
+    SetTimer(TIME_SHOW, 1000, NULL);
+    return TRUE;
+}
 // CDlgGiftNotify 消息处理程序
 void CDlgGiftNotify::OnBnClickedBtnBegin()
 {
     UpdateData(TRUE);
+    display_ = true;
+    ClearList();
+    SetTimer(TIME_SKIP, 1000, NULL);
 
     // 获取房间礼物列表
     std::string giftliststr;
@@ -83,6 +101,32 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
     //networkRight_->EnterRoom(m_room_right);
 }
 
+void CDlgGiftNotify::OnTimer(UINT_PTR nIDEvent)
+{
+    UpdateData(TRUE);
+    std::wstring showtime;
+    switch (nIDEvent)
+    {
+    case TIME_SHOW:// 显示时间
+        showtime = base::UTF8ToWide(MakeFormatTimeString(base::Time::Now()));
+        m_static_time = showtime.c_str();
+        break;
+    case TIME_SKIP:// 显示剩余时间
+        m_time_left--;
+        if (m_time_left<=0)
+        {
+            KillTimer(TIME_SKIP);
+            StopAccumulative();
+        }
+        break;
+    default:
+        break;
+    }
+    UpdateData(FALSE);
+    return;
+}
+
+
 LRESULT CDlgGiftNotify::OnAddGiftInfo(WPARAM wParam, LPARAM lParam)
 {
     std::vector<UserGiftAccumulative> newmessage;
@@ -97,11 +141,11 @@ LRESULT CDlgGiftNotify::OnAddGiftInfo(WPARAM wParam, LPARAM lParam)
         {
         case ROOM_TYPE::ROOM_LEFT:
             m_coin_left += it.giftcoin;
-            m_list_left.AddString(wstr.c_str());
+            m_list_left.InsertString(m_list_left.GetCount(), wstr.c_str());
             break;;
         case ROOM_TYPE::ROOM_RIGHT:
             m_coin_right += it.giftcoin;
-            m_list_right.AddString(wstr.c_str());
+            m_list_right.InsertString(m_list_right.GetCount(),wstr.c_str());
             break;
         default:
             break;
@@ -133,6 +177,13 @@ void CDlgGiftNotify::Notify601(ROOM_TYPE roomtype,
     giftAccumulative.nickname = roomgiftinfo.sendername;
     giftAccumulative.giftcoin = income;
     giftAccumulative.accumulative = 0;//暂时不使用
+    messageLock_.lock();
+    messageQueue_.push_back(giftAccumulative);
+    messageLock_.unlock();
+    SendMessage(WM_USER_ADD_GIFT_INFO, 0, 0);
+
+    if (!display_)
+        return;
 
     switch (roomtype)
     {
@@ -146,10 +197,7 @@ void CDlgGiftNotify::Notify601(ROOM_TYPE roomtype,
         break;
     }
     
-    messageLock_.lock();
-    messageQueue_.push_back(giftAccumulative);
-    messageLock_.unlock();
-    SendMessage(WM_USER_ADD_GIFT_INFO, 0, 0);
+
 }
 
 void CDlgGiftNotify::ClearList()
@@ -171,4 +219,9 @@ void CDlgGiftNotify::ClearList()
         m_list_right.DeleteString(i);
     }
     UpdateData(FALSE);
+}
+
+void CDlgGiftNotify::StopAccumulative()
+{
+    display_ = false;
 }
