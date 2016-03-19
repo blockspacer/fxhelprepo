@@ -98,10 +98,33 @@ bool TcpClient::DoRecv()
             break;
         }
         
-        len = recv(socket_, &buffer[0], buffer.size(), 0);
-        if (len>0)
+        fd_set rfdset;
+        FD_ZERO(&rfdset);
+        FD_SET(socket_, &rfdset);
+        timeval timeout = { 0, 5000 };
+        int ret = select(0, &rfdset, 0, 0, &timeout);
+        if (ret == 0)//timeout
         {
-            HandleData(buffer, len);
+            continue;
+        }
+        else if (ret < 0)
+        {
+            break;
+        }
+        else
+        {
+            if (FD_ISSET(socket_, &rfdset))
+            {
+                len = recv(socket_, &buffer[0], buffer.size(), 0);
+                if (len>0)
+                {
+                    HandleData(buffer, len);
+                }
+            }
+            else
+            {
+                assert(false && L"Î´Öª´íÎó");
+            }
         }
     }
     SetEvent(recvEvent_);
