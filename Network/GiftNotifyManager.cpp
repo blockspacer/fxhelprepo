@@ -66,48 +66,6 @@ void TcpNotify(void* privatedata, const std::vector<char>& data)
     return;
 }
 
-std::string Packet = "";
-int pos = 0;
-// 在网络积压数据包的时候，可能返回多个完整的数据包
-std::vector<std::string> HandleMixPackage(const std::string& package)
-{
-    std::vector<std::string> retVec;
-    auto it = package.begin();
-    auto sentinel = it;
-    while (it!=package.end())
-    { 
-        switch (*it)
-        {
-        case '{':
-            pos++;
-            if (pos==1)
-            {
-                sentinel = it;
-            }
-            break;
-        case '}':
-            pos--;
-            if (pos == 0)
-            {
-                Packet += std::string(sentinel, it+1);
-                retVec.push_back(Packet);
-                Packet = "";
-            }
-            break;
-        default:
-            break;
-        }
-        it++;    
-    }
-
-    if(pos!=0) // 如果到结束还不是一个完整的json串，要等下一个数据包
-    {
-        Packet = std::string(sentinel,it);
-    }
-
-    return retVec;
-}
-
 uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name)
 {
     uint32 ret = 0;
@@ -506,8 +464,8 @@ void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid,
     const std::string& ext)
 {
     std::string decodestr = UrlDecode(ext);// 测试使用
-    Packet = "";
-    pos = 0;
+    Packet_ = "";
+    position_ = 0;
     tcpClient_8080_->SetNotify((NotifyFunction)TcpNotify, this);
     if (!tcpClient_8080_->Connect(targetip, port8080))
     {
@@ -547,4 +505,43 @@ void GiftNotifyManager::DoSendHeartBeat()
 }
 
 
+// 在网络积压数据包的时候，可能返回多个完整的数据包
+std::vector<std::string> GiftNotifyManager::HandleMixPackage(const std::string& package)
+{
+    std::vector<std::string> retVec;
+    auto it = package.begin();
+    auto sentinel = it;
+    while (it != package.end())
+    {
+        switch (*it)
+        {
+        case '{':
+            position_++;
+            if (position_ == 1)
+            {
+                sentinel = it;
+            }
+            break;
+        case '}':
+            position_--;
+            if (position_ == 0)
+            {
+                Packet_ += std::string(sentinel, it + 1);
+                retVec.push_back(Packet_);
+                Packet_ = "";
+            }
+            break;
+        default:
+            break;
+        }
+        it++;
+    }
+
+    if (position_ != 0) // 如果到结束还不是一个完整的json串，要等下一个数据包
+    {
+        Packet_ = std::string(sentinel, it);
+    }
+
+    return retVec;
+}
 

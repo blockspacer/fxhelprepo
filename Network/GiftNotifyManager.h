@@ -111,15 +111,12 @@ private:
         const std::string& key, const std::string& ext);
     void DoSendHeartBeat();
 
-    //std::unique_ptr<Thread> thread_;
-    //std::unique_ptr<std::thread> stdthread_;
-    //std::unique_ptr<std::future<bool>> stdfuture_;
-    //std::unique_ptr<std::promise<bool>> stdpromise_;
-    //std::unique_ptr<std::condition_variable> stdcv_;
-    //std::mutex mtx;
+    std::vector<std::string> HandleMixPackage(const std::string& package);
 
     base::Thread baseThread_;
     base::RepeatingTimer<GiftNotifyManager> repeatingTimer_;
+    std::string Packet_ = "";
+    int position_ = 0;
 
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
