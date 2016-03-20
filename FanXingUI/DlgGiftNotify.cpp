@@ -26,7 +26,6 @@ CDlgGiftNotify::CDlgGiftNotify(CWnd* pParent /*=NULL*/)
     , m_time_left(0)
     , m_coin_left(0)
     , m_coin_right(0)
-    , m_static_time(_T("00:00:00"))
     , display_(false)
 {
     networkLeft_.reset(new NetworkHelper);
@@ -52,7 +51,6 @@ void CDlgGiftNotify::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_RIGHT, m_list_right);
     DDX_Text(pDX, IDC_EDIT_LEFT_GIFT, m_coin_left);
     DDX_Text(pDX, IDC_EDIT_RIGHT_GIFT, m_coin_right);
-    DDX_Text(pDX, IDC_STATIC_TIME, m_static_time);
     DDX_Control(pDX, IDC_BTN_BEGIN, m_btn_begin);
     DDX_Control(pDX, IDC_STATIC_TIME, m_static_now_time);
     DDX_Control(pDX, IDC_EDIT_LEFT_GIFT, m_edit_coin_left);
@@ -141,61 +139,76 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
     ClearList();
     m_btn_begin.EnableWindow(FALSE);
  
-    // 获取房间礼物列表
-    if (!networkLeft_->GetGiftList(m_room_left))
+    if (m_room_left)
     {
-        ::MessageBoxW(0, L"获取房间礼物种类失败", L"错误", 0);
-        m_btn_begin.EnableWindow(TRUE);
-        return;
-    }
-    if (!networkRight_->GetGiftList(m_room_right))
-    {
-        ::MessageBoxW(0, L"获取房间礼物种类失败", L"错误", 0);
-        m_btn_begin.EnableWindow(TRUE);
-        return;
-    }
+        // 获取左边房间礼物列表
+        if (!networkLeft_->GetGiftList(m_room_left))
+        {
+            ::MessageBoxW(0, L"获取房间礼物种类失败", L"错误", 0);
+            m_btn_begin.EnableWindow(TRUE);
+            return;
+        }
 
-    // 分别进入房间
-    networkLeft_->SetNotify(
-        std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
-    networkLeft_->SetNotify601(
-        std::bind(&CDlgGiftNotify::Notify601, this, ROOM_TYPE::ROOM_LEFT, 
-        std::placeholders::_1, std::placeholders::_2));
+        // 左边的房间
+        networkLeft_->SetNotify(
+            std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
+        networkLeft_->SetNotify601(
+            std::bind(&CDlgGiftNotify::Notify601, this, ROOM_TYPE::ROOM_LEFT, 
+            std::placeholders::_1, std::placeholders::_2));
 
-    if (!networkLeft_->EnterRoom(m_room_left))
-    {
-        ::MessageBoxW(0, L"进入房间失败", L"错误", 0);
-        assert(false && L"进入房间失败");
-        m_btn_begin.EnableWindow(TRUE);
-        return;
+        if (!networkLeft_->EnterRoom(m_room_left))
+        {
+            ::MessageBoxW(0, L"进入房间失败", L"错误", 0);
+            assert(false && L"进入房间失败");
+            m_btn_begin.EnableWindow(TRUE);
+            return;
+        }
     }
 
-    // 分别进入房间
-    networkRight_->SetNotify(
-        std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
-    networkRight_->SetNotify601(
-        std::bind(&CDlgGiftNotify::Notify601, this, ROOM_TYPE::ROOM_RIGHT,
-        std::placeholders::_1, std::placeholders::_2));
-
-    if (!networkRight_->EnterRoom(m_room_right))
+    if (m_room_right)
     {
-        ::MessageBoxW(0, L"进入房间失败", L"错误", 0);
-        assert(false && L"进入房间失败");
-        m_btn_begin.EnableWindow(TRUE);
-        return;
+        // 右边的房间
+        if (!networkRight_->GetGiftList(m_room_right))
+        {
+            ::MessageBoxW(0, L"获取房间礼物种类失败", L"错误", 0);
+            m_btn_begin.EnableWindow(TRUE);
+            return;
+        }
+
+        networkRight_->SetNotify(
+            std::bind(&CDlgGiftNotify::Notify, this, std::placeholders::_1));
+        networkRight_->SetNotify601(
+            std::bind(&CDlgGiftNotify::Notify601, this, ROOM_TYPE::ROOM_RIGHT,
+            std::placeholders::_1, std::placeholders::_2));
+
+        if (!networkRight_->EnterRoom(m_room_right))
+        {
+            ::MessageBoxW(0, L"进入房间失败", L"错误", 0);
+            assert(false && L"进入房间失败");
+            m_btn_begin.EnableWindow(TRUE);
+            return;
+        }
     }
-    SetTimer(TIME_SKIP, 1000, NULL);
+
+    if (m_room_left || m_room_right)
+    {
+        SetTimer(TIME_SKIP, 1000, NULL);
+    }
+    else
+    {
+        ::MessageBoxW(0, L"开始之前先输入房间号", L"错误", 0);
+        m_btn_begin.EnableWindow(TRUE);
+    }
 }
 
 void CDlgGiftNotify::OnTimer(UINT_PTR nIDEvent)
 {
-    UpdateData(TRUE);
     std::wstring showtime;
     switch (nIDEvent)
     {
     case TIME_SHOW:// 显示时间
         showtime = base::UTF8ToWide(MakeFormatTimeString(base::Time::Now()));
-        m_static_time = showtime.c_str();
+        m_static_now_time.SetWindowTextW(showtime.c_str());
         break;
     case TIME_SKIP:// 显示剩余时间
         m_time_left--;
@@ -205,11 +218,12 @@ void CDlgGiftNotify::OnTimer(UINT_PTR nIDEvent)
             StopAccumulative();
             m_btn_begin.EnableWindow(TRUE);
         }
+        UpdateData(FALSE);
         break;
     default:
         break;
     }
-    UpdateData(FALSE);
+    
     return;
 }
 
