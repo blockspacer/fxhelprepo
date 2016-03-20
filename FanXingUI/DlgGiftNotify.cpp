@@ -27,7 +27,55 @@ CDlgGiftNotify::CDlgGiftNotify(CWnd* pParent /*=NULL*/)
     , m_coin_left(0)
     , m_coin_right(0)
     , display_(false)
+    , font16_(new CFont)
+    , font18_(new CFont)
+    , font22_(new CFont)
 {
+    font16_->CreateFont(16,                        // nHeight
+        0,                         // nWidth
+        0,                         // nEscapement
+        0,                         // nOrientation
+        FW_BOLD,                   // nWeight
+        FALSE,                     // bItalic
+        FALSE,                     // bUnderline
+        0,                         // cStrikeOut
+        DEFAULT_CHARSET,           // nCharSet
+        OUT_CHARACTER_PRECIS,        // nOutPrecision
+        CLIP_DEFAULT_PRECIS,       // nClipPrecision
+        DEFAULT_QUALITY,           // nQuality
+        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+        TEXT("黑体"));             // lpszFacename
+
+    font18_->CreateFont(18,                        // nHeight
+        0,                         // nWidth
+        0,                         // nEscapement
+        0,                         // nOrientation
+        FW_BOLD,                   // nWeight
+        FALSE,                     // bItalic
+        FALSE,                     // bUnderline
+        0,                         // cStrikeOut
+        DEFAULT_CHARSET,           // nCharSet
+        OUT_DEFAULT_PRECIS,        // nOutPrecision
+        CLIP_DEFAULT_PRECIS,       // nClipPrecision
+        DEFAULT_QUALITY,           // nQuality
+        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+        TEXT("黑体"));
+
+    font22_->CreateFont(22,                        // nHeight
+        0,                         // nWidth
+        0,                         // nEscapement
+        0,                         // nOrientation
+        FW_BOLD,                   // nWeight
+        FALSE,                     // bItalic
+        FALSE,                     // bUnderline
+        0,                         // cStrikeOut
+        DEFAULT_CHARSET,           // nCharSet
+        OUT_DEFAULT_PRECIS,        // nOutPrecision
+        CLIP_DEFAULT_PRECIS,       // nClipPrecision
+        DEFAULT_QUALITY,           // nQuality
+        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+        TEXT("宋体"));
+
     networkLeft_.reset(new NetworkHelper);
     networkLeft_->Initialize();
     networkRight_.reset(new NetworkHelper);
@@ -72,62 +120,15 @@ BOOL CDlgGiftNotify::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
 
-    scoped_ptr<CFont> font16(new CFont);
-    font16->CreateFont(16,                        // nHeight
-        30,                         // nWidth
-        0,                         // nEscapement
-        0,                         // nOrientation
-        FW_BOLD,                   // nWeight
-        FALSE,                     // bItalic
-        FALSE,                     // bUnderline
-        0,                         // cStrikeOut
-        DEFAULT_CHARSET,           // nCharSet
-        OUT_CHARACTER_PRECIS,        // nOutPrecision
-        CLIP_DEFAULT_PRECIS,       // nClipPrecision
-        DEFAULT_QUALITY,           // nQuality
-        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
-        TEXT("黑体"));             // lpszFacename
+    m_btn_begin.SetFont(font16_.get(), FALSE);
+    m_static_now_time.SetFont(font16_.get(), FALSE);
+    m_edit_coin_left.SetFont(font18_.get(), FALSE);
+    m_edit_coin_right.SetFont(font18_.get(), FALSE);
+    m_edit_time_left.SetFont(font22_.get(), FALSE);
+    m_edit_time_all.SetFont(font22_.get(), FALSE);
+    m_static_notice.SetFont(font18_.get(), FALSE);
 
-    scoped_ptr<CFont> font40(new CFont);
-    font40->CreateFont(140,                        // nHeight
-        400,                         // nWidth
-        60,                         // nEscapement
-        0,                         // nOrientation
-        FW_BOLD,                   // nWeight
-        FALSE,                     // bItalic
-        FALSE,                     // bUnderline
-        0,                         // cStrikeOut
-        DEFAULT_CHARSET,           // nCharSet
-        OUT_DEFAULT_PRECIS,        // nOutPrecision
-        CLIP_DEFAULT_PRECIS,       // nClipPrecision
-        DEFAULT_QUALITY,           // nQuality
-        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
-        TEXT("黑体"));
-
-    scoped_ptr<CFont> font60(new CFont);
-    font60->CreateFont(60,                        // nHeight
-        50,                         // nWidth
-        0,                         // nEscapement
-        0,                         // nOrientation
-        FW_BOLD,                   // nWeight
-        FALSE,                     // bItalic
-        FALSE,                     // bUnderline
-        0,                         // cStrikeOut
-        DEFAULT_CHARSET,           // nCharSet
-        OUT_DEFAULT_PRECIS,        // nOutPrecision
-        CLIP_DEFAULT_PRECIS,       // nClipPrecision
-        DEFAULT_QUALITY,           // nQuality
-        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
-        TEXT("黑体"));
-    m_btn_begin.SetFont(font16.get());;
-    m_static_now_time.SetFont(font16.get());;
-    m_edit_coin_left.SetFont(font40.get());;
-    m_edit_coin_right.SetFont(font40.get());;
-    m_edit_time_left.SetFont(font60.get());;
-    m_edit_time_all.SetFont(font16.get());;
-    m_static_notice.SetFont(font16.get());;
-
-    m_static_notice.SetWindowTextW(L"说明：本工具处于测试阶段，目前暂不支持幸运类礼物以及女神酒店类礼物统计,如果房间人数过多，会出现无法进入房间的问题。后续新版本会完善功能。");
+    m_static_notice.SetWindowTextW(L"说明：本工具处于测试阶段，目前暂不支持非星币直接购买的礼物统计,不支持抢座位及点歌等。如果房间人数过多，会出现无法进入房间的问题。后续新版本会完善功能。");
 
     SetTimer(TIME_SHOW, 1000, NULL);
     return TRUE;

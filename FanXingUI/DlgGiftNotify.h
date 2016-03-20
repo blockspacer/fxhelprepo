@@ -72,6 +72,9 @@ private:
     std::mutex messageLock_;
     std::vector<UserGiftAccumulative> messageQueue_;
 
+    scoped_ptr<CFont> font16_;
+    scoped_ptr<CFont> font18_;
+    scoped_ptr<CFont> font22_;
     bool display_;
     int m_room_left;
     int m_room_right;
