@@ -227,12 +227,14 @@ LRESULT CDlgGiftNotify::OnAddGiftInfo(WPARAM wParam, LPARAM lParam)
         switch (it.roomtype)
         {
         case ROOM_TYPE::ROOM_LEFT:
-            m_coin_left += it.giftcoin;
             m_list_left.InsertString(m_list_left.GetCount(), wstr.c_str());
+            if (display_)
+                m_coin_left += it.giftcoin;
             break;;
         case ROOM_TYPE::ROOM_RIGHT:
-            m_coin_right += it.giftcoin;
-            m_list_right.InsertString(m_list_right.GetCount(),wstr.c_str());
+            m_list_right.InsertString(m_list_right.GetCount(), wstr.c_str());
+            if (display_)
+                m_coin_right += it.giftcoin;
             break;
         default:
             break;
@@ -282,23 +284,6 @@ void CDlgGiftNotify::Notify601(ROOM_TYPE roomtype,
     messageQueue_.push_back(giftAccumulative);
     messageLock_.unlock();
     SendMessage(WM_USER_ADD_GIFT_INFO, 0, 0);
-
-    if (!display_)
-        return;
-
-    switch (roomtype)
-    {
-    case CDlgGiftNotify::ROOM_TYPE::ROOM_LEFT:
-        m_coin_left += income;
-        break;
-    case CDlgGiftNotify::ROOM_TYPE::ROOM_RIGHT:
-        m_coin_right += income;
-        break;
-    default:
-        break;
-    }
-    
-
 }
 
 void CDlgGiftNotify::ClearList()
