@@ -6,6 +6,7 @@ Thread::Thread()
     , param_(0)
     , handle_(0)
     , threadid_(0)
+    , running_(false)
 {
 }
 
@@ -22,6 +23,7 @@ void Thread::Init(run_fn run, LPVOID lpParam)
 }
 bool Thread::Start()
 {
+    running_ = true;
     ResumeThread(handle_);
     return (handle_ != INVALID_HANDLE_VALUE);
 }
@@ -32,5 +34,12 @@ void Thread::Stop()
     {
         TerminateThread(handle_, 0);
     }
+    running_ = false;
     handle_ = 0;
 }
+
+bool Thread::IsRunning() const
+{
+    return running_;
+}
+

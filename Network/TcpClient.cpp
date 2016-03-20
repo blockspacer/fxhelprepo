@@ -31,6 +31,10 @@ bool TcpClient::Initialize()
 
 void TcpClient::Finalize()
  {
+    if (!thread_->IsRunning())
+    {
+        return;
+    }
     SetEvent(stopEvent_);
     auto waitResult = WaitForSingleObject(recvEvent_, 1000);
     if (WAIT_OBJECT_0 == waitResult)
@@ -116,7 +120,11 @@ bool TcpClient::DoRecv()
             if (FD_ISSET(socket_, &rfdset))
             {
                 len = recv(socket_, &buffer[0], buffer.size(), 0);
-                if (len>0)
+                if (SOCKET_ERROR == len)
+                {
+                    continue;
+                }
+                else if (len>0)
                 {
                     HandleData(buffer, len);
                 }
@@ -135,7 +143,7 @@ bool TcpClient::HandleData(const std::vector<char>& data, int len)
 {
     //std::string strdata = BinToAnsiHex(&data[0], len);
     //printf(strdata.c_str());
-    if (notify_ && privateData_)
+    if (notify_ && privateData_ && (len>0))
     {
         std::vector<char> outdata;
         outdata.assign(&data[0], &data[0] + len);
