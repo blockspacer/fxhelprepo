@@ -222,6 +222,9 @@ bool NetworkHelper::GetGiftList(uint32 roomid)
 // giftNotifyManager_ 线程回调
 void NetworkHelper::NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo601)
 {
+    if (!notify601_)
+        return;
+
     // 如果不是在本房间送给主播的消息，过滤掉不回调
     if ((roomid!=roomgiftinfo601.roomid)
         ||(singerid != roomgiftinfo601.receiverid))
@@ -240,6 +243,9 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, uint32 singerid, const Room
 
 void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    if (!notify201_)
+        return;
+
     enterRoomUserInfoMap_[enterRoomUserInfo.userid] = enterRoomUserInfo;
     RowData rowdata = EnterRoomUserInfoToRowdata(enterRoomUserInfo);
     notify201_(rowdata);

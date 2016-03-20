@@ -62,7 +62,7 @@ public:
     void SetNotify201(Notify201 notify201);
     void SetNotify601(Notify601 notify601);
     void SetNormalNotify(NormalNotify normalNotify);
-    void Notify(const std::vector<char>& data);
+
     // 固定的请求，不需要带其他参数
     bool Connect843();
 
@@ -110,7 +110,9 @@ private:
         uint32 richlevel, uint32 ismaster, uint32 staruserid,
         const std::string& key, const std::string& ext);
     void DoSendHeartBeat();
+    void DoRecv();
 
+    void Notify(const std::vector<char>& data);
     std::vector<std::string> HandleMixPackage(const std::string& package);
 
     base::Thread baseThread_;
