@@ -92,4 +92,6 @@ private:
     CEdit m_edit_time_left;
     CEdit m_edit_time_all;
     CStatic m_static_notice;
+    CEdit m_edit_left_gift_list;
+    CEdit m_edit_right_gift_list;
 };

@@ -106,6 +106,8 @@ void CDlgGiftNotify::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_TIME_LEFT, m_edit_time_left);
     DDX_Control(pDX, IDC_EDIT_TIME_ALL, m_edit_time_all);
     DDX_Control(pDX, IDC_STATIC_NOTICE, m_static_notice);
+    DDX_Control(pDX, IDC_EDIT_LEFT_GIFT_LIST, m_edit_left_gift_list);
+    DDX_Control(pDX, IDC_EDIT_RIGHT_GIFT_LIST, m_edit_right_gift_list);
 }
 
 
@@ -126,7 +128,7 @@ BOOL CDlgGiftNotify::OnInitDialog()
     m_edit_coin_right.SetFont(font18_.get(), FALSE);
     m_edit_time_left.SetFont(font22_.get(), FALSE);
     m_edit_time_all.SetFont(font22_.get(), FALSE);
-    m_static_notice.SetFont(font18_.get(), FALSE);
+    m_static_notice.SetFont(font16_.get(), FALSE);
 
     m_static_notice.SetWindowTextW(L"说明：本工具处于测试阶段，目前暂不支持非星币直接购买的礼物统计,不支持抢座位及点歌等。如果房间人数过多，会出现无法进入房间的问题。后续新版本会完善功能。");
 
@@ -142,7 +144,7 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
  
     if (m_room_left)
     {
-        // 获取左边房间礼物列表
+        // 从网页中获取左边房间礼物列表
         if (!networkLeft_->GetGiftList(m_room_left))
         {
             ::MessageBoxW(0, L"获取房间礼物种类失败", L"错误", 0);
@@ -168,7 +170,7 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
 
     if (m_room_right)
     {
-        // 右边的房间
+        // 从网页中获取左边房间礼物列表
         if (!networkRight_->GetGiftList(m_room_right))
         {
             ::MessageBoxW(0, L"获取房间礼物种类失败", L"错误", 0);
@@ -182,6 +184,7 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
             std::bind(&CDlgGiftNotify::Notify601, this, ROOM_TYPE::ROOM_RIGHT,
             std::placeholders::_1, std::placeholders::_2));
 
+        // 右边的房间
         if (!networkRight_->EnterRoom(m_room_right))
         {
             ::MessageBoxW(0, L"进入房间失败", L"错误", 0);
