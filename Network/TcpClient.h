@@ -21,19 +21,13 @@ public:
     bool Initialize();
     void Finalize();
 
-    void SetNotify(NotifyFunction notify, void* privatedata);
     bool Connect(const std::string& ip, unsigned short port);
     bool Send(const std::vector<char>& data);
 
-    static DWORD Recv(LPVOID lpParam);
-    bool DoRecv();
+    bool Recv(std::vector<char>* buffer);
+    
     bool HandleData(const std::vector<char>& data, int len);
 private:
-    std::unique_ptr<Thread> thread_;
-    HANDLE stopEvent_;
-    HANDLE recvEvent_;
     SOCKET socket_;
-    NotifyFunction notify_;
-    void* privateData_;
 };
 

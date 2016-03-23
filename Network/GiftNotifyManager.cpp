@@ -16,7 +16,8 @@
 
 
 namespace
-{   
+{
+static int threadindex = 0;
 const char* targetip = "42.62.68.50";
 const uint16 port843 = 843;
 const uint16 port8080 = 8080;
@@ -52,58 +53,11 @@ bool GetFirstPackage(const cmd201package& package,
     root["key"] = package.key;
     root["keytime"] = package.keytime;
     root["ext"] = package.ext;
+    root["appid"] = 1010;
     std::string data = writer.write(root);
     packagedata->assign(data.begin(), data.end());
 
     return true;
-}
-void TcpNotify(void* privatedata, const std::vector<char>& data)
-{
-    GiftNotifyManager* manager = static_cast<GiftNotifyManager*>(privatedata);
-    manager->Notify(data);
-    return;
-}
-
-std::string Packet = "";
-int pos = 0;
-// 在网络积压数据包的时候，可能返回多个完整的数据包
-std::vector<std::string> HandleMixPackage(const std::string& package)
-{
-    std::vector<std::string> retVec;
-    auto it = package.begin();
-    auto sentinel = it;
-    while (it!=package.end())
-    { 
-        switch (*it)
-        {
-        case '{':
-            pos++;
-            if (pos==1)
-            {
-                sentinel = it;
-            }
-            break;
-        case '}':
-            pos--;
-            if (pos == 0)
-            {
-                Packet += std::string(sentinel, it+1);
-                retVec.push_back(Packet);
-                Packet = "";
-            }
-            break;
-        default:
-            break;
-        }
-        it++;    
-    }
-
-    if(pos!=0) // 如果到结束还不是一个完整的json串，要等下一个数据包
-    {
-        Packet = std::string(sentinel,it);
-    }
-
-    return retVec;
 }
 
 uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name)
@@ -292,7 +246,7 @@ GiftNotifyManager::GiftNotifyManager()
     tcpClient_8080_(new TcpClient),
     notify201_(nullptr),
     notify601_(nullptr),
-    baseThread_("NetworkHelperThread")
+    baseThread_("NetworkHelperThread" + base::IntToString(threadindex))
 {
 }
 
@@ -310,6 +264,9 @@ bool GiftNotifyManager::Initialize()
 }
 void GiftNotifyManager::Finalize()
 {
+    if (repeatingTimer_.IsRunning())
+        repeatingTimer_.Stop();
+    
     tcpClient_843_->Finalize();
     tcpClient_8080_->Finalize();
     baseThread_.Stop();
@@ -330,6 +287,27 @@ void GiftNotifyManager::SetNormalNotify(NormalNotify normalNotify)
     normalNotify_ = normalNotify;
 }
 
+//"cmd" : 601,
+//"roomid" : "1096718",
+//"senderid" : "22202340",
+//"receiverid" : 0,
+//"time" : "1458141348",
+//"content" : {
+//    "actionId" : 0,
+//        "roomid" : "1096718",
+//        "token" : "",
+//        "giftname" : "\u6cd5\u62c9\u5229",
+//        "senderid" : "22202340",
+//        "senderkgid" : "12013116",
+//        "sendername" : "\u4e0d\u5e0c\u671b\u88ab\u4eba\u8bb0\u4f4f",
+//        "senderrichlevel" : "16",
+//        "receiverid" : "197471408",
+//        "receiverkgid" : 781510668,
+//        "receivername" : "\u6843\u5b50_ing",
+//        "receiverrichlevel" : "2",
+//        "giftid" : "41",
+//        "num" : "1",
+//        "type" : 2,
 void GiftNotifyManager::Notify(const std::vector<char>& data)
 {
     // 需要处理粘包问题
@@ -338,95 +316,98 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
 
     for (auto package : packages)
     {
-        try
+        Json::Reader reader;
+        Json::Value rootdata(Json::objectValue);
+        if (!reader.parse(package, rootdata, false))
         {
-            Json::Reader reader;
-            Json::Value rootdata(Json::objectValue);
-            if (!reader.parse(package, rootdata, false))
-            {
-                return;
-            }
+            return;
+        }
 
-            // 暂时没有必要检测status的值
-            Json::Value jvCmd(Json::ValueType::intValue);
-            uint32 cmd = GetInt32FromJsonValue(rootdata, "cmd");
-            uint32 roomid = GetInt32FromJsonValue(rootdata, "roomid");
-            uint32 senderid = GetInt32FromJsonValue(rootdata, "senderid");
-            uint32 receiverid = GetInt32FromJsonValue(rootdata, "receiverid");
-            uint32 time = GetInt32FromJsonValue(rootdata, "time");
-            if (cmd == 601)
+        // 暂时没有必要检测status的值
+        Json::Value jvCmd(Json::ValueType::intValue);
+        uint32 cmd = GetInt32FromJsonValue(rootdata, "cmd");
+        uint32 roomid = GetInt32FromJsonValue(rootdata, "roomid");
+        uint32 senderid = GetInt32FromJsonValue(rootdata, "senderid");
+            
+        uint32 time = GetInt32FromJsonValue(rootdata, "time");
+        if (cmd == 601)
+        {
+            Json::Value jvContent(Json::ValueType::objectValue);
+            Json::Value  content = rootdata.get("content", jvContent);
+            if (!content.isNull())
             {
-                Json::Value jvContent(Json::ValueType::objectValue);
-                Json::Value  content = rootdata.get("content", jvContent);
-                if (!content.isNull())
-                {
-                    Json::Value jvKey(Json::ValueType::stringValue);
-                    std::string key = content.get(std::string("token"), jvKey).asString();
-                    if (!key.empty())
-                    {
-                        notify601_(key);
-                    }
-                }
-            }
-            else if (cmd == 201)
-            {
-                EnterRoomUserInfo enterRoomUserInfo;
-                Json::Value jvContent(Json::ValueType::objectValue);
-                enterRoomUserInfo.roomid = GetInt32FromJsonValue(rootdata,"roomid");
-                enterRoomUserInfo.unixtime = GetInt32FromJsonValue(rootdata, "time");
-                Json::Value  content = rootdata.get("content", jvContent);
-                
-                if (!content.isNull())
-                {
-                    Json::Value jvString("");
-                    enterRoomUserInfo.nickname = content.get("nickname", jvString).asString();
-                    enterRoomUserInfo.richlevel = GetInt32FromJsonValue(content, "richlevel");
-                    enterRoomUserInfo.userid = GetInt32FromJsonValue(content, "userid");
-                }
-                if (notify201_)
-                {
-                    notify201_(enterRoomUserInfo);
-                }
-            }
-
-            std::string outmsg;
-            switch (cmd)
-            {
-            case 100:
-                break;
-            case 201:
-                CommandHandle_201(rootdata, &outmsg);
-                break;
-            case 315:
-                CommandHandle_315(rootdata, &outmsg);
-                break;
-            case 501:
-                CommandHandle_501(rootdata, &outmsg);
-                break;
-            case 601:
-                CommandHandle_601(rootdata, &outmsg);
-                break;
-            case 602:
-                CommandHandle_602(rootdata, &outmsg);
-                break;
-            case 606:
-                CommandHandle_606(rootdata, &outmsg);
-                break;
-            default:
-                break;
-            }
-
-            // 处理数据包,转换成输出界面信息
-            std::wstring wstr = base::UTF8ToWide(package);
-            normalNotify_(wstr);
-            if (!outmsg.empty())
-            {
-                wstr = base::UTF8ToWide(outmsg);
-                normalNotify_(wstr);
+                RoomGiftInfo601 roomgiftinfo;
+                roomgiftinfo.time = time;
+                roomgiftinfo.roomid = roomid;
+                roomgiftinfo.senderid = GetInt32FromJsonValue(content, "senderid");
+                roomgiftinfo.sendername = content.get("sendername", "").asString();
+                roomgiftinfo.receiverid = GetInt32FromJsonValue(content, "receiverid");
+                roomgiftinfo.receivername = content.get("receivername", "").asString();
+                roomgiftinfo.giftid = GetInt32FromJsonValue(content, "giftid");
+                roomgiftinfo.giftname = content.get("giftname", "").asString();
+                roomgiftinfo.gitfnumber = GetInt32FromJsonValue(content, "num");
+                roomgiftinfo.tips = content.get("tip", "").asString();
+                roomgiftinfo.happyobj = GetInt32FromJsonValue(content, "happyobj");
+                roomgiftinfo.happytype = GetInt32FromJsonValue(content, "happytype");
+                roomgiftinfo.token = content.get("token", "").asString();
+                notify601_(roomgiftinfo);
             }
         }
-        catch (...)
+        else if (cmd == 201)
         {
+            EnterRoomUserInfo enterRoomUserInfo;
+            Json::Value jvContent(Json::ValueType::objectValue);
+            enterRoomUserInfo.roomid = GetInt32FromJsonValue(rootdata,"roomid");
+            enterRoomUserInfo.unixtime = GetInt32FromJsonValue(rootdata, "time");
+            Json::Value  content = rootdata.get("content", jvContent);
+                
+            if (!content.isNull())
+            {
+                Json::Value jvString("");
+                enterRoomUserInfo.nickname = content.get("nickname", jvString).asString();
+                enterRoomUserInfo.richlevel = GetInt32FromJsonValue(content, "richlevel");
+                enterRoomUserInfo.userid = GetInt32FromJsonValue(content, "userid");
+            }
+            if (notify201_)
+            {
+                notify201_(enterRoomUserInfo);
+            }
+        }
+
+        std::string outmsg;
+        switch (cmd)
+        {
+        case 100:
+            break;
+        case 201:
+            CommandHandle_201(rootdata, &outmsg);
+            break;
+        case 315:
+            CommandHandle_315(rootdata, &outmsg);
+            break;
+        case 501:
+            CommandHandle_501(rootdata, &outmsg);
+            break;
+        case 601:
+            CommandHandle_601(rootdata, &outmsg);
+            break;
+        case 602:
+            CommandHandle_602(rootdata, &outmsg);
+            break;
+        case 606:
+            CommandHandle_606(rootdata, &outmsg);
+            break;
+        default:
+            break;
+        }
+
+        // 处理数据包,转换成输出界面信息
+        std::wstring wstr = base::UTF8ToWide(package);
+        normalNotify_(wstr);
+        if (!outmsg.empty())
+        {
+            wstr = base::UTF8ToWide(outmsg);
+            normalNotify_(wstr);
         }
     }
 }
@@ -442,7 +423,6 @@ bool GiftNotifyManager::Connect843()
 void GiftNotifyManager::DoConnect843()
 {
     // 843端口的连接数据没什么用
-    //tcpClient_843_->SetNotify((NotifyFunction)TcpNotify, this);
     tcpClient_843_->Connect(targetip, port843);
     std::string str = "<policy-file-request/>";
     std::vector<char> data;
@@ -464,16 +444,14 @@ bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
     return true;
 }
 
-
 void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid, 
     const std::string& nickname, uint32 richlevel, uint32 ismaster, 
     uint32 staruserid, const std::string& key,/* uint64 keytime, */
     const std::string& ext)
 {
     std::string decodestr = UrlDecode(ext);// 测试使用
-    Packet = "";
-    pos = 0;
-    tcpClient_8080_->SetNotify((NotifyFunction)TcpNotify, this);
+    Packet_ = "";
+    position_ = 0;
     if (!tcpClient_8080_->Connect(targetip, port8080))
     {
         assert(false && L"socket连接失败");
@@ -498,6 +476,7 @@ void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid,
     repeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10), this,
         &GiftNotifyManager::DoSendHeartBeat);
 
+    DoRecv();
     return ;
 }
 
@@ -511,5 +490,58 @@ void GiftNotifyManager::DoSendHeartBeat()
     normalNotify_(L"Send Heartbeat");
 }
 
+void GiftNotifyManager::DoRecv()
+{
+    std::vector<char> buffer;
+    if (!tcpClient_8080_->Recv(&buffer))
+        return;// 如果返回错误，结束流程
 
+    baseThread_.message_loop()->PostTask(FROM_HERE,
+        base::Bind(&GiftNotifyManager::DoRecv, this));
+
+    if (buffer.empty())
+        return;
+
+    Notify(buffer);
+}
+
+// 在网络积压数据包的时候，可能返回多个完整的数据包
+std::vector<std::string> GiftNotifyManager::HandleMixPackage(const std::string& package)
+{
+    std::vector<std::string> retVec;
+    auto it = package.begin();
+    auto sentinel = it;
+    while (it != package.end())
+    {
+        switch (*it)
+        {
+        case '{':
+            position_++;
+            if (position_ == 1)
+            {
+                sentinel = it;
+            }
+            break;
+        case '}':
+            position_--;
+            if (position_ == 0)
+            {
+                Packet_ += std::string(sentinel, it + 1);
+                retVec.push_back(Packet_);
+                Packet_ = "";
+            }
+            break;
+        default:
+            break;
+        }
+        it++;
+    }
+
+    if (position_ != 0) // 如果到结束还不是一个完整的json串，要等下一个数据包
+    {
+        Packet_ = std::string(sentinel, it);
+    }
+
+    return retVec;
+}
 

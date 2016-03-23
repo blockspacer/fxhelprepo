@@ -9,7 +9,12 @@
 #endif
 
 #include "resource.h"		// 主符号
+#include "third_party/chromium/base/memory/scoped_ptr.h"
 
+namespace base
+{
+    class AtExitManager;
+}
 
 // CFanXingApp: 
 // 有关此类的实现，请参阅 FanXing.cpp
@@ -29,6 +34,7 @@ public:
 	DECLARE_MESSAGE_MAP()
 private:
     void InitAppLog();
+    scoped_ptr<base::AtExitManager> atExitManager_;
 };
 
 extern CFanXingApp theApp;

@@ -25,7 +25,24 @@ struct EnterRoomUserInfo
     
 };
 
-typedef std::function<void(const std::string& key)> Notify601;
+struct RoomGiftInfo601
+{
+    uint32 time;
+    uint32 roomid;
+    uint32 senderid;
+    std::string sendername;
+    uint32 receiverid;
+    std::string receivername;
+    uint32 giftid;
+    std::string giftname;
+    uint32 gitfnumber;
+    std::string tips;
+    uint32 happyobj;
+    uint32 happytype;
+    std::string token;
+};
+
+typedef std::function<void(const RoomGiftInfo601& roomgiftinfo)> Notify601;
 typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify201;
 
 typedef std::function<void(const std::wstring& data)> NormalNotify;
@@ -45,7 +62,7 @@ public:
     void SetNotify201(Notify201 notify201);
     void SetNotify601(Notify601 notify601);
     void SetNormalNotify(NormalNotify normalNotify);
-    void Notify(const std::vector<char>& data);
+
     // 固定的请求，不需要带其他参数
     bool Connect843();
 
@@ -93,16 +110,15 @@ private:
         uint32 richlevel, uint32 ismaster, uint32 staruserid,
         const std::string& key, const std::string& ext);
     void DoSendHeartBeat();
+    void DoRecv();
 
-    //std::unique_ptr<Thread> thread_;
-    //std::unique_ptr<std::thread> stdthread_;
-    //std::unique_ptr<std::future<bool>> stdfuture_;
-    //std::unique_ptr<std::promise<bool>> stdpromise_;
-    //std::unique_ptr<std::condition_variable> stdcv_;
-    //std::mutex mtx;
+    void Notify(const std::vector<char>& data);
+    std::vector<std::string> HandleMixPackage(const std::string& package);
 
     base::Thread baseThread_;
     base::RepeatingTimer<GiftNotifyManager> repeatingTimer_;
+    std::string Packet_ = "";
+    int position_ = 0;
 
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
