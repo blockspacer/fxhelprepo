@@ -230,10 +230,10 @@ HCURSOR CFanXingDlg::OnQueryDragIcon()
 // 登录功能
 void CFanXingDlg::OnBnClickedButtonLogin()
 {
-    CString username = L"fanxingtest001";
-    CString password = L"1233211234567";
-    //GetDlgItemText(IDC_EDIT_Username, username);
-    //GetDlgItemText(IDC_EDIT_Password, password);
+    CString username;
+    CString password;
+    GetDlgItemText(IDC_EDIT_Username, username);
+    GetDlgItemText(IDC_EDIT_Password, password);
 
     // 测试通过的curl登录方式
     bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
@@ -297,7 +297,7 @@ void CFanXingDlg::OnBnClickedBtnAdd()
 
     int nitem = m_ListCtrl_UserStatus.InsertItem(0, rowdata[0].c_str());
     m_ListCtrl_UserStatus.SetItemData(nitem, listCtrlRowIndex_++);
-    for (int j = 1; j < rowdata.size(); ++j)
+    for (uint32 j = 1; j < rowdata.size(); ++j)
     {
         m_ListCtrl_UserStatus.SetItemText(nitem, j, rowdata[j].c_str());
     }
@@ -348,7 +348,7 @@ LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
 
     int itemcount = m_ListCtrl_UserStatus.GetItemCount();
 
-    for (int i = 0; i < rowdatas.size(); ++i)
+    for (uint32 i = 0; i < rowdatas.size(); ++i)
     {
         bool exist = false;
         // 检测是否存在相同用户id
@@ -366,7 +366,7 @@ LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
                 CString strEnterCount = base::UintToString16(entercount).c_str();
                 m_ListCtrl_UserStatus.SetItemText(index, 6, strEnterCount);
 
-                for (int j = 0; j < rowdatas[i].size(); ++j)
+                for (uint32 j = 0; j < rowdatas[i].size(); ++j)
                 {
                     m_ListCtrl_UserStatus.SetItemText(itemcount + i, j, rowdatas[i][j].c_str());
                 }
@@ -379,7 +379,7 @@ LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
         {
             int nitem = m_ListCtrl_UserStatus.InsertItem(itemcount + i, rowdatas[i][0].c_str());
             m_ListCtrl_UserStatus.SetItemData(nitem, i);
-            for (int j = 1; j < rowdatas[i].size(); ++j)
+            for (uint32 j = 1; j < rowdatas[i].size(); ++j)
             {
                 m_ListCtrl_UserStatus.SetItemText(itemcount + nitem, j, rowdatas[i][j].c_str());
             }
