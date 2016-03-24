@@ -85,4 +85,5 @@ public:
     afx_msg void OnBnClickedBtnUnsilent();
     CString m_query_key;
     afx_msg void OnBnClickedBtnClear();
+    CButton m_check_remember;
 };

@@ -87,6 +87,7 @@ void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST1, InfoList_);
     DDX_Control(pDX, IDC_LIST_USER_STATUS, m_ListCtrl_UserStatus);
     DDX_Text(pDX, IDC_EDIT_QUERY_KEYWORD, m_query_key);
+    DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
 }
 
 BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
