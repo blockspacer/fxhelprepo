@@ -219,6 +219,37 @@ bool NetworkHelper::GetGiftList(uint32 roomid)
     return giftInfoHelper_->Initialize(responsedata);
 }
 
+bool NetworkHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
+{
+    curlWrapper_->RegisterGetVerifyCode(picture);
+    return false;
+}
+
+bool NetworkHelper::RegisterCheckUserExist(const std::wstring& username)
+{
+    curlWrapper_->RegisterCheckUserExist(WideToUtf8(username));
+    return false;
+}
+
+bool NetworkHelper::RegisterCheckUserInfo(const std::string& username, const std::string& password)
+{
+    curlWrapper_->RegisterCheckUserInfo(username, password);
+    return false;
+}
+
+bool NetworkHelper::RegisterCheckVerifyCode(const std::string& verifycode)
+{
+    curlWrapper_->RegisterCheckVerifyCode(verifycode);
+    return false;
+}
+
+bool NetworkHelper::RegisterUser(const std::string& username, const std::string& password,
+    const std::string& verifycode)
+{
+    curlWrapper_->RegisterUser(username, password, verifycode);
+    return false;
+}
+
 // giftNotifyManager_ 线程回调
 void NetworkHelper::NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo601)
 {

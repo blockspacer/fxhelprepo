@@ -16,6 +16,7 @@
 #include "FanXingDlg.h"
 #include "NetworkHelper.h"
 #include "DlgGiftNotify.h"
+#include "DlgRegister.h"
 #include "../Network/EncodeHelper.h"
 
 #ifdef _DEBUG
@@ -87,7 +88,8 @@ BOOL CFanXingApp::InitInstance()
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
     //CFanXingDlg dlg;
-    CDlgGiftNotify dlg;
+    //CDlgGiftNotify dlg;
+    CDlgRegister dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
 

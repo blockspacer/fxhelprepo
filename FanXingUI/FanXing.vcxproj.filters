@@ -51,6 +51,12 @@
     <ClInclude Include="GiftInfoHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DlgRegister.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RegisterHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FanXingDlg.cpp">
@@ -78,6 +84,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GiftInfoHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgRegister.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RegisterHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
