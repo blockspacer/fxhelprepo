@@ -7,6 +7,7 @@
 #include "third_party/libcurl/curl/curl.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/time/time.h"
+#include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/files/file.h"
 #include "third_party/chromium/base/rand_util.h"
@@ -71,7 +72,7 @@ bool SearchHelper::GetAllFamilyInfo(std::map<uint32, FamilyInfo>* familyInfoMap)
 {
     std::string responsedata;
     std::vector<std::string> familyIds;
-    for (auto i = 1; i < pagecount_; i++)
+    for (uint32 i = 1; i < pagecount_; i++)
     {
         std::string pageid = base::IntToString(i);
         std::string pageurl = "http://visitor.fanxing.kugou.com/VServices/Clan.ClanServices.getClanList/";
@@ -452,39 +453,42 @@ bool SearchHelper::WriteToFile(const std::map<uint32, FamilyInfo>& familyMap,
     {
         return true; // 没有数据，不需要写
     }
-    std::wstring wpath = L"d:/singeroutput.txt";
-    base::FilePath path(wpath);
+
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::string timestr = base::Uint64ToString(base::Time::Now().ToInternalValue());
+    std::wstring prestr = L"上次上播时间跟踪";
+    std::wstring filename = prestr + base::UTF8ToWide(timestr + ".txt");
+    base::FilePath logpath = dirPath.Append(filename);
+    base::FilePath path(logpath);
     base::File fileobject;
-    fileobject.Initialize(path, base::File::FLAG_OPEN_ALWAYS | base::File::FLAG_APPEND);
+    fileobject.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_APPEND);
+
+    std::vector<std::string> headers;
+    headers.push_back(base::WideToUTF8(L"家族id"));
+    headers.push_back(base::WideToUTF8(L"繁星号"));
+    headers.push_back(base::WideToUTF8(L"用户名"));
+    headers.push_back(base::WideToUTF8(L"财富等级"));
+    headers.push_back(base::WideToUTF8(L"明星等级"));
+    headers.push_back(base::WideToUTF8(L"房间号"));
+    headers.push_back(base::WideToUTF8(L"上次直播1"));
+    headers.push_back(base::WideToUTF8(L"上次直播2"));
+    headers.push_back(base::WideToUTF8(L"粉丝数"));
+    headers.push_back(base::WideToUTF8(L"个人图片数"));
+    headers.push_back(base::WideToUTF8(L"用户页面"));
+    headers.push_back(base::WideToUTF8(L"房间链接"));
+    std::string headerstr;
+    for (const auto& header:headers)
+    {
+        headerstr += header + " \t";
+    }
+    headerstr += "\n";
+    fileobject.WriteAtCurrentPos(headerstr.c_str(), headerstr.size());
 
     // 按数据库格式，打印到文件
     for (auto singer : singerVec)
     {
-        // 关联家族信息
-        auto find = familyMap.find(singer.clanid);
-        if (find == familyMap.end())
-        {
-            assert(false);
-            continue;
-        }
-        const FamilyInfo& familyInfo = find->second;
         std::string outstring;
-        //struct SingerInfo
-        //{
-        //    uint32 roomid;
-        //    uint32 userid;
-        //    uint32 clanid;
-        //    uint32 lastday;//最后一次上播离现在的天数，一个月按30天算
-        //    uint32 fans;// 粉丝数量
-        //    uint32 pictures;//个人相册照片数量
-        //    std::string nickname;
-        //    std::string richlevel;
-        //    std::string starlevel;
-        //    std::string roomurl;
-        //    std::string userurl;
-        //    std::string lastactiionString;
-        //};
-
         outstring += base::UintToString(singer.clanid) + " \t";
         outstring += base::UintToString(singer.userid) + " \t";
         outstring += singer.nickname + " \t";
@@ -497,52 +501,13 @@ bool SearchHelper::WriteToFile(const std::map<uint32, FamilyInfo>& familyMap,
         outstring += base::UintToString(singer.pictures) + " \t";
         outstring += singer.userurl + " \t";
         outstring += singer.roomurl + " \t";
-
-        outstring += familyInfo.clanname + " \t";
-        outstring += familyInfo.badgename + " \t";
-        outstring += base::UintToString(familyInfo.clanroomid) + " \t";
-        outstring += base::UintToString(familyInfo.cointotal) + " \t";
-        outstring += base::UintToString(familyInfo.clanlevel) + " \t";
-        outstring += base::UintToString(familyInfo.clanleaderuserid) + " \t";
-        outstring += familyInfo.clanleadernickname + " \t";
-        outstring += base::UintToString(familyInfo.managercount) + " \t";
-        outstring += base::UintToString(familyInfo.subleadercount) + " \t";
-        outstring += base::UintToString(familyInfo.usercount) + " \t";
-        outstring += base::UintToString(familyInfo.starcount) + " \t";
-        // 时间数据处理有问题
-        //base::Time addtime;
-        //addtime.FromInternalValue(familyInfo.addtime*1000);
-        //base::Time::Exploded exploded;
-        //addtime.UTCExplode(&exploded);
-        //outstring += base::UintToString(exploded.year) + "/" +
-        //    base::UintToString(exploded.month) + "/" +
-        //    base::UintToString(exploded.day_of_month) + " \t";
-        outstring += (familyInfo.iscompany ? "company" : "personal");
-        outstring += " \t \n";
-
-        //struct FamilyInfo
-        //{
-        //    uint32 clanid;
-        //    std::string clanname;
-        //    std::string badgename;//家族简称
-        //    uint32 clanroomid;
-        //    uint64 cointotal;
-        //    uint32 clanlevel;
-        //    uint32 clanleaderuserid;
-        //    std::string clanleadernickname;
-        //    uint32 managercount;
-        //    uint32 subleadercount;
-        //    uint32 usercount;
-        //    uint32 starcount;
-        //    uint64 addtime;//unix time;
-        //    bool iscompany;
-        //};
-
+        outstring += "\n";
         fileobject.WriteAtCurrentPos(outstring.c_str(), outstring.size());
     }
     fileobject.Close();
     return true;
 }
+
 bool SearchHelper::GetExpiredFamilySingers(
     std::map<uint32, FamilyInfo>* familyInfoMap,
     std::vector<SingerInfo>* singerinfo)
@@ -595,8 +560,38 @@ bool SearchHelper::GetExpiredNormalSingers(std::vector<SingerInfo>* singerinfo)
     return false;
 }
 
+bool SearchHelper::GetClanAllSingerInfo(uint32 clanid)
+{
+    std::vector<SingerInfo> singerInfoVec;
+    std::vector<std::string> singerIdList;
+    if (!GetAllSingers(clanid, &singerIdList))
+    {
+        assert(false);
+        return false;
+    }
+    std::cout << "Singer count = " <<
+        base::IntToString(singerIdList.size()) << std::endl;
+    for (auto singerid : singerIdList)
+    {
+        SingerInfo singerInfo;
+        if (!GetSingsInfos(singerid, &singerInfo))
+        {
+            continue;
+        }
+        singerInfo.clanid = clanid;
+        singerInfoVec.push_back(singerInfo);
+    }
+    std::cout << "Expired Singer count = " <<
+        base::IntToString(singerInfoVec.size()) << std::endl;
 
-bool SearchHelper::GetUrlData(const std::string& url, std::string* response)
+    std::map<uint32, FamilyInfo> familyInfoMap;
+    FamilyInfo familyInfo;
+    familyInfoMap.insert(std::make_pair(clanid, familyInfo));
+    WriteToFile(familyInfoMap, singerInfoVec);
+    return false;
+}
+
+bool SearchHelper::GetUrlData(const std::string& url, std::string* response) const
 {
     CURL *curl;
     CURLcode res;

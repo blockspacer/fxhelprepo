@@ -57,9 +57,10 @@ public:
 
     bool GetExpiredNormalSingers(std::vector<SingerInfo>* singerinfo);
 
+    bool GetClanAllSingerInfo(uint32 clanid);
 private:
 
-    bool GetUrlData(const std::string& url, std::string* response);
+    bool GetUrlData(const std::string& url, std::string* response) const;
     bool GetAllFamilyInfo(std::map<uint32,FamilyInfo>* familyInfoMap);
     bool GetAllSingers(uint32 clanid, std::vector<std::string>* singerIdList);
     bool GetSingsInfos(const std::string& singerId, SingerInfo* singerinfo);

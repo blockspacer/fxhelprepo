@@ -10,6 +10,7 @@
 #include <string>
 #include "third_party/chromium/base/files/file.h"
 #include "third_party/chromium/base/files/file_path.h"
+#include "third_party/chromium/base/at_exit.h"
 #include <mutex> 
 #include <condition_variable>
 #include "SearchHelper.h"
@@ -192,6 +193,7 @@ void GetAllExpiredUser();
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+    base::AtExitManager atExitManager;
     GlobalInit();
     //RunTest();
     GetAllExpiredUser();
@@ -202,7 +204,11 @@ int _tmain(int argc, _TCHAR* argv[])
 void GetAllExpiredUser()
 {
     SearchHelper searchHelper;
-    // 最后一次上播在20日以前，设置拿40页家族数据
-    searchHelper.SetFilter(20,20);
-    searchHelper.Run();
+    // 最后一次上播在20日以前，设置拿20页家族数据
+    //searchHelper.SetFilter(20,20);
+    //searchHelper.Run();
+
+    // 最后一次上播在20日以前
+    searchHelper.SetFilter(1, 0);
+    searchHelper.GetClanAllSingerInfo(3783);
 }
