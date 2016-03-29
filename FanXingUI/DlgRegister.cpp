@@ -105,6 +105,8 @@ void CDlgRegister::OnBnClickedBtnRegister()
         AfxMessageBox(L"×¢²áÊ§°Ü");
         return;
     }
+
+    registerHelper_->SaveAccountToFile(username.GetString(), password.GetString());
 }
 
 
@@ -112,13 +114,18 @@ void CDlgRegister::OnBnClickedBtnVerifyCode()
 {
     std::vector<uint8> picture;
     registerNetworkHelper_->RegisterGetVerifyCode(&picture);
-    registerHelper_->SaveVerifyCodeImage(picture);
     std::wstring pathname;
-    registerHelper_->GetVerifyCodeImagePath(&pathname);
+    if (!registerHelper_->SaveVerifyCodeImage(picture, &pathname))
+    {
+        assert(false);
+        return;
+    }
+
     if (!image.IsNull())
     {
         image.Destroy();
     }
+
     image.Load(pathname.c_str());
     int hight = image.GetHeight();
     int width = image.GetWidth();

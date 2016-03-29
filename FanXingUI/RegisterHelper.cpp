@@ -13,14 +13,14 @@ RegisterHelper::RegisterHelper()
 {
 }
 
-
 RegisterHelper::~RegisterHelper()
 {
 }
 
-bool RegisterHelper::SaveVerifyCodeImage(const std::vector<uint8>& image)
+bool RegisterHelper::SaveVerifyCodeImage(const std::vector<uint8>& image,
+    std::wstring* path)
 {
-    if (image.empty())
+    if (image.empty() || !path)
     {
         return false;
     }
@@ -30,19 +30,36 @@ bool RegisterHelper::SaveVerifyCodeImage(const std::vector<uint8>& image)
     base::FilePath dirPath;
     bool result = PathService::Get(base::DIR_EXE, &dirPath);
     std::wstring filename = base::UTF8ToWide(timestr + ".png");
-    pathname_ = dirPath.Append(filename);
-    base::File pngfile(pathname_,
+    base::FilePath pathname = dirPath.Append(filename);
+    base::File pngfile(pathname,
         base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
     pngfile.Write(0, (char*)image.data(), image.size());
     pngfile.Close();
+    *path = pathname.value();
     return true;
 }
 
-bool RegisterHelper::GetVerifyCodeImagePath(std::wstring* path) const
+bool RegisterHelper::SaveAccountToFile(const std::wstring& username,
+    const std::wstring& password)
 {
-    if (!path)
-        return false;
+    std::string utf8username = base::WideToUTF8(username);
+    std::string utf8password = base::WideToUTF8(password);
 
-    *path = pathname_.value();
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    base::FilePath pathname = dirPath.Append(L"accountinfo.txt");
+    base::File accountfile(pathname,
+        base::File::FLAG_OPEN_ALWAYS | base::File::FLAG_APPEND | base::File::FLAG_WRITE);
+    accountfile.WriteAtCurrentPos((char*)utf8username.data(), utf8username.size());
+    accountfile.WriteAtCurrentPos("\t", 1);
+    accountfile.WriteAtCurrentPos((char*)utf8password.data(), utf8password.size());
+    accountfile.WriteAtCurrentPos("\n", 1);
+    accountfile.Close();
     return true;
+}
+
+bool RegisterHelper::LoadAccountFromFile(
+    std::vector<std::pair<std::wstring, std::wstring>>* accountinfo)
+{
+    return false;
 }
