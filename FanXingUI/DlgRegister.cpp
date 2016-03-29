@@ -16,6 +16,7 @@ IMPLEMENT_DYNAMIC(CDlgRegister, CDialogEx)
 
 CDlgRegister::CDlgRegister(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CDlgRegister::IDD, pParent)
+    , infoListCount_(0)
 {
     registerNetworkHelper_.reset(new NetworkHelper);
     registerNetworkHelper_->Initialize();
@@ -34,14 +35,16 @@ void CDlgRegister::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_REGISTER_PASSWORD, m_register_password);
     DDX_Control(pDX, IDC_EDIT_VERIFY_CODE, m_register_verifycode);
     DDX_Control(pDX, IDC_STATIC_VERIFYCODE, m_static_verifycode);
+    DDX_Control(pDX, IDC_LIST_REGISTER_INFO, m_register_info_list);
 }
 
 
 BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
+    ON_WM_PAINT()
     ON_BN_CLICKED(IDC_BTN_CHECK_EXIST, &CDlgRegister::OnBnClickedBtnCheckExist)
     ON_BN_CLICKED(IDC_BTN_REGISTER, &CDlgRegister::OnBnClickedBtnRegister)
     ON_BN_CLICKED(IDC_BTN_VERIFY_CODE, &CDlgRegister::OnBnClickedBtnVerifyCode)
-    ON_WM_PAINT()
+    ON_MESSAGE(WM_USER_REGISTER_INFO, &CDlgRegister::OnNotifyMessage)
 END_MESSAGE_MAP()
 
 
@@ -62,13 +65,43 @@ void CDlgRegister::OnPaint()
     CDialogEx::OnPaint();
 }
 
+LRESULT CDlgRegister::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
+{
+    std::vector<std::wstring> messages;
+    messageMutex_.lock();
+    messages.swap(messageQueen_);
+    messageMutex_.unlock();
+
+    for (auto str : messages)
+    {
+        m_register_info_list.InsertString(infoListCount_++, str.c_str());
+    }
+
+    m_register_info_list.SetCurSel(infoListCount_ - 1);
+    return 0;
+}
+
+void CDlgRegister::Notify(const std::wstring& message)
+{
+    // 发送数据给窗口
+    messageMutex_.lock();
+    messageQueen_.push_back(message);
+    messageMutex_.unlock();
+    this->PostMessage(WM_USER_REGISTER_INFO, 0, 0);
+}
+
 void CDlgRegister::OnBnClickedBtnCheckExist()
 {
     CString username;
     m_register_username.GetWindowTextW(username);
-    registerNetworkHelper_->RegisterCheckUserExist(username.GetBuffer());
+    bool result = registerNetworkHelper_->RegisterCheckUserExist(username.GetBuffer());
+    if (!result)
+    {
+        Notify(L"网络出错或用户已经存在!");
+        return;
+    }
+    Notify(L"用户名可用");
 }
-
 
 void CDlgRegister::OnBnClickedBtnRegister()
 {
@@ -82,31 +115,48 @@ void CDlgRegister::OnBnClickedBtnRegister()
 
     if (username.IsEmpty() || password.IsEmpty() || verifycode.IsEmpty())
     {
+        Notify(L"输入的注册信息不完整");
         AfxMessageBox(L"请输入完整注册信息");
         return;
     }
 
+    bool result = registerNetworkHelper_->RegisterCheckUserExist(username.GetBuffer());
+    if (!result)
+    {
+        Notify(L"网络出错或用户已经存在!");
+        return;
+    }
+    Notify(L"用户名可用");
+
     if (!registerNetworkHelper_->RegisterCheckUserInfo(username.GetString(),
         password.GetString()))
     {
-        AfxMessageBox(L"检测用户信息失败");
+        Notify(L"检测用户信息失败");
         return;
     }
+    Notify(L"检测用户信息成功");
 
     if (!registerNetworkHelper_->RegisterCheckVerifyCode(verifycode.GetString()))
     {
-        AfxMessageBox(L"验证码检测失败");
+        Notify(L"验证码错误或失效");
         return;
     }
+    Notify(L"验证码验证成功");
 
     if (!registerNetworkHelper_->RegisterUser(username.GetString(),
         password.GetString(), verifycode.GetString()))
     {
-        AfxMessageBox(L"注册失败");
+        Notify(L"注册失败");
         return;
     }
+    Notify(L"注册成功");
 
-    registerHelper_->SaveAccountToFile(username.GetString(), password.GetString());
+    if (!registerHelper_->SaveAccountToFile(username.GetString(), 
+        password.GetString()))
+    {
+        Notify(L"保存注册信息到文件失败!");
+    }
+    Notify(L"保存注册信息到文件成功!");
 }
 
 

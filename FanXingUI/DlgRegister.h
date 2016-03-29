@@ -1,5 +1,7 @@
 #pragma once
 #include <memory>
+#include <vector>
+#include <mutex>
 #include "resource.h"
 #include "afxwin.h"
 
@@ -16,19 +18,21 @@ public:
 	virtual ~CDlgRegister();
 
 // 对话框数据
-	enum { IDD = IDD_DLG_REGISTER };
+	enum { IDD = IDD_DLG_REGISTER ,
+        WM_USER_REGISTER_INFO = WM_USER + 1,
+    };
 
+    afx_msg void OnPaint();
+    afx_msg void OnBnClickedBtnCheckExist();
+    afx_msg void OnBnClickedBtnRegister();
+    afx_msg void OnBnClickedBtnVerifyCode();
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
 	DECLARE_MESSAGE_MAP()
-public:
-    afx_msg void OnPaint();
 
-    afx_msg void OnBnClickedBtnCheckExist();
-    afx_msg void OnBnClickedBtnRegister();
-    afx_msg void OnBnClickedBtnVerifyCode();
-
+    LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
+    void Notify(const std::wstring& message);
 private:
     CStatic m_static_verifycode;
     CEdit m_register_username;
@@ -38,4 +42,8 @@ private:
     std::unique_ptr<NetworkHelper> registerNetworkHelper_;
     std::unique_ptr<RegisterHelper> registerHelper_;
 
+    int infoListCount_;
+    std::mutex messageMutex_;
+    std::vector<std::wstring> messageQueen_;
+    CListBox m_register_info_list;
 };
