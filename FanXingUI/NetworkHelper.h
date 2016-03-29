@@ -60,10 +60,10 @@ public:
     // ×¢²áÐÂºÅÂë¹¦ÄÜ
     bool RegisterGetVerifyCode(std::vector<uint8>* picture);
     bool RegisterCheckUserExist(const std::wstring& username);
-    bool RegisterCheckUserInfo(const std::string& username, const std::string& password);
-    bool RegisterCheckVerifyCode(const std::string& verifycode);
-    bool RegisterUser(const std::string& username, const std::string& password,
-        const std::string& verifycode);
+    bool RegisterCheckUserInfo(const std::wstring& username, const std::wstring& password);
+    bool RegisterCheckVerifyCode(const std::wstring& verifycode);
+    bool RegisterUser(const std::wstring& username, const std::wstring& password,
+        const std::wstring& verifycode);
 
 private:
     void NotifyCallback(const std::wstring& message);

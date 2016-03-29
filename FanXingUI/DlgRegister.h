@@ -23,7 +23,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-    //afx_msg void OnPaint();
+    afx_msg void OnPaint();
 
     afx_msg void OnBnClickedBtnCheckExist();
     afx_msg void OnBnClickedBtnRegister();
@@ -37,4 +37,5 @@ private:
     std::unique_ptr<RegisterHelper> registerHelper_;
 public:
     CStatic m_static_verifycode;
+    CImage image;
 };

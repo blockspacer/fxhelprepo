@@ -227,27 +227,29 @@ bool NetworkHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
 
 bool NetworkHelper::RegisterCheckUserExist(const std::wstring& username)
 {
-    curlWrapper_->RegisterCheckUserExist(WideToUtf8(username));
-    return false;
+    return curlWrapper_->RegisterCheckUserExist(WideToUtf8(username));
 }
 
-bool NetworkHelper::RegisterCheckUserInfo(const std::string& username, const std::string& password)
+bool NetworkHelper::RegisterCheckUserInfo(const std::wstring& username, const std::wstring& password)
 {
-    curlWrapper_->RegisterCheckUserInfo(username, password);
-    return false;
+    std::string utf8username = base::WideToUTF8(username);
+    std::string utf8password = base::WideToUTF8(password);
+    return curlWrapper_->RegisterCheckUserInfo(utf8username, utf8password);
 }
 
-bool NetworkHelper::RegisterCheckVerifyCode(const std::string& verifycode)
+bool NetworkHelper::RegisterCheckVerifyCode(const std::wstring& verifycode)
 {
-    curlWrapper_->RegisterCheckVerifyCode(verifycode);
-    return false;
+    std::string utf8verifycode = base::WideToUTF8(verifycode);
+    return curlWrapper_->RegisterCheckVerifyCode(utf8verifycode);
 }
 
-bool NetworkHelper::RegisterUser(const std::string& username, const std::string& password,
-    const std::string& verifycode)
+bool NetworkHelper::RegisterUser(const std::wstring& username, 
+    const std::wstring& password, const std::wstring& verifycode)
 {
-    curlWrapper_->RegisterUser(username, password, verifycode);
-    return false;
+    std::string utf8username = base::WideToUTF8(username);
+    std::string utf8password = base::WideToUTF8(password);
+    std::string utf8verifycode = base::WideToUTF8(verifycode);
+    return curlWrapper_->RegisterUser(utf8username, utf8password, utf8verifycode);
 }
 
 // giftNotifyManager_ 线程回调

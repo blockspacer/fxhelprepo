@@ -41,27 +41,70 @@ BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_CHECK_EXIST, &CDlgRegister::OnBnClickedBtnCheckExist)
     ON_BN_CLICKED(IDC_BTN_REGISTER, &CDlgRegister::OnBnClickedBtnRegister)
     ON_BN_CLICKED(IDC_BTN_VERIFY_CODE, &CDlgRegister::OnBnClickedBtnVerifyCode)
+    ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
 // DlgRegister 消息处理程序
 
-//void CDlgRegister::OnPaint()
-//{
-//    CDialogEx::OnPaint();
-//}
+void CDlgRegister::OnPaint()
+{
+    if (!image.IsNull())
+    {
+        int hight = image.GetHeight();
+        int width = image.GetWidth();
+        CRect rc;
+        m_static_verifycode.GetWindowRect(&rc);
+        ScreenToClient(rc);
+        image.Draw(GetDC()->m_hDC, CRect(rc.left + 20, rc.top + 30, rc.left + width + 20,
+            rc.top + hight + 30));
+    }
+    CDialogEx::OnPaint();
+}
 
 void CDlgRegister::OnBnClickedBtnCheckExist()
 {
     CString username;
-    m_register_username.GetDlgItemTextW(IDC_EDIT_REGISTER_NAME, username);
+    m_register_username.GetWindowTextW(username);
     registerNetworkHelper_->RegisterCheckUserExist(username.GetBuffer());
 }
 
 
 void CDlgRegister::OnBnClickedBtnRegister()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    CString username;
+    CString password;
+    CString verifycode;
+
+    m_register_username.GetWindowTextW(username);
+    m_register_password.GetWindowTextW(password);
+    m_register_verifycode.GetWindowTextW(verifycode);
+
+    if (username.IsEmpty() || password.IsEmpty() || verifycode.IsEmpty())
+    {
+        AfxMessageBox(L"请输入完整注册信息");
+        return;
+    }
+
+    if (!registerNetworkHelper_->RegisterCheckUserInfo(username.GetString(),
+        password.GetString()))
+    {
+        AfxMessageBox(L"检测用户信息失败");
+        return;
+    }
+
+    if (!registerNetworkHelper_->RegisterCheckVerifyCode(verifycode.GetString()))
+    {
+        AfxMessageBox(L"验证码检测失败");
+        return;
+    }
+
+    if (!registerNetworkHelper_->RegisterUser(username.GetString(),
+        password.GetString(), verifycode.GetString()))
+    {
+        AfxMessageBox(L"注册失败");
+        return;
+    }
 }
 
 
@@ -72,7 +115,10 @@ void CDlgRegister::OnBnClickedBtnVerifyCode()
     registerHelper_->SaveVerifyCodeImage(picture);
     std::wstring pathname;
     registerHelper_->GetVerifyCodeImagePath(&pathname);
-    CImage image;
+    if (!image.IsNull())
+    {
+        image.Destroy();
+    }
     image.Load(pathname.c_str());
     int hight = image.GetHeight();
     int width = image.GetWidth();

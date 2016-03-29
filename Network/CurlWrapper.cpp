@@ -1544,7 +1544,6 @@ bool CurlWrapper::RegisterCheckUserExist(const std::string& username)
 bool CurlWrapper::RegisterCheckUserInfo(const std::string& username, 
     const std::string& password)
 {
-
     std::string pwdMd5 = MakeMd5FromString(password);
 
     LOG(INFO) << __FUNCTION__ << L" username = " << username;
@@ -1574,11 +1573,11 @@ bool CurlWrapper::RegisterCheckUserInfo(const std::string& username,
 
     struct curl_slist *headers = 0;
     //headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
-    headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    //headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
     headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
     headers = curl_slist_append(headers, "Connection: Keep-Alive");
     headers = curl_slist_append(headers, "Accept-Language: zh-CN,en,*");
-    headers = curl_slist_append(headers, "Host: fanxing.kugou.com");//这个值与别的不一样
+    headers = curl_slist_append(headers, "Host: userinfo.user.kugou.com");//这个值与别的不一样
     headers = curl_slist_append(headers, "Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3");
     headers = curl_slist_append(headers, "Accept: */*");
     headers = curl_slist_append(headers, "Content-Type: application/json;charset=utf-8");
@@ -1757,6 +1756,19 @@ bool CurlWrapper::RegisterCheckVerifyCode(const std::string& verifycode)
     auto pos = data.find(CheckSudoCode);
     if (pos == std::string::npos)
     {
+        std::string pre = "KgUser.CheckSudoCode(";
+        std::string json = data.substr(pre.length(), data.length() - pre.length() - 1);
+        Json::Reader reader;
+        Json::Value rootdata(Json::objectValue);
+        if (!reader.parse(json, rootdata, false))
+        {
+            return false;
+        }
+
+        // 有必要检测msg的值
+        std::string msg = rootdata.get(std::string("errorMsg"), "").asString();
+        std::string utf8msg;
+        UnicodeToUtf8(msg, &utf8msg);
         return false;
     }
     return true;
@@ -1803,6 +1815,11 @@ bool CurlWrapper::RegisterUser(const std::string& username,
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
     curl_easy_setopt(curl, CURLOPT_REFERER, fanxingurl);
+    if (!cookies.empty())
+    {
+        curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+    }
+
     // 把请求返回来时设置的cookie保存起来
     std::string path = "d:/cookie_";
     path += MakeReasonablePath(__FUNCTION__) + ".txt";
@@ -1823,6 +1840,10 @@ bool CurlWrapper::RegisterUser(const std::string& username,
     // 获取请求业务结果
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+    if (responsecode!=200)
+    {
+        return false;
+    }
 
     std::string regSuccessCallback = "regSuccessCallback";
     std::string data = currentWriteData_;
@@ -1831,29 +1852,25 @@ bool CurlWrapper::RegisterUser(const std::string& username,
         return false;
 
     data = data.substr(regSuccessCallback.length() + 1, 
-        data.length() - regSuccessCallback.length() - 2);
-
+        data.length() - regSuccessCallback.length() - 3);
     
-    if (data.find("pic")==std::string::npos)
+    std::string json = data;
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(json, rootdata, false))
     {
         return false;
     }
-    if (data.find("nickname") == std::string::npos)
+    Json::Value::Members members = rootdata.getMemberNames();
+    for (auto member : members)
     {
-        return false;
+        if (member == "errorCode")
+        {
+            LOG(INFO) << __FUNCTION__ << L"注册失败";
+            return false;
+        }   
     }
-    if (data.find("username") == std::string::npos)
-    {
-        return false;
-    }
-    if (data.find("token") == std::string::npos)
-    {
-        return false;
-    }
-    if (data.find("userid") == std::string::npos)
-    {
-        return false;
-    }
+
     return true;
 }
 
