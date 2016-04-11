@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <string>
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/files/file.h"
@@ -11,6 +12,31 @@ enum class KICK_TYPE
     KICK_TYPE_MONTH = 1,
 };
 
+class HttpRequest
+{
+public:
+    enum class HTTP_METHOD
+    {
+        HTTP_METHOD_GET = 0,
+        HTTP_METHOD_POST = 1,
+    };
+    HTTP_METHOD method;
+    std::string url;
+    std::string referer;
+    std::string cookies;
+    std::map<std::string, std::string> queries;
+    std::map<std::string, std::string> headers;
+};
+
+class HttpResponse
+{
+public:
+    uint32 curlcode;
+    uint32 statuscode;
+    std::string cookies;
+    std::vector<uint8> content;
+
+};
 // 提供方便的使用curl接口的执行请求函数。
 class CurlWrapper
 {
@@ -72,6 +98,8 @@ public:
     bool RegisterUser(const std::string& username, const std::string& password,
         const std::string& verifycode);
 
+protected:
+    bool Execute(const HttpRequest& request, HttpResponse* reponse);
 
 private:
     bool ParseGiftServiceResponse(const std::string& responsedata,

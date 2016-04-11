@@ -206,6 +206,11 @@ namespace
         }
         return true;
     }
+
+    bool GetCookiesFromHeader(const std::string& header, std::string* cookies)
+    {
+        return false;
+    }
 }
 
 bool CurlWrapper::WriteCallback(const std::string& data)
@@ -1869,6 +1874,100 @@ bool CurlWrapper::RegisterUser(const std::string& username,
             LOG(INFO) << __FUNCTION__ << L"×¢²áÊ§°Ü";
             return false;
         }   
+    }
+
+    return true;
+}
+
+bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
+{
+    LOG(INFO) << __FUNCTION__;
+
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (!curl)
+        return false;
+    std::string url = request.url;
+    if (!request.queries.empty())
+    {
+        bool first = true;
+        for (const auto& it : request.queries)
+        {
+            url += first ? "?" : "&";
+            first = false;
+            url += it.first + "=" + it.second;
+        }
+    }
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    if (url.find("https")!=std::string::npos)
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    }
+
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    struct curl_slist *headers = 0;
+    headers = curl_slist_append(headers, "Connection:Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Language:zh-CN");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
+    headers = curl_slist_append(headers, "Accept:*/*");
+    for (const auto& it : request.headers)
+    {
+        std::string header = it.first + ":" + it.second;
+        headers = curl_slist_append(headers, header.c_str());
+    }
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+    if (!request.referer.empty())
+    {
+        curl_easy_setopt(curl, CURLOPT_REFERER, request.referer.c_str());
+    }
+    
+    if (!request.cookies.empty())
+    {
+        curl_easy_setopt(curl, CURLOPT_COOKIE, request.cookies.c_str());
+    }
+
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    currentResponseHeader_.clear();
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
+
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+
+    res = curl_easy_perform(curl);
+    response->curlcode = res;
+    if (res != CURLE_OK)
+    {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        LOG(ERROR) << curl_easy_strerror(res);       
+        return false;
+    }
+
+    long responsecode = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+    response->statuscode = responsecode;
+    if (responsecode != 200)
+    {
+        fprintf(stderr, "reponsecode: %ld\n", responsecode);
+        return false;
+    }
+
+    response->content.assign(currentWriteData_.begin(), currentWriteData_.end());
+    std::string setcookies;
+    if (GetCookiesFromHeader(currentResponseHeader_, &setcookies))
+    {
+        response->cookies = setcookies;
     }
 
     return true;
