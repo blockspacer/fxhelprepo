@@ -10,7 +10,7 @@
 #include "third_party/chromium/base/strings/string_piece.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
-static const wchar_t HEX[] = L"0123456789ABCDEF";
+static const wchar_t HEX[] = L"0123456789abcdef";
 std::wstring BinToHex(const void* bin, int len)
 {
     const unsigned char* b = static_cast<const unsigned char*>(bin);

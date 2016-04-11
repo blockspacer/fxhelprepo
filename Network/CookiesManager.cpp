@@ -92,11 +92,12 @@ CookiesManager::~CookiesManager()
 
 bool CookiesManager::SetCookies(const std::string& key, const std::string& cookie)
 {
-    if (cookies_.find(key) != cookies_.end())
-    {
-        return false;
-    }
-    cookies_.insert(std::make_pair(key, cookie));
+    //if (cookies_.find(key) != cookies_.end())
+    //{
+    //    return false;
+    //}
+    //cookies_.insert(std::make_pair(key, cookie));
+    cookies_[key] = cookie;
     return true;
 }
 

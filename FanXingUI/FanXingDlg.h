@@ -67,6 +67,7 @@ private:
     uint32 listCtrlRowIndex_;
 
 public:
+    CString m_query_key;
     CListBox InfoList_;
     int infoListCount_;
     CListCtrl m_ListCtrl_UserStatus;
@@ -82,8 +83,7 @@ public:
     afx_msg void OnBnClickedBtnKickoutMonth();
     afx_msg void OnBnClickedBtnKickoutHour();
     afx_msg void OnBnClickedBtnSilent();
-    afx_msg void OnBnClickedBtnUnsilent();
-    CString m_query_key;
+    afx_msg void OnBnClickedBtnUnsilent();  
     afx_msg void OnBnClickedBtnClear();
     CButton m_check_remember;
 };

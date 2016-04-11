@@ -57,6 +57,14 @@ public:
 
     bool GetGiftList(uint32 roomid);
 
+    // ×¢²áÐÂºÅÂë¹¦ÄÜ
+    bool RegisterGetVerifyCode(std::vector<uint8>* picture);
+    bool RegisterCheckUserExist(const std::wstring& username);
+    bool RegisterCheckUserInfo(const std::wstring& username, const std::wstring& password);
+    bool RegisterCheckVerifyCode(const std::wstring& verifycode);
+    bool RegisterUser(const std::wstring& username, const std::wstring& password,
+        const std::wstring& verifycode);
+
 private:
     void NotifyCallback(const std::wstring& message);
     void NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo);

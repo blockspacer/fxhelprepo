@@ -219,6 +219,39 @@ bool NetworkHelper::GetGiftList(uint32 roomid)
     return giftInfoHelper_->Initialize(responsedata);
 }
 
+bool NetworkHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
+{
+    curlWrapper_->RegisterGetVerifyCode(picture);
+    return false;
+}
+
+bool NetworkHelper::RegisterCheckUserExist(const std::wstring& username)
+{
+    return curlWrapper_->RegisterCheckUserExist(WideToUtf8(username));
+}
+
+bool NetworkHelper::RegisterCheckUserInfo(const std::wstring& username, const std::wstring& password)
+{
+    std::string utf8username = base::WideToUTF8(username);
+    std::string utf8password = base::WideToUTF8(password);
+    return curlWrapper_->RegisterCheckUserInfo(utf8username, utf8password);
+}
+
+bool NetworkHelper::RegisterCheckVerifyCode(const std::wstring& verifycode)
+{
+    std::string utf8verifycode = base::WideToUTF8(verifycode);
+    return curlWrapper_->RegisterCheckVerifyCode(utf8verifycode);
+}
+
+bool NetworkHelper::RegisterUser(const std::wstring& username, 
+    const std::wstring& password, const std::wstring& verifycode)
+{
+    std::string utf8username = base::WideToUTF8(username);
+    std::string utf8password = base::WideToUTF8(password);
+    std::string utf8verifycode = base::WideToUTF8(verifycode);
+    return curlWrapper_->RegisterUser(utf8username, utf8password, utf8verifycode);
+}
+
 // giftNotifyManager_ 线程回调
 void NetworkHelper::NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo601)
 {

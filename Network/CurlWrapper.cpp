@@ -1311,7 +1311,6 @@ bool CurlWrapper::GetGiftList(uint32 roomid, std::string* outputstr)
 bool CurlWrapper::ParseGiftServiceResponse(const std::string& responsedata,
     std::wstring* notifyinfo)
 {
-
     return false;
 }
 
@@ -1328,5 +1327,550 @@ bool CurlWrapper::SetCookieFromString(const std::string& key, const std::string&
     auto end = cookiestring.find(';', begin);
     bool result = cookiesmanager_.SetCookies(key, cookiestring.substr(begin, end - begin));
     return result;
+}
+
+// 请求注册的验证码，返回函数会设置Set-Cookie: RegCheckCode
+//GET http://verifycode.service.kugou.com/v1/get_img_code?type=RegCheckCode&appid=1010&codetype=1&t=1458830896851 HTTP/1.1
+//Host: verifycode.service.kugou.com
+//Connection: keep-alive
+//Accept: image/webp,*/*;q=0.8
+//User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36
+//Referer: http://fanxing.kugou.com/
+//Accept-Encoding: gzip, deflate, sdch
+//Accept-Language: zh-CN,zh;q=0.8
+bool CurlWrapper::RegisterGetVerifyCode(std::vector<uint8>* picture)
+{
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (!curl)
+        return false;
+
+    std::string url = "http://verifycode.service.kugou.com";
+    url += "/v1/get_img_code?type=RegCheckCode&appid=1010&codetype=1&t=";
+    url += GetNowTimeString();
+
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+
+    struct curl_slist *headers = 0;
+    //headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
+    headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
+    headers = curl_slist_append(headers, "Connection: Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Language: zh-CN,en,*");
+    headers = curl_slist_append(headers, "Host: verifycode.service.kugou.com");//这个值与别的不一样
+    headers = curl_slist_append(headers, "Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3");
+    headers = curl_slist_append(headers, "Accept: image/webp,*/*;q=0.8"); // 接收图片
+    headers = curl_slist_append(headers, "Content-Type: application/json;charset=utf-8");
+
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+    // 这里不要接受压缩的数据包，免得解压麻烦
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    std::string referer = "http://fanxing.kugou.com/";
+    curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+
+    // 把请求返回来时设置的cookie保存起来
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
+
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    currentResponseHeader_.clear();
+    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
+
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if (res != CURLE_OK)
+    {
+        LOG(INFO) << __FUNCTION__ << L" curl_easy_perform failed";
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return false;
+    }
+    // 获取请求业务结果
+    long responsecode = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+
+    auto pos = currentResponseHeader_.find("RegCheckCode");
+    if (pos != std::string::npos)
+    {
+        auto begin = pos;
+        auto end = currentResponseHeader_.find(';', begin);
+        if (end != std::string::npos)
+        {
+            cookiesmanager_.SetCookies("RegCheckCode", currentResponseHeader_.substr(begin, end - begin));
+        }
+    }
+
+    picture->assign(currentWriteData_.begin(), currentWriteData_.end());
+
+    LOG(INFO) << __FUNCTION__ << L" responsecode = " << base::IntToString(responsecode);
+    if (responsecode != 200)
+    {
+        return false;
+    }
+    return true;
+}
+
+//GET http://fanxing.kugou.com/UServices/UserService/UserService/isExists?args=[%22fanxingtest007%22,1]&_=1458830905099 HTTP/1.1
+//Host: fanxing.kugou.com
+//Connection: keep-alive
+//Accept: application/json, text/javascript, */*; q=0.01
+//X-Requested-With: XMLHttpRequest
+//User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36
+//Referer: http://fanxing.kugou.com/
+//Accept-Encoding: gzip, deflate, sdch
+//Accept-Language: zh-CN,zh;q=0.8
+//Cookie: RegCheckCode=599f85ea9acb57d2c50492130330f782
+// 检查用户是否已经存在，未确认不请求会不会有问题
+bool CurlWrapper::RegisterCheckUserExist(const std::string& username)
+{
+    LOG(INFO) << __FUNCTION__ << L" username = " << username;
+
+    std::vector<std::string> keys;
+    keys.push_back("RegCheckCode");
+    std::string cookies = cookiesmanager_.GetCookies(keys);
+
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (!curl)
+        return false;
+
+    std::string url = std::string(fanxingurl);
+    url += "/UServices/UserService/UserService/isExists?args=[%22";
+    url += username + "%22,1]&_=";
+    url += GetNowTimeString();
+
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+
+    struct curl_slist *headers = 0;
+    //headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
+    headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
+    headers = curl_slist_append(headers, "Connection: Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Language: zh-CN,en,*");
+    headers = curl_slist_append(headers, "Host: fanxing.kugou.com");//这个值与别的不一样
+    headers = curl_slist_append(headers, "Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3");
+    headers = curl_slist_append(headers, "Accept: application/json;text/javascript,*/*;q=0.01");
+    headers = curl_slist_append(headers, "Content-Type: application/json;charset=utf-8");
+
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+    // 这里不要接受压缩的数据包，免得解压麻烦
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    std::string referer = "http://fanxing.kugou.com/";
+    curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+
+    if (!cookies.empty())
+    {
+        curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+    }
+
+    // 把请求返回来时设置的cookie保存起来
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
+
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if (res != CURLE_OK)
+    {
+        LOG(INFO) << __FUNCTION__ << L" curl_easy_perform failed";
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return false;
+    }
+    // 获取请求业务结果
+    long responsecode = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+    LOG(INFO) << __FUNCTION__ << L" responsecode = " << base::IntToString(responsecode);
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+
+    if (responsecode != 200)
+    {
+        return false;
+    }
+
+    const std::string& data = currentWriteData_;
+    //解析json数据
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(data, rootdata, false))
+    {
+        return false;
+    }
+
+    // 有必要检测status的值
+    uint32 status = rootdata.get(std::string("status"), 0).asInt();
+    if (status == 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// 检查用户和密码有效性，未确认不请求会不会有问题
+bool CurlWrapper::RegisterCheckUserInfo(const std::string& username, 
+    const std::string& password)
+{
+    std::string pwdMd5 = MakeMd5FromString(password);
+
+    LOG(INFO) << __FUNCTION__ << L" username = " << username;
+
+    std::vector<std::string> keys;
+    keys.push_back("RegCheckCode");
+    std::string cookies = cookiesmanager_.GetCookies(keys);
+
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (!curl)
+        return false;
+
+    std::string url = "http://userinfo.user.kugou.com";
+    url += "/check_str/?appid=1010&str=" + pwdMd5;
+    url += "&username=" + username + "&callback=checkPwdSuccessCallback";
+
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+
+    struct curl_slist *headers = 0;
+    //headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
+    //headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
+    headers = curl_slist_append(headers, "Connection: Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Language: zh-CN,en,*");
+    headers = curl_slist_append(headers, "Host: userinfo.user.kugou.com");//这个值与别的不一样
+    headers = curl_slist_append(headers, "Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3");
+    headers = curl_slist_append(headers, "Accept: */*");
+    headers = curl_slist_append(headers, "Content-Type: application/json;charset=utf-8");
+
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+    // 这里不要接受压缩的数据包，免得解压麻烦
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    std::string referer = "http://fanxing.kugou.com/";
+    curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+
+    if (!cookies.empty())
+    {
+        curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+    }
+
+    // 把请求返回来时设置的cookie保存起来
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
+
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if (res != CURLE_OK)
+    {
+        LOG(INFO) << __FUNCTION__ << L" curl_easy_perform failed";
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return false;
+    }
+    // 获取请求业务结果
+    long responsecode = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+    LOG(INFO) << __FUNCTION__ << L" responsecode = " << base::IntToString(responsecode);
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+
+    if (responsecode != 200)
+    {
+        return false;
+    }
+
+    std::string& data = currentWriteData_;
+    std::string checkPwdSuccessCallback = "checkPwdSuccessCallback";
+    auto pos = data.find("checkPwdSuccessCallback");
+    if (pos == std::string::npos)
+    {
+        return false;
+    }
+
+    // checkPwdSuccessCallback({"status":1,"error_code":0,"data":0})
+    // 取出json数据
+    data = data.substr(checkPwdSuccessCallback.length() + 1, 
+        data.length()-checkPwdSuccessCallback.length()-2);
+
+    //解析json数据
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(data, rootdata, false))
+    {
+        return false;
+    }
+
+    // 有必要检测status的值
+    uint32 status = rootdata.get(std::string("status"), 0).asInt();
+    if (status == 0)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+//GET http://verifycode.service.kugou.com/v1/check_img_code/?appid=1010&ct=1458830934&code=5987&type=RegCheckCode&callback=KgUser.CheckSudoCode HTTP/1.1
+//Host: verifycode.service.kugou.com
+//Connection: keep-alive
+//Accept: */*
+//User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36
+//Referer: http://fanxing.kugou.com/
+//Accept-Encoding: gzip, deflate, sdch
+//Accept-Language: zh-CN,zh;q=0.8
+//Cookie: RegCheckCode=599f85ea9acb57d2c50492130330f782
+// 提交验证码数据
+bool CurlWrapper::RegisterCheckVerifyCode(const std::string& verifycode)
+{
+    LOG(INFO) << __FUNCTION__ << L" verifycode = " << verifycode;
+
+    std::vector<std::string> keys;
+    keys.push_back("RegCheckCode");
+    std::string cookies = cookiesmanager_.GetCookies(keys);
+
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (!curl)
+        return false;
+
+    std::string url = "http://verifycode.service.kugou.com";
+    url += "/v1/check_img_code/?appid=1010&ct=" + GetNowTimeString();
+    url += "&code=" + verifycode + "&type=RegCheckCode&callback=KgUser.CheckSudoCode";
+
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+
+    struct curl_slist *headers = 0;
+    //headers = curl_slist_append(headers, "Accept: text/html, application/xhtml+xml, */*");
+    headers = curl_slist_append(headers, "X-Requested-With: XMLHttpRequest");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
+    headers = curl_slist_append(headers, "Connection: Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Language: zh-CN,en,*");
+    headers = curl_slist_append(headers, "Host: verifycode.service.kugou.com");//这个值与别的不一样
+    headers = curl_slist_append(headers, "Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3");
+    headers = curl_slist_append(headers, "Accept: */*");
+    headers = curl_slist_append(headers, "Content-Type: application/json;charset=utf-8");
+
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+    // 这里不要接受压缩的数据包，免得解压麻烦
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    std::string referer = "http://fanxing.kugou.com/";
+    curl_easy_setopt(curl, CURLOPT_REFERER, referer.c_str());
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+
+    if (!cookies.empty())
+    {
+        curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+    }
+
+    // 把请求返回来时设置的cookie保存起来
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
+
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if (res != CURLE_OK)
+    {
+        LOG(INFO) << __FUNCTION__ << L" curl_easy_perform failed";
+        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return false;
+    }
+    // 获取请求业务结果
+    long responsecode = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+    LOG(INFO) << __FUNCTION__ << L" responsecode = " << base::IntToString(responsecode);
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+
+    if (responsecode != 200)
+    {
+        return false;
+    }
+
+    std::string& data = currentWriteData_;
+    std::string CheckSudoCode = R"(KgUser.CheckSudoCode({"msg":"success"}))";
+    auto pos = data.find(CheckSudoCode);
+    if (pos == std::string::npos)
+    {
+        std::string pre = "KgUser.CheckSudoCode(";
+        std::string json = data.substr(pre.length(), data.length() - pre.length() - 1);
+        Json::Reader reader;
+        Json::Value rootdata(Json::objectValue);
+        if (!reader.parse(json, rootdata, false))
+        {
+            return false;
+        }
+
+        // 有必要检测msg的值
+        std::string msg = rootdata.get(std::string("errorMsg"), "").asString();
+        std::string utf8msg;
+        UnicodeToUtf8(msg, &utf8msg);
+        return false;
+    }
+    return true;
+}
+
+// 提交注册功能
+bool CurlWrapper::RegisterUser(const std::string& username,
+    const std::string& password,
+    const std::string& verifycode)
+{
+    LOG(INFO) << __FUNCTION__ << L" verifycode = " << verifycode;
+
+    std::vector<std::string> keys;
+    keys.push_back("RegCheckCode");
+    std::string cookies = cookiesmanager_.GetCookies(keys);
+
+    CURL *curl;
+    CURLcode res;
+    curl = curl_easy_init();
+
+    if (!curl)
+        return false;
+    std::string url = "https://reg-user.kugou.com";
+    url += "/v2/reg/?regtype=username&appid=1010&code="+verifycode;
+    url += "&expire_day=1&username=" + UrlEncode(username);
+    url += "&sex=1&password=" + MakeMd5FromString(password);
+    url += "&nickname=" + UrlEncode(username);
+    url += "&security_email=&id_card=&truename=&callback=regSuccessCallback&codetype=1";
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    /* example.com is redirected, so we tell libcurl to follow redirection */
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+    struct curl_slist *headers = 0;
+    headers = curl_slist_append(headers, "Connection:Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Language:zh-CN");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
+    headers = curl_slist_append(headers, "Accept:*/*");
+    headers = curl_slist_append(headers, "Host:reg-user.kugou.com");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+    curl_easy_setopt(curl, CURLOPT_REFERER, fanxingurl);
+    if (!cookies.empty())
+    {
+        curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
+    }
+
+    // 把请求返回来时设置的cookie保存起来
+    std::string path = "d:/cookie_";
+    path += MakeReasonablePath(__FUNCTION__) + ".txt";
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
+
+    currentWriteData_.clear();
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
+
+    /* Perform the request, res will get the return code */
+    res = curl_easy_perform(curl);
+    /* Check for errors */
+    if (res != CURLE_OK)
+    {
+        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+        return false;
+    }
+    // 获取请求业务结果
+    long responsecode = 0;
+    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
+    if (responsecode!=200)
+    {
+        return false;
+    }
+
+    std::string regSuccessCallback = "regSuccessCallback";
+    std::string data = currentWriteData_;
+    auto pos = data.find(regSuccessCallback);
+    if (pos == std::string::npos)
+        return false;
+
+    data = data.substr(regSuccessCallback.length() + 1, 
+        data.length() - regSuccessCallback.length() - 3);
+    
+    std::string json = data;
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(json, rootdata, false))
+    {
+        return false;
+    }
+    Json::Value::Members members = rootdata.getMemberNames();
+    for (auto member : members)
+    {
+        if (member == "errorCode")
+        {
+            LOG(INFO) << __FUNCTION__ << L"注册失败";
+            return false;
+        }   
+    }
+
+    return true;
 }
 
