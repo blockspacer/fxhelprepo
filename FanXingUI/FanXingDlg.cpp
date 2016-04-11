@@ -3,16 +3,30 @@
 //
 
 #include "stdafx.h"
+#include <xutility>
 #include "FanXing.h"
 #include "FanXingDlg.h"
 #include "afxdialogex.h"
-
+#include "NetworkHelper.h"
 #include "WebHandler.h"
+#include "base/strings/string_number_conversions.h"
+#include "base/strings/utf_string_conversions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+namespace
+{
+    const wchar_t* columnlist[] = {
+        L"昵称",
+        L"财富等级",
+        L"用户id",
+        L"进房时间",
+        L"房间号",
+        L"进入次数"
+    };
+}
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
@@ -52,12 +66,10 @@ END_MESSAGE_MAP()
 CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFanXingDlg::IDD, pParent)
     , network_(nullptr)
-    , count(0)
+    , infoListCount_(0)
+    , listCtrlRowIndex_(0)
+    , m_query_key(_T(""))
 {
-    //network_->Initialize();
-    //network_->SetNotify(
-    //    std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
-
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
 }
 
@@ -72,23 +84,37 @@ CFanXingDlg::~CFanXingDlg()
 void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_EXPLORER1, web_);
     DDX_Control(pDX, IDC_LIST1, InfoList_);
+    DDX_Control(pDX, IDC_LIST_USER_STATUS, m_ListCtrl_UserStatus);
+    DDX_Text(pDX, IDC_EDIT_QUERY_KEYWORD, m_query_key);
+    DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
 }
 
 BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_WM_SYSCOMMAND()
     ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
-    ON_BN_CLICKED(IDC_BUTTON1, &CFanXingDlg::OnBnClickedButton1)
+    ON_WM_QUERYDRAGICON()
+    ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CFanXingDlg::OnBnClickedButtonLogin)
     ON_BN_CLICKED(IDC_BUTTON_CLICK, &CFanXingDlg::OnBnClickedButtonClick)
     ON_BN_CLICKED(IDC_BUTTON_REWARSTAR, &CFanXingDlg::OnBnClickedButtonRewarstar)
     ON_BN_CLICKED(IDC_BUTTON_REWARDGIFT, &CFanXingDlg::OnBnClickedButtonRewardgift)
     ON_BN_CLICKED(IDC_BUTTON_NAV, &CFanXingDlg::OnBnClickedButtonNav)
     ON_WM_LBUTTONDOWN()
     ON_BN_CLICKED(IDC_BTN_GETMSG, &CFanXingDlg::OnBnClickedBtnGetmsg)
-    ON_BN_CLICKED(IDC_BTN_TEST, &CFanXingDlg::OnBnClickedBtnTest)
+    ON_BN_CLICKED(IDC_BTN_ADD, &CFanXingDlg::OnBnClickedBtnAdd)
     ON_MESSAGE(WM_USER_01, &CFanXingDlg::OnNotifyMessage)
+    ON_MESSAGE(WM_USER_ADD_ENTER_ROOM_INFO, &CFanXingDlg::OnDisplayDataToGrid)
+    ON_NOTIFY(HDN_ITEMCLICK, 0, &CFanXingDlg::OnHdnItemclickListUserStatus)
+    ON_BN_CLICKED(IDC_BUTTON_REMOVE, &CFanXingDlg::OnBnClickedButtonRemove)
+    ON_BN_CLICKED(IDC_BTN_MODIFY, &CFanXingDlg::OnBnClickedBtnModify)
+    ON_BN_CLICKED(IDC_BTN_QUERY, &CFanXingDlg::OnBnClickedBtnQuery)
+    ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CFanXingDlg::OnBnClickedBtnSelectAll)
+    ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE, &CFanXingDlg::OnBnClickedBtnSelectReverse)
+    ON_BN_CLICKED(IDC_BTN_KICKOUT_MONTH, &CFanXingDlg::OnBnClickedBtnKickoutMonth)
+    ON_BN_CLICKED(IDC_BTN_KICKOUT_HOUR, &CFanXingDlg::OnBnClickedBtnKickoutHour)
+    ON_BN_CLICKED(IDC_BTN_SILENT, &CFanXingDlg::OnBnClickedBtnSilent)
+    ON_BN_CLICKED(IDC_BTN_UNSILENT, &CFanXingDlg::OnBnClickedBtnUnsilent)
+    ON_BN_CLICKED(IDC_BTN_CLEAR, &CFanXingDlg::OnBnClickedBtnClear)
 END_MESSAGE_MAP()
 
 
@@ -118,19 +144,30 @@ BOOL CFanXingDlg::OnInitDialog()
 		}
 	}
 
-    web_.put_Silent(TRUE);// 禁止弹出360升级浏览器提示
-
 	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
-    web_.Navigate(L"http://fanxing.kugou.com", NULL, NULL, NULL, NULL);
+    DWORD dwStyle = m_ListCtrl_UserStatus.GetExtendedStyle();
+    dwStyle |= LVS_EX_CHECKBOXES;
+    dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
+    dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
+    m_ListCtrl_UserStatus.SetExtendedStyle(dwStyle); //设置扩展风格
 
-    SetDlgItemText(IDC_EDIT_NAV, L"1014619");
+    SetDlgItemText(IDC_EDIT_NAV, L"1053637");
     SetDlgItemInt(IDC_EDIT_X, 0);
     SetDlgItemInt(IDC_EDIT_Y, 0);
-    SetDlgItemText(IDC_EDIT_GIFT, L"普通,红心");
+
+    int nColumnCount = m_ListCtrl_UserStatus.GetHeaderCtrl()->GetItemCount();
+    for (int i = nColumnCount - 1; i >= 0; i--)
+        m_ListCtrl_UserStatus.DeleteColumn(i);
+
+    uint32 i = 0;
+    for (const auto& it : columnlist)
+    {
+        m_ListCtrl_UserStatus.InsertColumn(i++, it, LVCFMT_LEFT, 100);//插入列
+    }
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -192,45 +229,32 @@ HCURSOR CFanXingDlg::OnQueryDragIcon()
 }
 
 // 登录功能
-void CFanXingDlg::OnBnClickedButton1()
+void CFanXingDlg::OnBnClickedButtonLogin()
 {
     CString username;
     CString password;
     GetDlgItemText(IDC_EDIT_Username, username);
     GetDlgItemText(IDC_EDIT_Password, password);
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            WebHandler handler(iDocu);
-            //handler.Execute();
-            handler.Login(username, password);
-        }
-    }
+
+    // 测试通过的curl登录方式
+    bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
+    std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
+    Notify(message);
 }
 
 //跳转页面功能
 void CFanXingDlg::OnBnClickedButtonNav()
 {
+    // 先清空原来数据
+    m_ListCtrl_UserStatus.DeleteAllItems();
+
     CString strRoomid;
     GetDlgItemText(IDC_EDIT_NAV, strRoomid);
-    CString strUrl = L"http://fanxing.kugou.com/" + strRoomid;
-    VARIANT vtNull = {};
-    web_.Navigate(strUrl, &vtNull, &vtNull, &vtNull, &vtNull);
-    LOG(INFO) << L"Navigate To " << strUrl;
-    // 获取房间信息，启动功能
-
-    if (network_)
-    {
-        network_->Finalize();
-    }    
-    network_.reset(new NetworkHelper);
-    network_->Initialize();
     network_->SetNotify(
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
+
+    network_->SetNotify201(
+        std::bind(&CFanXingDlg::Notify201, this, std::placeholders::_1));
 
     network_->EnterRoom(strRoomid.GetBuffer());
 }
@@ -238,96 +262,45 @@ void CFanXingDlg::OnBnClickedButtonNav()
 //指定位置点击功能
 void CFanXingDlg::OnBnClickedButtonClick()
 {
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            int x = GetDlgItemInt(IDC_EDIT_X);
-            int y = GetDlgItemInt(IDC_EDIT_Y);           
 
-            HWND explorerHWND = nullptr;
-
-            HWND hwnd = ::FindWindowEx(web_.m_hWnd, 0, L"Shell DocObject View", NULL);
-            if (hwnd)
-                explorerHWND = ::FindWindowEx(hwnd, 0, L"Internet Explorer_Server", NULL);
-            
-            if (explorerHWND)
-            {
-                WebHandler handler(iDocu);
-                handler.ClickXY(explorerHWND, x, y);
-            }
-        }
-    }
 }
 
 // 送星星功能
 void CFanXingDlg::OnBnClickedButtonRewarstar()
 {
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            WebHandler handler(iDocu);
-            handler.RewardStar();
-        }
-    }
 }
 
 // 送礼物功能
 void CFanXingDlg::OnBnClickedButtonRewardgift()
 {
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
-    {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            CString strGift;
-            GetDlgItemText(IDC_EDIT_GIFT, strGift);
-
-            WebHandler handler(iDocu);
-            handler.RewardGift((LPCTSTR)strGift);
-        }
-    }
 }
-
-
 
 void CFanXingDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
-    // TODO:  在此添加消息处理程序代码和/或调用默认值
-
     CDialogEx::OnLButtonDown(nFlags, point);
 }
 
 // 获取公屏信息
 void CFanXingDlg::OnBnClickedBtnGetmsg()
 {
-    // TODO:  在此添加控件通知处理程序代码
 }
 
 // 用来做测试的函数
-void CFanXingDlg::OnBnClickedBtnTest()
+void CFanXingDlg::OnBnClickedBtnAdd()
 {
-    // TODO:  在此添加控件通知处理程序代码
-    CComQIPtr<IDispatch> iDisp(web_.get_Document());
-    if (iDisp)
+    RowData rowdata;
+    rowdata.push_back(L"1");
+    rowdata.push_back(L"2");
+    rowdata.push_back(L"3");
+    rowdata.push_back(L"4");
+    rowdata.push_back(L"5");
+    rowdata.push_back(L"1");
+
+    int nitem = m_ListCtrl_UserStatus.InsertItem(0, rowdata[0].c_str());
+    m_ListCtrl_UserStatus.SetItemData(nitem, listCtrlRowIndex_++);
+    for (uint32 j = 1; j < rowdata.size(); ++j)
     {
-        CComQIPtr<IHTMLDocument2> iDocu;
-        HRESULT hr = iDisp->QueryInterface(IID_IHTMLDocument2, (void**)&iDocu);
-        if (!FAILED(hr))
-        {
-            //处理数据
-            WebHandler handler(iDocu);
-            handler.GetChatMessage();
-        }
+        m_ListCtrl_UserStatus.SetItemText(nitem, j, rowdata[j].c_str());
     }
 }
 
@@ -340,6 +313,84 @@ void CFanXingDlg::Notify(const std::wstring& message)
     this->PostMessage(WM_USER_01, 0, 0);
 }
 
+void CFanXingDlg::Notify201(const RowData& rowdata)
+{
+    // 发送数据给窗口
+    rowdataMutex_.lock();
+    rowdataQueue_.push_back(rowdata);
+    rowdataMutex_.unlock();
+    this->PostMessage(WM_USER_ADD_ENTER_ROOM_INFO, 0, 0);
+}
+
+bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstring& password)
+{
+    if (network_)
+    {
+        network_->Finalize();
+    }
+    network_.reset(new NetworkHelper);
+    network_->Initialize();
+    network_->SetNotify(
+        std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
+
+    return network_->Login(username, password);
+}
+
+// 界面线程执行
+LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
+{
+    if (rowdataQueue_.empty())
+        return 0;
+    
+    std::vector<RowData> rowdatas;
+    rowdataMutex_.lock();
+    rowdatas.swap(rowdataQueue_);
+    rowdataMutex_.unlock();
+
+    int itemcount = m_ListCtrl_UserStatus.GetItemCount();
+
+    for (uint32 i = 0; i < rowdatas.size(); ++i)
+    {
+        bool exist = false;
+        // 检测是否存在相同用户id
+        for (int index = 0; index < itemcount; index++)
+        {
+            CString text = m_ListCtrl_UserStatus.GetItemText(index, 3);
+            if (rowdatas[i][3].compare(text.GetBuffer()) == 0) // 相同用户id
+            {
+                // 更新进入次数显示，其他的数据都全部默认更新的
+                CString itemText = m_ListCtrl_UserStatus.GetItemText(index, 6);
+                std::string temp = base::WideToUTF8(itemText.GetBuffer());
+                uint32 entercount = 0;
+                base::StringToUint(temp, &entercount);
+                entercount++;
+                CString strEnterCount = base::UintToString16(entercount).c_str();
+                m_ListCtrl_UserStatus.SetItemText(index, 6, strEnterCount);
+
+                for (uint32 j = 0; j < rowdatas[i].size(); ++j)
+                {
+                    m_ListCtrl_UserStatus.SetItemText(itemcount + i, j, rowdatas[i][j].c_str());
+                }
+                exist = true;
+                break;
+            }
+        }
+
+        if (!exist) // 如果不存在，需要插入新数据
+        {
+            int nitem = m_ListCtrl_UserStatus.InsertItem(itemcount + i, rowdatas[i][0].c_str());
+            m_ListCtrl_UserStatus.SetItemData(nitem, i);
+            for (uint32 j = 1; j < rowdatas[i].size(); ++j)
+            {
+                m_ListCtrl_UserStatus.SetItemText(itemcount + nitem, j, rowdatas[i][j].c_str());
+            }
+            m_ListCtrl_UserStatus.SetItemText(nitem, 6, L"1"); // 第一次记录数据
+        }
+    }
+
+    return 0;
+}
+
 LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 {
     std::vector<std::wstring> messages;
@@ -349,9 +400,182 @@ LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 
     for (auto str : messages)
     {
-        InfoList_.InsertString(count++, str.c_str());
+        InfoList_.InsertString(infoListCount_++, str.c_str());
     }
     
-    InfoList_.SetCurSel(count-1);
+    InfoList_.SetCurSel(infoListCount_-1);
     return 0;
+}
+
+void CFanXingDlg::OnBnClickedButton2()
+{
+
+
+    m_ListCtrl_UserStatus.SetCheck(0);
+}
+
+// 比较方法
+int CFanXingDlg::CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+    CListCtrl* ctlList = reinterpret_cast <CListCtrl*> (lParamSort);
+
+    LV_FINDINFO lvi;
+    memset(&lvi, 0, sizeof(lvi));
+    lvi.flags = LVFI_PARAM;
+
+    lvi.lParam = lParam1;
+    int nItem1(ctlList->FindItem(&lvi));
+
+    lvi.lParam = lParam2;
+    int nItem2(ctlList->FindItem(&lvi));
+
+    CString s1(ctlList->GetItemText(nItem1, 0));
+
+    CString s2(ctlList->GetItemText(nItem2, 0));
+
+    int nReturn(s1.CompareNoCase(s2));
+
+    return nReturn > 0 ? 0:1;
+}
+
+// 排序
+void CFanXingDlg::OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult)
+{
+    LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+    
+    m_ListCtrl_UserStatus.SortItems(CompareFunc, reinterpret_cast <DWORD> (this));
+
+    *pResult = 0;}
+
+
+void CFanXingDlg::OnBnClickedButtonRemove()
+{
+    int count = m_ListCtrl_UserStatus.GetItemCount();
+
+    // 从后往前删除
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_ListCtrl_UserStatus.GetCheck(i))
+        {
+            // 把要删除的消息发到日志记录列表上
+            CString itemtext = m_ListCtrl_UserStatus.GetItemText(i, 2);
+            itemtext + L"被从列表中删除";
+            InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+
+            // 删除已经勾选的记录
+            m_ListCtrl_UserStatus.DeleteItem(i);
+        }
+    }
+}
+
+
+void CFanXingDlg::OnBnClickedBtnModify()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFanXingDlg::OnBnClickedBtnQuery()
+{
+    UpdateData(TRUE);
+    CString key = m_query_key;
+    int count = m_ListCtrl_UserStatus.GetItemCount();
+
+    for (int i = count - 1; i >= 0; --i)
+    {
+        CString temp = m_ListCtrl_UserStatus.GetItemText(i, 3);
+        if (temp.Find(key)>=0)
+        {
+            m_ListCtrl_UserStatus.SetCheck(i, TRUE);
+        }
+    }
+}
+
+
+void CFanXingDlg::OnBnClickedBtnSelectAll()
+{
+    int count = m_ListCtrl_UserStatus.GetItemCount();
+
+    for (int i = count - 1; i >= 0; --i)
+    {
+        m_ListCtrl_UserStatus.SetCheck(i, 1);
+    }
+}
+
+
+void CFanXingDlg::OnBnClickedBtnSelectReverse()
+{
+    int count = m_ListCtrl_UserStatus.GetItemCount();
+
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_ListCtrl_UserStatus.GetCheck(i))
+        {
+            m_ListCtrl_UserStatus.SetCheck(i,FALSE);
+        }
+        else
+        {
+            m_ListCtrl_UserStatus.SetCheck(i, TRUE);
+        }
+    }
+}
+
+
+void CFanXingDlg::OnBnClickedBtnKickoutMonth()
+{
+    int count = m_ListCtrl_UserStatus.GetItemCount();
+
+    // 从后往前删除
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_ListCtrl_UserStatus.GetCheck(i))
+        {
+            // 发送踢出房间的网络请求
+
+            // 把要删除的消息发到日志记录列表上
+            CString itemtext = m_ListCtrl_UserStatus.GetItemText(i, 2);
+            itemtext += L"被踢出一个月，并从列表中删除";
+            InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+
+            // 删除已经勾选的记录
+            m_ListCtrl_UserStatus.DeleteItem(i);
+        }
+    }
+}
+
+
+void CFanXingDlg::OnBnClickedBtnKickoutHour()
+{
+    EnterRoomUserInfo enterRoomUserInfo;
+    enterRoomUserInfo.roomid = 1053637;
+    enterRoomUserInfo.richlevel = 1;
+    enterRoomUserInfo.nickname = "fanxingtest111";
+    enterRoomUserInfo.userid = 120831944;
+    network_->KickoutUsers(110468466, enterRoomUserInfo);
+}
+
+
+void CFanXingDlg::OnBnClickedBtnSilent()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFanXingDlg::OnBnClickedBtnUnsilent()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFanXingDlg::OnBnClickedBtnClear()
+{
+    int count = m_ListCtrl_UserStatus.GetItemCount();
+    // 从后往前删除
+    for (int i = count - 1; i >= 0; --i)
+    {
+        m_ListCtrl_UserStatus.DeleteItem(i);
+    }
+
+    CString itemtext = L"清空列表";
+    InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
 }

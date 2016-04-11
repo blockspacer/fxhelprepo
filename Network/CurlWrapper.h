@@ -2,6 +2,14 @@
 #include <string>
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/files/file.h"
+#include "Network/CookiesManager.h"
+#include "Network/GiftNotifyManager.h"
+
+enum class KICK_TYPE
+{
+    KICK_TYPE_HOUR = 0,
+    KICK_TYPE_MONTH = 1,
+};
 
 // 提供方便的使用curl接口的执行请求函数。
 class CurlWrapper
@@ -15,46 +23,70 @@ public:
     static void CurlInit();
     static void CurlCleanup();
     bool WriteCallback(const std::string& data);
+    bool WriteResponseHeaderCallback(const std::string& data);
 
     bool LoginRequestWithCookies();
+
+    // 测试通过
     bool LoginRequestWithUsernameAndPassword(const std::string& username, 
                                              const std::string& password);
     bool Services_UserService_UserService_getMyUserDataInfo();
     bool Services_IndexService_IndexService_getUserCenter();
-
-    bool EnterRoom(uint32 roomid);
+    
+    // 在未登录状态下进入房间，并获取艺人id,供发起tcp连接使用
+    bool EnterRoom(uint32 roomid, uint32* singerid);
 
 	// 在进入房间以后，获取用户信息
-	bool Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid);
+	bool Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid,
+        uint32* userid, std::string* nickname, uint32* richlevel);
 
     // 关键数据获取，返回数据里面包含tcp请求中需要带的key参数值
     bool RoomService_RoomService_enterRoom(uint32 roomid);
 
     // ismaster无法获取到
-    bool ExtractUsefulInfo_RoomService_enterRoom(
-        uint32* userid,
-        std::string* nickname, uint32* richlevel, uint32* staruserid,
+    bool ExtractStarfulInfo_RoomService_enterRoom(uint32* staruserid,
         std::string* key, std::string* ext);
 
     // 抢星币的重要请求, 时机由flash收到601包礼物通知数据，601包里有key_601值
     bool GiftService_GiftService(uint32 roomid,
         const std::string& key_601, std::wstring* responsedata);
 
+    bool KickoutUser(uint32 singerid, KICK_TYPE kicktype, const EnterRoomUserInfo& enterRoomUserInfo);
+
+    // 获取礼物列表信息，为降低耦合，这里不解析数据
+    bool GetGiftList(uint32 roomid, std::string* outputstr);
+
+    // 请求注册的验证码，返回函数会设置Set-Cookie: RegCheckCode
+    bool RegisterGetVerifyCode(std::vector<uint8>* picture);
+
+    // 检查用户是否已经存在，未确认不请求会不会有问题
+    bool RegisterCheckUserExist(const std::string& username);
+
+    // 检查用户和密码有效性，未确认不请求会不会有问题
+    bool RegisterCheckUserInfo(const std::string& username, const std::string& password);
+
+    // 提交验证码数据
+    bool RegisterCheckVerifyCode(const std::string& verifycode);
+
+    // 提交注册功能
+    bool RegisterUser(const std::string& username, const std::string& password,
+        const std::string& verifycode);
+
+
 private:
-
-    bool ExtractUsefulInfo_RoomService_enterRoom_(const std::string& inputstr,
-        uint32* userid,
-        std::string* nickname, uint32* richlevel, uint32* staruserid,
-        std::string* key, std::string* ext);
-
     bool ParseGiftServiceResponse(const std::string& responsedata,
         std::wstring* notifyinfo);
 
-    //base::File file_;
+    bool SetCookieFromString(const std::string& key, const std::string& cookiestring);
     std::string currentWriteData_;
+    std::string currentResponseHeader_;
     std::string response_of_RoomService_RoomService_enterRoom_;
     std::string response_of_Services_UserService_UserService_getMyUserDataInfo_;
     std::string response_of_GiftService_GiftService_;
+    std::string response_of_LoginWithUsernameAndPassword_;
+    std::string response_of_EnterRoom_;
+
+    CookiesManager cookiesmanager_;
 };
 
 

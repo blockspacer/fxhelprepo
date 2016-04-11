@@ -6,9 +6,11 @@
 #include <assert.h>
 #include "third_party/libcurl/curl/curl.h"
 #include "third_party/chromium/base/strings/sys_string_conversions.h"
+#include "third_party/chromium/base/md5.h"
+#include "third_party/chromium/base/strings/string_piece.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 
-
-static const wchar_t HEX[] = L"0123456789ABCDEF";
+static const wchar_t HEX[] = L"0123456789abcdef";
 std::wstring BinToHex(const void* bin, int len)
 {
     const unsigned char* b = static_cast<const unsigned char*>(bin);
@@ -139,3 +141,81 @@ std::wstring GBKToWide(const std::string& text)
     return base::SysMultiByteToWide(text, 936);
 }
 
+std::string WideToUtf8(const std::wstring& text)
+{
+    return base::SysWideToUTF8(text);
+}
+std::wstring Utf8ToWide(const std::string& text)
+{
+    return base::SysUTF8ToWide(text);
+}
+
+std::string MakeMd5FromString(const std::string& text)
+{
+    base::MD5Context contex;
+    base::MD5Init(&contex);
+    base::MD5Digest md5;
+    base::MD5Update(&contex, base::StringPiece(text));
+    base::MD5Final(&md5, &contex);
+    return BinToAnsiHex(md5.a, sizeof(md5));
+}
+
+bool UnicodeToUtf8(const std::string& unicode, std::string* utf8)
+{
+    std::string temp = unicode;
+    auto pos = temp.find("\\u");
+    while (pos!=std::string::npos)
+    {
+        temp.replace(pos, 2, "");
+        pos = temp.find("\\u");
+    }
+    std::wstring wstr = Utf8ToWide(temp);
+    int len = wstr.length();
+    char* str = new char[len];
+    bool result = HexToBin(wstr.c_str(), wstr.length(), str, &len);
+    if (!result)
+    {
+        return false;
+    }
+
+    std::wstring w;
+    int d = 0;
+    while (d < len)
+    {
+        char wc[2] = { 0 };
+        wc[1] = str[d];
+        wc[0] = str[d + 1];
+        w.push_back(*(wchar_t*)(wc));
+        d += 2;
+    }
+    
+    *utf8 = WideToUtf8(w);
+    return true;
+}
+
+std::string MakeFormatTimeString(const base::Time time)
+{
+    base::Time::Exploded exploded;
+    time.LocalExplode(&exploded);
+    std::string hour = base::IntToString(exploded.hour);
+    if (hour.length() < 2)
+    {
+        hour = "0" + hour;
+    }
+    std::string minute = base::IntToString(exploded.minute);
+    if (minute.length() < 2)
+    {
+        minute = "0" + minute;
+    }
+
+    std::string second = base::IntToString(exploded.second);
+    if (second.length() < 2)
+    {
+        second = "0" + second;
+    }
+
+    //std::string millisecond = base::IntToString(exploded.millisecond);
+    std::string timestring = hour + ":" + minute + ":" + second;
+
+    return std::move(timestring);
+}

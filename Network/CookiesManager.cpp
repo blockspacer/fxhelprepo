@@ -90,12 +90,34 @@ CookiesManager::~CookiesManager()
 {
 }
 
-bool CookiesManager::GetCookies(const std::string& url, std::string* cookies)
+bool CookiesManager::SetCookies(const std::string& key, const std::string& cookie)
 {
-    if (!cookies)
+    //if (cookies_.find(key) != cookies_.end())
+    //{
+    //    return false;
+    //}
+    //cookies_.insert(std::make_pair(key, cookie));
+    cookies_[key] = cookie;
+    return true;
+}
+
+std::string CookiesManager::GetCookies(const std::vector<std::string>& keys) const
+{
+    std::string temp;
+    for (const auto& key : keys)
     {
-        return false;
+        const auto& result = cookies_.find(key);
+        if (result!=cookies_.end())
+        {
+            temp += result->second;
+            temp += ";";
+        }
+    }
+    if (temp.empty())
+    {
+        return temp;
     }
 
-    return InternalInternetGetCookie(url, cookies);
+    temp = temp.substr(0, temp.length() - 1);
+    return temp;
 }

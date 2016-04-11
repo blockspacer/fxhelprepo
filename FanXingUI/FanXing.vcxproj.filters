@@ -42,6 +42,21 @@
     <ClInclude Include="NetworkHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="RoomController.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgGiftNotify.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GiftInfoHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DlgRegister.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RegisterHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FanXingDlg.cpp">
@@ -60,6 +75,21 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="NetworkHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoomController.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgGiftNotify.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GiftInfoHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DlgRegister.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RegisterHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

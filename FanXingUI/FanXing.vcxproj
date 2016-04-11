@@ -47,6 +47,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>SingerHelper</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -60,8 +61,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib;libcurl.lib;ssleay32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir)</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -110,20 +111,30 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DlgGiftNotify.h" />
+    <ClInclude Include="DlgRegister.h" />
     <ClInclude Include="explorer1.h" />
     <ClInclude Include="FanXing.h" />
     <ClInclude Include="FanXingDlg.h" />
+    <ClInclude Include="GiftInfoHelper.h" />
     <ClInclude Include="NetworkHelper.h" />
+    <ClInclude Include="RegisterHelper.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="RoomController.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WebHandler.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DlgGiftNotify.cpp" />
+    <ClCompile Include="DlgRegister.cpp" />
     <ClCompile Include="explorer1.cpp" />
     <ClCompile Include="FanXingUI.cpp" />
     <ClCompile Include="FanXingDlg.cpp" />
+    <ClCompile Include="GiftInfoHelper.cpp" />
     <ClCompile Include="NetworkHelper.cpp" />
+    <ClCompile Include="RegisterHelper.cpp" />
+    <ClCompile Include="RoomController.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -154,6 +165,12 @@
     </ProjectReference>
     <ProjectReference Include="..\third_party\libcurl\curl\lib\libcurl.vcxproj">
       <Project>{a9b789e9-ca2d-4b2f-b5fb-6d515ecfb31e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\libeay32\libeay32.vcxproj">
+      <Project>{ac33ff8e-59e7-4e1e-8111-f446e9fb0231}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\ssleay32\ssleay32.vcxproj">
+      <Project>{057ea5b8-8c47-4519-b5fc-9b28191d6843}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

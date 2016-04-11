@@ -11,10 +11,12 @@ public:
     void Init(run_fn run, LPVOID lpParam);
     bool Start();
     void Stop();
+    bool IsRunning() const;
 private:
     HANDLE handle_;
     DWORD threadid_;
     run_fn run_;
     LPVOID param_;
+    bool running_;
 };
 

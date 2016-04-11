@@ -15,6 +15,9 @@
 #include "FanXing.h"
 #include "FanXingDlg.h"
 #include "NetworkHelper.h"
+#include "DlgGiftNotify.h"
+#include "DlgRegister.h"
+#include "../Network/EncodeHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,12 +34,14 @@ END_MESSAGE_MAP()
 // CFanXingApp 构造
 
 CFanXingApp::CFanXingApp()
+    :atExitManager_(nullptr)
 {
 	// 支持重新启动管理器
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
 
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
+    atExitManager_.reset(new base::AtExitManager);
     InitAppLog();
     LOG(INFO) << __FUNCTION__;
 }
@@ -82,9 +87,12 @@ BOOL CFanXingApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-    CFanXingDlg dlg;
+    //CFanXingDlg dlg;
+    //CDlgGiftNotify dlg;
+    CDlgRegister dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
+
 	if (nResponse == IDOK)
 	{
 		// TODO:  在此放置处理何时用
@@ -114,7 +122,6 @@ BOOL CFanXingApp::InitInstance()
 
 void CFanXingApp::InitAppLog()
 {
-    base::AtExitManager atExit;
     CommandLine::Init(0, NULL);
     base::FilePath path;
     PathService::Get(base::DIR_APP_DATA, &path);
