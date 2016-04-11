@@ -86,7 +86,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CookiesManager.h" />
+    <ClInclude Include="CookiesHelper.h" />
     <ClInclude Include="CurlWrapper.h" />
     <ClInclude Include="EncodeHelper.h" />
     <ClInclude Include="GiftNotifyManager.h" />
@@ -99,7 +99,7 @@
     <ClInclude Include="utf_help.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CookiesManager.cpp" />
+    <ClCompile Include="CookiesHelper.cpp" />
     <ClCompile Include="CurlWrapper.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>

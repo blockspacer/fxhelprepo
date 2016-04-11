@@ -2,7 +2,7 @@
 #include <string>
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/files/file.h"
-#include "Network/CookiesManager.h"
+#include "Network/CookiesHelper.h"
 #include "Network/GiftNotifyManager.h"
 
 enum class KICK_TYPE
@@ -86,7 +86,7 @@ private:
     std::string response_of_LoginWithUsernameAndPassword_;
     std::string response_of_EnterRoom_;
 
-    CookiesManager cookiesmanager_;
+    CookiesHelper cookiesmanager_;
 };
 
 

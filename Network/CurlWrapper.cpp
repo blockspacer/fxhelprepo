@@ -14,7 +14,7 @@
 
 
 #include "../Network/EncodeHelper.h"
-#include "CookiesManager.h"
+#include "CookiesHelper.h"
 
 namespace
 {
