@@ -33,12 +33,6 @@
     <ClInclude Include="GiftNotifyManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="TcpClient.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Thread.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="utf_help.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -49,6 +43,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CookiesHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpClient.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -72,9 +69,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TcpClient.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Thread.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="User.cpp">

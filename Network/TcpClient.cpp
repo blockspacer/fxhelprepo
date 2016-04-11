@@ -1,6 +1,5 @@
 #include <assert.h>
 #include "TcpClient.h"
-#include "Thread.h"
 #include "EncodeHelper.h"
 
 TcpClient::TcpClient()

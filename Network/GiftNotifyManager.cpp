@@ -3,7 +3,6 @@
 
 #include "TcpClient.h"
 #include "EncodeHelper.h"
-#include "Thread.h"
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/json/json.h"

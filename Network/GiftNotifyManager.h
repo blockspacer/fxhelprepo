@@ -12,7 +12,6 @@
 
 
 class TcpClient;
-class Thread;
 
 // 201消息回来解析后出去的数据包
 struct EnterRoomUserInfo 
