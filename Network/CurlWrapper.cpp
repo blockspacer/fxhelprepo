@@ -1943,8 +1943,20 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
 
-    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
-
+    switch (request.method)
+    {
+    case HttpRequest::HTTP_METHOD::HTTP_METHOD_GET:
+        curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+        break;
+    case HttpRequest::HTTP_METHOD::HTTP_METHOD_POST:
+        curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1L);
+        assert(false && L"未实现post数据功能");
+        break;
+    default:
+        assert(false);
+        break;
+    }
+    
     res = curl_easy_perform(curl);
     response->curlcode = res;
     if (res != CURLE_OK)

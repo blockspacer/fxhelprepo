@@ -21,6 +21,7 @@ public:
         HTTP_METHOD_POST = 1,
     };
     HTTP_METHOD method;
+    std::vector<uint8> postdata;
     std::string url;
     std::string referer;
     std::string cookies;
