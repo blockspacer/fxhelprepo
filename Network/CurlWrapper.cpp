@@ -19,7 +19,7 @@
 namespace
 {
     const char* fanxingurl = "http://fanxing.kugou.com";
-    const char* loginuserurl = "https://login-user.kugou.com";
+    
     const char* kugouurl = "http://kugou.com";
     const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
     const char* acceptencode = "gzip";//目前都不应该接收压缩数据，免得解压麻烦
@@ -47,6 +47,25 @@ namespace
     {
         return base::Uint64ToString(
             static_cast<uint64>(base::Time::Now().ToDoubleT() * 1000));
+    }
+
+    std::vector<std::string> SplitString(std::string str, const std::string& pattern)
+    {
+        std::vector<std::string> result;
+        str += pattern;//扩展字符串以方便操作
+        int size = str.size();
+
+        for (int i = 0; i < size; i++)
+        {
+            int pos = str.find(pattern, i);
+            if (pos < size)
+            {
+                std::string s = str.substr(i, pos - i);
+                result.push_back(s);
+                i = pos + pattern.size() - 1;
+            }
+        }
+        return result;
     }
 
     std::string MakeReasonablePath(const std::string& pathfile)
@@ -207,9 +226,23 @@ namespace
         return true;
     }
 
-    bool GetCookiesFromHeader(const std::string& header, std::string* cookies)
+    bool GetCookiesFromHeader(const std::string& header, std::vector<std::string>* cookies)
     {
-        return false;
+        std::vector<std::string> splitestrings = SplitString(header, "\r\n");
+
+        std::string setcookietag = "Set-Cookie:";
+        for (const auto& it : splitestrings)
+        {
+            auto pos = it.find("Set-Cookie:");
+            if (pos!=std::string::npos)
+            {
+                std::string temp = it.substr(setcookietag.size(), 
+                    it.size() - setcookietag.size());
+                auto splitstr = SplitString(temp, ";");
+                cookies->insert(cookies->end(), splitstr.begin(), splitstr.end());
+            }
+        }
+        return true;
     }
 }
 
@@ -250,196 +283,56 @@ void CurlWrapper::CurlCleanup()
 bool CurlWrapper::LoginRequestWithCookies()
 {
     std::string cookies = "";
-    bool ret = false;
-
-    CURL *curl;
-    CURLcode res;
-    curl = curl_easy_init();
-
-    if (!curl)
-        return false;
-
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-    curl_easy_setopt(curl, CURLOPT_URL, fanxingurl);
-
-    /* example.com is redirected, so we tell libcurl to follow redirection */
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-
-    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
-
-    struct curl_slist *headers = 0;
-    headers = curl_slist_append(headers, "Connection:Keep-Alive");
-    headers = curl_slist_append(headers,  "Accept-Language:zh-CN");
-    headers = curl_slist_append(headers, "Accept:text/html,application/xhtml+xml,*/*");
-    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
-
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = fanxingurl;
+    request.referer = "fanxing.kugou.com";
+    request.cookies = cookies;
     
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
-    curl_easy_setopt(curl, CURLOPT_REFERER, "www.fanxing.kugou.com");
-
-    curl_easy_setopt(curl, CURLOPT_COOKIE, cookies.c_str());
-    // 把请求返回来时设置的cookie保存起来
-    std::string path = "d:/cookie_";
-    path += MakeReasonablePath(__FUNCTION__) + ".txt";
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
-
-    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
-
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
-    /* Check for errors */
-    if (res != CURLE_OK)
-    {
-        //fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        return false;
-    }
-    // 获取请求业务结果
-    long responsecode = 0;
-    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
-
-    // 获取本次请求cookies
-    struct curl_slist* curllist = 0;
-    res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
-    if (curllist)
-    {
-        struct curl_slist* temp = curllist;
-        std::string retCookies;
-        while (temp)
-        {
-            retCookies += std::string(temp->data);
-            temp = temp->next;
-        }
-        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
-        curl_slist_free_all(curllist);
-    }
-    /* always cleanup */
-    curl_easy_cleanup(curl);
-
-    if (responsecode == 200)
-    {
-        return true;
-    }
-    return false;
+    HttpResponse response;
+    bool ret = Execute(request, &response);
+    return ret;
 }
 
 // 测试成功
 bool CurlWrapper::LoginRequestWithUsernameAndPassword(const std::string& username,
     const std::string& password)
 {
-    bool ret = false;
+    const char* loginuserurl = "https://login-user.kugou.com/v1/login/";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = loginuserurl;
+    request.referer = "www.fanxing.kugou.com";
+    request.cookies = "";
+    auto& queries = request.queries;
+    queries["appid"] = "1010";
+    queries["username"] = UrlEncode(username);
+    queries["pwd"] = MakeMd5FromString(password);;
+    queries["code"] = "";
+    queries["clienttime"] = base::UintToString(
+        static_cast<uint32>(base::Time::Now().ToDoubleT()));
+    queries["expire_day"] = "3";
+    queries["autologin"] = "false";
+    queries["redirect_uri"] = "";
+    queries["state"] = "";
+    queries["callback"] = "loginSuccessCallback";
+    queries["login_ver"] = "1";
 
-    CURL *curl;
-    CURLcode res;
-    curl = curl_easy_init();
+    HttpResponse response;
+    bool ret = Execute(request, &response);
 
-    if (!curl)
-        return false;
-
-    std::string url = loginuserurl;
-    url += "/v1/login/?appid=1010";
-    url += "&username=" + UrlEncode(username);
-    url += "&pwd=" + MakeMd5FromString(password);
-    url += "&code=";
-    uint32 nowtime = static_cast<uint32>(base::Time::Now().ToDoubleT());
-    url += "&clienttime=" + base::UintToString(nowtime);
-    url += "&expire_day=3";//这里先写死
-    url += "&autologin=false";
-    url += "&redirect_uri=";
-    url += "&state=";
-    url += "&callback=loginSuccessCallback";
-    url += "&login_ver=1";
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    /* example.com is redirected, so we tell libcurl to follow redirection */
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-    curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
-    curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
-    struct curl_slist *headers = 0;
-    headers = curl_slist_append(headers, "Connection:Keep-Alive");
-    headers = curl_slist_append(headers, "Accept-Language:zh-CN");
-    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
-    headers = curl_slist_append(headers, "Accept:*/*");
-    headers = curl_slist_append(headers, "Host:login-user.kugou.com");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
-
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
-    curl_easy_setopt(curl, CURLOPT_REFERER, fanxingurl);
-    // 把请求返回来时设置的cookie保存起来
-    std::string path = "d:/cookie_";
-    path += MakeReasonablePath(__FUNCTION__) + ".txt";
-    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, path.c_str());
-
-    currentWriteData_.clear();
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, this);
-    
-
-    currentResponseHeader_.clear();
-    curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
-    curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
-    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
-
-    /* Perform the request, res will get the return code */
-    res = curl_easy_perform(curl);
-    /* Check for errors */
-    if (res != CURLE_OK)
-    {
-        fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        return false;
-    }
-    // 获取请求业务结果
-    long responsecode = 0;
-    res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
-
-
-    response_of_LoginWithUsernameAndPassword_ = currentWriteData_;
-    base::FilePath dirPath;
-    bool result = PathService::Get(base::DIR_EXE, &dirPath);
-    std::wstring filename = base::UTF8ToWide(MakeReasonablePath(__FUNCTION__) + ".txt");
-    base::FilePath logpath = dirPath.Append(filename);
-    base::File logfile(logpath,
-        base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
-    logfile.Write(0, response_of_LoginWithUsernameAndPassword_.c_str(), response_of_LoginWithUsernameAndPassword_.size());
-
-    auto pos = currentResponseHeader_.find("KuGoo");
-    if (pos != std::string::npos)
-    {
-        auto begin = pos;
-        auto end = currentResponseHeader_.find(';', begin);
-        if (end != std::string::npos)
-        {
-            cookiesmanager_.SetCookies("KuGoo", currentResponseHeader_.substr(begin, end - begin));
-        }
-    }
-
-    // 获取本次请求cookies
-    struct curl_slist* curllist = 0;
-    res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &curllist);
-    if (curllist)
-    {
-        struct curl_slist* temp = curllist;
-        std::string retCookies;
-        while (temp)
-        {
-            retCookies += std::string(temp->data);
-            temp = temp->next;
-        }
-        //std::cout << "CURLINFO_COOKIELIST get cookie: " << retCookies;
-        curl_slist_free_all(curllist);
-    }
-    /* always cleanup */
-    curl_easy_cleanup(curl);
-
-    if (responsecode == 200)
-    {
-        return true;
-    }
-    return false;
+    // 记得把cookie返回到上层用户模块
+    //auto pos = currentResponseHeader_.find("KuGoo");
+    //if (pos != std::string::npos)
+    //{
+    //    auto begin = pos;
+    //    auto end = currentResponseHeader_.find(';', begin);
+    //    if (end != std::string::npos)
+    //    {
+    //        cookiesmanager_.SetCookies("KuGoo", currentResponseHeader_.substr(begin, end - begin));
+    //    }
+    //}
+    return ret;
 }
 
 // 测试通过
@@ -1923,6 +1816,7 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
     if (!request.referer.empty())
@@ -1976,7 +1870,7 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     }
 
     response->content.assign(currentWriteData_.begin(), currentWriteData_.end());
-    std::string setcookies;
+    std::vector<std::string> setcookies;
     if (GetCookiesFromHeader(currentResponseHeader_, &setcookies))
     {
         response->cookies = setcookies;

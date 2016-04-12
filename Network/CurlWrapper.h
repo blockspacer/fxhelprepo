@@ -34,7 +34,7 @@ class HttpResponse
 public:
     uint32 curlcode;
     uint32 statuscode;
-    std::string cookies;
+    std::vector<std::string> cookies;
     std::vector<uint8> content;
 
 };
