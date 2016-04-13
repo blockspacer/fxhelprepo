@@ -41,6 +41,7 @@ public:
     void SetNotify601(notify601 fn);
     void RemoveNotify601();
 
+    // 仅供不登录的用户使用
     bool EnterRoom(uint32 strroomid);
     bool EnterRoom(const std::wstring& strroomid);
 

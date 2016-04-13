@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
 #include "third_party/chromium/base/basictypes.h"
@@ -15,6 +16,9 @@ enum class ROOM_STATE
     IN_ROOM = 1
 };
 
+class CurlWrapper;
+class CookiesHelper;
+class Room;
 // 本类功能
 // 根据传入数据初始化用户使用页面的数据: 用户名+密码/cookie路径方式
 // 这里不要做任何线程保存功能
@@ -22,11 +26,13 @@ class User
 {
 public:
     User();
+    User(const std::string& username,
+        const std::string& password);
     ~User();
 
     // 设置参数
-    void SetUserName(const std::string& username);
-    std::string GetUserName() const;
+    void SetUsername(const std::string& username);
+    std::string GetUsername() const;
     
     void SetPassword(const std::string& password);
     std::string GetPassword() const;
@@ -39,6 +45,8 @@ public:
 
     // 操作行为
     bool Login();
+    bool Login(const std::string& username,
+        const std::string& password);
     bool Logout();
 
     bool EnterRoom(uint32 roomid);
@@ -53,9 +61,15 @@ public:
     bool SilencedUser(uint32 userid);
 
 private:
+
+    bool LoginHttps(const std::string& username,
+        const std::string& password);
+
+    bool LoginUServiceGetMyUserDataInfo();
+
+    bool LoginIndexServiceGetUserCenter();
     std::string username_;
     std::string password_;
-    std::vector<std::string> cookies_;
 
     // 登录后才能获得的用户信息
     uint32 userid_;
@@ -63,6 +77,8 @@ private:
     std::string usertoken_;
     std::string userkey_;
 
-    // 
+    std::unique_ptr<CurlWrapper> curlWrapper_;
+    std::unique_ptr<CookiesHelper> cookiesHelper_;
+    std::vector<std::shared_ptr<Room>> rooms_;
 };
 

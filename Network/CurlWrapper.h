@@ -99,7 +99,6 @@ public:
     bool RegisterUser(const std::string& username, const std::string& password,
         const std::string& verifycode);
 
-protected:
     bool Execute(const HttpRequest& request, HttpResponse* reponse);
 
 private:

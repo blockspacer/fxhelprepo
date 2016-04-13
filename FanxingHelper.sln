@@ -47,6 +47,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ssleay32", "third_party\ope
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libeay32", "third_party\openssl\libeay32\libeay32.vcxproj", "{AC33FF8E-59E7-4E1E-8111-F446E9FB0231}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestProject", "TestProject\TestProject.vcxproj", "{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -131,6 +133,12 @@ Global
 		{AC33FF8E-59E7-4E1E-8111-F446E9FB0231}.Release|Win32.ActiveCfg = Release|Win32
 		{AC33FF8E-59E7-4E1E-8111-F446E9FB0231}.Release|Win32.Build.0 = Release|Win32
 		{AC33FF8E-59E7-4E1E-8111-F446E9FB0231}.Release|x64.ActiveCfg = Release|Win32
+		{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}.Debug|Win32.Build.0 = Debug|Win32
+		{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}.Debug|x64.ActiveCfg = Debug|Win32
+		{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}.Release|Win32.ActiveCfg = Release|Win32
+		{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}.Release|Win32.Build.0 = Release|Win32
+		{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

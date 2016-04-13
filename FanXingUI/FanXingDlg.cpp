@@ -9,6 +9,7 @@
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
 #include "WebHandler.h"
+#include "UserController.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
 
@@ -231,15 +232,17 @@ HCURSOR CFanXingDlg::OnQueryDragIcon()
 // 登录功能
 void CFanXingDlg::OnBnClickedButtonLogin()
 {
-    CString username;
-    CString password;
-    GetDlgItemText(IDC_EDIT_Username, username);
-    GetDlgItemText(IDC_EDIT_Password, password);
+    UserController usercontroller;
+    usercontroller.Run();
+    //CString username;
+    //CString password;
+    //GetDlgItemText(IDC_EDIT_Username, username);
+    //GetDlgItemText(IDC_EDIT_Password, password);
 
-    // 测试通过的curl登录方式
-    bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
-    std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
-    Notify(message);
+    //// 测试通过的curl登录方式
+    //bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
+    //std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
+    //Notify(message);
 }
 
 //跳转页面功能

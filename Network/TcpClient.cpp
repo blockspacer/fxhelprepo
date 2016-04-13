@@ -39,6 +39,15 @@ bool TcpClient::Connect(const std::string& ip, unsigned short port)
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
     serverAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+
+    struct linger lig;
+    lig.l_onoff = 0;
+    lig.l_linger = 0;
+    int iLen = sizeof(struct linger);
+    setsockopt(socket_, SOL_SOCKET, SO_LINGER, (char *)&lig, iLen);
+    int flag = 1;
+    int len = sizeof(int);
+    setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, (const char*)&flag, len);
     int keepalivetime = 10;
     setsockopt(socket_, IPPROTO_TCP, SO_KEEPALIVE,
         (const char FAR *)&keepalivetime, sizeof(keepalivetime));

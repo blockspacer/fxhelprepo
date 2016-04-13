@@ -219,3 +219,10 @@ std::string MakeFormatTimeString(const base::Time time)
 
     return std::move(timestring);
 }
+
+// 获取13位的当前时间字符串
+std::string GetNowTimeString()
+{
+    return base::Uint64ToString(
+        static_cast<uint64>(base::Time::Now().ToDoubleT() * 1000));
+}

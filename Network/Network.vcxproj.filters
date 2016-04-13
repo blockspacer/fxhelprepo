@@ -48,6 +48,9 @@
     <ClInclude Include="TcpClient.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -75,6 +78,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CookiesHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

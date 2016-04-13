@@ -266,9 +266,9 @@ void GiftNotifyManager::Finalize()
     if (repeatingTimer_.IsRunning())
         repeatingTimer_.Stop();
     
-    tcpClient_843_->Finalize();
-    tcpClient_8080_->Finalize();
     baseThread_.Stop();
+    tcpClient_843_->Finalize();
+    tcpClient_8080_->Finalize();  
 }
 
 void GiftNotifyManager::SetNotify201(Notify201 notify201)
@@ -349,7 +349,10 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
                 roomgiftinfo.happyobj = GetInt32FromJsonValue(content, "happyobj");
                 roomgiftinfo.happytype = GetInt32FromJsonValue(content, "happytype");
                 roomgiftinfo.token = content.get("token", "").asString();
-                notify601_(roomgiftinfo);
+                if (notify601_)
+                {
+                    notify601_(roomgiftinfo);
+                }                
             }
         }
         else if (cmd == 201)
@@ -400,13 +403,16 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
             break;
         }
 
-        // 处理数据包,转换成输出界面信息
-        std::wstring wstr = base::UTF8ToWide(package);
-        normalNotify_(wstr);
-        if (!outmsg.empty())
+        if (normalNotify_)
         {
-            wstr = base::UTF8ToWide(outmsg);
+            // 处理数据包,转换成输出界面信息
+            std::wstring wstr = base::UTF8ToWide(package);
             normalNotify_(wstr);
+            if (!outmsg.empty())
+            {
+                wstr = base::UTF8ToWide(outmsg);
+                normalNotify_(wstr);
+            }
         }
     }
 }
@@ -486,7 +492,10 @@ void GiftNotifyManager::DoSendHeartBeat()
     std::vector<char> heardbeadvec;
     heardbeadvec.assign(heartbeat.begin(), heartbeat.end());
     tcpClient_8080_->Send(heardbeadvec);
-    normalNotify_(L"Send Heartbeat");
+    if (normalNotify_)
+    {
+        normalNotify_(L"Send Heartbeat");
+    }  
 }
 
 void GiftNotifyManager::DoRecv()
