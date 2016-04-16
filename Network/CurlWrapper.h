@@ -51,14 +51,6 @@ public:
     static void CurlCleanup();
     bool WriteCallback(const std::string& data);
     bool WriteResponseHeaderCallback(const std::string& data);
-
-    bool LoginRequestWithCookies();
-
-    // 测试通过
-    bool LoginRequestWithUsernameAndPassword(const std::string& username, 
-                                             const std::string& password);
-    bool Services_UserService_UserService_getMyUserDataInfo();
-    bool Services_IndexService_IndexService_getUserCenter();
     
     // 在未登录状态下进入房间，并获取艺人id,供发起tcp连接使用
     bool EnterRoom(uint32 roomid, uint32* singerid);
@@ -66,13 +58,6 @@ public:
 	// 在进入房间以后，获取用户信息
 	bool Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid,
         uint32* userid, std::string* nickname, uint32* richlevel);
-
-    // 关键数据获取，返回数据里面包含tcp请求中需要带的key参数值
-    bool RoomService_RoomService_enterRoom(uint32 roomid);
-
-    // ismaster无法获取到
-    bool ExtractStarfulInfo_RoomService_enterRoom(uint32* staruserid,
-        std::string* key, std::string* ext);
 
     // 抢星币的重要请求, 时机由flash收到601包礼物通知数据，601包里有key_601值
     bool GiftService_GiftService(uint32 roomid,
@@ -108,10 +93,7 @@ private:
     bool SetCookieFromString(const std::string& key, const std::string& cookiestring);
     std::string currentWriteData_;
     std::string currentResponseHeader_;
-    std::string response_of_RoomService_RoomService_enterRoom_;
-    std::string response_of_Services_UserService_UserService_getMyUserDataInfo_;
     std::string response_of_GiftService_GiftService_;
-    std::string response_of_LoginWithUsernameAndPassword_;
     std::string response_of_EnterRoom_;
 
     CookiesHelper cookiesmanager_;

@@ -172,22 +172,6 @@ bool NetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
 bool NetworkHelper::Login(const std::wstring& username, 
     const std::wstring& password)
 {
-    if (!curlWrapper_->LoginRequestWithUsernameAndPassword(WideToUtf8(username), WideToUtf8(password)))
-    {
-        return false;
-    }
-
-    // 获取cookie部分内容
-    if (!curlWrapper_->Services_UserService_UserService_getMyUserDataInfo())
-    {
-        return false;
-    }
-
-    // 获取cookie部分内容
-    if (!curlWrapper_->Services_IndexService_IndexService_getUserCenter())
-    {
-        return false;
-    }
     return true;
 }
 
