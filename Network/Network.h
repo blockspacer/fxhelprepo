@@ -1,0 +1,4 @@
+
+
+bool NetworkInitialize();
+void NetworkFainalize();

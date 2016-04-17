@@ -12,9 +12,8 @@
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/files/file_path.h"
 
-
-#include "../Network/EncodeHelper.h"
-#include "CookiesHelper.h"
+#include "Network/CookiesHelper.h"
+#include "Network/EncodeHelper.h"
 
 namespace
 {
@@ -146,6 +145,7 @@ bool CurlWrapper::WriteResponseHeaderCallback(const std::string& data)
 
 CurlWrapper::CurlWrapper()
     :currentWriteData_("")
+    , cookiesHelper_(new CookiesHelper)
 {
 }
 
@@ -153,9 +153,9 @@ CurlWrapper::~CurlWrapper()
 {
 }
 
-void CurlWrapper::CurlInit()
+bool CurlWrapper::CurlInit()
 {
-    curl_global_init(CURL_GLOBAL_ALL);
+    return CURLE_OK == curl_global_init(CURL_GLOBAL_ALL);
 }
 
 void CurlWrapper::CurlCleanup()
@@ -177,7 +177,7 @@ bool CurlWrapper::EnterRoom(uint32 roomid, uint32* singerid)
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
-    cookies = cookiesmanager_.GetCookies(keys);
+    cookies = cookiesHelper_->GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -280,7 +280,7 @@ bool CurlWrapper::GiftService_GiftService(uint32 roomid,
 {
     std::vector<std::string> keys;
     keys.push_back("KuGoo");
-    std::string cookies = cookiesmanager_.GetCookies(keys);
+    std::string cookies = cookiesHelper_->GetCookies(keys);
     bool ret = false;
 
 
@@ -401,7 +401,7 @@ bool CurlWrapper::KickoutUser(uint32 singerid,
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
-    std::string cookies = cookiesmanager_.GetCookies(keys);
+    std::string cookies = cookiesHelper_->GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -528,7 +528,7 @@ bool CurlWrapper::GetGiftList(uint32 roomid, std::string* outputstr)
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
-    std::string cookies = cookiesmanager_.GetCookies(keys);
+    std::string cookies = cookiesHelper_->GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -644,7 +644,7 @@ bool CurlWrapper::SetCookieFromString(const std::string& key, const std::string&
     }
     auto begin = pos;
     auto end = cookiestring.find(';', begin);
-    bool result = cookiesmanager_.SetCookies(key, cookiestring.substr(begin, end - begin));
+    bool result = cookiesHelper_->SetCookies(key, cookiestring.substr(begin, end - begin));
     return result;
 }
 
@@ -731,7 +731,7 @@ bool CurlWrapper::RegisterGetVerifyCode(std::vector<uint8>* picture)
         auto end = currentResponseHeader_.find(';', begin);
         if (end != std::string::npos)
         {
-            cookiesmanager_.SetCookies("RegCheckCode", currentResponseHeader_.substr(begin, end - begin));
+            cookiesHelper_->SetCookies("RegCheckCode", currentResponseHeader_.substr(begin, end - begin));
         }
     }
 
@@ -762,7 +762,7 @@ bool CurlWrapper::RegisterCheckUserExist(const std::string& username)
 
     std::vector<std::string> keys;
     keys.push_back("RegCheckCode");
-    std::string cookies = cookiesmanager_.GetCookies(keys);
+    std::string cookies = cookiesHelper_->GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -869,7 +869,7 @@ bool CurlWrapper::RegisterCheckUserInfo(const std::string& username,
 
     std::vector<std::string> keys;
     keys.push_back("RegCheckCode");
-    std::string cookies = cookiesmanager_.GetCookies(keys);
+    std::string cookies = cookiesHelper_->GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -993,7 +993,7 @@ bool CurlWrapper::RegisterCheckVerifyCode(const std::string& verifycode)
 
     std::vector<std::string> keys;
     keys.push_back("RegCheckCode");
-    std::string cookies = cookiesmanager_.GetCookies(keys);
+    std::string cookies = cookiesHelper_->GetCookies(keys);
 
     CURL *curl;
     CURLcode res;
@@ -1102,7 +1102,7 @@ bool CurlWrapper::RegisterUser(const std::string& username,
 
     std::vector<std::string> keys;
     keys.push_back("RegCheckCode");
-    std::string cookies = cookiesmanager_.GetCookies(keys);
+    std::string cookies = cookiesHelper_->GetCookies(keys);
 
     CURL *curl;
     CURLcode res;

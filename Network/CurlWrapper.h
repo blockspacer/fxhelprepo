@@ -1,9 +1,10 @@
 #pragma once
+#include <memory>
 #include <map>
 #include <string>
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/files/file.h"
-#include "Network/CookiesHelper.h"
+
 #include "Network/GiftNotifyManager.h"
 
 enum class KICK_TYPE
@@ -38,6 +39,8 @@ public:
     std::vector<uint8> content;
 
 };
+
+class CookiesHelper;
 // 提供方便的使用curl接口的执行请求函数。
 class CurlWrapper
 {
@@ -47,7 +50,7 @@ public:
     bool Initialize(){ return true; };//没有线程管理，直接返回true
     void Finalize(){ return; };//没有线程管理，直接返回
 
-    static void CurlInit();
+    static bool CurlInit();
     static void CurlCleanup();
     bool WriteCallback(const std::string& data);
     bool WriteResponseHeaderCallback(const std::string& data);
@@ -96,7 +99,7 @@ private:
     std::string response_of_GiftService_GiftService_;
     std::string response_of_EnterRoom_;
 
-    CookiesHelper cookiesmanager_;
+    std::unique_ptr<CookiesHelper> cookiesHelper_;
 };
 
 

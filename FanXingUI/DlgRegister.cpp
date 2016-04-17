@@ -7,7 +7,7 @@
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
 #include "RegisterHelper.h"
-#include "../Network/EncodeHelper.h"
+#include "Network/EncodeHelper.h"
 #include "third_party/chromium/base/basictypes.h"
 
 // DlgRegister ¶Ô»°¿ò

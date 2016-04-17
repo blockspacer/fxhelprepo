@@ -2,5 +2,15 @@
 //
 
 #include "stdafx.h"
+#include "CurlWrapper.h"
+
+bool NetworkInitialize()
+{
+    return CurlWrapper::CurlInit();
+}
+void NetworkFainalize()
+{
+    CurlWrapper::CurlCleanup();
+}
 
 

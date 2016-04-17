@@ -17,7 +17,7 @@
 #include "NetworkHelper.h"
 #include "DlgGiftNotify.h"
 #include "DlgRegister.h"
-#include "../Network/EncodeHelper.h"
+#include "Network/EncodeHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

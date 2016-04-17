@@ -5,7 +5,7 @@
 #include "DlgGiftNotify.h"
 #include "afxdialogex.h"
 #include "GiftInfoHelper.h"
-#include "../Network/EncodeHelper.h"
+#include "Network/EncodeHelper.h"
 #include "third_party/chromium/base/basictypes.h"
 
 #undef max // 因为微软这个二比在某些头文件定义了max宏

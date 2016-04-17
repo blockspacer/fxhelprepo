@@ -95,6 +95,8 @@ bool User::Login(const std::string& username,
     {
         return false;
     }
+
+    return true;
 }
 
 bool User::Logout()

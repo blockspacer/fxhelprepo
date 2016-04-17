@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "GiftInfoHelper.h"
-#include "../Network/EncodeHelper.h"
+#include "Network/EncodeHelper.h"
 
 #include "third_party/json/json.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
