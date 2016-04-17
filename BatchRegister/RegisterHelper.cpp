@@ -81,34 +81,38 @@ bool RegisterHelper::LoadAccountFromFile(
 
 bool RegisterHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
 {
-    curlWrapper_->RegisterGetVerifyCode(picture);
+    //curlWrapper_->RegisterGetVerifyCode(picture);
     return false;
 }
 
 bool RegisterHelper::RegisterCheckUserExist(const std::wstring& username)
 {
-    return curlWrapper_->RegisterCheckUserExist(WideToUtf8(username));
+    //return curlWrapper_->RegisterCheckUserExist(WideToUtf8(username));
+    return false;
 }
 
 bool RegisterHelper::RegisterCheckUserInfo(const std::wstring& username, const std::wstring& password)
 {
-    std::string utf8username = base::WideToUTF8(username);
-    std::string utf8password = base::WideToUTF8(password);
-    return curlWrapper_->RegisterCheckUserInfo(utf8username, utf8password);
+    //std::string utf8username = base::WideToUTF8(username);
+    //std::string utf8password = base::WideToUTF8(password);
+    //return curlWrapper_->RegisterCheckUserInfo(utf8username, utf8password);
+    return false;
 }
 
 bool RegisterHelper::RegisterCheckVerifyCode(const std::wstring& verifycode)
 {
-    std::string utf8verifycode = base::WideToUTF8(verifycode);
-    return curlWrapper_->RegisterCheckVerifyCode(utf8verifycode);
+    //std::string utf8verifycode = base::WideToUTF8(verifycode);
+    //return curlWrapper_->RegisterCheckVerifyCode(utf8verifycode);
+    return false;
 }
 
 bool RegisterHelper::RegisterUser(const std::wstring& username,
     const std::wstring& password, const std::wstring& verifycode)
 {
-    std::string utf8username = base::WideToUTF8(username);
-    std::string utf8password = base::WideToUTF8(password);
-    std::string utf8verifycode = base::WideToUTF8(verifycode);
-    return curlWrapper_->RegisterUser(utf8username, utf8password, utf8verifycode);
+    //std::string utf8username = base::WideToUTF8(username);
+    //std::string utf8password = base::WideToUTF8(password);
+    //std::string utf8verifycode = base::WideToUTF8(verifycode);
+    //return curlWrapper_->RegisterUser(utf8username, utf8password, utf8verifycode);
+    return false;
 }
 

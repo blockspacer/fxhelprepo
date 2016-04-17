@@ -71,22 +71,6 @@ public:
     // 获取礼物列表信息，为降低耦合，这里不解析数据
     bool GetGiftList(uint32 roomid, std::string* outputstr);
 
-    // 请求注册的验证码，返回函数会设置Set-Cookie: RegCheckCode
-    bool RegisterGetVerifyCode(std::vector<uint8>* picture);
-
-    // 检查用户是否已经存在，未确认不请求会不会有问题
-    bool RegisterCheckUserExist(const std::string& username);
-
-    // 检查用户和密码有效性，未确认不请求会不会有问题
-    bool RegisterCheckUserInfo(const std::string& username, const std::string& password);
-
-    // 提交验证码数据
-    bool RegisterCheckVerifyCode(const std::string& verifycode);
-
-    // 提交注册功能
-    bool RegisterUser(const std::string& username, const std::string& password,
-        const std::string& verifycode);
-
     bool Execute(const HttpRequest& request, HttpResponse* reponse);
 
 private:

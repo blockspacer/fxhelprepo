@@ -134,13 +134,6 @@ void CDlgRegister::OnBnClickedBtnRegister()
     }
     Notify(L"检测用户信息成功");
 
-    if (!registerHelper_->RegisterCheckVerifyCode(verifycode.GetString()))
-    {
-        Notify(L"验证码错误或失效");
-        return;
-    }
-    Notify(L"验证码验证成功");
-
     if (!registerHelper_->RegisterUser(username.GetString(),
         password.GetString(), verifycode.GetString()))
     {
