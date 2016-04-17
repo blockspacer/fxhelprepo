@@ -99,13 +99,6 @@ bool RegisterHelper::RegisterCheckUserInfo(const std::wstring& username, const s
     return false;
 }
 
-bool RegisterHelper::RegisterCheckVerifyCode(const std::wstring& verifycode)
-{
-    //std::string utf8verifycode = base::WideToUTF8(verifycode);
-    //return curlWrapper_->RegisterCheckVerifyCode(utf8verifycode);
-    return false;
-}
-
 bool RegisterHelper::RegisterUser(const std::wstring& username,
     const std::wstring& password, const std::wstring& verifycode)
 {

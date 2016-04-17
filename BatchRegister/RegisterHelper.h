@@ -29,7 +29,6 @@ public:
     bool RegisterCheckUserExist(const std::wstring& username);
     bool RegisterCheckUserInfo(const std::wstring& username, 
         const std::wstring& password);
-    bool RegisterCheckVerifyCode(const std::wstring& verifycode);
     bool RegisterUser(const std::wstring& username, const std::wstring& password,
         const std::wstring& verifycode);
 
