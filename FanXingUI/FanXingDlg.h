@@ -5,7 +5,6 @@
 #pragma once
 #include <memory>
 #include <mutex>
-#include "explorer1.h"
 
 #include "NetworkHelper.h"
 #include "afxwin.h"

@@ -33,12 +33,6 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="explorer1.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="WebHandler.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="NetworkHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -66,12 +60,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="explorer1.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="WebHandler.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="FanXingUI.cpp">
