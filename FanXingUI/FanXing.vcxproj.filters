@@ -45,12 +45,6 @@
     <ClInclude Include="GiftInfoHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgRegister.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="RegisterHelper.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="UserController.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -75,12 +69,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GiftInfoHelper.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgRegister.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RegisterHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="UserController.cpp">

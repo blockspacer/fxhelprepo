@@ -82,7 +82,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;PSAPI_VERSION=1;_CONSOLE;_LIB;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;__GXX_EXPERIMENTAL_CXX0X__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)third_party/chromium;$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -112,12 +112,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DlgGiftNotify.h" />
-    <ClInclude Include="DlgRegister.h" />
     <ClInclude Include="FanXing.h" />
     <ClInclude Include="FanXingDlg.h" />
     <ClInclude Include="GiftInfoHelper.h" />
     <ClInclude Include="NetworkHelper.h" />
-    <ClInclude Include="RegisterHelper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RoomController.h" />
     <ClInclude Include="stdafx.h" />
@@ -126,12 +124,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DlgGiftNotify.cpp" />
-    <ClCompile Include="DlgRegister.cpp" />
     <ClCompile Include="FanXingUI.cpp" />
     <ClCompile Include="FanXingDlg.cpp" />
     <ClCompile Include="GiftInfoHelper.cpp" />
     <ClCompile Include="NetworkHelper.cpp" />
-    <ClCompile Include="RegisterHelper.cpp" />
     <ClCompile Include="RoomController.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

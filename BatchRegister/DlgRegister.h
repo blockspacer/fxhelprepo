@@ -39,7 +39,6 @@ private:
     CEdit m_register_password;
     CEdit m_register_verifycode;
     CImage image;
-    std::unique_ptr<NetworkHelper> registerNetworkHelper_;
     std::unique_ptr<RegisterHelper> registerHelper_;
 
     int infoListCount_;

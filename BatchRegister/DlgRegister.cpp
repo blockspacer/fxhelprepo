@@ -5,7 +5,6 @@
 #include "DlgRegister.h"
 #include "atlimage.h"
 #include "afxdialogex.h"
-#include "NetworkHelper.h"
 #include "RegisterHelper.h"
 #include "Network/EncodeHelper.h"
 #include "third_party/chromium/base/basictypes.h"
@@ -18,14 +17,13 @@ CDlgRegister::CDlgRegister(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CDlgRegister::IDD, pParent)
     , infoListCount_(0)
 {
-    registerNetworkHelper_.reset(new NetworkHelper);
-    registerNetworkHelper_->Initialize();
     registerHelper_.reset(new RegisterHelper);
+    registerHelper_->Initialize();
 }
 
 CDlgRegister::~CDlgRegister()
 {
-    registerNetworkHelper_->Finalize();
+    registerHelper_->Finalize();
 }
 
 void CDlgRegister::DoDataExchange(CDataExchange* pDX)
@@ -94,7 +92,7 @@ void CDlgRegister::OnBnClickedBtnCheckExist()
 {
     CString username;
     m_register_username.GetWindowTextW(username);
-    bool result = registerNetworkHelper_->RegisterCheckUserExist(username.GetBuffer());
+    bool result = registerHelper_->RegisterCheckUserExist(username.GetBuffer());
     if (!result)
     {
         Notify(L"网络出错或用户已经存在!");
@@ -120,7 +118,7 @@ void CDlgRegister::OnBnClickedBtnRegister()
         return;
     }
 
-    bool result = registerNetworkHelper_->RegisterCheckUserExist(username.GetBuffer());
+    bool result = registerHelper_->RegisterCheckUserExist(username.GetBuffer());
     if (!result)
     {
         Notify(L"网络出错或用户已经存在!");
@@ -128,7 +126,7 @@ void CDlgRegister::OnBnClickedBtnRegister()
     }
     Notify(L"用户名可用");
 
-    if (!registerNetworkHelper_->RegisterCheckUserInfo(username.GetString(),
+    if (!registerHelper_->RegisterCheckUserInfo(username.GetString(),
         password.GetString()))
     {
         Notify(L"检测用户信息失败");
@@ -136,14 +134,14 @@ void CDlgRegister::OnBnClickedBtnRegister()
     }
     Notify(L"检测用户信息成功");
 
-    if (!registerNetworkHelper_->RegisterCheckVerifyCode(verifycode.GetString()))
+    if (!registerHelper_->RegisterCheckVerifyCode(verifycode.GetString()))
     {
         Notify(L"验证码错误或失效");
         return;
     }
     Notify(L"验证码验证成功");
 
-    if (!registerNetworkHelper_->RegisterUser(username.GetString(),
+    if (!registerHelper_->RegisterUser(username.GetString(),
         password.GetString(), verifycode.GetString()))
     {
         Notify(L"注册失败");
@@ -163,7 +161,7 @@ void CDlgRegister::OnBnClickedBtnRegister()
 void CDlgRegister::OnBnClickedBtnVerifyCode()
 {
     std::vector<uint8> picture;
-    registerNetworkHelper_->RegisterGetVerifyCode(&picture);
+    registerHelper_->RegisterGetVerifyCode(&picture);
     std::wstring pathname;
     if (!registerHelper_->SaveVerifyCodeImage(picture, &pathname))
     {

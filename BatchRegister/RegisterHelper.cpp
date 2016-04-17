@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include "RegisterHelper.h"
+#include "Network/Network.h"
+#include "Network/CurlWrapper.h"
+#include "Network/EncodeHelper.h"
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/files/file.h"
 
@@ -10,11 +13,22 @@
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
 RegisterHelper::RegisterHelper()
+    :curlWrapper_(new CurlWrapper)
 {
+    
 }
 
 RegisterHelper::~RegisterHelper()
 {
+}
+
+bool RegisterHelper::Initialize()
+{
+    return NetworkInitialize();
+}
+void RegisterHelper::Finalize()
+{
+    NetworkFainalize();
 }
 
 bool RegisterHelper::SaveVerifyCodeImage(const std::vector<uint8>& image,
@@ -63,3 +77,38 @@ bool RegisterHelper::LoadAccountFromFile(
 {
     return false;
 }
+
+
+bool RegisterHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
+{
+    curlWrapper_->RegisterGetVerifyCode(picture);
+    return false;
+}
+
+bool RegisterHelper::RegisterCheckUserExist(const std::wstring& username)
+{
+    return curlWrapper_->RegisterCheckUserExist(WideToUtf8(username));
+}
+
+bool RegisterHelper::RegisterCheckUserInfo(const std::wstring& username, const std::wstring& password)
+{
+    std::string utf8username = base::WideToUTF8(username);
+    std::string utf8password = base::WideToUTF8(password);
+    return curlWrapper_->RegisterCheckUserInfo(utf8username, utf8password);
+}
+
+bool RegisterHelper::RegisterCheckVerifyCode(const std::wstring& verifycode)
+{
+    std::string utf8verifycode = base::WideToUTF8(verifycode);
+    return curlWrapper_->RegisterCheckVerifyCode(utf8verifycode);
+}
+
+bool RegisterHelper::RegisterUser(const std::wstring& username,
+    const std::wstring& password, const std::wstring& verifycode)
+{
+    std::string utf8username = base::WideToUTF8(username);
+    std::string utf8password = base::WideToUTF8(password);
+    std::string utf8verifycode = base::WideToUTF8(verifycode);
+    return curlWrapper_->RegisterUser(utf8username, utf8password, utf8verifycode);
+}
+

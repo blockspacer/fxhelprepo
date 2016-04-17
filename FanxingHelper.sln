@@ -49,6 +49,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libeay32", "third_party\ope
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestProject", "TestProject\TestProject.vcxproj", "{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BatchRegister", "BatchRegister\BatchRegister.vcxproj", "{7DEDC63A-8B79-477B-B80D-00288B73E11D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -139,6 +141,12 @@ Global
 		{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}.Release|Win32.ActiveCfg = Release|Win32
 		{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}.Release|Win32.Build.0 = Release|Win32
 		{B5B3DCD8-B928-4E5C-82C5-BA898BA0F3BD}.Release|x64.ActiveCfg = Release|Win32
+		{7DEDC63A-8B79-477B-B80D-00288B73E11D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7DEDC63A-8B79-477B-B80D-00288B73E11D}.Debug|Win32.Build.0 = Debug|Win32
+		{7DEDC63A-8B79-477B-B80D-00288B73E11D}.Debug|x64.ActiveCfg = Debug|Win32
+		{7DEDC63A-8B79-477B-B80D-00288B73E11D}.Release|Win32.ActiveCfg = Release|Win32
+		{7DEDC63A-8B79-477B-B80D-00288B73E11D}.Release|Win32.Build.0 = Release|Win32
+		{7DEDC63A-8B79-477B-B80D-00288B73E11D}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
