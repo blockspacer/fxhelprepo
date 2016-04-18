@@ -25,6 +25,9 @@ public:
     bool LoadAccountFromFile(
         std::vector<std::pair<std::wstring, std::wstring>>* accountinfo);
 
+    std::wstring GetNewName() const;
+    std::wstring GetPassword() const;
+
     // 注册新号码，网络部分功能
     bool RegisterGetVerifyCode(std::vector<uint8>* picture);
     bool RegisterCheckUserExist(const std::wstring& username);

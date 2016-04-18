@@ -16,9 +16,26 @@ IMPLEMENT_DYNAMIC(CDlgRegister, CDialogEx)
 CDlgRegister::CDlgRegister(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CDlgRegister::IDD, pParent)
     , infoListCount_(0)
+    , font18_(new CFont)
 {
     registerHelper_.reset(new RegisterHelper);
     registerHelper_->Initialize();
+
+    font18_->CreateFont(18,                        // nHeight
+        0,                         // nWidth
+        0,                         // nEscapement
+        0,                         // nOrientation
+        FW_BOLD,                   // nWeight
+        FALSE,                     // bItalic
+        FALSE,                     // bUnderline
+        0,                         // cStrikeOut
+        DEFAULT_CHARSET,           // nCharSet
+        OUT_CHARACTER_PRECIS,        // nOutPrecision
+        CLIP_DEFAULT_PRECIS,       // nClipPrecision
+        DEFAULT_QUALITY,           // nQuality
+        DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+        TEXT("黑体"));             // lpszFacename
+
 }
 
 CDlgRegister::~CDlgRegister()
@@ -54,8 +71,14 @@ BOOL CDlgRegister::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
 
-    RegisterHotKey(m_hWnd, 1001, 0, VK_F5);
-    RegisterHotKey(m_hWnd, 1002, 0, VK_RETURN);
+    m_register_verifycode.SetFont(font18_.get(),FALSE);
+    RegisterHotKey(this->m_hWnd, 1001, 0, VK_F5);
+    RegisterHotKey(this->m_hWnd, 1002, 0, VK_RETURN);
+
+    m_register_username.SetWindowTextW(registerHelper_->GetNewName().c_str());
+    m_register_password.SetWindowTextW(registerHelper_->GetPassword().c_str());
+    OnBnClickedBtnVerifyCode();
+    
     return TRUE;
 }
 
@@ -70,6 +93,7 @@ void CDlgRegister::OnPaint()
         ScreenToClient(rc);
         image.Draw(GetDC()->m_hDC, CRect(rc.left + 20, rc.top + 30, rc.left + width + 20,
             rc.top + hight + 30));
+        m_register_verifycode.SetFocus();
     }
     CDialogEx::OnPaint();
 }
@@ -80,11 +104,17 @@ LRESULT CDlgRegister::OnHotKey(WPARAM wp, LPARAM lp)
     switch (vk)
     {
     case 1001:
-        OnBnClickedBtnVerifyCode();
+        m_register_verifycode.SetWindowTextW(L"");
+        OnBnClickedBtnVerifyCode(); 
         break;
     case 1002:
-        OnBnClickedBtnCheckExist();
+        // 快捷键盘功能：注册用户
         OnBnClickedBtnRegister();
+        // 直接设置下一个用户名字和密码       
+        m_register_username.SetWindowTextW(registerHelper_->GetNewName().c_str());
+        m_register_password.SetWindowTextW(registerHelper_->GetPassword().c_str());
+        // 直接显示新的验证码
+        OnBnClickedBtnVerifyCode();
         break;
     default:
         break;
@@ -205,4 +235,5 @@ void CDlgRegister::OnBnClickedBtnVerifyCode()
     ScreenToClient(rc);
     image.Draw(GetDC()->m_hDC, CRect(rc.left + 20, rc.top + 30, rc.left + width +20, 
         rc.top + hight + 30));
+    m_register_verifycode.SetWindowTextW(L"");
 }

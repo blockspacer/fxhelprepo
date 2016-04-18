@@ -48,4 +48,6 @@ private:
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;
     CListBox m_register_info_list;
+
+    std::unique_ptr<CFont> font18_;
 };

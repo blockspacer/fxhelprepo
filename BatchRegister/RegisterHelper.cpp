@@ -30,7 +30,9 @@ bool RegisterHelper::Initialize()
 {
     base::FilePath dirPath;
     bool result = PathService::Get(base::DIR_EXE, &dirPath);
-    base::FilePath pathname = dirPath.Append(L"accountinfo.txt");
+    std::wstring filename = L"AccountInfo" + 
+        base::UTF8ToWide(MakeFormatDateString(base::Time::Now())) + L".txt";
+    base::FilePath pathname = dirPath.Append(filename);
     accountFile_->Initialize(pathname,
         base::File::FLAG_OPEN_ALWAYS | base::File::FLAG_APPEND);
     
@@ -84,6 +86,17 @@ bool RegisterHelper::LoadAccountFromFile(
 {
     return false;
 }
+
+std::wstring RegisterHelper::GetNewName() const
+{
+    return std::wstring(L"nowreg")+ base::UTF8ToWide(GetNowTimeString());
+}
+
+std::wstring RegisterHelper::GetPassword() const
+{
+    return L"supperpwd123";
+}
+
 
 //GET /reg/web/verifycode/t=1460916352057 HTTP/1.1
 //Host: www.kugou.com

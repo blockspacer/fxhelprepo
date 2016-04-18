@@ -220,6 +220,29 @@ std::string MakeFormatTimeString(const base::Time time)
     return std::move(timestring);
 }
 
+std::string MakeFormatDateString(const base::Time time)
+{
+    base::Time::Exploded exploded;
+    time.LocalExplode(&exploded);
+    std::string year = base::IntToString(exploded.year);
+    std::string month = base::IntToString(exploded.month);
+    if (month.length() < 2)
+    {
+        month = "0" + month;
+    }
+
+    std::string day = base::IntToString(exploded.day_of_month);
+    if (day.length() < 2)
+    {
+        day = "0" + day;
+    }
+
+    //std::string millisecond = base::IntToString(exploded.millisecond);
+    std::string datestring = year + "_" + month + "_" + day;
+
+    return std::move(datestring);
+}
+
 // 获取13位的当前时间字符串
 std::string GetNowTimeString()
 {

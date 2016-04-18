@@ -37,5 +37,7 @@ bool UnicodeToUtf8(const std::string& unicode, std::string* utf8);
 
 std::string MakeFormatTimeString(const base::Time time);
 
+std::string MakeFormatDateString(const base::Time time);
+
 // 获取13位的当前时间字符串
 std::string GetNowTimeString();
