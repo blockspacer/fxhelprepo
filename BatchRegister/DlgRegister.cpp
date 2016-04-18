@@ -126,7 +126,7 @@ void CDlgRegister::OnBnClickedBtnRegister()
     }
     Notify(L"用户名可用");
 
-    if (!registerHelper_->RegisterCheckUserInfo(username.GetString(),
+    if (!registerHelper_->RegisterCheckPassword(username.GetString(),
         password.GetString()))
     {
         Notify(L"检测用户信息失败");

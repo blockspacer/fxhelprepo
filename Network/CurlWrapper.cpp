@@ -718,9 +718,11 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     case HttpRequest::HTTP_METHOD::HTTP_METHOD_GET:
         curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
         break;
-    case HttpRequest::HTTP_METHOD::HTTP_METHOD_POST:
+    case HttpRequest::HTTP_METHOD::HTTP_METHOD_POST:       
+        assert(!request.postdata.empty());
         curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1L);
-        assert(false && L"未实现post数据功能");
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, request.postdata.size());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, &request.postdata[0]);
         break;
     default:
         assert(false);

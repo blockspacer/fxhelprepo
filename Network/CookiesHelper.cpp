@@ -16,10 +16,6 @@ CookiesHelper::~CookiesHelper()
 
 bool CookiesHelper::SetCookies(const std::string& key, const std::string& cookie)
 {
-    if (cookies_.find(key) != cookies_.end())
-    {
-        return false;
-    }
     cookies_[key] = cookie;
     return true;
 }

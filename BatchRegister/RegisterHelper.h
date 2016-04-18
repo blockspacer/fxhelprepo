@@ -8,6 +8,7 @@
 #include "third_party/chromium/base/files/file.h"
 
 class CurlWrapper;
+class CookiesHelper;
 class RegisterHelper
 {
 public:
@@ -27,12 +28,14 @@ public:
     // 注册新号码，网络部分功能
     bool RegisterGetVerifyCode(std::vector<uint8>* picture);
     bool RegisterCheckUserExist(const std::wstring& username);
-    bool RegisterCheckUserInfo(const std::wstring& username, 
+    bool RegisterCheckPassword(const std::wstring& username, 
         const std::wstring& password);
     bool RegisterUser(const std::wstring& username, const std::wstring& password,
         const std::wstring& verifycode);
 
 private:
     std::unique_ptr<CurlWrapper> curlWrapper_;
+    std::unique_ptr<CookiesHelper> cookiesHelper_;
+    std::unique_ptr<base::File> accountFile_;
 };
 
