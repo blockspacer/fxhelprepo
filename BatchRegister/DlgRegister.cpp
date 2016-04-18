@@ -39,6 +39,7 @@ void CDlgRegister::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_WM_PAINT()
+    ON_MESSAGE(WM_HOTKEY, OnHotKey)//注册热键
     ON_BN_CLICKED(IDC_BTN_CHECK_EXIST, &CDlgRegister::OnBnClickedBtnCheckExist)
     ON_BN_CLICKED(IDC_BTN_REGISTER, &CDlgRegister::OnBnClickedBtnRegister)
     ON_BN_CLICKED(IDC_BTN_VERIFY_CODE, &CDlgRegister::OnBnClickedBtnVerifyCode)
@@ -47,6 +48,16 @@ END_MESSAGE_MAP()
 
 
 // DlgRegister 消息处理程序
+
+
+BOOL CDlgRegister::OnInitDialog()
+{
+    CDialogEx::OnInitDialog();
+
+    RegisterHotKey(m_hWnd, 1001, 0, VK_F5);
+    RegisterHotKey(m_hWnd, 1002, 0, VK_RETURN);
+    return TRUE;
+}
 
 void CDlgRegister::OnPaint()
 {
@@ -62,6 +73,25 @@ void CDlgRegister::OnPaint()
     }
     CDialogEx::OnPaint();
 }
+
+LRESULT CDlgRegister::OnHotKey(WPARAM wp, LPARAM lp)
+{
+    UINT vk = (UINT)(wp);
+    switch (vk)
+    {
+    case 1001:
+        OnBnClickedBtnVerifyCode();
+        break;
+    case 1002:
+        OnBnClickedBtnCheckExist();
+        OnBnClickedBtnRegister();
+        break;
+    default:
+        break;
+    }
+    return S_OK;
+}
+
 
 LRESULT CDlgRegister::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 {

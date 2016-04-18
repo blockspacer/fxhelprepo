@@ -12,7 +12,6 @@
 #include "third_party/chromium/base/at_exit.h"
 
 #include "BatchRegister.h"
-#include "BatchRegisterDlg.h"
 #include "DlgRegister.h"
 
 #ifdef _DEBUG

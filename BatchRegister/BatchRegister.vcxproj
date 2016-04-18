@@ -106,7 +106,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BatchRegister.h" />
-    <ClInclude Include="BatchRegisterDlg.h" />
     <ClInclude Include="DlgRegister.h" />
     <ClInclude Include="RegisterHelper.h" />
     <ClInclude Include="Resource.h" />
@@ -115,7 +114,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BatchRegister.cpp" />
-    <ClCompile Include="BatchRegisterDlg.cpp" />
     <ClCompile Include="DlgRegister.cpp" />
     <ClCompile Include="RegisterHelper.cpp" />
     <ClCompile Include="stdafx.cpp">
