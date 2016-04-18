@@ -51,6 +51,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestProject", "TestProject\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BatchRegister", "BatchRegister\BatchRegister.vcxproj", "{7DEDC63A-8B79-477B-B80D-00288B73E11D}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BatchLogin", "BatchLogin\BatchLogin.vcxproj", "{5EE689BB-8878-48D1-839C-8D1EF0D94F1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -147,6 +149,12 @@ Global
 		{7DEDC63A-8B79-477B-B80D-00288B73E11D}.Release|Win32.ActiveCfg = Release|Win32
 		{7DEDC63A-8B79-477B-B80D-00288B73E11D}.Release|Win32.Build.0 = Release|Win32
 		{7DEDC63A-8B79-477B-B80D-00288B73E11D}.Release|x64.ActiveCfg = Release|Win32
+		{5EE689BB-8878-48D1-839C-8D1EF0D94F1F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5EE689BB-8878-48D1-839C-8D1EF0D94F1F}.Debug|Win32.Build.0 = Debug|Win32
+		{5EE689BB-8878-48D1-839C-8D1EF0D94F1F}.Debug|x64.ActiveCfg = Debug|Win32
+		{5EE689BB-8878-48D1-839C-8D1EF0D94F1F}.Release|Win32.ActiveCfg = Release|Win32
+		{5EE689BB-8878-48D1-839C-8D1EF0D94F1F}.Release|Win32.Build.0 = Release|Win32
+		{5EE689BB-8878-48D1-839C-8D1EF0D94F1F}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
