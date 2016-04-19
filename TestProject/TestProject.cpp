@@ -17,7 +17,7 @@ void SingleUserSingleRoomTest()
 {
     bool result = true;
     User user;
-    result &= user.Login("fanxingtest001", "1233211234567");
+    result &= user.Login("fanxingtest001", "123321");
     result &= user.EnterRoom(1084594);
 
     while (1);

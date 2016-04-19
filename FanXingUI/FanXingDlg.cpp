@@ -8,7 +8,6 @@
 #include "FanXingDlg.h"
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
-#include "UserController.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
 
@@ -231,8 +230,8 @@ HCURSOR CFanXingDlg::OnQueryDragIcon()
 // µÇÂ¼¹¦ÄÜ
 void CFanXingDlg::OnBnClickedButtonLogin()
 {
-    UserController usercontroller;
-    usercontroller.Run();
+    //UserController usercontroller;
+    //usercontroller.Run();
     //CString username;
     //CString password;
     //GetDlgItemText(IDC_EDIT_Username, username);
