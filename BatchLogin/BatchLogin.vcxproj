@@ -52,11 +52,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;PSAPI_VERSION=1;_CONSOLE;_LIB;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;__GXX_EXPERIMENTAL_CXX0X__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)third_party/chromium;$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -76,13 +79,16 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;PSAPI_VERSION=1;_CONSOLE;_LIB;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;__GXX_EXPERIMENTAL_CXX0X__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)third_party/chromium;$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -121,6 +127,29 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\BatchLogin.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Network\Network.vcxproj">
+      <Project>{2147cb51-23f6-4022-8e4a-291b70570cb7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
+      <Project>{ed99d404-f6b3-517a-4ea7-604a10269355}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\chromium\third_party\zlib\zlib.vcxproj">
+      <Project>{57997958-0cdb-a2a6-b81a-c5cadfc6e484}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\json\json.vcxproj">
+      <Project>{0deca417-fd94-4652-9881-53f935d89245}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\libcurl\curl\lib\libcurl.vcxproj">
+      <Project>{a9b789e9-ca2d-4b2f-b5fb-6d515ecfb31e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\libeay32\libeay32.vcxproj">
+      <Project>{ac33ff8e-59e7-4e1e-8111-f446e9fb0231}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\ssleay32\ssleay32.vcxproj">
+      <Project>{057ea5b8-8c47-4519-b5fc-9b28191d6843}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

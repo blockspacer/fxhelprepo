@@ -9,11 +9,16 @@
 #endif
 
 #include "resource.h"		// 主符号
-
+#include <memory>
 
 // CBatchLoginApp: 
 // 有关此类的实现，请参阅 BatchLogin.cpp
 //
+
+namespace base
+{
+    class AtExitManager;
+}
 
 class CBatchLoginApp : public CWinApp
 {
@@ -27,6 +32,12 @@ public:
 // 实现
 
 	DECLARE_MESSAGE_MAP()
+
+protected:
+    void InitAppLog();
+
+private:
+    std::unique_ptr<base::AtExitManager> atExitManager_;
 };
 
 extern CBatchLoginApp theApp;
