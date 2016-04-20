@@ -9,8 +9,8 @@
 #endif
 
 #include "resource.h"		// 主符号
-#include <memory>
 
+#include "third_party/chromium/base/memory/scoped_ptr.h"
 // CBatchLoginApp: 
 // 有关此类的实现，请参阅 BatchLogin.cpp
 //
@@ -24,7 +24,7 @@ class CBatchLoginApp : public CWinApp
 {
 public:
 	CBatchLoginApp();
-
+    virtual ~CBatchLoginApp();
 // 重写
 public:
 	virtual BOOL InitInstance();
@@ -37,7 +37,7 @@ protected:
     void InitAppLog();
 
 private:
-    std::unique_ptr<base::AtExitManager> atExitManager_;
+    scoped_ptr<base::AtExitManager> atExitManager_;
 };
 
 extern CBatchLoginApp theApp;

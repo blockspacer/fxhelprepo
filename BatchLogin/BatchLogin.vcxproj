@@ -112,6 +112,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UserController.h" />
+    <ClInclude Include="UserRoomManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BatchLogin.cpp" />
@@ -122,6 +123,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="UserController.cpp" />
+    <ClCompile Include="UserRoomManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="BatchLogin.rc" />
@@ -158,4 +160,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="BatchLogin.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

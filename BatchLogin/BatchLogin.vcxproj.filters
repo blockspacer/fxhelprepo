@@ -39,6 +39,9 @@
     <ClInclude Include="RoomController.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="UserRoomManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BatchLogin.cpp">
@@ -54,6 +57,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="RoomController.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UserRoomManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

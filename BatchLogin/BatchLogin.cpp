@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "BatchLogin.h"
 #include "BatchLoginDlg.h"
+#include "UserRoomManager.h"
 
 #undef max
 #undef min
@@ -38,8 +39,9 @@ CBatchLoginApp::CBatchLoginApp()
     atExitManager_.reset(new base::AtExitManager);
     InitAppLog();
 }
-
-
+CBatchLoginApp::~CBatchLoginApp()
+{
+}
 // 唯一的一个 CBatchLoginApp 对象
 
 CBatchLoginApp theApp;

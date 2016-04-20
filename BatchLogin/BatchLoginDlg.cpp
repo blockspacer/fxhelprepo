@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "BatchLogin.h"
 #include "BatchLoginDlg.h"
+#include "UserRoomManager.h"
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -14,12 +15,17 @@
 
 // CBatchLoginDlg ¶Ô»°¿ò
 
-
-
 CBatchLoginDlg::CBatchLoginDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CBatchLoginDlg::IDD, pParent)
+    , userRoomManager_(nullptr)
 {
+    userRoomManager_.reset(new UserRoomManager);
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+}
+
+CBatchLoginDlg::~CBatchLoginDlg()
+{
+
 }
 
 void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
@@ -30,6 +36,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+    ON_BN_CLICKED(IDC_BTN_IMPORT_USER, &CBatchLoginDlg::OnBnClickedBtnImportUser)
 END_MESSAGE_MAP()
 
 
@@ -87,3 +94,10 @@ HCURSOR CBatchLoginDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CBatchLoginDlg::OnBnClickedBtnImportUser()
+{
+    userRoomManager_->LoadUserConfig();
+    userRoomManager_->LoadRoomConfig();
+}

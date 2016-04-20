@@ -4,14 +4,16 @@
 
 #pragma once
 
+#include <memory>
 
+class UserRoomManager;
 // CBatchLoginDlg 对话框
 class CBatchLoginDlg : public CDialogEx
 {
 // 构造
 public:
 	CBatchLoginDlg(CWnd* pParent = NULL);	// 标准构造函数
-
+    virtual ~CBatchLoginDlg();
 // 对话框数据
 	enum { IDD = IDD_BATCHLOGIN_DIALOG };
 
@@ -28,4 +30,9 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+    afx_msg void OnBnClickedBtnImportUser();
+
+private:
+    std::unique_ptr<UserRoomManager> userRoomManager_;
 };
