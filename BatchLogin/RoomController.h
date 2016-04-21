@@ -10,5 +10,9 @@ public:
     ~RoomController();
 
     bool AddRoom(uint32 roomid);
+    std::vector<uint32> GetRooms() const;
+
+private:
+    std::vector<uint32> roomids_;
 };
 

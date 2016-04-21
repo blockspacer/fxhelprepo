@@ -35,4 +35,8 @@ public:
 
 private:
     std::unique_ptr<UserRoomManager> userRoomManager_;
+public:
+    afx_msg void OnBnClickedBtnGetProxy();
+    afx_msg void OnBnClickedBtnBatchEnterRoom();
+    afx_msg void OnBnClickedBtnImportRoom();
 };

@@ -13,7 +13,8 @@ public:
     bool LoadUserConfig();
     bool LoadRoomConfig();
 
-    bool AddRoom(uint32 roomid);
+    bool FillSingleRoom(uint32 roomid);
+    bool FillConfigRooms();
 
 private:
     std::unique_ptr<UserController> userController_;

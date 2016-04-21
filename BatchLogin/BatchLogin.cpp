@@ -117,7 +117,7 @@ void CBatchLoginApp::InitAppLog()
     CommandLine::Init(0, NULL);
     base::FilePath path;
     PathService::Get(base::DIR_APP_DATA, &path);
-    path = path.Append(L"FanXingHelper").Append(L"fanxinghelper.log");
+    path = path.Append(L"BatchLogin").Append(L"BatchLogin.log");
     logging::LoggingSettings setting;
     setting.logging_dest = logging::LOG_TO_ALL;
     setting.lock_log = logging::LOCK_LOG_FILE;

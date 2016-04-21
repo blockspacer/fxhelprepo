@@ -21,8 +21,7 @@ bool UserController::AddUser(const std::string& username,
 }
 bool UserController::FillRoom(uint32 roomid, uint32 count)
 {
-    //assert(count < users_.size());
-    for (const auto& it:users_)
+    for (const auto& it : users_)
     {
         it->EnterRoom(roomid);
     }

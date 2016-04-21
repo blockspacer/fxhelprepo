@@ -249,3 +249,32 @@ std::string GetNowTimeString()
     return base::Uint64ToString(
         static_cast<uint64>(base::Time::Now().ToDoubleT() * 1000));
 }
+
+std::vector<std::string> SplitString(std::string str, const std::string& pattern)
+{
+    std::vector<std::string> result;
+    str += pattern;//扩展字符串以方便操作
+    int size = str.size();
+
+    for (int i = 0; i < size; i++)
+    {
+        int pos = str.find(pattern, i);
+        if (pos < size)
+        {
+            std::string s = str.substr(i, pos - i);
+            result.push_back(s);
+            i = pos + pattern.size() - 1;
+        }
+    }
+    return result;
+}
+
+void RemoveSpace(std::string* str)
+{
+    auto pos = str->find(' ');
+    while (pos != std::string::npos)
+    {
+        str->erase(pos, 1);
+        pos = str->find(' ');
+    }
+}

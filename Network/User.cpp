@@ -25,10 +25,7 @@ User::User(const std::string& username,
 
 User::~User()
 {
-    for (auto& it : rooms_)
-    {
-        it->Exit();
-    }
+    Logout();
 }
 
 // 设置参数
@@ -102,7 +99,10 @@ bool User::Login(const std::string& username,
 bool User::Logout()
 {
     // 需要断掉房间连接
-
+    for (const auto& room : rooms_)
+    {
+        room->Exit();
+    }
     return false;
 }
 
@@ -129,7 +129,6 @@ bool User::EnterRoom(uint32 roomid)
 
 bool User::ExitRoom()
 {
-    
     return false;
 }
 

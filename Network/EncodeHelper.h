@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <string>
 #undef max // 因为微软这个二比在某些头文件定义了max宏
 #undef min // 因为微软这个二比在某些头文件定义了min宏
@@ -41,3 +42,7 @@ std::string MakeFormatDateString(const base::Time time);
 
 // 获取13位的当前时间字符串
 std::string GetNowTimeString();
+
+std::vector<std::string> SplitString(std::string str, const std::string& pattern);
+
+void RemoveSpace(std::string* str);

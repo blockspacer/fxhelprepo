@@ -37,6 +37,9 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BTN_IMPORT_USER, &CBatchLoginDlg::OnBnClickedBtnImportUser)
+    ON_BN_CLICKED(IDC_BTN_GET_PROXY, &CBatchLoginDlg::OnBnClickedBtnGetProxy)
+    ON_BN_CLICKED(IDC_BTN_BATCH_ENTER_ROOM, &CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom)
+    ON_BN_CLICKED(IDC_BTN_IMPORT_ROOM, &CBatchLoginDlg::OnBnClickedBtnImportRoom)
 END_MESSAGE_MAP()
 
 
@@ -99,5 +102,25 @@ HCURSOR CBatchLoginDlg::OnQueryDragIcon()
 void CBatchLoginDlg::OnBnClickedBtnImportUser()
 {
     userRoomManager_->LoadUserConfig();
-    userRoomManager_->LoadRoomConfig();
+    // 显示数据到界面
 }
+
+void CBatchLoginDlg::OnBnClickedBtnImportRoom()
+{
+    userRoomManager_->LoadRoomConfig();
+    // 显示数据到界面
+}
+
+void CBatchLoginDlg::OnBnClickedBtnGetProxy()
+{
+
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
+{
+    userRoomManager_->FillConfigRooms();
+}
+
+
+
