@@ -40,5 +40,6 @@ private:
     std::unique_ptr<CurlWrapper> curlWrapper_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;
     std::unique_ptr<base::File> accountFile_;
+    std::vector<std::string> namepost;
 };
 

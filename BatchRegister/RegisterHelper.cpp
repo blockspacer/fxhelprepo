@@ -13,12 +13,17 @@
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
+namespace
+{
+    static int index = 0;
+}
 RegisterHelper::RegisterHelper()
     :curlWrapper_(new CurlWrapper)
     , cookiesHelper_(new CookiesHelper)
     , accountFile_(new base::File)
 {
-
+    namepost = { "qqcom", "163com", "sinacom",
+        "hotmailcom", "yahoocom", "gmailcom", "tomcom", "126com" };
 }
 
 RegisterHelper::~RegisterHelper()
@@ -89,12 +94,19 @@ bool RegisterHelper::LoadAccountFromFile(
 
 std::wstring RegisterHelper::GetNewName() const
 {
-    return std::wstring(L"nowreg")+ base::UTF8ToWide(GetNowTimeString());
+    std::string timestring = GetNowTimeString().substr(4);
+    uint32 time32 = 0;
+    base::StringToUint(timestring, &time32);
+    std::string post = namepost[time32%namepost.size()];
+    std::string pre;
+    pre.push_back('A' + (time32 % 25));
+    return base::UTF8ToWide(pre + timestring + post).substr(0,19);
 }
 
 std::wstring RegisterHelper::GetPassword() const
 {
-    return L"supperpwd123";
+    std::string timestring = GetNowTimeString();
+    return base::UTF8ToWide(timestring);
 }
 
 
