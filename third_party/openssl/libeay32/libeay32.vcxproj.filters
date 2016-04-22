@@ -2388,4 +2388,7 @@
       <Filter>engines\ccgost</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="libeay32.def" />
+  </ItemGroup>
 </Project>

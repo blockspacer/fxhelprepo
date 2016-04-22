@@ -761,6 +761,9 @@
     <ClCompile Include="x509\x509_vpm.c" />
     <ClCompile Include="x509\x_all.c" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="libeay32.def" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <SccProjectName />
     <SccLocalPath />
