@@ -186,13 +186,23 @@ bool User::SendGift(uint32 giftid)
 bool User::KickoutUser(uint32 roomid, 
     const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    //for (const auto& room : rooms_)
-    //{
-    //    if (room->)
-    //    {
-    //    }
-    //}
-    return false;
+    auto room = rooms_.find(roomid);
+    if (room==rooms_.end())
+    {
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    room->second->KickOutUser(cookies,enterRoomUserInfo);
 }
 
 bool User::SilencedUser(uint32 userid)

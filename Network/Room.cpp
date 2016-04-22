@@ -61,6 +61,44 @@ bool Room::Exit()
     return true;
 }
 
+bool Room::KickOutUser(const std::string&cookies,
+    const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
+    std::string url = std::string("http://fanxing.kugou.com");
+    url += "/Services.php?act=RoomService.RoomManageService&mtd=kickOut&d=";
+    url += GetNowTimeString();
+    url += R"(&args=)";
+    std::string jsonstr;
+    jsonstr += std::string(R"([")");
+    jsonstr += base::UintToString(singerid_);
+    jsonstr += R"(",")";
+    jsonstr += base::UintToString(enterRoomUserInfo.userid);
+    jsonstr += R"(",")";
+    jsonstr += base::UintToString(enterRoomUserInfo.roomid);
+    jsonstr += R"(",3600,")";
+    jsonstr += enterRoomUserInfo.nickname;
+    jsonstr += R"(",0])"; // 统一按踢一小时计算
+    jsonstr = UrlEncode(jsonstr);
+
+    url += jsonstr;
+
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid_);
+    request.cookies = cookies;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    return true;
+}
+
 void Room::SetNormalNotify(NormalNotify normalNotify)
 {
     giftNotifyManager_->SetNormalNotify(normalNotify);
@@ -71,7 +109,7 @@ void Room::SetNotify201(Notify201 notify201)
     giftNotifyManager_->SetNotify201(notify201);
 }
 
-bool Room::OpenRoom(const std::string& cookies) const
+bool Room::OpenRoom(const std::string& cookies)
 {
     HttpRequest request;
     request.url = std::string("http://fanxing.kugou.com/") +
@@ -100,6 +138,21 @@ bool Room::OpenRoom(const std::string& cookies) const
     {
         return false;
     }
+    std::string isClanRoomMark = "isClanRoom";
+    std::string starId = "starId";
+    auto isClanRoomPos = content.find(isClanRoomMark);
+    if (isClanRoomPos == std::string::npos)
+    {
+        return false;
+    }
+    auto starPos = content.find(starId, isClanRoomPos + isClanRoomMark.length());
+
+    auto beginPos = content.find("\"", starPos);
+    beginPos += 1;
+    auto endPos = content.find("\"", beginPos);
+
+    std::string singerid = content.substr(beginPos, endPos - beginPos);
+    base::StringToUint(singerid, &singerid_);
     return true;
 }
 
@@ -151,77 +204,77 @@ bool Room::EnterRoom(const std::string& cookies, uint32 userid, const std::strin
     return true;
 }
 
-bool Room::GetCurrentUserInfo(const std::string& cookies,
-    uint32* userid, std::string* nickname, uint32* richlevel)
-{
-    HttpRequest request;
-    request.url = std::string("http://fanxing.kugou.com/Services.php");
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_);;
-    request.queries["d"] = GetNowTimeString();
-    request.queries["act"] = "UserService.UserService";
-    request.queries["mtd"] = "getCurrentUserInfo";
-    request.queries["args"] = "%5B%5D";
-    request.queries["test"] = "3";
-    request.cookies = cookies;
-
-    HttpResponse response;
-    if (!curlWrapper_->Execute(request, &response))
-    {
-        return false;
-    }
-
-    std::string contents(response.content.begin(), response.content.end());
-
-    if (contents.empty())
-    {
-        return false;
-    }
-
-    const std::string& data = contents;
-    //解析json数据
-    Json::Reader reader;
-    Json::Value rootdata(Json::objectValue);
-    if (!reader.parse(data, rootdata, false))
-    {
-        return false;
-    }
-
-    // 有必要检测status的值
-    uint32 status = rootdata.get(std::string("status"), 0).asInt();
-    if (status == 0)
-    {
-        return false;
-    }
-
-    Json::Value dataObject(Json::objectValue);
-    dataObject = rootdata.get(std::string("data"), dataObject);
-    if (dataObject.empty())
-    {
-        return false;
-    }
-
-    Json::Value fxUserInfoObject(Json::objectValue);
-    fxUserInfoObject = dataObject.get("fxUserInfo", fxUserInfoObject);
-    if (fxUserInfoObject.empty())
-    {
-        return false;
-    }
-
-    std::string struserid = fxUserInfoObject["userId"].asString();
-    if (!base::StringToUint(struserid, userid))
-    {
-        return false;
-    }
-
-    *nickname = fxUserInfoObject["nickName"].asString();
-    std::string strrichLevel = fxUserInfoObject["richLevel"].asString();
-    if (!base::StringToUint(strrichLevel, richlevel))
-    {
-        return false;
-    }
-    return true;
-}
+//bool Room::GetCurrentUserInfo(const std::string& cookies,
+//    uint32* userid, std::string* nickname, uint32* richlevel)
+//{
+//    HttpRequest request;
+//    request.url = std::string("http://fanxing.kugou.com/Services.php");
+//    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+//    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_);;
+//    request.queries["d"] = GetNowTimeString();
+//    request.queries["act"] = "UserService.UserService";
+//    request.queries["mtd"] = "getCurrentUserInfo";
+//    request.queries["args"] = "%5B%5D";
+//    request.queries["test"] = "3";
+//    request.cookies = cookies;
+//
+//    HttpResponse response;
+//    if (!curlWrapper_->Execute(request, &response))
+//    {
+//        return false;
+//    }
+//
+//    std::string contents(response.content.begin(), response.content.end());
+//
+//    if (contents.empty())
+//    {
+//        return false;
+//    }
+//
+//    const std::string& data = contents;
+//    //解析json数据
+//    Json::Reader reader;
+//    Json::Value rootdata(Json::objectValue);
+//    if (!reader.parse(data, rootdata, false))
+//    {
+//        return false;
+//    }
+//
+//    // 有必要检测status的值
+//    uint32 status = rootdata.get(std::string("status"), 0).asInt();
+//    if (status == 0)
+//    {
+//        return false;
+//    }
+//
+//    Json::Value dataObject(Json::objectValue);
+//    dataObject = rootdata.get(std::string("data"), dataObject);
+//    if (dataObject.empty())
+//    {
+//        return false;
+//    }
+//
+//    Json::Value fxUserInfoObject(Json::objectValue);
+//    fxUserInfoObject = dataObject.get("fxUserInfo", fxUserInfoObject);
+//    if (fxUserInfoObject.empty())
+//    {
+//        return false;
+//    }
+//
+//    std::string struserid = fxUserInfoObject["userId"].asString();
+//    if (!base::StringToUint(struserid, userid))
+//    {
+//        return false;
+//    }
+//
+//    *nickname = fxUserInfoObject["nickName"].asString();
+//    std::string strrichLevel = fxUserInfoObject["richLevel"].asString();
+//    if (!base::StringToUint(strrichLevel, richlevel))
+//    {
+//        return false;
+//    }
+//    return true;
+//}
 
 bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     const std::string& usertoken)

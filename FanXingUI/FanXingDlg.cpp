@@ -380,10 +380,10 @@ LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
         if (!exist) // 如果不存在，需要插入新数据
         {
             int nitem = m_ListCtrl_UserStatus.InsertItem(itemcount + i, rowdatas[i][0].c_str());
-            m_ListCtrl_UserStatus.SetItemData(nitem, i);
-            for (uint32 j = 1; j < rowdatas[i].size(); ++j)
+            //m_ListCtrl_UserStatus.SetItemData(nitem, i);
+            for (uint32 j = 0; j < rowdatas[i].size(); ++j)
             {
-                m_ListCtrl_UserStatus.SetItemText(itemcount + nitem, j, rowdatas[i][j].c_str());
+                m_ListCtrl_UserStatus.SetItemText(nitem, j, rowdatas[i][j].c_str());
             }
             m_ListCtrl_UserStatus.SetItemText(nitem, 5, L"1"); // 第一次记录数据
         }

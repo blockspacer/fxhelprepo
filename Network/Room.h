@@ -21,13 +21,18 @@ public:
     // 中断接收数据的连接
     bool Exit();
 
-private:
-    bool OpenRoom(const std::string& cookies) const;
+    bool KickOutUser(const std::string& cookies,
+        const EnterRoomUserInfo& enterRoomUserInfo);
 
-    bool GetCurrentUserInfo(const std::string& cookies,
-        uint32* userid, std::string* nickname, uint32* richlevel);
+private:
+    bool OpenRoom(const std::string& cookies);
+
+    //bool GetCurrentUserInfo(const std::string& cookies,
+    //    uint32* userid, std::string* nickname, uint32* richlevel);
 
     bool EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken);
+
+    bool GetSingerInfo();
 
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
         const std::string& usertoken);
