@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "Room.h"
 #include "third_party/chromium/base/basictypes.h"
 
 enum class LOGIN_STATE
@@ -26,8 +27,7 @@ class User
 {
 public:
     User();
-    User(const std::string& username,
-        const std::string& password);
+    User(const std::string& username, const std::string& password);
     ~User();
 
     // 设置参数
@@ -41,7 +41,8 @@ public:
     std::vector<std::string> GetCookies() const;
 
     //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
-    void SetRoomNotify();   
+    void SetNormalNotify(NormalNotify normalNotify);
+    void SetNotify201(Notify201 notify201);
 
     // 操作行为
     bool Login();
@@ -80,5 +81,8 @@ private:
     std::unique_ptr<CurlWrapper> curlWrapper_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;
     std::vector<std::shared_ptr<Room>> rooms_;
+
+    NormalNotify normalNotify_;
+    Notify201 notify201_;
 };
 

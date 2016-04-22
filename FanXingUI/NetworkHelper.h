@@ -12,6 +12,8 @@ class CurlWrapper;
 class GiftNotifyManager;
 class GiftInfoHelper;
 class GiftInfo;
+class User;
+
 typedef std::function<void(const std::wstring&)> notifyfn;
 
 typedef std::vector<std::wstring> RowData;
@@ -53,7 +55,7 @@ public:
         const std::string& ext);
 
     bool Login(const std::wstring& username, const std::wstring& password);
-
+    bool EnterRoom(uint32 roomid);
     bool KickoutUsers(uint32 singerid, const EnterRoomUserInfo& enterRoomUserInfo);
 
     bool GetGiftList(uint32 roomid);
@@ -78,5 +80,6 @@ private:
     notify201 notify201_;
     notify502 notify502_;
     notify601 notify601_;
+    std::unique_ptr<User> user_;
 };
 

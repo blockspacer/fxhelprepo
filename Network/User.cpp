@@ -64,9 +64,14 @@ std::vector<std::string> User::GetCookies() const
 }
 
 //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
-void User::SetRoomNotify()
+void User::SetNormalNotify(NormalNotify normalNotify)
 {
+    normalNotify_ = normalNotify;
+}
 
+void User::SetNotify201(Notify201 notify201)
+{
+    notify201_ = notify201;
 }
 
 bool User::Login()
@@ -119,6 +124,15 @@ bool User::EnterRoom(uint32 roomid)
     keys.push_back("fxClientInfo");
     keys.push_back("KuGoo");
     std::string cookie = cookiesHelper_->GetCookies(keys);
+    if (normalNotify_)
+    {
+        room->SetNormalNotify(normalNotify_);
+    }
+    if (notify201_)
+    {
+        room->SetNotify201(notify201_);
+    }
+
     if (!room->Enter(cookie))
     {
         return false;

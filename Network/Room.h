@@ -4,6 +4,8 @@
 
 #include "third_party/chromium/base/basictypes.h"
 
+#include "GiftNotifyManager.h"
+
 class CurlWrapper;
 class GiftNotifyManager;
 class CookiesHelper;
@@ -14,7 +16,8 @@ public:
     ~Room();
     
     bool Enter(const std::string& cookies);
-    
+    void SetNormalNotify(NormalNotify normalNotify);
+    void SetNotify201(Notify201 notify201);
     // 中断接收数据的连接
     bool Exit();
 

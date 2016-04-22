@@ -356,17 +356,17 @@ LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
         // 检测是否存在相同用户id
         for (int index = 0; index < itemcount; index++)
         {
-            CString text = m_ListCtrl_UserStatus.GetItemText(index, 3);
-            if (rowdatas[i][3].compare(text.GetBuffer()) == 0) // 相同用户id
+            CString text = m_ListCtrl_UserStatus.GetItemText(index, 2);
+            if (rowdatas[i][2].compare(text.GetBuffer()) == 0) // 相同用户id
             {
                 // 更新进入次数显示，其他的数据都全部默认更新的
-                CString itemText = m_ListCtrl_UserStatus.GetItemText(index, 6);
+                CString itemText = m_ListCtrl_UserStatus.GetItemText(index, 5);
                 std::string temp = base::WideToUTF8(itemText.GetBuffer());
                 uint32 entercount = 0;
                 base::StringToUint(temp, &entercount);
                 entercount++;
                 CString strEnterCount = base::UintToString16(entercount).c_str();
-                m_ListCtrl_UserStatus.SetItemText(index, 6, strEnterCount);
+                m_ListCtrl_UserStatus.SetItemText(index, 5, strEnterCount);
 
                 for (uint32 j = 0; j < rowdatas[i].size(); ++j)
                 {
@@ -385,7 +385,7 @@ LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
             {
                 m_ListCtrl_UserStatus.SetItemText(itemcount + nitem, j, rowdatas[i][j].c_str());
             }
-            m_ListCtrl_UserStatus.SetItemText(nitem, 6, L"1"); // 第一次记录数据
+            m_ListCtrl_UserStatus.SetItemText(nitem, 5, L"1"); // 第一次记录数据
         }
     }
 
@@ -482,7 +482,7 @@ void CFanXingDlg::OnBnClickedBtnQuery()
 
     for (int i = count - 1; i >= 0; --i)
     {
-        CString temp = m_ListCtrl_UserStatus.GetItemText(i, 3);
+        CString temp = m_ListCtrl_UserStatus.GetItemText(i, 1);
         if (temp.Find(key)>=0)
         {
             m_ListCtrl_UserStatus.SetCheck(i, TRUE);

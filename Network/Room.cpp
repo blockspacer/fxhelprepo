@@ -62,6 +62,16 @@ bool Room::Exit()
     return true;
 }
 
+void Room::SetNormalNotify(NormalNotify normalNotify)
+{
+    giftNotifyManager_->SetNormalNotify(normalNotify);
+}
+
+void Room::SetNotify201(Notify201 notify201)
+{
+    giftNotifyManager_->SetNotify201(notify201);
+}
+
 bool Room::OpenRoom(const std::string& cookies) const
 {
     HttpRequest request;

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "NetworkHelper.h"
+#include "Network/User.h"
 #include "third_party/chromium/base/strings/sys_string_conversions.h"
 
 #undef max // 因为微软这个二比在某些头文件定义了max宏
@@ -47,6 +48,7 @@ bool NetworkHelper::Initialize()
     CurlWrapper::CurlInit();
     curlWrapper_->Initialize();
     giftNotifyManager_->Initialize();
+    user_.reset(new User);
     return true;
 }
 
@@ -173,9 +175,19 @@ bool NetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
 bool NetworkHelper::Login(const std::wstring& username, 
     const std::wstring& password)
 {
-    return true;
+    std::string strusername = base::WideToUTF8(username);
+    std::string strpassword = base::WideToUTF8(password);
+    return user_->Login(strusername, strpassword);
 }
 
+bool NetworkHelper::EnterRoom(uint32 roomid)
+{
+    user_->SetNotify201(std::bind(&NetworkHelper::NotifyCallback201, this,
+        std::placeholders::_1));
+    user_->SetNormalNotify(std::bind(&NetworkHelper::NotifyCallback, this,
+        std::placeholders::_1));
+    return user_->EnterRoom(roomid);
+}
 // giftNotifyManager_ 线程回调
 void NetworkHelper::NotifyCallback(const std::wstring& message)
 {
