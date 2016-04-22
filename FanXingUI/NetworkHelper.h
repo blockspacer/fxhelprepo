@@ -54,9 +54,10 @@ public:
         const std::string& key,
         const std::string& ext);
 
-    bool Login(const std::wstring& username, const std::wstring& password);
+    bool Login(const std::wstring& username, const std::wstring& password);   
+    bool EnterRoom(const std::wstring& roomid);
     bool EnterRoom(uint32 roomid);
-    bool KickoutUsers(uint32 singerid, const EnterRoomUserInfo& enterRoomUserInfo);
+    bool KickoutUsers(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
 
     bool GetGiftList(uint32 roomid);
 

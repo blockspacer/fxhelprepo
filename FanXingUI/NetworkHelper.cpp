@@ -167,8 +167,8 @@ bool NetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
         std::bind(&NetworkHelper::NotifyCallback,
         this, std::placeholders::_1));
 
-    ret = giftNotifyManager_->Connect8080(roomid, userid, nickname, richlevel,
-                                          ismaster, staruserid, key, ext);
+    //ret = giftNotifyManager_->Connect8080(roomid, userid, nickname, richlevel,
+    //                                      ismaster, staruserid, key, ext);
     return ret;
 }
 
@@ -178,6 +178,16 @@ bool NetworkHelper::Login(const std::wstring& username,
     std::string strusername = base::WideToUTF8(username);
     std::string strpassword = base::WideToUTF8(password);
     return user_->Login(strusername, strpassword);
+}
+bool NetworkHelper::EnterRoom(const std::wstring& roomid)
+{
+    std::string strroomid = base::WideToUTF8(roomid);
+    uint32 introomid = 0;
+    if (!base::StringToUint(strroomid, &introomid))
+    {
+        return false;
+    }
+    return EnterRoom(introomid);
 }
 
 bool NetworkHelper::EnterRoom(uint32 roomid)
@@ -199,10 +209,10 @@ void NetworkHelper::NotifyCallback(const std::wstring& message)
     }
 }
 
-bool NetworkHelper::KickoutUsers(uint32 singerid, const EnterRoomUserInfo& enterRoomUserInfo)
+bool NetworkHelper::KickoutUsers(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    assert(singerid);
-    curlWrapper_->KickoutUser(singerid, KICK_TYPE::KICK_TYPE_HOUR, enterRoomUserInfo);
+    user_->KickoutUser(roomid, enterRoomUserInfo);
+    //curlWrapper_->KickoutUser(singerid, KICK_TYPE::KICK_TYPE_HOUR, enterRoomUserInfo);
     return false;
 }
 

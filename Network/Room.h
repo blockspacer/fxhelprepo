@@ -15,7 +15,7 @@ public:
     explicit Room(uint32 roomid);
     ~Room();
     
-    bool Enter(const std::string& cookies);
+    bool Enter(const std::string& cookies, const std::string& usertoken, uint32 userid);
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
     // 中断接收数据的连接
@@ -27,16 +27,10 @@ private:
     bool GetCurrentUserInfo(const std::string& cookies,
         uint32* userid, std::string* nickname, uint32* richlevel);
 
-    bool EnterRoom(const std::string& cookies, uint32* singerid,
-        std::string* key, std::string* ext);
-
+    bool EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken);
 
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
-        const std::string& nickname,
-        uint32 richlevel, uint32 ismaster,
-        uint32 staruserid,
-        const std::string& key,
-        const std::string& ext);
+        const std::string& usertoken);
 
     uint32 roomid_;
     uint32 singerid_;

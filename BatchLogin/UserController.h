@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <memory>
+#undef max
+#undef min
 #include "third_party/chromium/base/basictypes.h"
 
 class User;

@@ -98,16 +98,13 @@ public:
     //    " token " : " c920ae50679115ada1ef5f89b350829466b035f515c4ac4693f965e5321b41b3 ",
     //    " kugouId " : 454395944
     //}
-    bool Connect8080(uint32 roomid, uint32 userid, const std::string& nickname, 
-        uint32 richlevel, uint32 ismaster, uint32 staruserid,
-        const std::string& key, const std::string& ext);
+    bool Connect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
 
 private:
 
     void DoConnect843();
-    void DoConnect8080(uint32 roomid, uint32 userid, const std::string& nickname,
-        uint32 richlevel, uint32 ismaster, uint32 staruserid,
-        const std::string& key, const std::string& ext);
+    void DoConnect8080(uint32 roomid, uint32 userid,
+        const std::string& usertoken);
     void DoSendHeartBeat();
     void DoRecv();
 

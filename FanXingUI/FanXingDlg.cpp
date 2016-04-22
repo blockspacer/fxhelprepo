@@ -257,7 +257,7 @@ void CFanXingDlg::OnBnClickedButtonNav()
     network_->SetNotify201(
         std::bind(&CFanXingDlg::Notify201, this, std::placeholders::_1));
 
-    network_->EnterRoom(strRoomid.GetBuffer(), &singerid_);
+    network_->EnterRoom(strRoomid.GetBuffer());
 }
 
 //指定位置点击功能
@@ -578,7 +578,7 @@ void CFanXingDlg::OnBnClickedBtnKickoutHour()
             uint32 userid = 0;
             base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 2).GetBuffer(), &userid);
             enterRoomUserInfo.userid = userid;
-            network_->KickoutUsers(singerid, enterRoomUserInfo);
+            network_->KickoutUsers(enterRoomUserInfo.roomid, enterRoomUserInfo);
 
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id
             CString itemtext = L"userid=" + m_ListCtrl_UserStatus.GetItemText(i, 2);

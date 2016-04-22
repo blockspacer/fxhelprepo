@@ -25,13 +25,7 @@ struct cmd201package
     uint32 cmd;
     uint32 roomid;
     uint32 userid;
-    std::string nickname;
-    uint32 richlevel;
-    uint32 ismaster;
-    uint32 staruserid;
-    std::string key;
-    uint32 keytime;
-    std::string ext;
+    std::string usertoken;
 };
 // 这个数据包应该从http请求那边返回过来设置
 bool GetFirstPackage(const cmd201package& package, 
@@ -44,14 +38,8 @@ bool GetFirstPackage(const cmd201package& package,
     Json::Value root(Json::objectValue);
     root["cmd"] = package.cmd;
     root["roomid"] = package.roomid;
-    root["userid"] = package.userid;
-    root["nickname"] = package.nickname;
-    root["richlevel"] = package.richlevel;
-    root["ismaster"] = package.ismaster;
-    root["staruserid"] = package.staruserid;
-    root["key"] = package.key;
-    root["keytime"] = package.keytime;
-    root["ext"] = package.ext;
+    root["kugouid"] = package.userid;
+    root["token"] = package.usertoken;
     root["appid"] = 1010;
     std::string data = writer.write(root);
     packagedata->assign(data.begin(), data.end());
@@ -437,24 +425,18 @@ void GiftNotifyManager::DoConnect843()
 }
 
 bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
-    const std::string& nickname, uint32 richlevel, uint32 ismaster,
-    uint32 staruserid, const std::string& key,/* uint64 keytime, */
-    const std::string& ext)
+    const std::string& usertoken)
 {
     baseThread_.message_loop()->PostTask(FROM_HERE,
         base::Bind(&GiftNotifyManager::DoConnect8080, this,
-                roomid,userid,nickname,richlevel,
-                ismaster,staruserid,key,ext));
+        roomid, userid, usertoken));
 
     return true;
 }
 
 void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid, 
-    const std::string& nickname, uint32 richlevel, uint32 ismaster, 
-    uint32 staruserid, const std::string& key,/* uint64 keytime, */
-    const std::string& ext)
+    const std::string& usertoken)
 {
-    std::string decodestr = UrlDecode(ext);// 测试使用
     Packet_ = "";
     position_ = 0;
     if (!tcpClient_8080_->Connect(targetip, port8080))
@@ -465,8 +447,7 @@ void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid,
     uint32 keytime = static_cast<uint32>(base::Time::Now().ToDoubleT());
     std::vector<uint8> data_for_send;
     cmd201package package = { 
-        201, roomid, userid, nickname, richlevel, ismaster, staruserid, key, 
-        keytime, ext };
+        201, roomid, userid, usertoken};
     GetFirstPackage(package, &data_for_send);
     std::vector<char> data_8080;
     data_8080.assign(data_for_send.begin(), data_for_send.end());

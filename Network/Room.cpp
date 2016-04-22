@@ -23,33 +23,32 @@ Room::~Room()
     giftNotifyManager_->Finalize();
 }
 
-bool Room::Enter(const std::string& cookies)
+bool Room::Enter(const std::string& cookies, const std::string& usertoken, uint32 userid)
 {
-    uint32 userid = 0;
-    std::string nickname = "";
-    uint32 richlevel = 0;
-    uint32 ismaster = 0;
-    uint32 singerid = 0;
-    std::string key = "";
-    std::string ext = "";
+    //uint32 userid = 0;
+    //std::string nickname = "";
+    //uint32 richlevel = 0;
+    //uint32 ismaster = 0;
+    //uint32 singerid = 0;
+    //std::string key = "";
+    //std::string ext = "";
 
     if (!OpenRoom(cookies))
     {
         return false;
     }
 
-    if (!GetCurrentUserInfo(cookies, &userid, &nickname, &richlevel))
-    {
-        return false;
-    }
+    //if (!GetCurrentUserInfo(cookies, &userid, &nickname, &richlevel))
+    //{
+    //    return false;
+    //}
 
-    if (!EnterRoom(cookies, &singerid, &key, &ext))
+    if (!EnterRoom(cookies, userid, usertoken))
     {
         return false;
     }
     
-    if (!ConnectToNotifyServer_(roomid_, userid, nickname, richlevel, ismaster, 
-        singerid, key, ext))
+    if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
     {
         return false;
     }
@@ -104,14 +103,13 @@ bool Room::OpenRoom(const std::string& cookies) const
     return true;
 }
 
-bool Room::EnterRoom(const std::string& cookies,
-    uint32* singerid, std::string* key, std::string* ext)
+// 需要重写
+bool Room::EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken)
 {
     HttpRequest request;
-    request.url = "http://fanxing.kugou.com/UServices/RoomService/RoomService/enterRoom";
+    request.url = "http://fanxing.kugou.com/UServices/RoomService/RoomService/tryEnter";
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_);
-    request.queries["_"] = GetNowTimeString();
     request.queries["args"] = "[%22" + 
         base::IntToString(static_cast<int>(roomid_))+
         "%22,%22%22,%22%22,%22web%22]";
@@ -145,41 +143,11 @@ bool Room::EnterRoom(const std::string& cookies,
         return false;
     }
 
-    // 暂时没有必要检测status的值
-    Json::Value dataObject(Json::objectValue);
-    dataObject = rootdata.get(std::string("data"), dataObject);
-    if (dataObject.empty())
+    uint32 status = rootdata.get("status", 0).asInt();
+    if (status != 1)
     {
         return false;
     }
-
-    Json::Value starDataObject(Json::objectValue);
-    starDataObject = dataObject.get("starData", starDataObject);
-    if (starDataObject.empty())
-    {
-        return false;
-    }
-
-    std::string strstarUserId = starDataObject["userId"].asString();
-    if (!base::StringToUint(strstarUserId, singerid))
-    {
-        return false;
-    }
-
-    Json::Value socketConfigObject(Json::objectValue);
-    socketConfigObject = dataObject.get("socketConfig", socketConfigObject);
-    if (socketConfigObject.empty())
-    {
-        return false;
-    }
-
-    // 这是flash的tcp连接的服务器的ip(由url解析出来)和端口信息，后续可能用到，目前不解析
-    std::string strsokt = socketConfigObject["sokt"].asString();
-
-    // 重要数据，进入房间后连接tcp所使用的key
-    *key = socketConfigObject["enter"].asString();
-    *ext = socketConfigObject["ext"].asString();
-
     return true;
 }
 
@@ -256,11 +224,7 @@ bool Room::GetCurrentUserInfo(const std::string& cookies,
 }
 
 bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
-    const std::string& nickname,
-    uint32 richlevel, uint32 ismaster,
-    uint32 staruserid,
-    const std::string& key,
-    const std::string& ext)
+    const std::string& usertoken)
 {
     bool ret = false;
     ret = giftNotifyManager_->Connect843();
@@ -279,7 +243,6 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     //    std::bind(&NetworkHelper::NotifyCallback,
     //    this, std::placeholders::_1));
 
-    ret = giftNotifyManager_->Connect8080(roomid, userid, nickname, richlevel,
-        ismaster, staruserid, key, ext);
+    ret = giftNotifyManager_->Connect8080(roomid, userid, usertoken);
     return ret;
 }

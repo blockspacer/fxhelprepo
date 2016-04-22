@@ -2,7 +2,11 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 #include "Room.h"
+
+#undef max
+#undef min
 #include "third_party/chromium/base/basictypes.h"
 
 enum class LOGIN_STATE
@@ -51,14 +55,15 @@ public:
     bool Logout();
 
     bool EnterRoom(uint32 roomid);
-    bool ExitRoom();
+    bool ExitRoom(uint32 roomid);
+    bool ExitRooms();
 
     bool Chat(const std::string& message);
     bool SendStar(uint32 count);
     bool RetrieveStart();
     bool SendGift(uint32 giftid);
 
-    bool KickoutUser(uint32 userid);
+    bool KickoutUser(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool SilencedUser(uint32 userid);
 
 private:
@@ -80,7 +85,7 @@ private:
 
     std::unique_ptr<CurlWrapper> curlWrapper_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;
-    std::vector<std::shared_ptr<Room>> rooms_;
+    std::map<uint32, std::shared_ptr<Room>> rooms_;
 
     NormalNotify normalNotify_;
     Notify201 notify201_;

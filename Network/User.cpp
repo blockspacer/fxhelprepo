@@ -4,6 +4,7 @@
 #include "CookiesHelper.h"
 #include "EncodeHelper.h"
 
+#include "third_party/json/json.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 
@@ -106,7 +107,7 @@ bool User::Logout()
     // 需要断掉房间连接
     for (const auto& room : rooms_)
     {
-        room->Exit();
+        room.second->Exit();
     }
     return false;
 }
@@ -133,15 +134,31 @@ bool User::EnterRoom(uint32 roomid)
         room->SetNotify201(notify201_);
     }
 
-    if (!room->Enter(cookie))
+    // 如果存在重复的房间，先断掉旧的
+    this->ExitRoom(roomid);
+
+    if (!room->Enter(cookie,usertoken_,userid_))
     {
         return false;
     }
-    rooms_.push_back(room);
+    
+    rooms_[roomid] = room;
     return true;
 }
 
-bool User::ExitRoom()
+bool User::ExitRoom(uint32 roomid)
+{
+    auto it = rooms_.find(roomid);
+    if (it != rooms_.end())
+    {
+        it->second->Exit();
+        rooms_.erase(it);
+        return true;
+    }
+    return false;
+}
+
+bool User::ExitRooms()
 {
     return false;
 }
@@ -166,8 +183,15 @@ bool User::SendGift(uint32 giftid)
     return false;
 }
 
-bool User::KickoutUser(uint32 userid)
+bool User::KickoutUser(uint32 roomid, 
+    const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    //for (const auto& room : rooms_)
+    //{
+    //    if (room->)
+    //    {
+    //    }
+    //}
     return false;
 }
 
@@ -204,6 +228,40 @@ bool User::LoginHttps(const std::string& username,
     {
         return false;
     }
+ //   loginSuccessCallback({
+	//"pic" : "http:\/\/imge.kugou.com\/kugouicon\/165\/20100101\/20100101192931478054.jpg",
+	//"nickname" : "fanxingtest001",
+	//"username" : "fanxingtest001",
+	//"token" : "20c7dd5dbfdea2e25846e666f820d64ae1ad3afdb8a0a7652a447fcc392d1e46",
+	//"userid" : 641607819
+ //   })
+
+    std::string responsedata;
+    responsedata.assign(response.content.begin(), response.content.end());
+    if (responsedata.empty())
+        return  false;
+    std::string header = "loginSuccessCallback(";
+    responsedata = responsedata.substr(header.length(), 
+        responsedata.length() - header.length() - 2);
+    //std::string beginmark = R"("token":")";
+    //auto beginpos = responsedata.find(beginmark);
+    //if (beginpos == std::string::npos)
+    //    return false;
+    //beginpos += beginmark.size();
+    //auto endpos = responsedata.find("\"",beginpos);
+    //usertoken_ = responsedata.substr(beginpos, endpos - beginpos);
+
+    Json::Reader reader;
+    Json::Value logindata(Json::objectValue);
+    if (!reader.parse(responsedata, logindata, false))
+    {
+        return false;
+    }
+
+    // 暂时没有必要检测status的值
+    Json::Value jvCmd(Json::ValueType::intValue);
+    usertoken_ = logindata.get("token", "").asString();
+    userid_ = logindata.get("userid",0).asUInt();
 
     for (const auto& it : response.cookies)
     {
