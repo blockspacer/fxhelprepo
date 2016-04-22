@@ -158,8 +158,8 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
         networkLeft_->SetNotify601(
             std::bind(&CDlgGiftNotify::Notify601, this, ROOM_TYPE::ROOM_LEFT, 
             std::placeholders::_1, std::placeholders::_2));
-
-        if (!networkLeft_->EnterRoom(m_room_left))
+        uint32 singerid = 0;
+        if (!networkLeft_->EnterRoom(m_room_left, &singerid))
         {
             ::MessageBoxW(0, L"进入房间失败", L"错误", 0);
             assert(false && L"进入房间失败");
@@ -185,7 +185,8 @@ void CDlgGiftNotify::OnBnClickedBtnBegin()
             std::placeholders::_1, std::placeholders::_2));
 
         // 右边的房间
-        if (!networkRight_->EnterRoom(m_room_right))
+        uint32 singerid = 0;
+        if (!networkRight_->EnterRoom(m_room_right, &singerid))
         {
             ::MessageBoxW(0, L"进入房间失败", L"错误", 0);
             assert(false && L"进入房间失败");

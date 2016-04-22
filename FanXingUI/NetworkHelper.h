@@ -42,8 +42,8 @@ public:
     void RemoveNotify601();
 
     // 仅供不登录的用户使用
-    bool EnterRoom(uint32 strroomid);
-    bool EnterRoom(const std::wstring& strroomid);
+    bool EnterRoom(uint32 strroomid, uint32* singerid);
+    bool EnterRoom(const std::wstring& strroomid, uint32* singerid);
 
     bool ConnectToNotifyServer(uint32 roomid, uint32 userid,
         const std::string& nickname,

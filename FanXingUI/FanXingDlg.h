@@ -85,4 +85,5 @@ public:
     afx_msg void OnBnClickedBtnUnsilent();  
     afx_msg void OnBnClickedBtnClear();
     CButton m_check_remember;
+    uint32 singerid_ = 0;
 };

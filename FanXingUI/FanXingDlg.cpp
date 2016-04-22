@@ -154,7 +154,7 @@ BOOL CFanXingDlg::OnInitDialog()
     dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
     m_ListCtrl_UserStatus.SetExtendedStyle(dwStyle); //设置扩展风格
 
-    SetDlgItemText(IDC_EDIT_NAV, L"1053637");
+    SetDlgItemText(IDC_EDIT_NAV, L"1062091");
     SetDlgItemInt(IDC_EDIT_X, 0);
     SetDlgItemInt(IDC_EDIT_Y, 0);
 
@@ -232,15 +232,15 @@ void CFanXingDlg::OnBnClickedButtonLogin()
 {
     //UserController usercontroller;
     //usercontroller.Run();
-    //CString username;
-    //CString password;
-    //GetDlgItemText(IDC_EDIT_Username, username);
-    //GetDlgItemText(IDC_EDIT_Password, password);
+    CString username;
+    CString password;
+    GetDlgItemText(IDC_EDIT_Username, username);
+    GetDlgItemText(IDC_EDIT_Password, password);
 
-    //// 测试通过的curl登录方式
-    //bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
-    //std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
-    //Notify(message);
+    // 测试通过的curl登录方式
+    bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
+    std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
+    Notify(message);
 }
 
 //跳转页面功能
@@ -257,7 +257,7 @@ void CFanXingDlg::OnBnClickedButtonNav()
     network_->SetNotify201(
         std::bind(&CFanXingDlg::Notify201, this, std::placeholders::_1));
 
-    network_->EnterRoom(strRoomid.GetBuffer());
+    network_->EnterRoom(strRoomid.GetBuffer(), &singerid_);
 }
 
 //指定位置点击功能
@@ -410,8 +410,6 @@ LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 
 void CFanXingDlg::OnBnClickedButton2()
 {
-
-
     m_ListCtrl_UserStatus.SetCheck(0);
 }
 
@@ -547,12 +545,51 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 
 void CFanXingDlg::OnBnClickedBtnKickoutHour()
 {
-    EnterRoomUserInfo enterRoomUserInfo;
-    enterRoomUserInfo.roomid = 1053637;
-    enterRoomUserInfo.richlevel = 1;
-    enterRoomUserInfo.nickname = "fanxingtest111";
-    enterRoomUserInfo.userid = 120831944;
-    network_->KickoutUsers(110468466, enterRoomUserInfo);
+    // 从后往前删除
+    int count = m_ListCtrl_UserStatus.GetItemCount();
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_ListCtrl_UserStatus.GetCheck(i))
+        {
+            // 数据格式
+            //RowData rowdata;
+            //rowdata.push_back(base::SysUTF8ToWide(enterRoomUserInfo.nickname)); 0
+            //rowdata.push_back(base::UintToString16(enterRoomUserInfo.richlevel)); 1
+            //rowdata.push_back(base::UintToString16(enterRoomUserInfo.userid)); 2
+            //base::Time entertime = base::Time::FromDoubleT(enterRoomUserInfo.unixtime); 3
+            //std::wstring time = base::SysUTF8ToWide(MakeFormatTimeString(entertime).c_str());
+            //rowdata.push_back(time);
+            //rowdata.push_back(base::UintToString16(enterRoomUserInfo.roomid)); 4
+
+            // 需要获取singerid,
+            uint32 singerid = singerid_;
+
+            // 发送踢出房间的网络请求
+            EnterRoomUserInfo enterRoomUserInfo;
+            CString temp = m_ListCtrl_UserStatus.GetItemText(i, 4);
+            uint32 roomid = 0;
+            base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 4).GetBuffer(), &roomid);
+            enterRoomUserInfo.roomid = roomid;
+            uint32 richlevel = 0;
+            base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 1).GetBuffer(), &richlevel);
+            enterRoomUserInfo.richlevel = richlevel;
+            
+            enterRoomUserInfo.nickname = base::WideToUTF8(m_ListCtrl_UserStatus.GetItemText(i, 0).GetBuffer());
+            uint32 userid = 0;
+            base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 2).GetBuffer(), &userid);
+            enterRoomUserInfo.userid = userid;
+            network_->KickoutUsers(singerid, enterRoomUserInfo);
+
+            // 把要删除的消息发到日志记录列表上, id = 2 是用户id
+            CString itemtext = L"userid=" + m_ListCtrl_UserStatus.GetItemText(i, 2);
+            itemtext += L"被踢出一小时，并从列表中删除";
+            InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+
+            // 删除已经勾选的记录
+            m_ListCtrl_UserStatus.DeleteItem(i);
+        }
+    }
+
 }
 
 

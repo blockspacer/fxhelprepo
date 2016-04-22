@@ -98,14 +98,14 @@ void NetworkHelper::RemoveNotify601()
     notify601_ = nullptr;
 }
 
-bool NetworkHelper::EnterRoom(const std::wstring& strroomid)
+bool NetworkHelper::EnterRoom(const std::wstring& strroomid, uint32* singerid)
 {
     uint32 roomid = 0;
     base::StringToUint(strroomid, &roomid);
-    return EnterRoom(roomid);
+    return EnterRoom(roomid, singerid);
 }
 
-bool NetworkHelper::EnterRoom(uint32 roomid)
+bool NetworkHelper::EnterRoom(uint32 roomid, uint32* singerid)
 {
     uint32 userid = 0;
     std::string nickname = "";
@@ -127,6 +127,7 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
     ret = ConnectToNotifyServer_(roomid, userid, nickname, richlevel, ismaster, 
                                  staruserid, key, ext);
 
+    *singerid = staruserid;
     return ret;
 }
 
@@ -188,6 +189,7 @@ void NetworkHelper::NotifyCallback(const std::wstring& message)
 
 bool NetworkHelper::KickoutUsers(uint32 singerid, const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    assert(singerid);
     curlWrapper_->KickoutUser(singerid, KICK_TYPE::KICK_TYPE_HOUR, enterRoomUserInfo);
     return false;
 }
