@@ -183,6 +183,27 @@ bool User::SendGift(uint32 giftid)
     return false;
 }
 
+bool User::GetViewerList(uint32 roomid,
+    std::vector<EnterRoomUserInfo>* enterRoomUserInfo)
+{
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+    bool result = room->second->GetViewerList(cookies, enterRoomUserInfo);
+    return result;
+}
+
 bool User::KickoutUser(uint32 roomid, 
     const EnterRoomUserInfo& enterRoomUserInfo)
 {
@@ -202,7 +223,7 @@ bool User::KickoutUser(uint32 roomid,
     keys.push_back("fxClientInfo");
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
-    room->second->KickOutUser(cookies,enterRoomUserInfo);
+    return room->second->KickOutUser(cookies,enterRoomUserInfo);
 }
 
 bool User::SilencedUser(uint32 userid)

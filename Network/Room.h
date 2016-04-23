@@ -21,6 +21,8 @@ public:
     // 中断接收数据的连接
     bool Exit();
 
+    bool GetViewerList(const std::string& cookies, 
+        std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
     bool KickOutUser(const std::string& cookies,
         const EnterRoomUserInfo& enterRoomUserInfo);
 

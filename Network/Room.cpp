@@ -61,6 +61,88 @@ bool Room::Exit()
     return true;
 }
 
+bool Room::GetViewerList(const std::string& cookies,
+    std::vector<EnterRoomUserInfo>* enterRoomUserInfoList)
+{
+    std::string url = "http://visitor.fanxing.kugou.com";
+    url += "/VServices/RoomService.RoomService.getViewerList/";
+    url += base::UintToString(roomid_) +"-" + base::UintToString(singerid_);
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid_);
+    request.cookies = cookies;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+    auto beginpos = responsedata.find("(");
+    auto endpos = responsedata.rfind(")");
+    if (beginpos == std::string::npos || endpos == std::string::npos)
+    {
+        assert(false);
+        return false;
+    }
+
+    responsedata = responsedata.substr(beginpos + 1, endpos - beginpos - 1);
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1461378689).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    if (status != 1)
+    {
+        assert(false);
+        return false;
+    }
+    Json::Value jvdata(Json::ValueType::objectValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull())
+    {
+        assert(false);
+        return false;
+    }
+    
+    Json::Value jvlist(Json::ValueType::objectValue);
+    Json::Value list = data.get(std::string("list"), jvlist);
+    if (!list.isArray())
+    {
+        assert(false);
+        return false;
+    }
+
+    for (const auto& item : list)
+    {
+        EnterRoomUserInfo enterRoomUserInfo;
+        enterRoomUserInfo.nickname = item.get("nickname", "").asString();
+        std::string strrichlevel = item.get("richlevel","0").asString();
+        enterRoomUserInfo.richlevel = 0;
+        base::StringToUint(strrichlevel, &enterRoomUserInfo.richlevel);
+        enterRoomUserInfo.userid = item.get("userid", 0).asUInt();
+        enterRoomUserInfo.unixtime = unixtime;
+        enterRoomUserInfoList->push_back(enterRoomUserInfo);
+    }
+
+    return true;
+}
+
 bool Room::KickOutUser(const std::string&cookies,
     const EnterRoomUserInfo& enterRoomUserInfo)
 {

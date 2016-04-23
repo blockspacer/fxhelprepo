@@ -57,6 +57,8 @@ public:
     bool Login(const std::wstring& username, const std::wstring& password);   
     bool EnterRoom(const std::wstring& roomid);
     bool EnterRoom(uint32 roomid);
+    bool GetViewerList(uint32 roomid,
+        std::vector<RowData>* enterRoomUserInfoRowdata);
     bool KickoutUsers(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
 
     bool GetGiftList(uint32 roomid);

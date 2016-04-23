@@ -114,6 +114,7 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_SILENT, &CFanXingDlg::OnBnClickedBtnSilent)
     ON_BN_CLICKED(IDC_BTN_UNSILENT, &CFanXingDlg::OnBnClickedBtnUnsilent)
     ON_BN_CLICKED(IDC_BTN_CLEAR, &CFanXingDlg::OnBnClickedBtnClear)
+    ON_BN_CLICKED(IDC_BTN_GET_VIEWER_LIST, &CFanXingDlg::OnBnClickedBtnGetViewerList)
 END_MESSAGE_MAP()
 
 
@@ -251,6 +252,8 @@ void CFanXingDlg::OnBnClickedButtonNav()
 
     CString strRoomid;
     GetDlgItemText(IDC_EDIT_NAV, strRoomid);
+    base::StringToUint(strRoomid.GetBuffer(), &roomid_);
+
     network_->SetNotify(
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
 
@@ -569,7 +572,7 @@ void CFanXingDlg::OnBnClickedBtnKickoutHour()
             CString temp = m_ListCtrl_UserStatus.GetItemText(i, 4);
             uint32 roomid = 0;
             base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 4).GetBuffer(), &roomid);
-            enterRoomUserInfo.roomid = roomid;
+            enterRoomUserInfo.roomid = roomid_;
             uint32 richlevel = 0;
             base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 1).GetBuffer(), &richlevel);
             enterRoomUserInfo.richlevel = richlevel;
@@ -616,4 +619,23 @@ void CFanXingDlg::OnBnClickedBtnClear()
 
     CString itemtext = L"Çå¿ÕÁÐ±í";
     InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+}
+
+
+void CFanXingDlg::OnBnClickedBtnGetViewerList()
+{
+    std::vector<RowData> enterRoomUserInfoRowdata;
+    if (!network_->GetViewerList(roomid_, &enterRoomUserInfoRowdata))
+    {
+        return;
+    }
+
+    rowdataMutex_.lock();
+    for (const auto& rowdata : enterRoomUserInfoRowdata)
+    {
+        rowdataQueue_.push_back(rowdata);
+    }   
+    rowdataMutex_.unlock();
+    this->PostMessage(WM_USER_ADD_ENTER_ROOM_INFO, 0, 0);
+
 }

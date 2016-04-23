@@ -63,6 +63,8 @@ public:
     bool RetrieveStart();
     bool SendGift(uint32 giftid);
 
+    bool GetViewerList(uint32 roomid, 
+        std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
     bool KickoutUser(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool SilencedUser(uint32 userid);
 

@@ -198,6 +198,21 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
         std::placeholders::_1));
     return user_->EnterRoom(roomid);
 }
+
+bool NetworkHelper::GetViewerList(uint32 roomid,
+    std::vector<RowData>* enterRoomUserInfoRowdata)
+{
+    std::vector<EnterRoomUserInfo> enterRoomUserInfoList;
+    bool result = user_->GetViewerList(roomid, &enterRoomUserInfoList);
+    for (const auto& enterRoomUserInfo : enterRoomUserInfoList)
+    {
+        RowData rowdata = EnterRoomUserInfoToRowdata(enterRoomUserInfo);
+        enterRoomUserInfoRowdata->push_back(rowdata);
+    }
+    return result;
+}
+
+
 // giftNotifyManager_ 线程回调
 void NetworkHelper::NotifyCallback(const std::wstring& message)
 {
@@ -211,9 +226,9 @@ void NetworkHelper::NotifyCallback(const std::wstring& message)
 
 bool NetworkHelper::KickoutUsers(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    user_->KickoutUser(roomid, enterRoomUserInfo);
+    
     //curlWrapper_->KickoutUser(singerid, KICK_TYPE::KICK_TYPE_HOUR, enterRoomUserInfo);
-    return false;
+    return user_->KickoutUser(roomid, enterRoomUserInfo);;
 }
 
 bool NetworkHelper::GetGiftList(uint32 roomid)

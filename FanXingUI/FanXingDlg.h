@@ -85,5 +85,7 @@ public:
     afx_msg void OnBnClickedBtnUnsilent();  
     afx_msg void OnBnClickedBtnClear();
     CButton m_check_remember;
+    uint32 roomid_ = 0;
     uint32 singerid_ = 0;
+    afx_msg void OnBnClickedBtnGetViewerList();
 };
