@@ -155,7 +155,7 @@ BOOL CFanXingDlg::OnInitDialog()
     dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
     m_ListCtrl_UserStatus.SetExtendedStyle(dwStyle); //设置扩展风格
 
-    SetDlgItemText(IDC_EDIT_NAV, L"1062091");
+    SetDlgItemText(IDC_EDIT_NAV, L"0");
     SetDlgItemInt(IDC_EDIT_X, 0);
     SetDlgItemInt(IDC_EDIT_Y, 0);
 
@@ -231,8 +231,6 @@ HCURSOR CFanXingDlg::OnQueryDragIcon()
 // 登录功能
 void CFanXingDlg::OnBnClickedButtonLogin()
 {
-    //UserController usercontroller;
-    //usercontroller.Run();
     CString username;
     CString password;
     GetDlgItemText(IDC_EDIT_Username, username);
@@ -504,7 +502,6 @@ void CFanXingDlg::OnBnClickedBtnSelectAll()
     }
 }
 
-
 void CFanXingDlg::OnBnClickedBtnSelectReverse()
 {
     int count = m_ListCtrl_UserStatus.GetItemCount();
@@ -554,16 +551,6 @@ void CFanXingDlg::OnBnClickedBtnKickoutHour()
     {
         if (m_ListCtrl_UserStatus.GetCheck(i))
         {
-            // 数据格式
-            //RowData rowdata;
-            //rowdata.push_back(base::SysUTF8ToWide(enterRoomUserInfo.nickname)); 0
-            //rowdata.push_back(base::UintToString16(enterRoomUserInfo.richlevel)); 1
-            //rowdata.push_back(base::UintToString16(enterRoomUserInfo.userid)); 2
-            //base::Time entertime = base::Time::FromDoubleT(enterRoomUserInfo.unixtime); 3
-            //std::wstring time = base::SysUTF8ToWide(MakeFormatTimeString(entertime).c_str());
-            //rowdata.push_back(time);
-            //rowdata.push_back(base::UintToString16(enterRoomUserInfo.roomid)); 4
-
             // 需要获取singerid,
             uint32 singerid = singerid_;
 

@@ -6,6 +6,7 @@
 #include "Network/EncodeHelper.h"
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/files/file.h"
+#include "third_party/chromium/base/files/file_util.h"
 
 #undef max // 因为微软这个二比在某些头文件定义了max宏
 #undef min // 因为微软这个二比在某些头文件定义了min宏
@@ -64,13 +65,19 @@ bool RegisterHelper::SaveVerifyCodeImage(const std::vector<uint8>& image,
     std::string timestr = base::Uint64ToString(time);
     base::FilePath dirPath;
     bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    
+    base::FilePath pathname = dirPath.Append(L"VerifyCode");
+    if (!base::DirectoryExists(pathname))
+    {
+        base::CreateDirectory(pathname);
+    }
     std::wstring filename = base::UTF8ToWide(timestr + ".png");
-    base::FilePath pathname = dirPath.Append(filename);
-    base::File pngfile(pathname,
+    base::FilePath filepath = pathname.Append(filename);
+    base::File pngfile(filepath,
         base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
     pngfile.Write(0, (char*)image.data(), image.size());
     pngfile.Close();
-    *path = pathname.value();
+    *path = filepath.value();
     return true;
 }
 
