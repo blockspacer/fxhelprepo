@@ -111,7 +111,7 @@ bool CommandHandle_315(const Json::Value& jvalue, std::string* outmsg)
     return false;
 }
 
-bool CommandHandle_501(const Json::Value& jvalue, std::string* outmsg)
+bool CommandHandle_501(const Json::Value& jvalue, EnterRoomUserInfo* enterRoomUserInfo, std::string* outmsg)
 {
     // 房间聊天消息
     try
@@ -126,11 +126,19 @@ bool CommandHandle_501(const Json::Value& jvalue, std::string* outmsg)
         Json::Value jvString("");
         uint32 receiverid = GetInt32FromJsonValue(content, "receiverid");
         uint32 senderid = GetInt32FromJsonValue(content, "senderid");
+		uint32 senderrichlevel = GetInt32FromJsonValue(content, "senderrichlevel");
         uint32 issecrect = GetInt32FromJsonValue(content, "issecrect");//是否私聊
         std::string chatmsg = content.get("chatmsg", jvString).asString();
         std::string sendername = content.get("sendername", jvString).asString();
         std::string receivername = content.get("receivername", jvString).asString();
         *outmsg = base::WideToUTF8(L"聊天消息:") + chatmsg;
+
+		
+		enterRoomUserInfo->roomid = GetInt32FromJsonValue(jvalue, "roomid");
+		enterRoomUserInfo->unixtime = GetInt32FromJsonValue(jvalue, "time");
+		enterRoomUserInfo->nickname = sendername;
+		enterRoomUserInfo->richlevel = senderrichlevel;
+		enterRoomUserInfo->userid = senderid;
     }
     catch (...)
     {
@@ -347,6 +355,7 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
             }
         }
 
+		EnterRoomUserInfo enterRoomUserInfo;
         std::string outmsg;
         switch (cmd)
         {
@@ -359,7 +368,13 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
             CommandHandle_315(rootdata, &outmsg);
             break;
         case 501:
-            CommandHandle_501(rootdata, &outmsg);
+			
+			if (CommandHandle_501(rootdata, &enterRoomUserInfo, &outmsg))
+            {
+				if (notify201_)
+					notify201_(enterRoomUserInfo);
+            }
+            
             break;
         case 601:
             CommandHandle_601(rootdata, &outmsg);
