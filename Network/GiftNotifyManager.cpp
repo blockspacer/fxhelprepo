@@ -47,23 +47,6 @@ bool GetFirstPackage(const cmd201package& package,
     return true;
 }
 
-uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name)
-{
-    uint32 ret = 0;
-    Json::Value jvdefault(Json::ValueType::objectValue);
-    auto getdata = jvalue.get(name, jvdefault);
-    if (getdata.isInt())
-    {
-        ret = getdata.asInt();
-    }
-    else if (getdata.isString())
-    {
-        base::StringToUint(getdata.asString(), &ret);
-    }
-
-    return ret;
-}
-
 bool CommandHandle_100(const Json::Value& jvalue, std::string* outmsg)
 {
     // 全站广播消息

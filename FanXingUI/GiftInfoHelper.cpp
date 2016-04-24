@@ -8,46 +8,6 @@
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversion_utils.h"
 
-namespace
-{
-uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name)
-{
-    uint32 ret = 0;
-    Json::Value jvdefault(Json::ValueType::objectValue);
-    auto getdata = jvalue.get(name, jvdefault);
-    if (getdata.isInt())
-    {
-        ret = getdata.asInt();
-    }
-    else if (getdata.isString())
-    {
-        base::StringToUint(getdata.asString(), &ret);
-    }
-
-    return ret;
-}
-
-double GetDoubleFromJsonValue(const Json::Value& jvalue, const std::string& name)
-{
-    double ret = 0;
-    Json::Value jvdefault(Json::ValueType::objectValue);
-    auto getdata = jvalue.get(name, jvdefault);
-    if (getdata.isDouble())
-    {
-        ret = getdata.asDouble();
-    }
-    else if (getdata.isInt())
-    {
-        ret = getdata.asDouble();
-    }
-    else if (getdata.isString())
-    {
-        base::StringToDouble(getdata.asString(), &ret);
-    }
-
-    return ret;
-}
-}
 GiftInfoHelper::GiftInfoHelper()
 {
 }
@@ -83,7 +43,7 @@ bool GiftInfoHelper::Initialize(const std::string& inputstr)
     }
 
     // 有必要检测status的值
-    uint32 status = rootdata.get(std::string("status"), 0).asInt();
+	uint32 status = GetInt32FromJsonValue(rootdata, "status");
     if (status != 1)
     {
         return false;

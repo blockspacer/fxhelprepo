@@ -278,3 +278,41 @@ void RemoveSpace(std::string* str)
         pos = str->find(' ');
     }
 }
+
+uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name)
+{
+	uint32 ret = 0;
+	Json::Value jvdefault(Json::ValueType::objectValue);
+	auto getdata = jvalue.get(name, jvdefault);
+	if (getdata.isInt())
+	{
+		ret = getdata.asInt();
+	}
+	else if (getdata.isString())
+	{
+		base::StringToUint(getdata.asString(), &ret);
+	}
+
+	return ret;
+}
+
+double GetDoubleFromJsonValue(const Json::Value& jvalue, const std::string& name)
+{
+	double ret = 0;
+	Json::Value jvdefault(Json::ValueType::objectValue);
+	auto getdata = jvalue.get(name, jvdefault);
+	if (getdata.isDouble())
+	{
+		ret = getdata.asDouble();
+	}
+	else if (getdata.isInt())
+	{
+		ret = getdata.asDouble();
+	}
+	else if (getdata.isString())
+	{
+		base::StringToDouble(getdata.asString(), &ret);
+	}
+
+	return ret;
+}

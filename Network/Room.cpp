@@ -132,10 +132,8 @@ bool Room::GetViewerList(const std::string& cookies,
     {
         EnterRoomUserInfo enterRoomUserInfo;
         enterRoomUserInfo.nickname = item.get("nickname", "").asString();
-        std::string strrichlevel = item.get("richlevel","0").asString();
-        enterRoomUserInfo.richlevel = 0;
-        base::StringToUint(strrichlevel, &enterRoomUserInfo.richlevel);
-        enterRoomUserInfo.userid = item.get("userid", 0).asUInt();
+		enterRoomUserInfo.richlevel = GetInt32FromJsonValue(item, "richlevel");
+		enterRoomUserInfo.userid = GetInt32FromJsonValue(item, "userid");
         enterRoomUserInfo.unixtime = unixtime;
         enterRoomUserInfoList->push_back(enterRoomUserInfo);
     }
@@ -278,7 +276,7 @@ bool Room::EnterRoom(const std::string& cookies, uint32 userid, const std::strin
         return false;
     }
 
-    uint32 status = rootdata.get("status", 0).asInt();
+	uint32 status = GetInt32FromJsonValue(rootdata, "status");
     if (status != 1)
     {
         return false;
