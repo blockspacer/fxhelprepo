@@ -55,6 +55,7 @@ private:
     void Notify(const std::wstring& message);
     void Notify201(const RowData& rowdata);
     bool LoginByRequest(const std::wstring& username, const std::wstring& password);
+	bool GetSelectUsers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
 
     std::unique_ptr<NetworkHelper> network_;
     std::mutex messageMutex_;
@@ -84,8 +85,9 @@ public:
     afx_msg void OnBnClickedBtnSilent();
     afx_msg void OnBnClickedBtnUnsilent();  
     afx_msg void OnBnClickedBtnClear();
-    CButton m_check_remember;
-    uint32 roomid_ = 0;
-    uint32 singerid_ = 0;
+
     afx_msg void OnBnClickedBtnGetViewerList();
+	CButton m_check_remember;
+	uint32 roomid_ = 0;
+	uint32 singerid_ = 0;
 };

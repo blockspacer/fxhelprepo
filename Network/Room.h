@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "third_party/chromium/base/basictypes.h"
-
+#include "CurlWrapper.h"
 #include "GiftNotifyManager.h"
 
 class CurlWrapper;
@@ -23,7 +23,7 @@ public:
 
     bool GetViewerList(const std::string& cookies, 
         std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
-    bool KickOutUser(const std::string& cookies,
+	bool KickOutUser(KICK_TYPE kicktype, const std::string& cookies,
         const EnterRoomUserInfo& enterRoomUserInfo);
 
 private:

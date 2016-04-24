@@ -135,13 +135,14 @@ bool Room::GetViewerList(const std::string& cookies,
 		enterRoomUserInfo.richlevel = GetInt32FromJsonValue(item, "richlevel");
 		enterRoomUserInfo.userid = GetInt32FromJsonValue(item, "userid");
         enterRoomUserInfo.unixtime = unixtime;
+		enterRoomUserInfo.roomid = roomid_;
         enterRoomUserInfoList->push_back(enterRoomUserInfo);
     }
 
     return true;
 }
 
-bool Room::KickOutUser(const std::string&cookies,
+bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
     const EnterRoomUserInfo& enterRoomUserInfo)
 {
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
@@ -158,7 +159,15 @@ bool Room::KickOutUser(const std::string&cookies,
     jsonstr += base::UintToString(enterRoomUserInfo.roomid);
     jsonstr += R"(",3600,")";
     jsonstr += enterRoomUserInfo.nickname;
-    jsonstr += R"(",0])"; // 统一按踢一小时计算
+	if (kicktype == KICK_TYPE::KICK_TYPE_MONTH)
+	{
+		jsonstr += R"(",0,2])"; // 统一按踢一个月计算
+	}
+	else
+	{
+		jsonstr += R"(",0])"; // 统一按踢一小时计算
+	}
+    
     jsonstr = UrlEncode(jsonstr);
 
     url += jsonstr;

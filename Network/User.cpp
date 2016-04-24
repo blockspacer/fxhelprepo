@@ -204,7 +204,7 @@ bool User::GetViewerList(uint32 roomid,
     return result;
 }
 
-bool User::KickoutUser(uint32 roomid, 
+bool User::KickoutUser(KICK_TYPE kicktype, uint32 roomid,
     const EnterRoomUserInfo& enterRoomUserInfo)
 {
     auto room = rooms_.find(roomid);
@@ -223,7 +223,7 @@ bool User::KickoutUser(uint32 roomid,
     keys.push_back("fxClientInfo");
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
-    return room->second->KickOutUser(cookies,enterRoomUserInfo);
+    return room->second->KickOutUser(kicktype, cookies,enterRoomUserInfo);
 }
 
 bool User::SilencedUser(uint32 userid)

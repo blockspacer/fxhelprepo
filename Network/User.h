@@ -65,7 +65,7 @@ public:
 
     bool GetViewerList(uint32 roomid, 
         std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
-    bool KickoutUser(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+	bool KickoutUser(KICK_TYPE kicktype, uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool SilencedUser(uint32 userid);
 
 private:

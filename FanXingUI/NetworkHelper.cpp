@@ -224,11 +224,9 @@ void NetworkHelper::NotifyCallback(const std::wstring& message)
     }
 }
 
-bool NetworkHelper::KickoutUsers(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
+bool NetworkHelper::KickoutUsers(KICK_TYPE kicktype, uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    
-    //curlWrapper_->KickoutUser(singerid, KICK_TYPE::KICK_TYPE_HOUR, enterRoomUserInfo);
-    return user_->KickoutUser(roomid, enterRoomUserInfo);;
+	return user_->KickoutUser(kicktype, roomid, enterRoomUserInfo);;
 }
 
 bool NetworkHelper::GetGiftList(uint32 roomid)

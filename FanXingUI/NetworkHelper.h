@@ -7,6 +7,7 @@
 #undef max // 因为微软这个二比在某些头文件定义了max宏
 #undef min // 因为微软这个二比在某些头文件定义了min宏
 #include "Network/GiftNotifyManager.h"
+#include "Network/CurlWrapper.h"
 
 class CurlWrapper;
 class GiftNotifyManager;
@@ -59,7 +60,7 @@ public:
     bool EnterRoom(uint32 roomid);
     bool GetViewerList(uint32 roomid,
         std::vector<RowData>* enterRoomUserInfoRowdata);
-    bool KickoutUsers(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+    bool KickoutUsers(KICK_TYPE kicktype, uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
 
     bool GetGiftList(uint32 roomid);
 
