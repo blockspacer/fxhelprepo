@@ -89,7 +89,6 @@ private:
 
     static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
     afx_msg void OnBnClickedButtonRemove();
-    afx_msg void OnBnClickedBtnModify();
     afx_msg void OnBnClickedBtnQuery();
     afx_msg void OnBnClickedBtnSelectAll();
     afx_msg void OnBnClickedBtnSelectReverse();

@@ -114,7 +114,6 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_MESSAGE(WM_USER_ADD_TO_BLACK_LIST, &CFanXingDlg::OnDisplayDtatToBlackList)
     ON_NOTIFY(HDN_ITEMCLICK, 0, &CFanXingDlg::OnHdnItemclickListUserStatus)
     ON_BN_CLICKED(IDC_BUTTON_REMOVE, &CFanXingDlg::OnBnClickedButtonRemove)
-    ON_BN_CLICKED(IDC_BTN_MODIFY, &CFanXingDlg::OnBnClickedBtnModify)
     ON_BN_CLICKED(IDC_BTN_QUERY, &CFanXingDlg::OnBnClickedBtnQuery)
     ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CFanXingDlg::OnBnClickedBtnSelectAll)
     ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE, &CFanXingDlg::OnBnClickedBtnSelectReverse)
@@ -601,13 +600,6 @@ void CFanXingDlg::OnBnClickedButtonRemove()
         }
     }
 }
-
-
-void CFanXingDlg::OnBnClickedBtnModify()
-{
-    // TODO:  在此添加控件通知处理程序代码
-}
-
 
 void CFanXingDlg::OnBnClickedBtnQuery()
 {
