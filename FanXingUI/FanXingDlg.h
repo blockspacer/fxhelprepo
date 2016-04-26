@@ -7,6 +7,7 @@
 #include <mutex>
 
 #include "NetworkHelper.h"
+#include "BlacklistHelper.h"
 #include "afxwin.h"
 #include "afxcmn.h"
 
@@ -72,13 +73,17 @@ private:
     std::vector<RowData> blackRowdataQueue_;
 
     uint32 listCtrlRowIndex_;
+    CButton m_check_remember;
+    uint32 roomid_ = 0;
+    uint32 singerid_ = 0;
 
-public:
     CString m_query_key;
     CListBox InfoList_;
     int infoListCount_;
     CListCtrl m_ListCtrl_Viewers;
     CListCtrl m_ListCtrl_Blacks;
+    std::unique_ptr<BlacklistHelper> blacklistHelper_;
+
     afx_msg void OnBnClickedButton2();
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
 
@@ -95,9 +100,7 @@ public:
     afx_msg void OnBnClickedBtnClear();
 
     afx_msg void OnBnClickedBtnGetViewerList();
-	CButton m_check_remember;
-	uint32 roomid_ = 0;
-	uint32 singerid_ = 0;
+
     afx_msg void OnBnClickedBtnKickoutMonthBlack();
     afx_msg void OnBnClickedBtnKickoutHourBlack();
     afx_msg void OnBnClickedBtnSilentBlack();
@@ -107,4 +110,6 @@ public:
     afx_msg void OnBnClickedBtnRemoveBlack();
     afx_msg void OnBnClickedBtnLoadBlack();
     afx_msg void OnBnClickedBtnAddToBlack();
+public:
+    afx_msg void OnBnClickedBtnSaveBlack();
 };

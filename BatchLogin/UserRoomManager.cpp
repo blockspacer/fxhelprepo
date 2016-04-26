@@ -77,7 +77,7 @@ bool UserRoomManager::LoadUserConfig()
         userController_->AddUser(username, password);
     }
     
-    return false;
+    return true;
 }
 
 bool UserRoomManager::LoadRoomConfig()

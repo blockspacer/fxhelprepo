@@ -8,6 +8,7 @@
 #include "FanXingDlg.h"
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
+#include "BlacklistHelper.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
 
@@ -17,13 +18,18 @@
 
 namespace
 {
-    const wchar_t* columnlist[] = {
+    const wchar_t* viewcolumnlist[] = {
         L"昵称",
         L"财富等级",
         L"用户id",
         L"进房时间",
         L"房间号",
         L"进入次数"
+    };
+
+    const wchar_t* blackcolumnlist[] = {
+        L"昵称",
+        L"用户id"
     };
 }
 
@@ -65,10 +71,12 @@ END_MESSAGE_MAP()
 CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFanXingDlg::IDD, pParent)
     , network_(nullptr)
+    , blacklistHelper_(nullptr)
     , infoListCount_(0)
     , listCtrlRowIndex_(0)
     , m_query_key(_T(""))
 {
+    blacklistHelper_.reset(new BlacklistHelper);
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
 }
 
@@ -103,6 +111,7 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_ADD, &CFanXingDlg::OnBnClickedBtnAdd)
     ON_MESSAGE(WM_USER_01, &CFanXingDlg::OnNotifyMessage)
     ON_MESSAGE(WM_USER_ADD_ENTER_ROOM_INFO, &CFanXingDlg::OnDisplayDataToViewerList)
+    ON_MESSAGE(WM_USER_ADD_TO_BLACK_LIST, &CFanXingDlg::OnDisplayDtatToBlackList)
     ON_NOTIFY(HDN_ITEMCLICK, 0, &CFanXingDlg::OnHdnItemclickListUserStatus)
     ON_BN_CLICKED(IDC_BUTTON_REMOVE, &CFanXingDlg::OnBnClickedButtonRemove)
     ON_BN_CLICKED(IDC_BTN_MODIFY, &CFanXingDlg::OnBnClickedBtnModify)
@@ -124,6 +133,7 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_REMOVE_BLACK, &CFanXingDlg::OnBnClickedBtnRemoveBlack)
     ON_BN_CLICKED(IDC_BTN_LOAD_BLACK, &CFanXingDlg::OnBnClickedBtnLoadBlack)
     ON_BN_CLICKED(IDC_BTN_ADD_TO_BLACK, &CFanXingDlg::OnBnClickedBtnAddToBlack)
+    ON_BN_CLICKED(IDC_BTN_SAVE_BLACK, &CFanXingDlg::OnBnClickedBtnSaveBlack)
 END_MESSAGE_MAP()
 
 
@@ -157,26 +167,30 @@ BOOL CFanXingDlg::OnInitDialog()
 	//  执行此操作
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
+    SetDlgItemText(IDC_EDIT_NAV, L"0");
+    SetDlgItemInt(IDC_EDIT_X, 0);
+    SetDlgItemInt(IDC_EDIT_Y, 0);
 
     DWORD dwStyle = m_ListCtrl_Viewers.GetExtendedStyle();
     dwStyle |= LVS_EX_CHECKBOXES;
     dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
     dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
+
     m_ListCtrl_Viewers.SetExtendedStyle(dwStyle); //设置扩展风格
-
-    SetDlgItemText(IDC_EDIT_NAV, L"0");
-    SetDlgItemInt(IDC_EDIT_X, 0);
-    SetDlgItemInt(IDC_EDIT_Y, 0);
-
     int nColumnCount = m_ListCtrl_Viewers.GetHeaderCtrl()->GetItemCount();
     for (int i = nColumnCount - 1; i >= 0; i--)
         m_ListCtrl_Viewers.DeleteColumn(i);
+    uint32 index = 0;
+    for (const auto& it : viewcolumnlist)
+        m_ListCtrl_Viewers.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
 
-    uint32 i = 0;
-    for (const auto& it : columnlist)
-    {
-        m_ListCtrl_Viewers.InsertColumn(i++, it, LVCFMT_LEFT, 100);//插入列
-    }
+    m_ListCtrl_Blacks.SetExtendedStyle(dwStyle);
+    nColumnCount = m_ListCtrl_Blacks.GetHeaderCtrl()->GetItemCount();
+    for (int i = nColumnCount - 1; i >= 0; i--)
+        m_ListCtrl_Blacks.DeleteColumn(i);
+    index = 0;
+    for (const auto& it : blackcolumnlist)
+        m_ListCtrl_Blacks.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -476,6 +490,40 @@ LRESULT CFanXingDlg::OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam)
 
 LRESULT CFanXingDlg::OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam)
 {
+    if (blackRowdataQueue_.empty())
+        return 0;
+
+    std::vector<RowData> rowdatas;
+    blackRowdataMutex_.lock();
+    rowdatas.swap(blackRowdataQueue_);
+    blackRowdataMutex_.unlock();
+
+    int itemcount = m_ListCtrl_Blacks.GetItemCount();
+
+    for (uint32 i = 0; i < rowdatas.size(); ++i)
+    {
+        bool exist = false;
+        // 检测是否存在相同用户id
+        for (int index = 0; index < itemcount; index++)
+        {
+            CString text = m_ListCtrl_Blacks.GetItemText(index, 1);
+            if (rowdatas[i][1].compare(text.GetBuffer()) == 0) // 相同用户id
+            {
+                exist = true;
+                break;
+            }
+        }
+
+        if (!exist) // 如果不存在，需要插入新数据
+        {
+            int nitem = m_ListCtrl_Blacks.InsertItem(itemcount + i, rowdatas[i][0].c_str());
+            for (uint32 j = 0; j < rowdatas[i].size(); ++j)
+            {
+                m_ListCtrl_Blacks.SetItemText(nitem, j, rowdatas[i][j].c_str());
+            }
+        }
+    }
+
     return 0;
 }
 
@@ -663,7 +711,6 @@ void CFanXingDlg::OnBnClickedBtnGetViewerList()
     }   
     viewerRowdataMutex_.unlock();
     this->PostMessage(WM_USER_ADD_ENTER_ROOM_INFO, 0, 0);
-
 }
 
 
@@ -697,29 +744,106 @@ void CFanXingDlg::OnBnClickedBtnUnsilentBlack()
 
 void CFanXingDlg::OnBnClickedBtnSelectAllBlack()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    int count = m_ListCtrl_Blacks.GetItemCount();
+
+    for (int i = count - 1; i >= 0; --i)
+    {
+        m_ListCtrl_Blacks.SetCheck(i, 1);
+    }
 }
 
 
 void CFanXingDlg::OnBnClickedBtnSelectReverseBlack()
 {
-    // TODO:  在此添加控件通知处理程序代码
-}
+    int count = m_ListCtrl_Blacks.GetItemCount();
 
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_ListCtrl_Blacks.GetCheck(i))
+        {
+            m_ListCtrl_Blacks.SetCheck(i, FALSE);
+        }
+        else
+        {
+            m_ListCtrl_Blacks.SetCheck(i, TRUE);
+        }
+    }
+}
 
 void CFanXingDlg::OnBnClickedBtnRemoveBlack()
 {
-    // TODO:  在此添加控件通知处理程序代码
-}
+    int count = m_ListCtrl_Blacks.GetItemCount();
 
+    // 从后往前删除
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_ListCtrl_Blacks.GetCheck(i))
+        {
+            // 把要删除的消息发到日志记录列表上
+            CString itemtext = m_ListCtrl_Blacks.GetItemText(i, 2);
+            itemtext + L"被从黑名单列表中删除";
+            InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+
+            // 删除已经勾选的记录
+            m_ListCtrl_Blacks.DeleteItem(i);
+        }
+    }
+}
 
 void CFanXingDlg::OnBnClickedBtnLoadBlack()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    std::vector<RowData> rowdatas;
+    if (!blacklistHelper_->LoadBlackList(&rowdatas))
+    {
+        CString itemtext = L"读取黑名单失败";
+        InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+        return;
+    }
+    
+    blackRowdataMutex_.lock();
+    for (const auto& rowdata : rowdatas)
+    {
+        assert(rowdata.size() == 2);
+        blackRowdataQueue_.push_back(rowdata);
+    }
+    blackRowdataMutex_.unlock();
+
+    this->PostMessage(WM_USER_ADD_TO_BLACK_LIST, 0, 0);
 }
 
 
 void CFanXingDlg::OnBnClickedBtnAddToBlack()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectViewers(&enterRoomUserInfos);
+
+    blackRowdataMutex_.lock();
+    for (const auto& enterRoomUserInfo : enterRoomUserInfos)
+    {
+        RowData rowdata;
+        rowdata.push_back(base::UTF8ToWide(enterRoomUserInfo.nickname));
+        rowdata.push_back(base::UintToString16(enterRoomUserInfo.userid));      
+        blackRowdataQueue_.push_back(rowdata);
+    }
+    blackRowdataMutex_.unlock();
+
+    this->PostMessage(WM_USER_ADD_TO_BLACK_LIST, 0, 0);
+}
+
+
+void CFanXingDlg::OnBnClickedBtnSaveBlack()
+{
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectBlacks(&enterRoomUserInfos);
+
+    std::vector<RowData> rowdatas;
+    for (const auto& enterRoomUserInfo : enterRoomUserInfos)
+    {
+        RowData rowdata;
+        rowdata.push_back(base::UTF8ToWide(enterRoomUserInfo.nickname));
+        rowdata.push_back(base::UintToString16(enterRoomUserInfo.userid));
+        rowdatas.push_back(rowdata);
+    }
+
+    blacklistHelper_->SaveBlackList(rowdatas);
 }
