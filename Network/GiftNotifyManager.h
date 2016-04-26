@@ -16,12 +16,11 @@ class TcpClient;
 // 201消息回来解析后出去的数据包
 struct EnterRoomUserInfo 
 {
-    std::string nickname;
-    uint32 richlevel;
-    uint32 roomid;
-    uint32 unixtime;
-    uint32 userid;
-    
+    std::string nickname = "";
+    uint32 richlevel = 0;
+    uint32 roomid = 0;
+    uint32 unixtime = 0;
+    uint32 userid = 0;
 };
 
 struct RoomGiftInfo601

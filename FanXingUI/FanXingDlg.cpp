@@ -84,9 +84,10 @@ void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_LIST1, InfoList_);
-    DDX_Control(pDX, IDC_LIST_USER_STATUS, m_ListCtrl_UserStatus);
+    DDX_Control(pDX, IDC_LIST_USER_STATUS, m_ListCtrl_Viewers);
     DDX_Text(pDX, IDC_EDIT_QUERY_KEYWORD, m_query_key);
     DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
+    DDX_Control(pDX, IDC_LIST_USER_STATUS_BLACK, m_ListCtrl_Blacks);
 }
 
 BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
@@ -94,7 +95,6 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_WM_PAINT()
     ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CFanXingDlg::OnBnClickedButtonLogin)
-    ON_BN_CLICKED(IDC_BUTTON_CLICK, &CFanXingDlg::OnBnClickedButtonClick)
     ON_BN_CLICKED(IDC_BUTTON_REWARSTAR, &CFanXingDlg::OnBnClickedButtonRewarstar)
     ON_BN_CLICKED(IDC_BUTTON_REWARDGIFT, &CFanXingDlg::OnBnClickedButtonRewardgift)
     ON_BN_CLICKED(IDC_BUTTON_NAV, &CFanXingDlg::OnBnClickedButtonNav)
@@ -102,7 +102,7 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_GETMSG, &CFanXingDlg::OnBnClickedBtnGetmsg)
     ON_BN_CLICKED(IDC_BTN_ADD, &CFanXingDlg::OnBnClickedBtnAdd)
     ON_MESSAGE(WM_USER_01, &CFanXingDlg::OnNotifyMessage)
-    ON_MESSAGE(WM_USER_ADD_ENTER_ROOM_INFO, &CFanXingDlg::OnDisplayDataToGrid)
+    ON_MESSAGE(WM_USER_ADD_ENTER_ROOM_INFO, &CFanXingDlg::OnDisplayDataToViewerList)
     ON_NOTIFY(HDN_ITEMCLICK, 0, &CFanXingDlg::OnHdnItemclickListUserStatus)
     ON_BN_CLICKED(IDC_BUTTON_REMOVE, &CFanXingDlg::OnBnClickedButtonRemove)
     ON_BN_CLICKED(IDC_BTN_MODIFY, &CFanXingDlg::OnBnClickedBtnModify)
@@ -115,6 +115,15 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_UNSILENT, &CFanXingDlg::OnBnClickedBtnUnsilent)
     ON_BN_CLICKED(IDC_BTN_CLEAR, &CFanXingDlg::OnBnClickedBtnClear)
     ON_BN_CLICKED(IDC_BTN_GET_VIEWER_LIST, &CFanXingDlg::OnBnClickedBtnGetViewerList)
+    ON_BN_CLICKED(IDC_BTN_KICKOUT_MONTH_BLACK, &CFanXingDlg::OnBnClickedBtnKickoutMonthBlack)
+    ON_BN_CLICKED(IDC_BTN_KICKOUT_HOUR_BLACK, &CFanXingDlg::OnBnClickedBtnKickoutHourBlack)
+    ON_BN_CLICKED(IDC_BTN_SILENT_BLACK, &CFanXingDlg::OnBnClickedBtnSilentBlack)
+    ON_BN_CLICKED(IDC_BTN_UNSILENT_BLACK, &CFanXingDlg::OnBnClickedBtnUnsilentBlack)
+    ON_BN_CLICKED(IDC_BTN_SELECT_ALL_BLACK, &CFanXingDlg::OnBnClickedBtnSelectAllBlack)
+    ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE_BLACK, &CFanXingDlg::OnBnClickedBtnSelectReverseBlack)
+    ON_BN_CLICKED(IDC_BTN_REMOVE_BLACK, &CFanXingDlg::OnBnClickedBtnRemoveBlack)
+    ON_BN_CLICKED(IDC_BTN_LOAD_BLACK, &CFanXingDlg::OnBnClickedBtnLoadBlack)
+    ON_BN_CLICKED(IDC_BTN_ADD_TO_BLACK, &CFanXingDlg::OnBnClickedBtnAddToBlack)
 END_MESSAGE_MAP()
 
 
@@ -149,24 +158,24 @@ BOOL CFanXingDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
-    DWORD dwStyle = m_ListCtrl_UserStatus.GetExtendedStyle();
+    DWORD dwStyle = m_ListCtrl_Viewers.GetExtendedStyle();
     dwStyle |= LVS_EX_CHECKBOXES;
     dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
     dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
-    m_ListCtrl_UserStatus.SetExtendedStyle(dwStyle); //设置扩展风格
+    m_ListCtrl_Viewers.SetExtendedStyle(dwStyle); //设置扩展风格
 
     SetDlgItemText(IDC_EDIT_NAV, L"0");
     SetDlgItemInt(IDC_EDIT_X, 0);
     SetDlgItemInt(IDC_EDIT_Y, 0);
 
-    int nColumnCount = m_ListCtrl_UserStatus.GetHeaderCtrl()->GetItemCount();
+    int nColumnCount = m_ListCtrl_Viewers.GetHeaderCtrl()->GetItemCount();
     for (int i = nColumnCount - 1; i >= 0; i--)
-        m_ListCtrl_UserStatus.DeleteColumn(i);
+        m_ListCtrl_Viewers.DeleteColumn(i);
 
     uint32 i = 0;
     for (const auto& it : columnlist)
     {
-        m_ListCtrl_UserStatus.InsertColumn(i++, it, LVCFMT_LEFT, 100);//插入列
+        m_ListCtrl_Viewers.InsertColumn(i++, it, LVCFMT_LEFT, 100);//插入列
     }
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -246,7 +255,7 @@ void CFanXingDlg::OnBnClickedButtonLogin()
 void CFanXingDlg::OnBnClickedButtonNav()
 {
     // 先清空原来数据
-    m_ListCtrl_UserStatus.DeleteAllItems();
+    m_ListCtrl_Viewers.DeleteAllItems();
 
     CString strRoomid;
     GetDlgItemText(IDC_EDIT_NAV, strRoomid);
@@ -259,12 +268,6 @@ void CFanXingDlg::OnBnClickedButtonNav()
         std::bind(&CFanXingDlg::Notify201, this, std::placeholders::_1));
 
     network_->EnterRoom(strRoomid.GetBuffer());
-}
-
-//指定位置点击功能
-void CFanXingDlg::OnBnClickedButtonClick()
-{
-
 }
 
 // 送星星功能
@@ -298,11 +301,11 @@ void CFanXingDlg::OnBnClickedBtnAdd()
     rowdata.push_back(L"5");
     rowdata.push_back(L"1");
 
-    int nitem = m_ListCtrl_UserStatus.InsertItem(0, rowdata[0].c_str());
-    m_ListCtrl_UserStatus.SetItemData(nitem, listCtrlRowIndex_++);
+    int nitem = m_ListCtrl_Viewers.InsertItem(0, rowdata[0].c_str());
+    m_ListCtrl_Viewers.SetItemData(nitem, listCtrlRowIndex_++);
     for (uint32 j = 1; j < rowdata.size(); ++j)
     {
-        m_ListCtrl_UserStatus.SetItemText(nitem, j, rowdata[j].c_str());
+        m_ListCtrl_Viewers.SetItemText(nitem, j, rowdata[j].c_str());
     }
 }
 
@@ -318,9 +321,9 @@ void CFanXingDlg::Notify(const std::wstring& message)
 void CFanXingDlg::Notify201(const RowData& rowdata)
 {
     // 发送数据给窗口
-    rowdataMutex_.lock();
-    rowdataQueue_.push_back(rowdata);
-    rowdataMutex_.unlock();
+    viewerRowdataMutex_.lock();
+    viewerRowdataQueue_.push_back(rowdata);
+    viewerRowdataMutex_.unlock();
     this->PostMessage(WM_USER_ADD_ENTER_ROOM_INFO, 0, 0);
 }
 
@@ -338,29 +341,29 @@ bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstrin
     return network_->Login(username, password);
 }
 
-bool CFanXingDlg::GetSelectUsers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
+bool CFanXingDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
 {
 	if (!enterRoomUserInfos)
 	{
 		return false;
 	}
 
-	int count = m_ListCtrl_UserStatus.GetItemCount();
+	int count = m_ListCtrl_Viewers.GetItemCount();
 	for (int i = count - 1; i >= 0; --i)
 	{
-		if (m_ListCtrl_UserStatus.GetCheck(i))
+		if (m_ListCtrl_Viewers.GetCheck(i))
 		{
 			// 发送踢出房间的网络请求
 			EnterRoomUserInfo enterRoomUserInfo;
 			uint32 roomid = 0;
-			base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 4).GetBuffer(), &roomid);
+			base::StringToUint(m_ListCtrl_Viewers.GetItemText(i, 4).GetBuffer(), &roomid);
 			enterRoomUserInfo.roomid = roomid_;
 			uint32 richlevel = 0;
-			base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 1).GetBuffer(), &richlevel);
+			base::StringToUint(m_ListCtrl_Viewers.GetItemText(i, 1).GetBuffer(), &richlevel);
 			enterRoomUserInfo.richlevel = richlevel;
-			enterRoomUserInfo.nickname = base::WideToUTF8(m_ListCtrl_UserStatus.GetItemText(i, 0).GetBuffer());
+			enterRoomUserInfo.nickname = base::WideToUTF8(m_ListCtrl_Viewers.GetItemText(i, 0).GetBuffer());
 			uint32 userid = 0;
-			base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 2).GetBuffer(), &userid);
+			base::StringToUint(m_ListCtrl_Viewers.GetItemText(i, 2).GetBuffer(), &userid);
 			enterRoomUserInfo.userid = userid;
 			enterRoomUserInfos->push_back(enterRoomUserInfo);
 		}
@@ -368,19 +371,66 @@ bool CFanXingDlg::GetSelectUsers(std::vector<EnterRoomUserInfo>* enterRoomUserIn
 	return true;
 }
 
-
-// 界面线程执行
-LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
+bool CFanXingDlg::GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
 {
-    if (rowdataQueue_.empty())
+    if (!enterRoomUserInfos)
+    {
+        return false;
+    }
+    int count = m_ListCtrl_Blacks.GetItemCount();
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_ListCtrl_Blacks.GetCheck(i))
+        {
+            // 发送踢出房间的网络请求
+            EnterRoomUserInfo enterRoomUserInfo;
+            enterRoomUserInfo.roomid = roomid_;
+            enterRoomUserInfo.nickname = base::WideToUTF8(m_ListCtrl_Blacks.GetItemText(i, 0).GetBuffer());
+            uint32 userid = 0;
+            base::StringToUint(m_ListCtrl_Blacks.GetItemText(i, 1).GetBuffer(), &userid);
+            enterRoomUserInfo.userid = userid;
+            enterRoomUserInfos->push_back(enterRoomUserInfo);
+        }
+    }
+
+    return true;
+}
+
+bool CFanXingDlg::KickOut(
+    const std::vector<EnterRoomUserInfo>& enterRoomUserInfos,
+    KICK_TYPE kicktype)
+{
+    for (const auto& enterRoomUserInfo : enterRoomUserInfos)
+    {
+        std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
+        if (!network_->KickoutUsers(kicktype,
+            enterRoomUserInfo.roomid, enterRoomUserInfo))
+        {
+            msg += L"踢出失败!权限不够或网络错误!";
+            InfoList_.InsertString(infoListCount_++, msg.c_str());
+        }
+        else
+        {
+            // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
+            msg += L"被踢出一个月";
+            InfoList_.InsertString(infoListCount_++, msg.c_str());
+        }
+    }
+
+    return true;
+}
+// 界面线程执行
+LRESULT CFanXingDlg::OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam)
+{
+    if (viewerRowdataQueue_.empty())
         return 0;
     
     std::vector<RowData> rowdatas;
-    rowdataMutex_.lock();
-    rowdatas.swap(rowdataQueue_);
-    rowdataMutex_.unlock();
+    viewerRowdataMutex_.lock();
+    rowdatas.swap(viewerRowdataQueue_);
+    viewerRowdataMutex_.unlock();
 
-    int itemcount = m_ListCtrl_UserStatus.GetItemCount();
+    int itemcount = m_ListCtrl_Viewers.GetItemCount();
 
     for (uint32 i = 0; i < rowdatas.size(); ++i)
     {
@@ -388,21 +438,21 @@ LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
         // 检测是否存在相同用户id
         for (int index = 0; index < itemcount; index++)
         {
-            CString text = m_ListCtrl_UserStatus.GetItemText(index, 2);
+            CString text = m_ListCtrl_Viewers.GetItemText(index, 2);
             if (rowdatas[i][2].compare(text.GetBuffer()) == 0) // 相同用户id
             {
                 // 更新进入次数显示，其他的数据都全部默认更新的
-                CString itemText = m_ListCtrl_UserStatus.GetItemText(index, 5);
+                CString itemText = m_ListCtrl_Viewers.GetItemText(index, 5);
                 std::string temp = base::WideToUTF8(itemText.GetBuffer());
                 uint32 entercount = 0;
                 base::StringToUint(temp, &entercount);
                 entercount++;
                 CString strEnterCount = base::UintToString16(entercount).c_str();
-                m_ListCtrl_UserStatus.SetItemText(index, 5, strEnterCount);
+                m_ListCtrl_Viewers.SetItemText(index, 5, strEnterCount);
 
                 for (uint32 j = 0; j < rowdatas[i].size(); ++j)
                 {
-                    m_ListCtrl_UserStatus.SetItemText(itemcount + i, j, rowdatas[i][j].c_str());
+                    m_ListCtrl_Viewers.SetItemText(itemcount + i, j, rowdatas[i][j].c_str());
                 }
                 exist = true;
                 break;
@@ -411,16 +461,21 @@ LRESULT CFanXingDlg::OnDisplayDataToGrid(WPARAM wParam, LPARAM lParam)
 
         if (!exist) // 如果不存在，需要插入新数据
         {
-            int nitem = m_ListCtrl_UserStatus.InsertItem(itemcount + i, rowdatas[i][0].c_str());
+            int nitem = m_ListCtrl_Viewers.InsertItem(itemcount + i, rowdatas[i][0].c_str());
             //m_ListCtrl_UserStatus.SetItemData(nitem, i);
             for (uint32 j = 0; j < rowdatas[i].size(); ++j)
             {
-                m_ListCtrl_UserStatus.SetItemText(nitem, j, rowdatas[i][j].c_str());
+                m_ListCtrl_Viewers.SetItemText(nitem, j, rowdatas[i][j].c_str());
             }
-            m_ListCtrl_UserStatus.SetItemText(nitem, 5, L"1"); // 第一次记录数据
+            m_ListCtrl_Viewers.SetItemText(nitem, 5, L"1"); // 第一次记录数据
         }
     }
 
+    return 0;
+}
+
+LRESULT CFanXingDlg::OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam)
+{
     return 0;
 }
 
@@ -442,7 +497,7 @@ LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 
 void CFanXingDlg::OnBnClickedButton2()
 {
-    m_ListCtrl_UserStatus.SetCheck(0);
+    m_ListCtrl_Viewers.SetCheck(0);
 }
 
 // 比较方法
@@ -474,27 +529,27 @@ void CFanXingDlg::OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult)
 {
     LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
     
-    m_ListCtrl_UserStatus.SortItems(CompareFunc, reinterpret_cast <DWORD> (this));
+    m_ListCtrl_Viewers.SortItems(CompareFunc, reinterpret_cast <DWORD> (this));
 
     *pResult = 0;}
 
 
 void CFanXingDlg::OnBnClickedButtonRemove()
 {
-    int count = m_ListCtrl_UserStatus.GetItemCount();
+    int count = m_ListCtrl_Viewers.GetItemCount();
 
     // 从后往前删除
     for (int i = count - 1; i >= 0; --i)
     {
-        if (m_ListCtrl_UserStatus.GetCheck(i))
+        if (m_ListCtrl_Viewers.GetCheck(i))
         {
             // 把要删除的消息发到日志记录列表上
-            CString itemtext = m_ListCtrl_UserStatus.GetItemText(i, 2);
+            CString itemtext = m_ListCtrl_Viewers.GetItemText(i, 2);
             itemtext + L"被从列表中删除";
             InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
 
             // 删除已经勾选的记录
-            m_ListCtrl_UserStatus.DeleteItem(i);
+            m_ListCtrl_Viewers.DeleteItem(i);
         }
     }
 }
@@ -510,14 +565,14 @@ void CFanXingDlg::OnBnClickedBtnQuery()
 {
     UpdateData(TRUE);
     CString key = m_query_key;
-    int count = m_ListCtrl_UserStatus.GetItemCount();
+    int count = m_ListCtrl_Viewers.GetItemCount();
 
     for (int i = count - 1; i >= 0; --i)
     {
-        CString temp = m_ListCtrl_UserStatus.GetItemText(i, 1);
+        CString temp = m_ListCtrl_Viewers.GetItemText(i, 1);
         if (temp.Find(key)>=0)
         {
-            m_ListCtrl_UserStatus.SetCheck(i, TRUE);
+            m_ListCtrl_Viewers.SetCheck(i, TRUE);
         }
     }
 }
@@ -525,27 +580,27 @@ void CFanXingDlg::OnBnClickedBtnQuery()
 
 void CFanXingDlg::OnBnClickedBtnSelectAll()
 {
-    int count = m_ListCtrl_UserStatus.GetItemCount();
+    int count = m_ListCtrl_Viewers.GetItemCount();
 
     for (int i = count - 1; i >= 0; --i)
     {
-        m_ListCtrl_UserStatus.SetCheck(i, 1);
+        m_ListCtrl_Viewers.SetCheck(i, 1);
     }
 }
 
 void CFanXingDlg::OnBnClickedBtnSelectReverse()
 {
-    int count = m_ListCtrl_UserStatus.GetItemCount();
+    int count = m_ListCtrl_Viewers.GetItemCount();
 
     for (int i = count - 1; i >= 0; --i)
     {
-        if (m_ListCtrl_UserStatus.GetCheck(i))
+        if (m_ListCtrl_Viewers.GetCheck(i))
         {
-            m_ListCtrl_UserStatus.SetCheck(i,FALSE);
+            m_ListCtrl_Viewers.SetCheck(i, FALSE);
         }
         else
         {
-            m_ListCtrl_UserStatus.SetCheck(i, TRUE);
+            m_ListCtrl_Viewers.SetCheck(i, TRUE);
         }
     }
 }
@@ -554,91 +609,16 @@ void CFanXingDlg::OnBnClickedBtnSelectReverse()
 void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 {
 	std::vector<EnterRoomUserInfo> enterRoomUserInfos;
-	GetSelectUsers(&enterRoomUserInfos);
-	
-	for (const auto& enterRoomUserInfo : enterRoomUserInfos)
-	{
-		std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
-		if (!network_->KickoutUsers(KICK_TYPE::KICK_TYPE_MONTH,
-		enterRoomUserInfo.roomid, enterRoomUserInfo))
-		{
-			
-			msg += L"踢出失败!权限不够或网络错误!";
-			InfoList_.InsertString(infoListCount_++, msg.c_str());
-		}
-		else
-		{
-			// 把要删除的消息发到日志记录列表上, id = 2 是用户id				
-			msg += L"被踢出一个月";
-			InfoList_.InsertString(infoListCount_++, msg.c_str());
-		}
-	}
+	GetSelectViewers(&enterRoomUserInfos);
+    KickOut(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_MONTH);
 }
 
 
 void CFanXingDlg::OnBnClickedBtnKickoutHour()
 {
 	std::vector<EnterRoomUserInfo> enterRoomUserInfos;
-	GetSelectUsers(&enterRoomUserInfos);
-	
-	for (const auto& enterRoomUserInfo : enterRoomUserInfos)
-	{
-		std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
-		if (!network_->KickoutUsers(KICK_TYPE::KICK_TYPE_HOUR,
-			enterRoomUserInfo.roomid, enterRoomUserInfo))
-		{
-
-			msg += L"踢出失败!权限不够或网络错误!";
-			InfoList_.InsertString(infoListCount_++, msg.c_str());
-		}
-		else
-		{
-			// 把要删除的消息发到日志记录列表上, id = 2 是用户id				
-			msg += L"被踢出一个小时";
-			InfoList_.InsertString(infoListCount_++, msg.c_str());
-		}
-	}
-   // // 从后往前删除
-   // int count = m_ListCtrl_UserStatus.GetItemCount();
-   // for (int i = count - 1; i >= 0; --i)
-   // {
-   //     if (m_ListCtrl_UserStatus.GetCheck(i))
-   //     {
-   //         // 需要获取singerid,
-   //         uint32 singerid = singerid_;
-
-   //         // 发送踢出房间的网络请求
-   //         EnterRoomUserInfo enterRoomUserInfo;
-   //         CString temp = m_ListCtrl_UserStatus.GetItemText(i, 4);
-   //         uint32 roomid = 0;
-   //         base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 4).GetBuffer(), &roomid);
-   //         enterRoomUserInfo.roomid = roomid_;
-   //         uint32 richlevel = 0;
-   //         base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 1).GetBuffer(), &richlevel);
-   //         enterRoomUserInfo.richlevel = richlevel;
-   //         
-   //         enterRoomUserInfo.nickname = base::WideToUTF8(m_ListCtrl_UserStatus.GetItemText(i, 0).GetBuffer());
-   //         uint32 userid = 0;
-   //         base::StringToUint(m_ListCtrl_UserStatus.GetItemText(i, 2).GetBuffer(), &userid);
-   //         enterRoomUserInfo.userid = userid;
-			//CString itemtext = L"userid=" + m_ListCtrl_UserStatus.GetItemText(i, 2);
-			//if (!network_->KickoutUsers(KICK_TYPE::KICK_TYPE_HOUR, enterRoomUserInfo.roomid, enterRoomUserInfo))
-   //         {
-			//	itemtext += L"踢出失败!";
-			//	InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
-   //         }
-			//else
-			//{
-			//	// 把要删除的消息发到日志记录列表上, id = 2 是用户id				
-			//	itemtext += L"被踢出一小时，并从列表中删除";
-			//	InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
-
-			//	// 删除已经勾选的记录
-			//	m_ListCtrl_UserStatus.DeleteItem(i);
-			//}
-   //     }
-   // }
-
+	GetSelectViewers(&enterRoomUserInfos);
+    KickOut(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_HOUR);
 }
 
 
@@ -656,11 +636,11 @@ void CFanXingDlg::OnBnClickedBtnUnsilent()
 
 void CFanXingDlg::OnBnClickedBtnClear()
 {
-    int count = m_ListCtrl_UserStatus.GetItemCount();
+    int count = m_ListCtrl_Viewers.GetItemCount();
     // 从后往前删除
     for (int i = count - 1; i >= 0; --i)
     {
-        m_ListCtrl_UserStatus.DeleteItem(i);
+        m_ListCtrl_Viewers.DeleteItem(i);
     }
 
     CString itemtext = L"清空列表";
@@ -676,12 +656,70 @@ void CFanXingDlg::OnBnClickedBtnGetViewerList()
         return;
     }
 
-    rowdataMutex_.lock();
+    viewerRowdataMutex_.lock();
     for (const auto& rowdata : enterRoomUserInfoRowdata)
     {
-        rowdataQueue_.push_back(rowdata);
+        viewerRowdataQueue_.push_back(rowdata);
     }   
-    rowdataMutex_.unlock();
+    viewerRowdataMutex_.unlock();
     this->PostMessage(WM_USER_ADD_ENTER_ROOM_INFO, 0, 0);
 
+}
+
+
+void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
+{
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectBlacks(&enterRoomUserInfos);
+    KickOut(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_MONTH);
+}
+
+
+void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
+{
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectBlacks(&enterRoomUserInfos);
+    KickOut(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_HOUR);
+}
+
+
+void CFanXingDlg::OnBnClickedBtnSilentBlack()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFanXingDlg::OnBnClickedBtnUnsilentBlack()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFanXingDlg::OnBnClickedBtnSelectAllBlack()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFanXingDlg::OnBnClickedBtnSelectReverseBlack()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFanXingDlg::OnBnClickedBtnRemoveBlack()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFanXingDlg::OnBnClickedBtnLoadBlack()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CFanXingDlg::OnBnClickedBtnAddToBlack()
+{
+    // TODO:  在此添加控件通知处理程序代码
 }
