@@ -425,7 +425,7 @@ bool CFanXingDlg::KickOut(
         else
         {
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
-            msg += L"被踢出一个月";
+            msg += L"被踢出";
             InfoList_.InsertString(infoListCount_++, msg.c_str());
         }
     }

@@ -389,6 +389,7 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
             break;
         }
 
+#ifdef _DEBUG
         if (normalNotify_)
         {
             // 处理数据包,转换成输出界面信息
@@ -400,6 +401,7 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
                 normalNotify_(wstr);
             }
         }
+#endif
     }
 }
 
