@@ -409,7 +409,7 @@ bool CFanXingDlg::GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserI
     return true;
 }
 
-bool CFanXingDlg::KickOut(
+bool CFanXingDlg::KickOut_(
     const std::vector<EnterRoomUserInfo>& enterRoomUserInfos,
     KICK_TYPE kicktype)
 {
@@ -432,6 +432,49 @@ bool CFanXingDlg::KickOut(
 
     return true;
 }
+
+bool CFanXingDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
+{
+    for (const auto& enterRoomUserInfo : enterRoomUserInfos)
+    {
+        std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
+        if (!network_->BanChat(
+            enterRoomUserInfo.roomid, enterRoomUserInfo))
+        {
+            msg += L"禁言失败!权限不够或网络错误!";
+            InfoList_.InsertString(infoListCount_++, msg.c_str());
+        }
+        else
+        {
+            // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
+            msg += L"被禁言五分钟";
+            InfoList_.InsertString(infoListCount_++, msg.c_str());
+        }
+    }
+    return true;
+}
+
+bool CFanXingDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
+{
+    for (const auto& enterRoomUserInfo : enterRoomUserInfos)
+    {
+        std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
+        if (!network_->UnbanChat(
+            enterRoomUserInfo.roomid, enterRoomUserInfo))
+        {
+            msg += L"恢复发言失败!权限不够或网络错误!";
+            InfoList_.InsertString(infoListCount_++, msg.c_str());
+        }
+        else
+        {
+            // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
+            msg += L"被恢复发言";
+            InfoList_.InsertString(infoListCount_++, msg.c_str());
+        }
+    }
+    return true;
+}
+
 // 界面线程执行
 LRESULT CFanXingDlg::OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam)
 {
@@ -542,11 +585,6 @@ LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-void CFanXingDlg::OnBnClickedButton2()
-{
-    m_ListCtrl_Viewers.SetCheck(0);
-}
-
 // 比较方法
 int CFanXingDlg::CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
@@ -650,7 +688,7 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 {
 	std::vector<EnterRoomUserInfo> enterRoomUserInfos;
 	GetSelectViewers(&enterRoomUserInfos);
-    KickOut(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_MONTH);
+    KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_MONTH);
 }
 
 
@@ -658,21 +696,23 @@ void CFanXingDlg::OnBnClickedBtnKickoutHour()
 {
 	std::vector<EnterRoomUserInfo> enterRoomUserInfos;
 	GetSelectViewers(&enterRoomUserInfos);
-    KickOut(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_HOUR);
+    KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_HOUR);
 }
 
 
 void CFanXingDlg::OnBnClickedBtnSilent()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectViewers(&enterRoomUserInfos);
+    BanChat_(enterRoomUserInfos);
 }
-
 
 void CFanXingDlg::OnBnClickedBtnUnsilent()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectViewers(&enterRoomUserInfos);
+    UnbanChat_(enterRoomUserInfos);
 }
-
 
 void CFanXingDlg::OnBnClickedBtnClear()
 {
@@ -710,7 +750,7 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
 {
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectBlacks(&enterRoomUserInfos);
-    KickOut(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_MONTH);
+    KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_MONTH);
 }
 
 
@@ -718,21 +758,23 @@ void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
 {
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectBlacks(&enterRoomUserInfos);
-    KickOut(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_HOUR);
+    KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_HOUR);
 }
 
 
 void CFanXingDlg::OnBnClickedBtnSilentBlack()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectBlacks(&enterRoomUserInfos);
+    BanChat_(enterRoomUserInfos);
 }
-
 
 void CFanXingDlg::OnBnClickedBtnUnsilentBlack()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectBlacks(&enterRoomUserInfos);
+    UnbanChat_(enterRoomUserInfos);
 }
-
 
 void CFanXingDlg::OnBnClickedBtnSelectAllBlack()
 {

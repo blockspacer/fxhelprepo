@@ -185,6 +185,123 @@ bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
         return false;
     }
 
+    std::string data(response.content.begin(), response.content.end());
+    //解析json数据
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(data, rootdata, false))
+    {
+        return false;
+    }
+
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
+    if (status != 1)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool Room::BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
+    std::string url = std::string("http://fanxing.kugou.com");
+    url += "/UServices/RoomService/RoomManageService/banChat/?d=";
+    url += GetNowTimeString();
+    url += R"(&args=)";
+    std::string jsonstr;
+    jsonstr += std::string(R"([")");
+    jsonstr += base::UintToString(singerid_);
+    jsonstr += R"(",")";
+    jsonstr += base::UintToString(enterRoomUserInfo.userid);
+    jsonstr += R"(",")";
+    jsonstr += base::UintToString(enterRoomUserInfo.roomid);
+    jsonstr += R"(",300,")";
+    jsonstr += enterRoomUserInfo.nickname;
+    jsonstr += R"("])";
+
+    jsonstr = UrlEncode(jsonstr);
+
+    url += jsonstr;
+
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid_);
+    request.cookies = cookies;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string data(response.content.begin(), response.content.end());
+    //解析json数据
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(data, rootdata, false))
+    {
+        return false;
+    }
+
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
+    if (status != 1)
+    {
+        return false;
+    }
+    return true;
+}
+bool Room::UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
+    std::string url = std::string("http://fanxing.kugou.com");
+    url += "/UServices/RoomService/RoomManageService/undoBanChat/?d=";
+    url += GetNowTimeString();
+    url += R"(&args=)";
+    std::string jsonstr;
+    jsonstr += std::string(R"([")");
+    jsonstr += base::UintToString(singerid_);
+    jsonstr += R"(",")";
+    jsonstr += base::UintToString(enterRoomUserInfo.userid);
+    jsonstr += R"(",")";
+    jsonstr += base::UintToString(enterRoomUserInfo.roomid);
+    jsonstr += R"(",")";
+    jsonstr += enterRoomUserInfo.nickname;
+    jsonstr += R"("])";
+
+    jsonstr = UrlEncode(jsonstr);
+
+    url += jsonstr;
+
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid_);
+    request.cookies = cookies;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string data(response.content.begin(),response.content.end());
+    //解析json数据
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(data, rootdata, false))
+    {
+        return false;
+    }
+
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
+    if (status != 1)
+    {
+        return false;
+    }
     return true;
 }
 

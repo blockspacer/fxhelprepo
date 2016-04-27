@@ -29,7 +29,7 @@ public:
         WM_USER_ADD_ENTER_ROOM_INFO = WM_USER + 2,
         WM_USER_ADD_TO_BLACK_LIST = WM_USER + 3,
     };
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV Ö§³Ö
     afx_msg void OnBnClickedButtonRewarstar();
     afx_msg void OnBnClickedButtonRewardgift();
@@ -59,8 +59,10 @@ private:
     bool LoginByRequest(const std::wstring& username, const std::wstring& password);
 	bool GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
     bool GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
-    bool KickOut(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos,
+    bool KickOut_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos,
         KICK_TYPE kicktype);
+    bool BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos);
+    bool UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos);
 
     std::unique_ptr<NetworkHelper> network_;
     std::mutex messageMutex_;
@@ -84,10 +86,9 @@ private:
     CListCtrl m_ListCtrl_Blacks;
     std::unique_ptr<BlacklistHelper> blacklistHelper_;
 
-    afx_msg void OnBnClickedButton2();
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
-
     static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
     afx_msg void OnBnClickedButtonRemove();
     afx_msg void OnBnClickedBtnQuery();
     afx_msg void OnBnClickedBtnSelectAll();

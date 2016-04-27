@@ -229,6 +229,17 @@ bool NetworkHelper::KickoutUsers(KICK_TYPE kicktype, uint32 roomid, const EnterR
 	return user_->KickoutUser(kicktype, roomid, enterRoomUserInfo);;
 }
 
+bool NetworkHelper::BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    return user_->BanChat(roomid, enterRoomUserInfo);
+}
+
+bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    return user_->UnbanChat(roomid, enterRoomUserInfo);
+}
+
+
 bool NetworkHelper::GetGiftList(uint32 roomid)
 {
     std::string responsedata;

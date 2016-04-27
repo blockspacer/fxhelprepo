@@ -26,6 +26,9 @@ public:
 	bool KickOutUser(KICK_TYPE kicktype, const std::string& cookies,
         const EnterRoomUserInfo& enterRoomUserInfo);
 
+    bool BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo);
+    bool UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo);
+
 private:
     bool OpenRoom(const std::string& cookies);
 

@@ -226,9 +226,43 @@ bool User::KickoutUser(KICK_TYPE kicktype, uint32 roomid,
     return room->second->KickOutUser(kicktype, cookies,enterRoomUserInfo);
 }
 
-bool User::SilencedUser(uint32 userid)
+bool User::BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    return false;
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    return room->second->BanChat(cookies, enterRoomUserInfo);
+}
+bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    return room->second->UnbanChat(cookies, enterRoomUserInfo);
 }
 
 bool User::LoginHttps(const std::string& username,

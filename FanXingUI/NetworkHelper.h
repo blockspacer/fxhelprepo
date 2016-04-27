@@ -60,7 +60,10 @@ public:
     bool EnterRoom(uint32 roomid);
     bool GetViewerList(uint32 roomid,
         std::vector<RowData>* enterRoomUserInfoRowdata);
+
     bool KickoutUsers(KICK_TYPE kicktype, uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+    bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+    bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
 
     bool GetGiftList(uint32 roomid);
 
