@@ -65,9 +65,13 @@ public:
 
     bool GetViewerList(uint32 roomid, 
         std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
-	bool KickoutUser(KICK_TYPE kicktype, uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+
+    uint32 GetUserClanId() const;
+	bool KickoutUser(KICK_TYPE kicktype, uint32 roomid, 
+        const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+    
 
 private:
 
@@ -81,13 +85,14 @@ private:
     std::string password_;
 
     // 登录后才能获得的用户信息
-    uint32 userid_;
-    uint32 coin_;
+    uint32 userid_ = 0;
+    uint32 clanid_ = 0;
+    uint32 coin_ = 0;
     std::string usertoken_;
     std::string userkey_;
 
-    std::unique_ptr<CurlWrapper> curlWrapper_;
-    std::unique_ptr<CookiesHelper> cookiesHelper_;
+    std::unique_ptr<CurlWrapper> curlWrapper_ = nullptr;
+    std::unique_ptr<CookiesHelper> cookiesHelper_ = nullptr;
     std::map<uint32, std::shared_ptr<Room>> rooms_;
 
     NormalNotify normalNotify_;

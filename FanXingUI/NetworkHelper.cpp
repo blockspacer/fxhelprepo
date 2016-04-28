@@ -199,6 +199,17 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
     return user_->EnterRoom(roomid);
 }
 
+bool NetworkHelper::GetGiftList(uint32 roomid)
+{
+    std::string responsedata;
+    if (!curlWrapper_->GetGiftList(roomid, &responsedata))
+    {
+        return false;
+    }
+
+    return giftInfoHelper_->Initialize(responsedata);
+}
+
 bool NetworkHelper::GetViewerList(uint32 roomid,
     std::vector<RowData>* enterRoomUserInfoRowdata)
 {
@@ -239,16 +250,13 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
     return user_->UnbanChat(roomid, enterRoomUserInfo);
 }
 
-
-bool NetworkHelper::GetGiftList(uint32 roomid)
+bool NetworkHelper::GetActionPrivilege()
 {
-    std::string responsedata;
-    if (!curlWrapper_->GetGiftList(roomid, &responsedata))
-    {
+    uint32 clanid = user_->GetUserClanId();
+    if (clanid != 3783) // 只有指定的家族成员才能操作
         return false;
-    }
 
-    return giftInfoHelper_->Initialize(responsedata);
+    return true;
 }
 
 // giftNotifyManager_ 线程回调

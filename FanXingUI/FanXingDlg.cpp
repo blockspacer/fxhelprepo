@@ -66,7 +66,7 @@ END_MESSAGE_MAP()
 
 // CFanXingDlg 对话框
 
-
+#define NOPRIVILEGE_NOTICE L"你没有操作权限, 目前此功能只提供给指定家族成员操作"
 
 CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFanXingDlg::IDD, pParent)
@@ -293,11 +293,6 @@ void CFanXingDlg::OnBnClickedButtonRewardgift()
 {
 }
 
-void CFanXingDlg::OnLButtonDown(UINT nFlags, CPoint point)
-{
-    CDialogEx::OnLButtonDown(nFlags, point);
-}
-
 // 获取公屏信息
 void CFanXingDlg::OnBnClickedBtnGetmsg()
 {
@@ -419,15 +414,14 @@ bool CFanXingDlg::KickOut_(
         if (!network_->KickoutUsers(kicktype,
             enterRoomUserInfo.roomid, enterRoomUserInfo))
         {
-            msg += L"踢出失败!权限不够或网络错误!";
-            InfoList_.InsertString(infoListCount_++, msg.c_str());
+            msg += L"踢出失败!权限不够或网络错误!";          
         }
         else
         {
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
             msg += L"被踢出";
-            InfoList_.InsertString(infoListCount_++, msg.c_str());
         }
+        Notify(msg);
     }
 
     return true;
@@ -442,14 +436,13 @@ bool CFanXingDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserIn
             enterRoomUserInfo.roomid, enterRoomUserInfo))
         {
             msg += L"禁言失败!权限不够或网络错误!";
-            InfoList_.InsertString(infoListCount_++, msg.c_str());
         }
         else
         {
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
             msg += L"被禁言五分钟";
-            InfoList_.InsertString(infoListCount_++, msg.c_str());
         }
+        Notify(msg);
     }
     return true;
 }
@@ -463,14 +456,13 @@ bool CFanXingDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUser
             enterRoomUserInfo.roomid, enterRoomUserInfo))
         {
             msg += L"恢复发言失败!权限不够或网络错误!";
-            InfoList_.InsertString(infoListCount_++, msg.c_str());
         }
         else
         {
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
             msg += L"被恢复发言";
-            InfoList_.InsertString(infoListCount_++, msg.c_str());
         }
+        Notify(msg);
     }
     return true;
 }
@@ -631,7 +623,7 @@ void CFanXingDlg::OnBnClickedButtonRemove()
             // 把要删除的消息发到日志记录列表上
             CString itemtext = m_ListCtrl_Viewers.GetItemText(i, 2);
             itemtext + L"被从列表中删除";
-            InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+            Notify(itemtext.GetBuffer());
 
             // 删除已经勾选的记录
             m_ListCtrl_Viewers.DeleteItem(i);
@@ -686,6 +678,11 @@ void CFanXingDlg::OnBnClickedBtnSelectReverse()
 
 void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 {
+    if (!network_->GetActionPrivilege())
+    { 
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
 	std::vector<EnterRoomUserInfo> enterRoomUserInfos;
 	GetSelectViewers(&enterRoomUserInfos);
     KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_MONTH);
@@ -694,6 +691,11 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 
 void CFanXingDlg::OnBnClickedBtnKickoutHour()
 {
+    if (!network_->GetActionPrivilege())
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
 	std::vector<EnterRoomUserInfo> enterRoomUserInfos;
 	GetSelectViewers(&enterRoomUserInfos);
     KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_HOUR);
@@ -702,6 +704,11 @@ void CFanXingDlg::OnBnClickedBtnKickoutHour()
 
 void CFanXingDlg::OnBnClickedBtnSilent()
 {
+    if (!network_->GetActionPrivilege())
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectViewers(&enterRoomUserInfos);
     BanChat_(enterRoomUserInfos);
@@ -709,6 +716,11 @@ void CFanXingDlg::OnBnClickedBtnSilent()
 
 void CFanXingDlg::OnBnClickedBtnUnsilent()
 {
+    if (!network_->GetActionPrivilege())
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectViewers(&enterRoomUserInfos);
     UnbanChat_(enterRoomUserInfos);
@@ -724,7 +736,7 @@ void CFanXingDlg::OnBnClickedBtnClear()
     }
 
     CString itemtext = L"清空列表";
-    InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+    Notify(itemtext.GetBuffer());
 }
 
 
@@ -748,6 +760,11 @@ void CFanXingDlg::OnBnClickedBtnGetViewerList()
 
 void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
 {
+    if (!network_->GetActionPrivilege())
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectBlacks(&enterRoomUserInfos);
     KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_MONTH);
@@ -756,6 +773,11 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
 
 void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
 {
+    if (!network_->GetActionPrivilege())
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectBlacks(&enterRoomUserInfos);
     KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_HOUR);
@@ -764,6 +786,11 @@ void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
 
 void CFanXingDlg::OnBnClickedBtnSilentBlack()
 {
+    if (!network_->GetActionPrivilege())
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectBlacks(&enterRoomUserInfos);
     BanChat_(enterRoomUserInfos);
@@ -771,6 +798,11 @@ void CFanXingDlg::OnBnClickedBtnSilentBlack()
 
 void CFanXingDlg::OnBnClickedBtnUnsilentBlack()
 {
+    if (!network_->GetActionPrivilege())
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectBlacks(&enterRoomUserInfos);
     UnbanChat_(enterRoomUserInfos);
@@ -816,7 +848,7 @@ void CFanXingDlg::OnBnClickedBtnRemoveBlack()
             // 把要删除的消息发到日志记录列表上
             CString itemtext = m_ListCtrl_Blacks.GetItemText(i, 2);
             itemtext + L"被从黑名单列表中删除";
-            InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+            Notify(itemtext.GetBuffer());
 
             // 删除已经勾选的记录
             m_ListCtrl_Blacks.DeleteItem(i);
@@ -830,7 +862,7 @@ void CFanXingDlg::OnBnClickedBtnLoadBlack()
     if (!blacklistHelper_->LoadBlackList(&rowdatas))
     {
         CString itemtext = L"读取黑名单失败";
-        InfoList_.InsertString(infoListCount_++, itemtext.GetBuffer());
+        Notify(itemtext.GetBuffer());
         return;
     }
     

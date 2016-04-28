@@ -204,6 +204,11 @@ bool User::GetViewerList(uint32 roomid,
     return result;
 }
 
+uint32 User::GetUserClanId() const
+{
+    return clanid_;
+}
+
 bool User::KickoutUser(KICK_TYPE kicktype, uint32 roomid,
     const EnterRoomUserInfo& enterRoomUserInfo)
 {
@@ -355,13 +360,51 @@ bool User::LoginUServiceGetMyUserDataInfo()
         return false;
     }
 
-    // 仅仅是为了取得cookies
+    std::string responsedata;
+    responsedata.assign(response.content.begin(), response.content.end());
+    if (responsedata.empty())
+        return  false;
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        return false;
+    }
+
+    // 有必要检测status的值
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
+    if (status != 1)
+    {
+        return false;
+    }
+
+    Json::Value dataObject(Json::objectValue);
+    dataObject = rootdata.get(std::string("data"), dataObject);
+    if (dataObject.empty())
+    {
+        return false;
+    }
+
+    auto fxUserInfo = dataObject.get("fxUserInfo", Json::Value());
+    Json::Value::Members members = fxUserInfo.getMemberNames();
+    for (const auto& member : members)
+    {
+        if (member.compare("clanId")==0)
+        {
+            clanid_ = GetInt32FromJsonValue(fxUserInfo, "clanId");
+        }
+        else if (member.compare("coin") == 0)
+        {
+            coin_ = static_cast<uint32>(GetDoubleFromJsonValue(fxUserInfo, "coin"));
+        }
+    }
+
     for (const auto& it : response.cookies)
     {
         cookiesHelper_->SetCookies(it);
     }
 
-    // response.content其实也带了一些用户信息，但在这里不用处理。
     return true;
 }
 

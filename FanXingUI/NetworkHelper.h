@@ -47,6 +47,7 @@ public:
     // 仅供不登录的用户使用
     bool EnterRoom(uint32 strroomid, uint32* singerid);
     bool EnterRoom(const std::wstring& strroomid, uint32* singerid);
+    bool GetGiftList(uint32 roomid);
 
     bool ConnectToNotifyServer(uint32 roomid, uint32 userid,
         const std::string& nickname,
@@ -61,11 +62,13 @@ public:
     bool GetViewerList(uint32 roomid,
         std::vector<RowData>* enterRoomUserInfoRowdata);
 
-    bool KickoutUsers(KICK_TYPE kicktype, uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+    // 判断用户是否有操作权限，暂时实现为只有公会成员才能操作。
+    bool GetActionPrivilege();
+
+    bool KickoutUsers(KICK_TYPE kicktype, uint32 roomid, 
+        const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
-
-    bool GetGiftList(uint32 roomid);
 
 private:
     void NotifyCallback(const std::wstring& message);

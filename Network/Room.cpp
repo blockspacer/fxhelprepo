@@ -114,7 +114,7 @@ bool Room::GetViewerList(const std::string& cookies,
     }
     Json::Value jvdata(Json::ValueType::objectValue);
     Json::Value data = rootdata.get(std::string("data"), jvdata);
-    if (data.isNull())
+    if (data.isNull() || !data.isObject())
     {
         assert(false);
         return false;
