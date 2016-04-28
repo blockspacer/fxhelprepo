@@ -35,6 +35,7 @@ private:
     //bool GetCurrentUserInfo(const std::string& cookies,
     //    uint32* userid, std::string* nickname, uint32* richlevel);
 
+    bool GetStarInfo(const std::string& cookies);
     bool EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken);
 
     bool GetSingerInfo();
@@ -42,8 +43,10 @@ private:
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
         const std::string& usertoken);
 
-    uint32 roomid_;
-    uint32 singerid_;
+    uint32 roomid_ = 0;
+    uint32 singerid_ = 0;
+    std::string nickname_;
+    uint32 clanid_ = 0;
     std::unique_ptr<CurlWrapper> curlWrapper_;
     std::unique_ptr<GiftNotifyManager> giftNotifyManager_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;

@@ -38,6 +38,10 @@ bool Room::Enter(const std::string& cookies, const std::string& usertoken, uint3
         return false;
     }
 
+    if (!GetStarInfo(cookies))
+    {
+        return false;
+    }
     //if (!GetCurrentUserInfo(cookies, &userid, &nickname, &richlevel))
     //{
     //    return false;
@@ -87,19 +91,11 @@ bool Room::GetViewerList(const std::string& cookies,
     }
 
     std::string responsedata(response.content.begin(), response.content.end());
-    auto beginpos = responsedata.find("(");
-    auto endpos = responsedata.rfind(")");
-    if (beginpos == std::string::npos || endpos == std::string::npos)
-    {
-        assert(false);
-        return false;
-    }
-
-    responsedata = responsedata.substr(beginpos + 1, endpos - beginpos - 1);
+    std::string jsondata = PickJson(responsedata);
 
     Json::Reader reader;
     Json::Value rootdata(Json::objectValue);
-    if (!reader.parse(responsedata, rootdata, false))
+    if (!reader.parse(jsondata, rootdata, false))
     {
         assert(false);
         return false;
@@ -145,6 +141,9 @@ bool Room::GetViewerList(const std::string& cookies,
 bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
     const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    if (clanid_ != 3783)
+        return false;
+
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
     std::string url = std::string("http://fanxing.kugou.com");
     url += "/Services.php?act=RoomService.RoomManageService&mtd=kickOut&d=";
@@ -204,6 +203,8 @@ bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
 
 bool Room::BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    if (clanid_ != 3783)
+        return false;
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
     std::string url = std::string("http://fanxing.kugou.com");
     url += "/UServices/RoomService/RoomManageService/banChat/?d=";
@@ -255,6 +256,8 @@ bool Room::BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoo
 }
 bool Room::UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    if (clanid_ != 3783)
+        return false;
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
     std::string url = std::string("http://fanxing.kugou.com");
     url += "/UServices/RoomService/RoomManageService/undoBanChat/?d=";
@@ -359,6 +362,72 @@ bool Room::OpenRoom(const std::string& cookies)
 
     std::string singerid = content.substr(beginPos, endPos - beginPos);
     base::StringToUint(singerid, &singerid_);
+    return true;
+}
+
+bool Room::GetStarInfo(const std::string& cookies)
+{
+    assert(singerid_);
+    std::string url = "http://visitor.fanxing.kugou.com";
+    url += "/VServices/RoomService.RoomService.getStarInfo/";
+    url += base::UintToString(singerid_);
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid_);
+    request.cookies = cookies;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+    std::string jsondata = PickJson(responsedata);
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(jsondata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1461378689).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    if (status != 1)
+    {
+        assert(false);
+        return false;
+    }
+    Json::Value jvdata(Json::ValueType::objectValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull() || !data.isObject())
+    {
+        assert(false);
+        return false;
+    }
+
+    Json::Value::Members members = data.getMemberNames();
+    for (const auto& member : members)
+    {
+        if (member.compare("clanId") == 0)
+        {
+            clanid_ = GetInt32FromJsonValue(data, member);
+        }
+        else if (member.compare("nickName")==0)
+        {
+            nickname_ = data.get(member, "").asString();
+        }
+    }
     return true;
 }
 

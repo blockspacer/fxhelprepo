@@ -269,6 +269,20 @@ std::vector<std::string> SplitString(std::string str, const std::string& pattern
     return result;
 }
 
+std::string PickJson(const std::string& rawresponse)
+{
+    auto beginpos = rawresponse.find("(");
+    auto endpos = rawresponse.rfind(")");
+    if (beginpos == std::string::npos || endpos == std::string::npos)
+    {
+        return rawresponse;
+    }
+
+    std::string responsedata = 
+        rawresponse.substr(beginpos + 1, endpos - beginpos - 1);
+    return responsedata;
+}
+
 void RemoveSpace(std::string* str)
 {
     auto pos = str->find(' ');

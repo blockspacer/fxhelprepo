@@ -46,6 +46,8 @@ std::string GetNowTimeString();
 
 std::vector<std::string> SplitString(std::string str, const std::string& pattern);
 
+std::string PickJson(const std::string& rawresponse);
+
 void RemoveSpace(std::string* str);
 
 uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name);

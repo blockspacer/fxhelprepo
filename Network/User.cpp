@@ -392,11 +392,11 @@ bool User::LoginUServiceGetMyUserDataInfo()
     {
         if (member.compare("clanId")==0)
         {
-            clanid_ = GetInt32FromJsonValue(fxUserInfo, "clanId");
+            clanid_ = GetInt32FromJsonValue(fxUserInfo, member);
         }
         else if (member.compare("coin") == 0)
         {
-            coin_ = static_cast<uint32>(GetDoubleFromJsonValue(fxUserInfo, "coin"));
+            coin_ = static_cast<uint32>(GetDoubleFromJsonValue(fxUserInfo, member));
         }
     }
 
