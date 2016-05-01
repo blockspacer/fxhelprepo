@@ -30,7 +30,7 @@ UserRoomManager::~UserRoomManager()
 {
 }
 
-bool UserRoomManager::LoadUserConfig()
+bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total)
 {
     // ¶ÁÎÄ¼þ
     base::FilePath path;
@@ -62,6 +62,7 @@ bool UserRoomManager::LoadUserConfig()
 
     std::vector<std::string> userinfos = SplitString(data, "\r\n");
 
+    *total = userinfos.size();
     for (const auto& it : userinfos)
     {
         std::vector<std::string> userinfo = SplitString(it, "\t");
@@ -74,13 +75,18 @@ bool UserRoomManager::LoadUserConfig()
         std::string password = userinfo[1];
         RemoveSpace(&username);
         RemoveSpace(&password);
-        userController_->AddUser(username, password);
+        if (!userController_->AddUser(username, password))
+            continue;
+        RowData row;
+        row.push_back(base::UTF8ToWide(username));
+        row.push_back(base::UTF8ToWide(password));
+        userpwd->push_back(row);
     }
     
     return true;
 }
 
-bool UserRoomManager::LoadRoomConfig()
+bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
 {
     base::FilePath path;
     PathService::Get(base::DIR_EXE, &path);
@@ -109,7 +115,7 @@ bool UserRoomManager::LoadRoomConfig()
     assert(!data.empty());
 
     std::vector<std::string> rooms = SplitString(data, "\r\n");
-
+    *total = rooms.size();
     for (const auto& it : rooms)
     {
         std::string roomstr = it;
@@ -121,7 +127,10 @@ bool UserRoomManager::LoadRoomConfig()
             LOG(ERROR) << L"roomid change error! " << it;
             continue;
         }
-        roomController_->AddRoom(roomid);           
+        roomController_->AddRoom(roomid);
+        RowData row;
+        row.push_back(base::UintToString16(roomid));
+        roomgrid->push_back(row);
     }
     return true;
 }

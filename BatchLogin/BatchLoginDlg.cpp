@@ -12,6 +12,23 @@
 #define new DEBUG_NEW
 #endif
 
+namespace{
+    const wchar_t* usercolumnlist[] = {
+        L"用户名",
+        L"密码",
+        L"用户id",
+        L"昵称",
+        L"财富等级",
+        L"房间数"
+    };
+
+    const wchar_t* roomcolumnlist[] = {
+        L"房间号",
+        L"协议人数",
+        L"显示人数",
+        L"有效期",
+    };
+}
 
 // CBatchLoginDlg 对话框
 
@@ -30,7 +47,9 @@ CBatchLoginDlg::~CBatchLoginDlg()
 
 void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+    CDialogEx::DoDataExchange(pDX);
+    DDX_Control(pDX, IDC_LIST_USERS, m_ListCtrl_Users);
+    DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -40,6 +59,11 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_GET_PROXY, &CBatchLoginDlg::OnBnClickedBtnGetProxy)
     ON_BN_CLICKED(IDC_BTN_BATCH_ENTER_ROOM, &CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom)
     ON_BN_CLICKED(IDC_BTN_IMPORT_ROOM, &CBatchLoginDlg::OnBnClickedBtnImportRoom)
+    ON_MESSAGE(WM_USER_NOTIFY_MESSAGE, &CBatchLoginDlg::OnNotifyMessage)
+    ON_MESSAGE(WM_USER_USER_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToUserList)
+    ON_MESSAGE(WM_USER_ROOM_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToRoomList)
+
+    ON_BN_CLICKED(IDC_BTN_LOGIN, &CBatchLoginDlg::OnBnClickedBtnLogin)
 END_MESSAGE_MAP()
 
 
@@ -56,7 +80,27 @@ BOOL CBatchLoginDlg::OnInitDialog()
 
 	ShowWindow(SW_MINIMIZE);
 
-	// TODO:  在此添加额外的初始化代码
+    DWORD dwStyle = m_ListCtrl_Users.GetExtendedStyle();
+    dwStyle |= LVS_EX_CHECKBOXES;
+    dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
+    dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
+
+    m_ListCtrl_Users.SetExtendedStyle(dwStyle); //设置扩展风格
+    int nColumnCount = m_ListCtrl_Users.GetHeaderCtrl()->GetItemCount();
+    for (int i = nColumnCount - 1; i >= 0; i--)
+        m_ListCtrl_Users.DeleteColumn(i);
+    uint32 index = 0;
+    for (const auto& it : usercolumnlist)
+        m_ListCtrl_Users.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
+
+
+    m_ListCtrl_Rooms.SetExtendedStyle(dwStyle); //设置扩展风格
+    nColumnCount = m_ListCtrl_Rooms.GetHeaderCtrl()->GetItemCount();
+    for (int i = nColumnCount - 1; i >= 0; i--)
+        m_ListCtrl_Rooms.DeleteColumn(i);
+    index = 0;
+    for (const auto& it : roomcolumnlist)
+        m_ListCtrl_Rooms.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -101,14 +145,83 @@ HCURSOR CBatchLoginDlg::OnQueryDragIcon()
 
 void CBatchLoginDlg::OnBnClickedBtnImportUser()
 {
-    userRoomManager_->LoadUserConfig();
+    GridData griddata;
+    uint32 total = 0;
+    if (!userRoomManager_->LoadUserConfig(&griddata, &total))
+        return;
+    
+    assert(griddata.size() == total);
+
     // 显示数据到界面
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+
+    for (uint32 i = 0; i < griddata.size(); ++i)
+    {
+        bool exist = false;
+        // 检测是否存在相同用户id
+        for (int index = 0; index < itemcount; index++)
+        {
+            CString text = m_ListCtrl_Users.GetItemText(index, 0);
+            if (griddata[i][0].compare(text.GetBuffer()) == 0) // 相同用户名
+            {
+                exist = true;
+                break;
+            }
+        }
+
+        if (!exist) // 如果不存在，需要插入新数据
+        {
+            int nitem = m_ListCtrl_Users.InsertItem(itemcount + i, griddata[i][0].c_str());
+            //m_ListCtrl_UserStatus.SetItemData(nitem, i);
+            for (uint32 j = 0; j < griddata[i].size(); ++j)
+            {
+                m_ListCtrl_Users.SetItemText(nitem, j, griddata[i][j].c_str());
+            }
+        }
+    }
+}
+
+void CBatchLoginDlg::OnBnClickedBtnLogin()
+{
+    // TODO:  在此添加控件通知处理程序代码
 }
 
 void CBatchLoginDlg::OnBnClickedBtnImportRoom()
 {
-    userRoomManager_->LoadRoomConfig();
+    GridData griddata;
+    uint32 total = 0;
+    if (!userRoomManager_->LoadRoomConfig(&griddata, &total))
+        return;
+
+    assert(griddata.size() == total);
+
     // 显示数据到界面
+    int itemcount = m_ListCtrl_Rooms.GetItemCount();
+
+    for (uint32 i = 0; i < griddata.size(); ++i)
+    {
+        bool exist = false;
+        // 检测是否存在相同用户id
+        for (int index = 0; index < itemcount; index++)
+        {
+            CString text = m_ListCtrl_Rooms.GetItemText(index, 0);
+            if (griddata[i][0].compare(text.GetBuffer()) == 0) // 相同房间号
+            {
+                exist = true;
+                break;
+            }
+        }
+
+        if (!exist) // 如果不存在，需要插入新数据
+        {
+            int nitem = m_ListCtrl_Rooms.InsertItem(itemcount + i, griddata[i][0].c_str());
+            //m_ListCtrl_UserStatus.SetItemData(nitem, i);
+            for (uint32 j = 0; j < griddata[i].size(); ++j)
+            {
+                m_ListCtrl_Rooms.SetItemText(nitem, j, griddata[i][j].c_str());
+            }
+        }
+    }
 }
 
 void CBatchLoginDlg::OnBnClickedBtnGetProxy()
@@ -116,10 +229,24 @@ void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 
 }
 
-
 void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
 {
     userRoomManager_->FillConfigRooms();
+}
+
+LRESULT CBatchLoginDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
+{
+    return 0;
+}
+
+LRESULT CBatchLoginDlg::OnDisplayDataToUserList(WPARAM wParam, LPARAM lParam)
+{
+    return 0;
+}
+
+LRESULT CBatchLoginDlg::OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam)
+{
+    return 0;
 }
 
 

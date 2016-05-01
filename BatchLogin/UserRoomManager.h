@@ -10,8 +10,8 @@ public:
     UserRoomManager();
     ~UserRoomManager();
 
-    bool LoadUserConfig();
-    bool LoadRoomConfig();
+    bool LoadUserConfig(GridData* userpwd, uint32* total);
+    bool LoadRoomConfig(GridData* roomgrid, uint32* total);
 
     bool FillSingleRoom(uint32 roomid);
     bool FillConfigRooms();

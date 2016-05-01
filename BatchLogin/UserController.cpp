@@ -15,7 +15,12 @@ bool UserController::AddUser(const std::string& username,
     const std::string& password)
 {
     std::shared_ptr<User> shared_user(new User(username, password));
-    bool result = shared_user->Login();
+    if (!shared_user->Login())
+    {
+        assert(false && L"µÇÂ¼Ê§°Ü");
+        return false;
+    }
+    
     users_.push_back(shared_user);
     return true;
 }

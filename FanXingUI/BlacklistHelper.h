@@ -6,9 +6,9 @@
 #undef min // 因为微软这个二比在某些头文件定义了min宏
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/files/file.h"
-
-typedef std::vector<std::wstring> RowData;
-typedef std::vector<RowData> GridData;
+#include "Network/EncodeHelper.h"
+//typedef std::vector<std::wstring> RowData;
+//typedef std::vector<RowData> GridData;
 
 struct BlackInfo
 {

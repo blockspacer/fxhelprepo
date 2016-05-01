@@ -306,7 +306,9 @@ std::vector<std::string> SplitString(std::string str, const std::string& pattern
         if (pos < size)
         {
             std::string s = str.substr(i, pos - i);
-            result.push_back(s);
+            if (!s.empty())
+                result.push_back(s);
+            
             i = pos + pattern.size() - 1;
         }
     }
