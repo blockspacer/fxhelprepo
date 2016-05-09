@@ -2,15 +2,15 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{cfe55e78-4fbc-47aa-8540-85e374c78143}</UniqueIdentifier>
+      <UniqueIdentifier>{4606a70d-7283-4ba1-94fe-1d3069c738d6}</UniqueIdentifier>
       <Extensions>.cpp</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{8e9be36e-2c5e-422c-ab61-876d650fe1e8}</UniqueIdentifier>
+      <UniqueIdentifier>{2509d838-78e7-4f19-ad7a-bf64ab365088}</UniqueIdentifier>
       <Extensions>.;.h</Extensions>
     </Filter>
     <Filter Include="Miscellaneous">
-      <UniqueIdentifier>{ad7b261e-b535-4748-945e-0c9d4473fc48}</UniqueIdentifier>
+      <UniqueIdentifier>{7ac3e254-9363-4d37-bf2e-aceadf1314a2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -383,12 +383,6 @@
       <Filter>Miscellaneous</Filter>
     </None>
     <None Include="GNUmakefile">
-      <Filter>Miscellaneous</Filter>
-    </None>
-    <None Include="License.txt">
-      <Filter>Miscellaneous</Filter>
-    </None>
-    <None Include="Readme.txt">
       <Filter>Miscellaneous</Filter>
     </None>
   </ItemGroup>
@@ -777,6 +771,14 @@
     <ClInclude Include="zlib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="License.txt">
+      <Filter>Miscellaneous</Filter>
+    </Text>
+    <Text Include="Readme.txt">
+      <Filter>Miscellaneous</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="adhoc.cpp.proto">
