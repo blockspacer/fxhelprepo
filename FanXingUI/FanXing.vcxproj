@@ -111,6 +111,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AuthorityHelper.h" />
     <ClInclude Include="BlacklistHelper.h" />
     <ClInclude Include="DlgGiftNotify.h" />
     <ClInclude Include="FanXing.h" />
@@ -122,6 +123,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AuthorityHelper.cpp" />
     <ClCompile Include="BlacklistHelper.cpp" />
     <ClCompile Include="DlgGiftNotify.cpp" />
     <ClCompile Include="FanXingUI.cpp" />

@@ -345,7 +345,7 @@ bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstrin
     network_->Initialize();
     network_->SetNotify(
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
-
+    
     return network_->Login(username, password);
 }
 

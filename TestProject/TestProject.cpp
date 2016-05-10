@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <assert.h>
+#include "Network/EncodeHelper.h"
 #include "Network/User.h"
 #include "Network/CurlWrapper.h"
 
@@ -94,16 +95,16 @@ std::string RSAEncryptString(std::istream* pubFilename, const std::string& seed,
     StringSource(message, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
     return result;
 }
-
-std::string RSADecryptString(std::istream* privFilename, const std::string& ciphertext)
-{
-    FileSource privFile(*privFilename, true, new HexDecoder);
-    RSAES_OAEP_SHA_Decryptor priv(privFile);
-
-    std::string result;
-    StringSource(ciphertext, true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
-    return result;
-}
+//
+//std::string RSADecryptString(std::istream* privFilename, const std::string& ciphertext)
+//{
+//    FileSource privFile(*privFilename, true, new HexDecoder);
+//    RSAES_OAEP_SHA_Decryptor priv(privFile);
+//
+//    std::string result;
+//    StringSource(ciphertext, true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
+//    return result;
+//}
 
 void GenerateRSAKey(unsigned int keyLength, std::ostream* privFilename, std::ostream* pubFilename, const std::string& seed)
 {

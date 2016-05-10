@@ -10,6 +10,35 @@
 #include "third_party/chromium/base/strings/string_piece.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
+#include "third_party/cryptopp/cryptlib.h"
+#include "third_party/cryptopp/rsa.h"
+#include "third_party/cryptopp/aes.h"
+#include "third_party/cryptopp/modes.h"
+#include "third_party/cryptopp/filters.h"
+#include "third_party/cryptopp/files.h"
+#include "third_party/cryptopp/hex.h"
+#include "third_party/cryptopp/randpool.h"
+
+namespace
+{
+    static CryptoPP::OFB_Mode<CryptoPP::AES>::Encryption s_globalRNG;
+
+    CryptoPP::RandomNumberGenerator & GlobalRNG()
+    {
+        return s_globalRNG;
+    }
+
+    std::string RSADecryptString_(std::istream* privFilename, const std::string& ciphertext)
+    {
+        using namespace CryptoPP;
+        FileSource privFile(*privFilename, true, new HexDecoder);
+        RSAES_PKCS1v15_Decryptor priv(privFile);
+
+        std::string result;
+        StringSource(ciphertext.c_str(), true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
+        return result;
+    }
+}
 static const wchar_t HEX[] = L"0123456789abcdef";
 std::wstring BinToHex(const void* bin, int len)
 {
@@ -329,4 +358,26 @@ double GetDoubleFromJsonValue(const Json::Value& jvalue, const std::string& name
 	}
 
 	return ret;
+}
+
+std::string RSADecryptString(std::istream* privFilename, const std::string& ciphertext)
+{
+    std::string decrypted;
+    std::string part = ciphertext;
+    auto pos = 0;
+    int maxcipher = 128;
+    while (part.length() > maxcipher)
+    {
+        std::string temp = ciphertext.substr(pos, maxcipher);
+        decrypted += RSADecryptString_(privFilename, temp);
+        pos += maxcipher;
+        part = ciphertext.substr(pos);
+    }
+
+    if (!part.empty())
+    {
+        decrypted += RSADecryptString_(privFilename, part.c_str());
+    }
+
+    return decrypted;
 }

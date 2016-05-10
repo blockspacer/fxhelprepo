@@ -8,6 +8,7 @@
 #undef min // 因为微软这个二比在某些头文件定义了min宏
 #include "Network/GiftNotifyManager.h"
 #include "Network/CurlWrapper.h"
+#include "AuthorityHelper.h"
 
 class CurlWrapper;
 class GiftNotifyManager;
@@ -91,5 +92,6 @@ private:
     notify502 notify502_;
     notify601 notify601_;
     std::unique_ptr<User> user_;
+    std::unique_ptr<Authority> authority_;
 };
 

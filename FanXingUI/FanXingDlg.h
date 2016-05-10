@@ -8,6 +8,7 @@
 
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
+
 #include "afxwin.h"
 #include "afxcmn.h"
 
@@ -114,7 +115,5 @@ private:
     CListCtrl m_ListCtrl_Viewers;
     CListCtrl m_ListCtrl_Blacks;
     std::unique_ptr<BlacklistHelper> blacklistHelper_;
-
-
 
 };

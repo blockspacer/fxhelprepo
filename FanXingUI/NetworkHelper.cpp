@@ -33,6 +33,7 @@ NetworkHelper::NetworkHelper()
     :curlWrapper_(new CurlWrapper)
     , giftNotifyManager_(new GiftNotifyManager)
     , giftInfoHelper_(new GiftInfoHelper)
+    , authority_(new Authority)
 {
     
 }
@@ -49,6 +50,9 @@ bool NetworkHelper::Initialize()
     curlWrapper_->Initialize();
     giftNotifyManager_->Initialize();
     user_.reset(new User);
+
+    AuthorityHelper authorityHelper;
+    authorityHelper.Load(authority_.get());
     return true;
 }
 
