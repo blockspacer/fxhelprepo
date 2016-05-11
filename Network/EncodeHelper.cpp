@@ -32,7 +32,7 @@ namespace
     {
         using namespace CryptoPP;
         FileSource privFile(*privFilename, true, new HexDecoder);
-        RSAES_PKCS1v15_Decryptor priv(privFile);
+        RSAES_OAEP_SHA_Decryptor priv(privFile);
 
         std::string result;
         StringSource(ciphertext.c_str(), true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
@@ -362,10 +362,14 @@ double GetDoubleFromJsonValue(const Json::Value& jvalue, const std::string& name
 
 std::string RSADecryptString(std::istream* privFilename, const std::string& ciphertext)
 {
+    std::string seed = CryptoPP::IntToString(time(NULL));
+    seed.resize(16);
+    s_globalRNG.SetKeyWithIV((byte *)seed.data(), 16, (byte *)seed.data());
+
     std::string decrypted;
     std::string part = ciphertext;
     auto pos = 0;
-    int maxcipher = 128;
+    int maxcipher = 256;
     while (part.length() > maxcipher)
     {
         std::string temp = ciphertext.substr(pos, maxcipher);
