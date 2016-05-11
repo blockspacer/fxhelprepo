@@ -55,3 +55,5 @@ uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name)
 double GetDoubleFromJsonValue(const Json::Value& jvalue, const std::string& name);
 
 std::string RSADecryptString(std::istream* privFilename, const std::string& ciphertext);
+
+std::string RSAEncryptString(std::istream* pubFilename, const std::string& message);

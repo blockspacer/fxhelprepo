@@ -38,6 +38,21 @@ namespace
         StringSource(ciphertext.c_str(), true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
         return result;
     }
+
+
+    std::string RSAEncryptString_(std::istream* pubFilename, const std::string& seed, const std::string& message)
+    {
+        using namespace CryptoPP;
+        FileSource pubFile(*pubFilename, true, new HexDecoder);
+        RSAES_OAEP_SHA_Encryptor pub(pubFile);
+
+        RandomPool randPool;
+        randPool.IncorporateEntropy((byte *)seed.c_str(), seed.length());
+
+        std::string result;
+        StringSource(message, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
+        return result;
+    }
 }
 static const wchar_t HEX[] = L"0123456789abcdef";
 std::wstring BinToHex(const void* bin, int len)
@@ -384,4 +399,29 @@ std::string RSADecryptString(std::istream* privFilename, const std::string& ciph
     }
 
     return decrypted;
+}
+
+std::string RSAEncryptString(std::istream* pubFilename, const std::string& message)
+{
+    std::string seed = CryptoPP::IntToString(time(NULL));
+    seed.resize(16);
+    s_globalRNG.SetKeyWithIV((byte *)seed.data(), 16, (byte *)seed.data());
+
+    std::string ciphertext;
+    std::string part = message;
+    auto pos = 0;
+    int maxplain = 1024/8-11;
+    while (part.length() > maxplain)
+    {
+        std::string temp = message.substr(pos, maxplain);
+        ciphertext += RSAEncryptString_(pubFilename, seed, temp);
+        pos += maxplain;
+        part = message.substr(pos);
+    }
+
+    if (!part.empty())
+    {
+        ciphertext += RSAEncryptString_(pubFilename, seed, part.c_str());
+    }
+    return ciphertext;
 }
