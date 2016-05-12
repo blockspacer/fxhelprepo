@@ -209,6 +209,11 @@ uint32 User::GetUserClanId() const
     return clanid_;
 }
 
+uint32 User::GetUserId() const
+{
+    return userid_;
+}
+
 bool User::KickoutUser(KICK_TYPE kicktype, uint32 roomid,
     const EnterRoomUserInfo& enterRoomUserInfo)
 {

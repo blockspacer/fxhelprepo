@@ -151,4 +151,20 @@ void CAuthorityDlg::OnBnClickedBtnView()
     Authority authority;
     if (!authorityHelper.Load(&authority))
         return;
+
+    CString csUserid = base::UTF8ToWide(
+        base::UintToString(authority.userid)).c_str();
+    m_edit_userid.SetWindowTextW(csUserid);
+
+    CString csRoomid = base::UTF8ToWide(
+        base::UintToString(authority.roomid)).c_str();
+    m_edit_roomid.SetWindowTextW(csRoomid);
+
+    CString csClanid = base::UTF8ToWide(
+        base::UintToString(authority.clanid)).c_str();
+    m_edit_clanid.SetWindowTextW(csClanid);
+
+    m_chk_kickout.SetCheck(authority.kickout);
+    m_banchat.SetCheck(authority.banchat);
+    m_chk_anti_advance.SetCheck(authority.antiadvance);
 }

@@ -381,6 +381,10 @@ std::string RSADecryptString(std::istream* privFilename, const std::string& ciph
     seed.resize(16);
     s_globalRNG.SetKeyWithIV((byte *)seed.data(), 16, (byte *)seed.data());
 
+    using namespace CryptoPP;
+    FileSource privFile(*privFilename, true, new HexDecoder);
+    RSAES_OAEP_SHA_Decryptor priv(privFile);
+
     std::string decrypted;
     std::string part = ciphertext;
     auto pos = 0;
@@ -388,14 +392,18 @@ std::string RSADecryptString(std::istream* privFilename, const std::string& ciph
     while (part.length() > maxcipher)
     {
         std::string temp = ciphertext.substr(pos, maxcipher);
-        decrypted += RSADecryptString_(privFilename, temp);
+        std::string result;
+        StringSource(temp.c_str(), true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
+        decrypted += result;
         pos += maxcipher;
         part = ciphertext.substr(pos);
     }
 
     if (!part.empty())
     {
-        decrypted += RSADecryptString_(privFilename, part.c_str());
+        std::string result;
+        StringSource(part.c_str(), true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
+        decrypted += result;
     }
 
     return decrypted;
@@ -407,21 +415,33 @@ std::string RSAEncryptString(std::istream* pubFilename, const std::string& messa
     seed.resize(16);
     s_globalRNG.SetKeyWithIV((byte *)seed.data(), 16, (byte *)seed.data());
 
+
+    using namespace CryptoPP;
+    FileSource pubFile(*pubFilename, true, new HexDecoder);
+    RSAES_OAEP_SHA_Encryptor pub(pubFile);
+
+    RandomPool randPool;
+    randPool.IncorporateEntropy((byte *)seed.c_str(), seed.length());
+
     std::string ciphertext;
     std::string part = message;
     auto pos = 0;
-    int maxplain = 1024/8-11;
+    int maxplain = 86;
     while (part.length() > maxplain)
     {
         std::string temp = message.substr(pos, maxplain);
-        ciphertext += RSAEncryptString_(pubFilename, seed, temp);
+        std::string result;
+        StringSource(temp, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
+        ciphertext += result;
         pos += maxplain;
         part = message.substr(pos);
     }
 
     if (!part.empty())
     {
-        ciphertext += RSAEncryptString_(pubFilename, seed, part.c_str());
+        std::string result;
+        StringSource(part, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
+        ciphertext += result;
     }
     return ciphertext;
 }

@@ -77,6 +77,11 @@ bool AuthorityHelper::Save(const Authority& authority)
     std::wstring publickeyfilename = L"publickey.txt";
     base::FilePath pathname = dirPath.Append(publickeyfilename);
     std::ifstream ifs(pathname.value());
+    if (ifs.bad())
+        return false;
+
+    std::string mymessage = R"({"userid":1,"roomid":2,"clanid":3,"kickout":1,"banchat":1,"antiadvance":1})";
+
     std::string ciphertext = RSAEncryptString(&ifs, writestring);
 
     std::wstring Authorityfilename = L"Authority_";

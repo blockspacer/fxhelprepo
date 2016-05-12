@@ -67,6 +67,7 @@ public:
         std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
 
     uint32 GetUserClanId() const;
+    uint32 GetUserId() const;
 	bool KickoutUser(KICK_TYPE kicktype, uint32 roomid, 
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);

@@ -52,8 +52,8 @@ bool NetworkHelper::Initialize()
     user_.reset(new User);
 
     AuthorityHelper authorityHelper;
-    authorityHelper.Load(authority_.get());
-    return true;
+    bool result = authorityHelper.Load(authority_.get());
+    return result;
 }
 
 void NetworkHelper::Finalize()
@@ -108,6 +108,7 @@ bool NetworkHelper::EnterRoom(const std::wstring& strroomid, uint32* singerid)
 {
     uint32 roomid = 0;
     base::StringToUint(strroomid, &roomid);
+
     return EnterRoom(roomid, singerid);
 }
 
@@ -200,6 +201,7 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
         std::placeholders::_1));
     user_->SetNormalNotify(std::bind(&NetworkHelper::NotifyCallback, this,
         std::placeholders::_1));
+    roomid_ = roomid;
     return user_->EnterRoom(roomid);
 }
 
@@ -256,8 +258,13 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
 
 bool NetworkHelper::GetActionPrivilege()
 {
-    uint32 clanid = user_->GetUserClanId();
-    if (clanid != 3783) // 只有指定的家族成员才能操作
+    if (user_->GetUserId() != authority_->userid)
+        return false;
+
+    if (!authority_->clanid && user_->GetUserClanId() != authority_->clanid)
+        return false;
+
+    if (!authority_->roomid && (roomid_ == authority_->roomid))
         return false;
 
     return true;
