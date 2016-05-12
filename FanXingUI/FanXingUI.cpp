@@ -126,8 +126,13 @@ void CFanXingApp::InitAppLog()
     PathService::Get(base::DIR_APP_DATA, &path);
     path = path.Append(L"FanXingHelper").Append(L"fanxinghelper.log");
     logging::LoggingSettings setting;
+#ifdef DEBUG
     setting.logging_dest = logging::LOG_TO_ALL;
     setting.lock_log = logging::LOCK_LOG_FILE;
+#else
+    setting.logging_dest = logging::LOG_NONE;
+    setting.lock_log = logging::DONT_LOCK_LOG_FILE;
+#endif
     setting.log_file = path.value().c_str();
     setting.delete_old = logging::APPEND_TO_OLD_LOG_FILE;
     logging::InitLogging(setting);
