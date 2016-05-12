@@ -137,7 +137,7 @@ bool User::EnterRoom(uint32 roomid)
     // 如果存在重复的房间，先断掉旧的
     this->ExitRoom(roomid);
 
-    if (!room->Enter(cookie,usertoken_,userid_))
+    if (!room->Enter(cookie,usertoken_,kugouid_))
     {
         return false;
     }
@@ -209,9 +209,9 @@ uint32 User::GetUserClanId() const
     return clanid_;
 }
 
-uint32 User::GetUserId() const
+uint32 User::GetFanxingId() const
 {
-    return userid_;
+    return fanxingid_;
 }
 
 bool User::KickoutUser(KICK_TYPE kicktype, uint32 roomid,
@@ -336,7 +336,7 @@ bool User::LoginHttps(const std::string& username,
     // 暂时没有必要检测status的值
     Json::Value jvCmd(Json::ValueType::intValue);
     usertoken_ = logindata.get("token", "").asString();
-    userid_ = logindata.get("userid",0).asUInt();
+    kugouid_ = logindata.get("userid",0).asUInt();
 
     for (const auto& it : response.cookies)
     {
@@ -402,6 +402,10 @@ bool User::LoginUServiceGetMyUserDataInfo()
         else if (member.compare("coin") == 0)
         {
             coin_ = static_cast<uint32>(GetDoubleFromJsonValue(fxUserInfo, member));
+        }
+        else if (member.compare("userId")==0)
+        {
+            fanxingid_ = static_cast<uint32>(GetDoubleFromJsonValue(fxUserInfo, member));
         }
     }
 

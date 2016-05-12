@@ -258,13 +258,13 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
 
 bool NetworkHelper::GetActionPrivilege()
 {
-    if (user_->GetUserId() != authority_->userid)
+    if (user_->GetFanxingId() != authority_->userid)
         return false;
 
-    if (!authority_->clanid && user_->GetUserClanId() != authority_->clanid)
+    if (authority_->clanid && user_->GetUserClanId() != authority_->clanid)
         return false;
 
-    if (!authority_->roomid && (roomid_ == authority_->roomid))
+    if (authority_->roomid && (roomid_ != authority_->roomid))
         return false;
 
     return true;

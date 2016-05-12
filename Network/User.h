@@ -67,7 +67,7 @@ public:
         std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
 
     uint32 GetUserClanId() const;
-    uint32 GetUserId() const;
+    uint32 GetFanxingId() const;
 	bool KickoutUser(KICK_TYPE kicktype, uint32 roomid, 
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
@@ -86,7 +86,8 @@ private:
     std::string password_;
 
     // 登录后才能获得的用户信息
-    uint32 userid_ = 0;
+    uint32 kugouid_ = 0;
+    uint32 fanxingid_ = 0;
     uint32 clanid_ = 0;
     uint32 coin_ = 0;
     std::string usertoken_;
