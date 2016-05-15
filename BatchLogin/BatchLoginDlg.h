@@ -5,9 +5,12 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <mutex>
 #include "afxcmn.h"
 
 #include "Network/EncodeHelper.h"
+#include "afxwin.h"
 
 class UserRoomManager;
 // CBatchLoginDlg ¶Ô»°¿ò
@@ -39,6 +42,7 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
     afx_msg void OnBnClickedBtnImportUser();
+    afx_msg void OnBnClickedBtnLogin();
     afx_msg void OnBnClickedBtnGetProxy();
     afx_msg void OnBnClickedBtnBatchEnterRoom();
     afx_msg void OnBnClickedBtnImportRoom();
@@ -46,6 +50,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 private:
+    void Notify(const std::wstring& message);
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToUserList(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam);
@@ -53,6 +58,10 @@ private:
     std::unique_ptr<UserRoomManager> userRoomManager_;
     CListCtrl m_ListCtrl_Users;
     CListCtrl m_ListCtrl_Rooms;
-public:
-    afx_msg void OnBnClickedBtnLogin();
+    CListBox InfoList_;
+    int infoListCount_ = 0;
+
+    std::mutex messageMutex_;
+    std::vector<std::wstring> messageQueen_;    
+
 };

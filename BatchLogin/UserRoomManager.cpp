@@ -9,6 +9,7 @@
 
 #undef max
 #undef min
+#include "third_party/chromium/base/bind.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/path_service.h"
@@ -22,12 +23,31 @@ namespace
 UserRoomManager::UserRoomManager()
     :userController_(new UserController)
     , roomController_(new RoomController)
+    , workerThread_("UserRoomManagerThread")
 {
 }
 
-
 UserRoomManager::~UserRoomManager()
 {
+}
+
+bool UserRoomManager::Initialize()
+{
+    workerThread_.Start();
+    return false;
+}
+
+bool UserRoomManager::Finalize()
+{
+    if (workerThread_.IsRunning())
+        workerThread_.Stop();
+
+    return false;
+}
+
+void UserRoomManager::SetNotify(std::function<void(std::wstring)> notify)
+{
+    notify_ = notify;
 }
 
 bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total)
@@ -75,8 +95,8 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total)
         std::string password = userinfo[1];
         RemoveSpace(&username);
         RemoveSpace(&password);
-        if (!userController_->AddUser(username, password))
-            continue;
+        //if (!userController_->AddUser(username, password))
+        //    continue;
         RowData row;
         row.push_back(base::UTF8ToWide(username));
         row.push_back(base::UTF8ToWide(password));
@@ -85,6 +105,7 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total)
     
     return true;
 }
+
 
 bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
 {
@@ -127,7 +148,7 @@ bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
             LOG(ERROR) << L"roomid change error! " << it;
             continue;
         }
-        roomController_->AddRoom(roomid);
+        //roomController_->AddRoom(roomid);
         RowData row;
         row.push_back(base::UintToString16(roomid));
         roomgrid->push_back(row);
@@ -135,25 +156,73 @@ bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
     return true;
 }
 
-bool UserRoomManager::FillSingleRoom(uint32 roomid)
+bool UserRoomManager::BatchLogUsers(
+    const std::map<std::wstring, std::wstring>& userAccountPassword)
 {
-    if (!userController_->FillRoom(roomid, roomusercount))
-        return false;
-
+    workerThread_.message_loop_proxy()->PostTask(FROM_HERE, 
+        base::Bind(&UserRoomManager::DoBatchLogUsers, this, userAccountPassword));
     return true;
 }
 
-bool UserRoomManager::FillConfigRooms()
+void UserRoomManager::DoBatchLogUsers(
+    const std::map<std::wstring, std::wstring>& userAccountPassword)
 {
-    std::vector<uint32> roomids = roomController_->GetRooms();
+    for (auto it : userAccountPassword)
+    {
+        std::string account = base::WideToUTF8(it.first);
+        std::string password = base::WideToUTF8(it.second);
+        bool result = userController_->AddUser(account, password);
+        if (notify_)
+        {
+            std::wstring message = base::UTF8ToWide(account) + L" Login ";
+            message += result ? L"success!" : L"failed!";
+            notify_(message);
+        }
+    }
+}
+
+
+bool UserRoomManager::FillRooms(const std::vector<std::wstring>& roomids)
+{
+    std::vector<uint32> iroomids;
+    for (auto wstroomid : roomids)
+    {
+        std::string utf8roomids = base::WideToUTF8(wstroomid);
+        uint32 roomid = 0;
+        base::StringToUint(utf8roomids, &roomid);
+        iroomids.push_back(roomid);
+    }
+    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserRoomManager::DoFillRooms, this, iroomids));
+    return true;
+
+}
+
+void UserRoomManager::DoFillRooms(const std::vector<uint32>& roomids)
+{
+    //std::vector<uint32> roomids = roomController_->GetRooms();
     for (const auto& roomid : roomids)
     {
-        if (!userController_->FillRoom(roomid, roomusercount))
+        bool result = userController_->FillRoom(roomid, roomusercount);
+        assert(result && L"进入房间失败");
+        if (notify_)
         {
-            assert(false && L"进入房间失败");
-            LOG(ERROR) << L"FillRoom failed! " << base::UintToString(roomid);
+            std::wstring message = L"Fill Room ";
+            message += result ? L"Success!" : L"Failed!";
+            notify_(message);
         }
-        continue;
     }
-    return false;
+}
+
+void UserRoomManager::FillSingleRoom(uint32 roomid)
+{
+    bool result = userController_->FillRoom(roomid, roomusercount);
+    assert(result && L"进入房间失败");
+    if (notify_)
+    {
+        std::wstring message = L"Fill Room ";
+        message += result ? L"Success!" : L"Failed!";
+        notify_(message);
+    }
+
 }

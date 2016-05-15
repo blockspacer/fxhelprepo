@@ -3,10 +3,13 @@
 //
 
 #include "stdafx.h"
+#include <string>
+#include <map>
 #include "BatchLogin.h"
 #include "BatchLoginDlg.h"
 #include "UserRoomManager.h"
 #include "afxdialogex.h"
+#
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -42,7 +45,7 @@ CBatchLoginDlg::CBatchLoginDlg(CWnd* pParent /*=NULL*/)
 
 CBatchLoginDlg::~CBatchLoginDlg()
 {
-
+    userRoomManager_->Finalize();
 }
 
 void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
@@ -50,6 +53,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_LIST_USERS, m_ListCtrl_Users);
     DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
+    DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -102,6 +106,9 @@ BOOL CBatchLoginDlg::OnInitDialog()
     for (const auto& it : roomcolumnlist)
         m_ListCtrl_Rooms.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
 
+    userRoomManager_->Initialize();
+    userRoomManager_->SetNotify(
+        std::bind(&CBatchLoginDlg::Notify,this,std::placeholders::_1));
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -183,7 +190,15 @@ void CBatchLoginDlg::OnBnClickedBtnImportUser()
 
 void CBatchLoginDlg::OnBnClickedBtnLogin()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    std::map<std::wstring, std::wstring> userAccountPassword;
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        CString account = m_ListCtrl_Users.GetItemText(index, 0);
+        CString password = m_ListCtrl_Users.GetItemText(index, 1);
+        userAccountPassword[account.GetBuffer()] = password.GetBuffer();
+    }
+    userRoomManager_->BatchLogUsers(userAccountPassword);
 }
 
 void CBatchLoginDlg::OnBnClickedBtnImportRoom()
@@ -231,11 +246,38 @@ void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 
 void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
 {
-    userRoomManager_->FillConfigRooms();
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    std::vector<std::wstring> roomids;
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        CString roomid = m_ListCtrl_Rooms.GetItemText(index, 0);
+        roomids.push_back(roomid.GetBuffer());
+    }
+    userRoomManager_->FillRooms(roomids);
+}
+
+void CBatchLoginDlg::Notify(const std::wstring& message)
+{
+    // 发送数据给窗口
+    messageMutex_.lock();
+    messageQueen_.push_back(message);
+    messageMutex_.unlock();
+    this->PostMessage(WM_USER_NOTIFY_MESSAGE, 0, 0);
 }
 
 LRESULT CBatchLoginDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 {
+    std::vector<std::wstring> messages;
+    messageMutex_.lock();
+    messages.swap(messageQueen_);
+    messageMutex_.unlock();
+
+    for (auto str : messages)
+    {
+        InfoList_.InsertString(infoListCount_++, str.c_str());
+    }
+
+    InfoList_.SetCurSel(infoListCount_ - 1);
     return 0;
 }
 
