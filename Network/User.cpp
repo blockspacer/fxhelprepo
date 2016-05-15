@@ -112,6 +112,11 @@ bool User::Logout()
     return false;
 }
 
+uint32 User::GetServerTime() const
+{
+    return servertime_;
+}
+
 bool User::EnterRoom(uint32 roomid)
 {
     std::shared_ptr<Room> room(new Room(roomid));
@@ -383,7 +388,8 @@ bool User::LoginUServiceGetMyUserDataInfo()
     {
         return false;
     }
-
+    uint32 servertime = GetInt32FromJsonValue(rootdata, "servertime");
+    servertime_ = servertime;
     Json::Value dataObject(Json::objectValue);
     dataObject = rootdata.get(std::string("data"), dataObject);
     if (dataObject.empty())

@@ -4,6 +4,7 @@
 
 #pragma once
 #include "afxwin.h"
+#include "ATLComTime.h"
 
 
 // CAuthorityDlg ¶Ô»°¿ò
@@ -40,4 +41,5 @@ public:
     CButton m_chk_kickout;
     CButton m_banchat;
     CButton m_chk_anti_advance;
+    COleDateTime m_oleDateTime_End;
 };

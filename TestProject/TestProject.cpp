@@ -112,7 +112,7 @@ std::string MyRSADecryptString(std::istream* privFilename, const std::string& ci
     std::string decrypted;
     std::string part = ciphertext;
     auto pos = 0;
-    int maxcipher = 256;
+    uint32 maxcipher = 256;
     while (part.length() > maxcipher)
     {
         std::string temp = ciphertext.substr(pos, maxcipher);

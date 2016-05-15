@@ -53,6 +53,7 @@ public:
     bool Login(const std::string& username,
         const std::string& password);
     bool Logout();
+    uint32 GetServerTime() const;
 
     bool EnterRoom(uint32 roomid);
     bool ExitRoom(uint32 roomid);
@@ -73,9 +74,7 @@ public:
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     
-
 private:
-
     bool LoginHttps(const std::string& username,
         const std::string& password);
 
@@ -90,8 +89,9 @@ private:
     uint32 fanxingid_ = 0;
     uint32 clanid_ = 0;
     uint32 coin_ = 0;
-    std::string usertoken_;
-    std::string userkey_;
+    std::string usertoken_ = "";
+    std::string userkey_ = "";
+    uint32 servertime_ = 0xFFFFFFFF; // 这个值用来做权限控制的时间判断使用
 
     std::unique_ptr<CurlWrapper> curlWrapper_ = nullptr;
     std::unique_ptr<CookiesHelper> cookiesHelper_ = nullptr;

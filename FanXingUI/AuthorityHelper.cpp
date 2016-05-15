@@ -8,6 +8,7 @@
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/files/file_enumerator.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 
 #include "third_party/json/json.h"
 
@@ -87,6 +88,8 @@ bool AuthorityHelper::Load(Authority* authority)
         authority->kickout = GetInt32FromJsonValue(root, "kickout");
         authority->banchat = GetInt32FromJsonValue(root, "banchat");
         authority->antiadvance = GetInt32FromJsonValue(root, "antiadvance");
+        std::string expire = root.get("expiretime", "0").asString();
+        base::StringToUint64(expire, &authority->expiretime);
     }
     catch (...)
     {

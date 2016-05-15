@@ -261,6 +261,12 @@ bool NetworkHelper::GetActionPrivilege()
     if (user_->GetFanxingId() != authority_->userid)
         return false;
 
+    uint32 servertime = user_->GetServerTime();
+    uint64 expiretime = authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
+    expiretime /= 1000000;
+    if (servertime > expiretime)
+        return false;
+
     if (authority_->clanid && user_->GetUserClanId() != authority_->clanid)
         return false;
 

@@ -7,7 +7,9 @@
 #include "AuthorityDlg.h"
 #include "afxdialogex.h"
 #include "AuthorityHelper.h"
-
+#undef max
+#undef min
+#include "third_party/chromium/base/time/time.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversion_utils.h"
@@ -17,12 +19,37 @@
 #endif
 
 
+namespace
+{
+    bool OleDateTimeToBaseTime(const COleDateTime& oletime, base::Time* basetime)
+    {
+        if (!basetime)
+            return false;
+
+        SYSTEMTIME systemtime;
+        if (!oletime.GetAsSystemTime(systemtime))
+            return false;
+
+        base::Time::Exploded exploded;
+        exploded.year = systemtime.wYear;
+        exploded.month = systemtime.wMonth;
+        exploded.day_of_month = systemtime.wDay;
+        exploded.day_of_week = systemtime.wDayOfWeek;
+        exploded.hour = systemtime.wHour;
+        exploded.minute = systemtime.wMinute;
+        exploded.second = systemtime.wSecond;
+        exploded.millisecond = systemtime.wMilliseconds;
+        *basetime = base::Time::FromLocalExploded(exploded);
+        return true;
+    }
+}
 // CAuthorityDlg ¶Ô»°¿ò
 
 
 
 CAuthorityDlg::CAuthorityDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CAuthorityDlg::IDD, pParent)
+    , m_oleDateTime_End(COleDateTime::GetCurrentTime())
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -36,6 +63,7 @@ void CAuthorityDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_KICK_HOUR, m_chk_kickout);
     DDX_Control(pDX, IDC_CHK_SLIENT, m_banchat);
     DDX_Control(pDX, IDC_CHK_ANTI_ADVANCE, m_chk_anti_advance);
+    DDX_DateTimeCtrl(pDX, IDC_DATETIMEPICKER1, m_oleDateTime_End);
 }
 
 BEGIN_MESSAGE_MAP(CAuthorityDlg, CDialogEx)
@@ -120,6 +148,11 @@ void CAuthorityDlg::OnBnClickedCancel()
 
 void CAuthorityDlg::OnBnClickedBtnGenerate()
 {
+    UpdateData(TRUE);
+    base::Time endTime;
+    OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
+    uint64 expiretime = endTime.ToInternalValue();
+    
     CString csUserid = L"0";
     m_edit_userid.GetWindowTextW(csUserid);
     CString csRoomid = L"0";
@@ -139,6 +172,7 @@ void CAuthorityDlg::OnBnClickedBtnGenerate()
     authority.kickout = kickout;
     authority.banchat = banchat;
     authority.antiadvance = antiadvance;
+    authority.expiretime = expiretime;
 
     if (!authorityHelper.Save(authority))
         return;
@@ -167,4 +201,13 @@ void CAuthorityDlg::OnBnClickedBtnView()
     m_chk_kickout.SetCheck(authority.kickout);
     m_banchat.SetCheck(authority.banchat);
     m_chk_anti_advance.SetCheck(authority.antiadvance);
+    uint64 expiretime = authority.expiretime;
+
+    base::Time endTime;
+    endTime = base::Time::FromInternalValue(expiretime);
+    base::Time::Exploded exploded;
+    endTime.LocalExplode(&exploded);
+    m_oleDateTime_End.SetDate(
+        exploded.year, exploded.month, exploded.day_of_month);
+    UpdateData(FALSE);
 }
