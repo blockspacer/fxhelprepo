@@ -17,7 +17,8 @@
 namespace
 {
 static int threadindex = 0;
-const char* targetip = "42.62.68.50";
+//const char* targetip = "42.62.68.50";
+const char* targetip = "114.54.2.205";
 const uint16 port843 = 843;
 const uint16 port8080 = 8080;
 struct cmd201package
@@ -458,6 +459,7 @@ void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid,
     if (repeatingTimer_.IsRunning())
         repeatingTimer_.Stop();
     
+    GiftNotifyManager::DoSendHeartBeat();
     // 默认是每10秒发送一次心跳
     repeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10), this,
         &GiftNotifyManager::DoSendHeartBeat);
@@ -469,7 +471,7 @@ void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid,
 void GiftNotifyManager::DoSendHeartBeat()
 {
     std::string heartbeat = "HEARTBEAT_REQUEST";
-    heartbeat.append("\r\n");
+    heartbeat.append("\n");
     std::vector<char> heardbeadvec;
     heardbeadvec.assign(heartbeat.begin(), heartbeat.end());
     tcpClient_8080_->Send(heardbeadvec);
