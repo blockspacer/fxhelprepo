@@ -171,7 +171,7 @@ bool CommandHandle_602(const Json::Value& jvalue, std::string* outmsg)
         uint32 addtime = GetInt32FromJsonValue(content, "addTime");
         uint32 istop = GetInt32FromJsonValue(content, "istop");
 
-        *outmsg = base::WideToUTF8(L"头条信息和次头条信息");
+        *outmsg = base::WideToUTF8(L"头条信息和跑道信息");
     }
     catch (...)
     {
@@ -224,6 +224,7 @@ GiftNotifyManager::GiftNotifyManager()
     :tcpClient_843_(new TcpClient),
     tcpClient_8080_(new TcpClient),
     notify201_(nullptr),
+    notify501_(nullptr),
     notify601_(nullptr),
     baseThread_("NetworkHelperThread" + base::IntToString(threadindex))
 {
@@ -254,6 +255,11 @@ void GiftNotifyManager::Finalize()
 void GiftNotifyManager::SetNotify201(Notify201 notify201)
 {
     notify201_ = notify201;
+}
+
+void GiftNotifyManager::SetNotify501(Notify201 notify501)
+{
+    notify501_ = notify501;
 }
 
 void GiftNotifyManager::SetNotify601(Notify601 notify601)

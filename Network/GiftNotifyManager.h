@@ -42,6 +42,7 @@ struct RoomGiftInfo601
 
 typedef std::function<void(const RoomGiftInfo601& roomgiftinfo)> Notify601;
 typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify201;
+typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify501;
 
 typedef std::function<void(const std::wstring& data)> NormalNotify;
 class GiftNotifyManager 
@@ -58,6 +59,7 @@ public:
     void Finalize();
 
     void SetNotify201(Notify201 notify201);
+    void SetNotify501(Notify501 notify201);
     void SetNotify601(Notify601 notify601);
     void SetNormalNotify(NormalNotify normalNotify);
 
@@ -118,6 +120,7 @@ private:
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
     Notify201 notify201_;
+    Notify501 notify501_;
     Notify601 notify601_;
     NormalNotify normalNotify_;
 };

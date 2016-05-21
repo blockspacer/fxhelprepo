@@ -274,7 +274,7 @@ void CFanXingDlg::OnBnClickedButtonLogin()
     CString password;
     GetDlgItemText(IDC_EDIT_Username, username);
     GetDlgItemText(IDC_EDIT_Password, password);
-    bool remember = m_check_remember.GetCheck();
+    bool remember = !!m_check_remember.GetCheck();
 
     // 测试通过的curl登录方式
     bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
@@ -302,7 +302,10 @@ void CFanXingDlg::OnBnClickedButtonNav()
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
 
     network_->SetNotify201(
-        std::bind(&CFanXingDlg::Notify201, this, std::placeholders::_1));
+        std::bind(&CFanXingDlg::NotifyEnterRoom, this, std::placeholders::_1));
+
+    network_->SetNotify501(
+        std::bind(&CFanXingDlg::NotifyEnterRoom, this, std::placeholders::_1));
 
     bool result = network_->EnterRoom(strRoomid.GetBuffer());
     std::wstring message = std::wstring(L"Enter room ") + (result ? L"success" : L"failed");
@@ -356,7 +359,7 @@ void CFanXingDlg::Notify(const std::wstring& message)
     this->PostMessage(WM_USER_01, 0, 0);
 }
 
-void CFanXingDlg::Notify201(const RowData& rowdata)
+void CFanXingDlg::NotifyEnterRoom(const RowData& rowdata)
 {
     // 发送数据给窗口
     viewerRowdataMutex_.lock();

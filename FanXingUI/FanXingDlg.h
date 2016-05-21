@@ -82,7 +82,7 @@ protected:
 
 private:
     void Notify(const std::wstring& message);
-    void Notify201(const RowData& rowdata);
+    void NotifyEnterRoom(const RowData& rowdata);
     bool LoginByRequest(const std::wstring& username, const std::wstring& password);
 	bool GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
     bool GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);

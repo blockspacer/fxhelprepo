@@ -84,6 +84,16 @@ void NetworkHelper::RemoveNotify201()
     notify201_ = nullptr;
 }
 
+void NetworkHelper::SetNotify501(notify501 fn)
+{
+    notify501_ = fn;
+}
+
+void NetworkHelper::RemoveNotify501()
+{
+    notify501_ = nullptr;
+}
+
 void NetworkHelper::SetNotify502(notify502 fn)
 {
     notify502_ = fn;
@@ -162,6 +172,10 @@ bool NetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
 
     giftNotifyManager_->SetNotify201(
         std::bind(&NetworkHelper::NotifyCallback201,
+        this, std::placeholders::_1));
+
+    giftNotifyManager_->SetNotify501(
+        std::bind(&NetworkHelper::NotifyCallback501,
         this, std::placeholders::_1));
 
     giftNotifyManager_->SetNotify601(
@@ -307,3 +321,14 @@ void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo
     RowData rowdata = EnterRoomUserInfoToRowdata(enterRoomUserInfo);
     notify201_(rowdata);
 }
+
+void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    if (!notify501_)
+        return;
+
+    enterRoomUserInfoMap_[enterRoomUserInfo.userid] = enterRoomUserInfo;
+    RowData rowdata = EnterRoomUserInfoToRowdata(enterRoomUserInfo);
+    notify501_(rowdata);
+}
+

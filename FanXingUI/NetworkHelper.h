@@ -21,6 +21,7 @@ typedef std::function<void(const std::wstring&)> notifyfn;
 typedef std::vector<std::wstring> RowData;
 typedef std::vector<RowData> GridData;
 typedef std::function<void(const RowData&)> notify201;
+typedef std::function<void(const RowData&)> notify501;
 typedef std::function<void(uint32,const std::wstring&)> notify502;
 typedef std::function<void(const RoomGiftInfo601&, const GiftInfo&)> notify601;
 
@@ -38,6 +39,9 @@ public:
 
     void SetNotify201(notify201 fn);
     void RemoveNotify201();
+
+    void SetNotify501(notify501 fn);
+    void RemoveNotify501();
 
     void SetNotify502(notify502 fn);
     void RemoveNotify502();
@@ -75,6 +79,7 @@ private:
     void NotifyCallback(const std::wstring& message);
     void NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo);
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
+    void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo);
 
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
                                const std::string& nickname,
@@ -89,6 +94,7 @@ private:
     std::map<uint32, EnterRoomUserInfo> enterRoomUserInfoMap_;
     notifyfn notify_;
     notify201 notify201_;
+    notify201 notify501_;
     notify502 notify502_;
     notify601 notify601_;
     uint32 roomid_ = 0;
