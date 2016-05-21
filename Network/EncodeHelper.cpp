@@ -388,7 +388,7 @@ std::string RSADecryptString(std::istream* privFilename, const std::string& ciph
     std::string decrypted;
     std::string part = ciphertext;
     auto pos = 0;
-    int maxcipher = 256;
+    uint32 maxcipher = 256;
     while (part.length() > maxcipher)
     {
         std::string temp = ciphertext.substr(pos, maxcipher);
@@ -426,7 +426,7 @@ std::string RSAEncryptString(std::istream* pubFilename, const std::string& messa
     std::string ciphertext;
     std::string part = message;
     auto pos = 0;
-    int maxplain = 86;
+    uint32 maxplain = 86;
     while (part.length() > maxplain)
     {
         std::string temp = message.substr(pos, maxplain);

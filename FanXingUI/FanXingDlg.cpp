@@ -9,6 +9,7 @@
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
+#include "Config.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
 
@@ -191,6 +192,22 @@ BOOL CFanXingDlg::OnInitDialog()
     for (const auto& it : blackcolumnlist)
         m_ListCtrl_Blacks.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
 
+    // 初始化保存数据
+    Config config;
+    bool remember = config.GetRemember();
+    if (remember)
+    {
+        m_check_remember.SetCheck(remember);
+        std::wstring username,password;
+        config.GetUserName(&username);
+        config.GetPassword(&password);
+        SetDlgItemText(IDC_EDIT_Username, username.c_str());
+        SetDlgItemText(IDC_EDIT_Password, password.c_str());
+    }
+
+    std::wstring roomid;
+    config.GetRoomid(&roomid);
+    SetDlgItemText(IDC_EDIT_NAV, roomid.c_str());
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -257,10 +274,17 @@ void CFanXingDlg::OnBnClickedButtonLogin()
     CString password;
     GetDlgItemText(IDC_EDIT_Username, username);
     GetDlgItemText(IDC_EDIT_Password, password);
+    bool remember = m_check_remember.GetCheck();
 
     // 测试通过的curl登录方式
     bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
     std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
+    if (result)
+    {
+        Config config;
+        config.SaveUserInfo(username.GetBuffer(), password.GetBuffer(), remember);
+    }
+    
     Notify(message);
 }
 
@@ -280,7 +304,13 @@ void CFanXingDlg::OnBnClickedButtonNav()
     network_->SetNotify201(
         std::bind(&CFanXingDlg::Notify201, this, std::placeholders::_1));
 
-    network_->EnterRoom(strRoomid.GetBuffer());
+    bool result = network_->EnterRoom(strRoomid.GetBuffer());
+    std::wstring message = std::wstring(L"Enter room ") + (result ? L"success" : L"failed");
+    if (result)
+    {
+        Config config;
+        config.SaveRoomId(strRoomid.GetBuffer());
+    }
 }
 
 // 送星星功能
