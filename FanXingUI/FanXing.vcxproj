@@ -114,10 +114,8 @@
     <ClInclude Include="AuthorityHelper.h" />
     <ClInclude Include="BlacklistHelper.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="DlgGiftNotify.h" />
     <ClInclude Include="FanXing.h" />
     <ClInclude Include="FanXingDlg.h" />
-    <ClInclude Include="GiftInfoHelper.h" />
     <ClInclude Include="NetworkHelper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -127,10 +125,8 @@
     <ClCompile Include="AuthorityHelper.cpp" />
     <ClCompile Include="BlacklistHelper.cpp" />
     <ClCompile Include="Config.cpp" />
-    <ClCompile Include="DlgGiftNotify.cpp" />
     <ClCompile Include="FanXingUI.cpp" />
     <ClCompile Include="FanXingDlg.cpp" />
-    <ClCompile Include="GiftInfoHelper.cpp" />
     <ClCompile Include="NetworkHelper.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

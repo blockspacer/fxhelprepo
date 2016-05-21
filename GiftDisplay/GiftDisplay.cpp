@@ -1,10 +1,9 @@
 
-// FanXing.cpp : 定义应用程序的类行为。
+// GiftDisplay.cpp : 定义应用程序的类行为。
 //
 
 #include "stdafx.h"
 #include <memory>
-
 #undef max
 #undef min
 #include "third_party/chromium/base/path_service.h"
@@ -12,31 +11,27 @@
 #include "third_party/chromium/base/command_line.h"
 #include "third_party/chromium/base/at_exit.h"
 
-#include "FanXing.h"
-#include "FanXingDlg.h"
-#include "NetworkHelper.h"
-#include "Network/EncodeHelper.h"
+#include "GiftDisplay.h"
+#include "GiftDisplayDlg.h"
+#include "DlgGiftNotify.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-// CFanXingApp
+// CGiftDisplayApp
 
-BEGIN_MESSAGE_MAP(CFanXingApp, CWinApp)
+BEGIN_MESSAGE_MAP(CGiftDisplayApp, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 
-// CFanXingApp 构造
+// CGiftDisplayApp 构造
 
-CFanXingApp::CFanXingApp()
+CGiftDisplayApp::CGiftDisplayApp()
     :atExitManager_(nullptr)
 {
-	// 支持重新启动管理器
-	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
-
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
     atExitManager_.reset(new base::AtExitManager);
@@ -45,14 +40,14 @@ CFanXingApp::CFanXingApp()
 }
 
 
-// 唯一的一个 CFanXingApp 对象
+// 唯一的一个 CGiftDisplayApp 对象
 
-CFanXingApp theApp;
+CGiftDisplayApp theApp;
 
 
-// CFanXingApp 初始化
+// CGiftDisplayApp 初始化
 
-BOOL CFanXingApp::InitInstance()
+BOOL CGiftDisplayApp::InitInstance()
 {
 	// 如果一个运行在 Windows XP 上的应用程序清单指定要
 	// 使用 ComCtl32.dll 版本 6 或更高版本来启用可视化方式，
@@ -85,12 +80,9 @@ BOOL CFanXingApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-    CFanXingDlg dlg;
-    //CDlgGiftNotify dlg;
-    //CDlgRegister dlg;
+    CDlgGiftNotify dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
-
 	if (nResponse == IDOK)
 	{
 		// TODO:  在此放置处理何时用
@@ -118,7 +110,8 @@ BOOL CFanXingApp::InitInstance()
 	return FALSE;
 }
 
-void CFanXingApp::InitAppLog()
+
+void CGiftDisplayApp::InitAppLog()
 {
     CommandLine::Init(0, NULL);
     base::FilePath path;

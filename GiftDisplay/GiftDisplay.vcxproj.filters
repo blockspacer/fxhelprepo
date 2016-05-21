@@ -18,70 +18,58 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GiftDisplay.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="CurlWrapper.h">
+    <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="EncodeHelper.h">
+    <ClInclude Include="DlgGiftNotify.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="utf_help.h">
+    <ClInclude Include="GiftInfoHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Network.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="User.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="CookiesHelper.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="TcpClient.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Room.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="MessageNotifyManager.h">
+    <ClInclude Include="NetworkHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="GiftDisplay.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Network.cpp">
+    <ClCompile Include="DlgGiftNotify.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="dllmain.cpp">
+    <ClCompile Include="GiftInfoHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="CurlWrapper.cpp">
+    <ClCompile Include="GiftNetworkHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="EncodeHelper.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="TcpClient.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="User.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="CookiesHelper.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Room.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MessageNotifyManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GiftDisplay.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\GiftDisplay.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\GiftDisplay.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>
