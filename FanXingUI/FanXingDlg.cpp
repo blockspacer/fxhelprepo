@@ -291,6 +291,9 @@ void CFanXingDlg::OnBnClickedButtonLogin()
 //跳转页面功能
 void CFanXingDlg::OnBnClickedButtonNav()
 {
+    if (!network_)
+        return;
+    
     // 先清空原来数据
     m_ListCtrl_Viewers.DeleteAllItems();
 
@@ -319,16 +322,22 @@ void CFanXingDlg::OnBnClickedButtonNav()
 // 送星星功能
 void CFanXingDlg::OnBnClickedButtonRewarstar()
 {
+    if (!network_)
+        return;
 }
 
 // 送礼物功能
 void CFanXingDlg::OnBnClickedButtonRewardgift()
 {
+    if (!network_)
+        return;
 }
 
 // 获取公屏信息
 void CFanXingDlg::OnBnClickedBtnGetmsg()
 {
+    if (!network_)
+        return;
 }
 
 // 用来做测试的函数
@@ -385,9 +394,7 @@ bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstrin
 bool CFanXingDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
 {
 	if (!enterRoomUserInfos)
-	{
 		return false;
-	}
 
 	int count = m_ListCtrl_Viewers.GetItemCount();
 	for (int i = count - 1; i >= 0; --i)
@@ -415,9 +422,8 @@ bool CFanXingDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUser
 bool CFanXingDlg::GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
 {
     if (!enterRoomUserInfos)
-    {
         return false;
-    }
+
     int count = m_ListCtrl_Blacks.GetItemCount();
     for (int i = count - 1; i >= 0; --i)
     {
@@ -441,6 +447,9 @@ bool CFanXingDlg::KickOut_(
     const std::vector<EnterRoomUserInfo>& enterRoomUserInfos,
     KICK_TYPE kicktype)
 {
+    if (!network_)
+        return false;
+
     for (const auto& enterRoomUserInfo : enterRoomUserInfos)
     {
         std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
@@ -462,6 +471,9 @@ bool CFanXingDlg::KickOut_(
 
 bool CFanXingDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
 {
+    if (!network_)
+        return false;
+
     for (const auto& enterRoomUserInfo : enterRoomUserInfos)
     {
         std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
@@ -482,6 +494,9 @@ bool CFanXingDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserIn
 
 bool CFanXingDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
 {
+    if (!network_)
+        return false;
+
     for (const auto& enterRoomUserInfo : enterRoomUserInfos)
     {
         std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
@@ -711,6 +726,9 @@ void CFanXingDlg::OnBnClickedBtnSelectReverse()
 
 void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 {
+    if (!network_)
+        return;
+
     if (!network_->GetActionPrivilege())
     { 
         Notify(NOPRIVILEGE_NOTICE);
@@ -724,6 +742,9 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 
 void CFanXingDlg::OnBnClickedBtnKickoutHour()
 {
+    if (!network_)
+        return;
+
     if (!network_->GetActionPrivilege())
     {
         Notify(NOPRIVILEGE_NOTICE);
@@ -737,6 +758,9 @@ void CFanXingDlg::OnBnClickedBtnKickoutHour()
 
 void CFanXingDlg::OnBnClickedBtnSilent()
 {
+    if (!network_)
+        return;
+
     if (!network_->GetActionPrivilege())
     {
         Notify(NOPRIVILEGE_NOTICE);
@@ -749,6 +773,9 @@ void CFanXingDlg::OnBnClickedBtnSilent()
 
 void CFanXingDlg::OnBnClickedBtnUnsilent()
 {
+    if (!network_)
+        return;
+
     if (!network_->GetActionPrivilege())
     {
         Notify(NOPRIVILEGE_NOTICE);
@@ -775,6 +802,9 @@ void CFanXingDlg::OnBnClickedBtnClear()
 
 void CFanXingDlg::OnBnClickedBtnGetViewerList()
 {
+    if (!network_)
+        return;
+
     std::vector<RowData> enterRoomUserInfoRowdata;
     if (!network_->GetViewerList(roomid_, &enterRoomUserInfoRowdata))
     {
@@ -793,6 +823,9 @@ void CFanXingDlg::OnBnClickedBtnGetViewerList()
 
 void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
 {
+    if (!network_)
+        return;
+
     if (!network_->GetActionPrivilege())
     {
         Notify(NOPRIVILEGE_NOTICE);
@@ -806,6 +839,9 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
 
 void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
 {
+    if (!network_)
+        return;
+
     if (!network_->GetActionPrivilege())
     {
         Notify(NOPRIVILEGE_NOTICE);
@@ -819,6 +855,9 @@ void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
 
 void CFanXingDlg::OnBnClickedBtnSilentBlack()
 {
+    if (!network_)
+        return;
+
     if (!network_->GetActionPrivilege())
     {
         Notify(NOPRIVILEGE_NOTICE);
@@ -831,6 +870,9 @@ void CFanXingDlg::OnBnClickedBtnSilentBlack()
 
 void CFanXingDlg::OnBnClickedBtnUnsilentBlack()
 {
+    if (!network_)
+        return;
+
     if (!network_->GetActionPrivilege())
     {
         Notify(NOPRIVILEGE_NOTICE);
