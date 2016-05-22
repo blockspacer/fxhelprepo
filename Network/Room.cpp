@@ -140,9 +140,6 @@ bool Room::GetViewerList(const std::string& cookies,
 bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
     const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    if (clanid_ != 3783)
-        return false;
-
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
     std::string url = std::string("http://fanxing.kugou.com");
     url += "/Services.php?act=RoomService.RoomManageService&mtd=kickOut&d=";
@@ -202,8 +199,6 @@ bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
 
 bool Room::BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    if (clanid_ != 3783)
-        return false;
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
     std::string url = std::string("http://fanxing.kugou.com");
     url += "/UServices/RoomService/RoomManageService/banChat/?d=";
@@ -255,8 +250,6 @@ bool Room::BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoo
 }
 bool Room::UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    if (clanid_ != 3783)
-        return false;
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
     std::string url = std::string("http://fanxing.kugou.com");
     url += "/UServices/RoomService/RoomManageService/undoBanChat/?d=";
