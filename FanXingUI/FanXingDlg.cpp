@@ -134,6 +134,7 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_LOAD_BLACK, &CFanXingDlg::OnBnClickedBtnLoadBlack)
     ON_BN_CLICKED(IDC_BTN_ADD_TO_BLACK, &CFanXingDlg::OnBnClickedBtnAddToBlack)
     ON_BN_CLICKED(IDC_BTN_SAVE_BLACK, &CFanXingDlg::OnBnClickedBtnSaveBlack)
+    ON_BN_CLICKED(IDC_BTN_CLEAR_INFO, &CFanXingDlg::OnBnClickedBtnClearInfo)
 END_MESSAGE_MAP()
 
 
@@ -357,6 +358,25 @@ void CFanXingDlg::OnBnClickedBtnAdd()
     {
         m_ListCtrl_Viewers.SetItemText(nitem, j, rowdata[j].c_str());
     }
+}
+void CFanXingDlg::SetHScroll()
+{
+    CDC* dc = GetDC();
+    
+    CString str;
+    int index = InfoList_.GetCount() - 1;
+    if (index>=0)
+    {
+        InfoList_.GetText(index, str);
+        SIZE s = dc->GetTextExtent(str);
+        long temp = (long)SendDlgItemMessage(IDC_LIST1, LB_GETHORIZONTALEXTENT, 0, 0); //temp得到滚动条的宽度
+        if (s.cx > temp)
+        {
+            SendDlgItemMessage(IDC_LIST1, LB_SETHORIZONTALEXTENT, (WPARAM)s.cx, 0);
+        }
+    }
+
+    ReleaseDC(dc);
 }
 
 void CFanXingDlg::Notify(const std::wstring& message)
@@ -622,6 +642,7 @@ LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
     }
     
     InfoList_.SetCurSel(infoListCount_-1);
+    SetHScroll();
     return 0;
 }
 
@@ -987,4 +1008,13 @@ void CFanXingDlg::OnBnClickedBtnSaveBlack()
     }
 
     blacklistHelper_->SaveBlackList(rowdatas);
+}
+
+void CFanXingDlg::OnBnClickedBtnClearInfo()
+{
+    while (infoListCount_)
+    {
+        InfoList_.DeleteString(infoListCount_--);
+    }
+    InfoList_.DeleteString(0);
 }

@@ -81,6 +81,7 @@ protected:
     LRESULT OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam);
 
 private:
+    void SetHScroll();
     void Notify(const std::wstring& message);
     void NotifyEnterRoom(const RowData& rowdata);
     bool LoginByRequest(const std::wstring& username, const std::wstring& password);
@@ -116,4 +117,6 @@ private:
     CListCtrl m_ListCtrl_Blacks;
     std::unique_ptr<BlacklistHelper> blacklistHelper_;
 
+public:
+    afx_msg void OnBnClickedBtnClearInfo();
 };
