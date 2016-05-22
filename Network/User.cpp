@@ -117,6 +117,16 @@ uint32 User::GetServerTime() const
     return servertime_;
 }
 
+uint32 User::GetFanxingId() const
+{
+    return fanxingid_;
+}
+
+uint32 User::GetClanId() const
+{
+    return clanid_;
+}
+
 bool User::EnterRoom(uint32 roomid)
 {
     std::shared_ptr<Room> room(new Room(roomid));
@@ -207,16 +217,6 @@ bool User::GetViewerList(uint32 roomid,
     std::string cookies = cookiesHelper_->GetCookies(keys);
     bool result = room->second->GetViewerList(cookies, enterRoomUserInfo);
     return result;
-}
-
-uint32 User::GetUserClanId() const
-{
-    return clanid_;
-}
-
-uint32 User::GetFanxingId() const
-{
-    return fanxingid_;
 }
 
 bool User::KickoutUser(KICK_TYPE kicktype, uint32 roomid,

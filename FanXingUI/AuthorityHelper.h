@@ -19,5 +19,6 @@ public:
     ~AuthorityHelper();
 
     bool Load(Authority* authority);
+    bool GetAuthorityDisplayInfo(std::wstring* display);
 };
 

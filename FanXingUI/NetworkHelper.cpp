@@ -113,6 +113,22 @@ bool NetworkHelper::Login(const std::wstring& username,
     std::string strpassword = base::WideToUTF8(password);
     return user_->Login(strusername, strpassword);
 }
+bool NetworkHelper::GetCurrentUserDisplay(std::wstring* display)
+{
+    uint32 clanid = user_->GetClanId();
+    uint32 fanxingid = user_->GetFanxingId();
+    uint64 servertime = static_cast<uint64>(user_->GetServerTime());
+    if (!fanxingid || !clanid || !servertime)
+        return false;
+
+    servertime *= 1000000;
+    std::wstring loginInfo = L"登录信息: ";
+    loginInfo += L"繁星号: " + base::UintToString16(fanxingid);
+    loginInfo += L" 公会ID: " + base::UintToString16(clanid);
+    *display = loginInfo;
+    return true;
+}
+
 bool NetworkHelper::EnterRoom(const std::wstring& roomid)
 {
     std::string strroomid = base::WideToUTF8(roomid);
@@ -147,7 +163,6 @@ bool NetworkHelper::GetViewerList(uint32 roomid,
     return result;
 }
 
-
 // messageNotifyManager_ 线程回调
 void NetworkHelper::NotifyCallback(const std::wstring& message)
 {
@@ -174,22 +189,35 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
     return user_->UnbanChat(roomid, enterRoomUserInfo);
 }
 
-bool NetworkHelper::GetActionPrivilege()
+bool NetworkHelper::GetActionPrivilege(std::wstring* message)
 {
     if (user_->GetFanxingId() != authority_->userid)
+    {
+        *message = L"当前用户未授权!";
         return false;
+    }
 
     uint32 servertime = user_->GetServerTime();
     uint64 expiretime = authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
     expiretime /= 1000000;
     if (servertime > expiretime)
+    {
+        *message = L"当前用户授权已过期!";
         return false;
+    }
 
-    if (authority_->clanid && user_->GetUserClanId() != authority_->clanid)
+    if (authority_->clanid && user_->GetClanId() != authority_->clanid)
+    {
+        *message = L"当前授权仅限指定公会成员使用!";
         return false;
+    }
+
 
     if (authority_->roomid && (roomid_ != authority_->roomid))
+    {
+        *message = L"当前授权仅限指定房间使用!";
         return false;
+    }
 
     return true;
 }

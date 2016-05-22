@@ -9,6 +9,7 @@
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/files/file_enumerator.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 #include "third_party/json/json.h"
 
@@ -95,5 +96,36 @@ bool AuthorityHelper::Load(Authority* authority)
     {
         return false;
     }
+    return true;
+}
+
+bool AuthorityHelper::GetAuthorityDisplayInfo(std::wstring* display)
+{
+    Authority authority;
+    if (!Load(&authority))
+        return false;
+
+    std::wstring userid = base::UintToString16(authority.userid);
+    std::wstring roomid = base::UintToString16(authority.roomid);
+    base::Time expired = base::Time::FromInternalValue(authority.expiretime);
+    std::string expiredstr = MakeFormatDateString(expired) + " " +
+        MakeFormatTimeString(expired);
+    std::wstring expiredwstr = base::UTF8ToWide(expiredstr);
+    std::wstring clanid = base::UTF8ToWide(base::UintToString(authority.clanid));
+    *display = L"授权信息:";
+    if (authority.clanid)
+    {
+        *display += std::wstring(L" 公会ID: ") + clanid;
+    }
+    if (authority.userid)
+    {
+        *display += std::wstring(L" 繁星号: ") + userid;
+    }
+    if (authority.roomid)
+    {
+        *display += std::wstring(L" 房间号: ") + roomid;
+    }
+
+    *display += L" 到期时间: " + expiredwstr;
     return true;
 }

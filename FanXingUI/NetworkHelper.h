@@ -49,14 +49,15 @@ public:
     void SetNotify601(notify601 fn);
     void RemoveNotify601();
 
-    bool Login(const std::wstring& username, const std::wstring& password);   
+    bool Login(const std::wstring& username, const std::wstring& password);
+    bool GetCurrentUserDisplay(std::wstring* display);
     bool EnterRoom(const std::wstring& roomid);
     bool EnterRoom(uint32 roomid);
     bool GetViewerList(uint32 roomid,
         std::vector<RowData>* enterRoomUserInfoRowdata);
 
     // 判断用户是否有操作权限，暂时实现为只有公会成员才能操作。
-    bool GetActionPrivilege();
+    bool GetActionPrivilege(std::wstring* message);
 
     bool KickoutUsers(KICK_TYPE kicktype, uint32 roomid, 
         const EnterRoomUserInfo& enterRoomUserInfo);

@@ -119,4 +119,7 @@ private:
 
 public:
     afx_msg void OnBnClickedBtnClearInfo();
+    afx_msg void OnBnClickedCancel();
+    CStatic m_static_auth_info;
+    CStatic m_static_login_info;
 };

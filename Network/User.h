@@ -53,7 +53,10 @@ public:
     bool Login(const std::string& username,
         const std::string& password);
     bool Logout();
+
     uint32 GetServerTime() const;
+    uint32 GetFanxingId() const;
+    uint32 GetClanId() const;
 
     bool EnterRoom(uint32 roomid);
     bool ExitRoom(uint32 roomid);
@@ -67,8 +70,6 @@ public:
     bool GetViewerList(uint32 roomid, 
         std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
 
-    uint32 GetUserClanId() const;
-    uint32 GetFanxingId() const;
 	bool KickoutUser(KICK_TYPE kicktype, uint32 roomid, 
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
