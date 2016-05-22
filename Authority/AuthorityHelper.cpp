@@ -7,9 +7,34 @@
 #include "third_party/chromium/base/files/file.h"
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_enumerator.h"
 #include "third_party/json/json.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
+namespace
+{
+    bool GetEncrptyFileName(base::FilePath* outpath)
+    {
+        base::FilePath path;
+        PathService::Get(base::DIR_EXE, &path);
+
+        base::FileEnumerator fileEnumerator(path, false,
+            base::FileEnumerator::FILES, FILE_PATH_LITERAL("Authority*.auth"));
+
+        base::FilePath filepath = fileEnumerator.Next();
+        while (!filepath.value().empty())
+        {
+            std::wstring basename = filepath.BaseName().value();
+            if (basename.find(L"Authority") == 0)
+            {
+                *outpath = filepath;
+                return true;
+            }
+            filepath = fileEnumerator.Next();
+        }
+        return false;
+    }
+}
 AuthorityHelper::AuthorityHelper()
 {
 }
@@ -23,7 +48,9 @@ bool AuthorityHelper::Load(Authority* authority)
 {
     base::FilePath dirPath;
     bool result = PathService::Get(base::DIR_EXE, &dirPath);
-    base::FilePath pathname = dirPath.Append(L"Authority_.auth");
+    base::FilePath pathname;
+    if (!GetEncrptyFileName(&pathname))
+        return false;
 
     std::ifstream cipherifs;
     cipherifs.open(pathname.value());
@@ -88,9 +115,9 @@ bool AuthorityHelper::Save(const Authority& authority)
     std::string ciphertext = RSAEncryptString(&ifs, writestring);
 
     std::wstring Authorityfilename = L"Authority_";
-    //filename += base::UintToString16(authority.userid) + L"_";
-    //filename += base::UintToString16(authority.roomid) + L"_";
-    //filename += base::UintToString16(authority.clanid) + L"_";
+    Authorityfilename += base::UintToString16(authority.userid) + L"_";
+    Authorityfilename += base::UintToString16(authority.roomid) + L"_";
+    Authorityfilename += base::UintToString16(authority.clanid);
     //filename += base::UintToString16(authority.kickout) + L"_";
     //filename += base::UintToString16(authority.banchat) + L"_";
     //filename += base::UintToString16(authority.antiadvance);
