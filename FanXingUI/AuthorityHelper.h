@@ -10,6 +10,7 @@ struct Authority
     uint32 banchat = 0;
     uint32 antiadvance = 0;
     uint64 expiretime = 0;
+    std::string serverip = "192.168.0.1";
 };
 
 class AuthorityHelper

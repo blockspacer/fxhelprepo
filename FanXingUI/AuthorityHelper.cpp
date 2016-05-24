@@ -91,6 +91,7 @@ bool AuthorityHelper::Load(Authority* authority)
         authority->antiadvance = GetInt32FromJsonValue(root, "antiadvance");
         std::string expire = root.get("expiretime", "0").asString();
         base::StringToUint64(expire, &authority->expiretime);
+        authority->serverip = root.get("serverip", "").asString();
     }
     catch (...)
     {

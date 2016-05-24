@@ -22,6 +22,11 @@ Room::~Room()
     messageNotifyManager_->Finalize();
 }
 
+void Room::SetServerIp(const std::string& serverip)
+{
+    messageNotifyManager_->SetServerIp(serverip);
+}
+
 bool Room::Enter(const std::string& cookies, const std::string& usertoken, uint32 userid)
 {
     //uint32 userid = 0;

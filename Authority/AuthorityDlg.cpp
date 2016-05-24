@@ -64,6 +64,7 @@ void CAuthorityDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_SLIENT, m_banchat);
     DDX_Control(pDX, IDC_CHK_ANTI_ADVANCE, m_chk_anti_advance);
     DDX_DateTimeCtrl(pDX, IDC_DATETIMEPICKER1, m_oleDateTime_End);
+    DDX_Control(pDX, IDC_EDIT_SERVER_IP, m_edit_serverip);
 }
 
 BEGIN_MESSAGE_MAP(CAuthorityDlg, CDialogEx)
@@ -90,7 +91,7 @@ BOOL CAuthorityDlg::OnInitDialog()
 	ShowWindow(SW_NORMAL);
 
 	// TODO:  在此添加额外的初始化代码
-
+    m_edit_serverip.SetWindowTextW(L"42.62.68.50");
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -159,6 +160,8 @@ void CAuthorityDlg::OnBnClickedBtnGenerate()
     m_edit_roomid.GetWindowTextW(csRoomid);
     CString csClanid = L"0";
     m_edit_clanid.GetWindowTextW(csClanid);
+    CString csServerIp = L"0";
+    m_edit_serverip.GetWindowTextW(csServerIp);
 
     int kickout = m_chk_kickout.GetCheck();
     int banchat = m_banchat.GetCheck();
@@ -173,6 +176,7 @@ void CAuthorityDlg::OnBnClickedBtnGenerate()
     authority.banchat = banchat;
     authority.antiadvance = antiadvance;
     authority.expiretime = expiretime;
+    authority.serverip = base::WideToUTF8(csServerIp.GetBuffer());
 
     if (!authorityHelper.Save(authority))
         return;

@@ -292,6 +292,10 @@ void CFanXingDlg::OnBnClickedButtonLogin()
     std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
     if (result)
     {
+        std::wstring displayinfo;
+        network_->GetCurrentUserDisplay(&displayinfo);
+        m_static_login_info.SetWindowTextW(displayinfo.c_str());
+
         Config config;
         config.SaveUserInfo(username.GetBuffer(), password.GetBuffer(), remember);
     }
@@ -419,9 +423,6 @@ bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstrin
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
     
     bool result = network_->Login(username, password);
-    std::wstring displayinfo;
-    network_->GetCurrentUserDisplay(&displayinfo);
-    m_static_login_info.SetWindowTextW(displayinfo.c_str());
     return result;
 }
 

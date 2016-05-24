@@ -42,4 +42,5 @@ public:
     CButton m_banchat;
     CButton m_chk_anti_advance;
     COleDateTime m_oleDateTime_End;
+    CEdit m_edit_serverip;
 };

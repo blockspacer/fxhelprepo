@@ -474,6 +474,9 @@ void MessageNotifyManager::DoConnect843()
     data.assign(str.begin(), str.end());
     data.push_back(0);
     tcpClient_843_->Send(data);
+    std::vector<char> responsedata;
+    tcpClient_843_->Recv(&responsedata);
+    tcpClient_843_->Finalize();
 }
 
 bool MessageNotifyManager::Connect8080(uint32 roomid, uint32 userid,
@@ -511,7 +514,7 @@ void MessageNotifyManager::DoConnect8080(uint32 roomid, uint32 userid,
     if (repeatingTimer_.IsRunning())
         repeatingTimer_.Stop();
     
-    MessageNotifyManager::DoSendHeartBeat();
+    //MessageNotifyManager::DoSendHeartBeat();
     // 默认是每10秒发送一次心跳
     repeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10), this,
         &MessageNotifyManager::DoSendHeartBeat);
@@ -573,9 +576,9 @@ void MessageNotifyManager::DoSendHeartBeat()
 {
     std::string heartbeat = "HEARTBEAT_REQUEST";
     heartbeat.append("\n");
-    std::vector<char> heardbeadvec;
-    heardbeadvec.assign(heartbeat.begin(), heartbeat.end());
-    tcpClient_8080_->Send(heardbeadvec);
+    std::vector<char> heardbeatvec;
+    heardbeatvec.assign(heartbeat.begin(), heartbeat.end());
+    tcpClient_8080_->Send(heardbeatvec);
     if (normalNotify_)
     {
         normalNotify_(L"Send Heartbeat");

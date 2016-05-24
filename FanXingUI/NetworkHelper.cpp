@@ -47,6 +47,8 @@ bool NetworkHelper::Initialize()
 
     AuthorityHelper authorityHelper;
     bool result = authorityHelper.Load(authority_.get());
+    assert(!authority_->serverip.empty());
+    user_->SetServerIp(authority_->serverip);
     return result;
 }
 
@@ -118,7 +120,10 @@ bool NetworkHelper::GetCurrentUserDisplay(std::wstring* display)
     uint32 clanid = user_->GetClanId();
     uint32 fanxingid = user_->GetFanxingId();
     uint64 servertime = static_cast<uint64>(user_->GetServerTime());
-    if (!fanxingid || !clanid || !servertime)
+    if (!fanxingid && !clanid)
+        return false;
+
+    if (!servertime)
         return false;
 
     servertime *= 1000000;

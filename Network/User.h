@@ -44,6 +44,8 @@ public:
     void SetCookies(const std::vector<std::string> cookies);
     std::vector<std::string> GetCookies() const;
 
+    void SetServerIp(const std::string& serverip);
+
     //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
@@ -84,6 +86,7 @@ private:
     bool LoginIndexServiceGetUserCenter();
     std::string username_;
     std::string password_;
+    std::string serverip_;
 
     // 登录后才能获得的用户信息
     uint32 kugouid_ = 0;

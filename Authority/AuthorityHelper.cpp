@@ -83,6 +83,7 @@ bool AuthorityHelper::Load(Authority* authority)
     authority->kickout = GetInt32FromJsonValue(rootdata, "kickout");
     authority->banchat = GetInt32FromJsonValue(rootdata, "banchat");
     authority->antiadvance = GetInt32FromJsonValue(rootdata, "antiadvance");
+    authority->serverip = rootdata.get("serverip", "").asString();
     std::string expire = rootdata.get("expiretime", "0").asString();
     base::StringToUint64(expire, &authority->expiretime);
 
@@ -99,6 +100,7 @@ bool AuthorityHelper::Save(const Authority& authority)
     root["banchat"] = authority.banchat;
     root["antiadvance"] = authority.antiadvance;
     root["expiretime"] = base::Uint64ToString(authority.expiretime);
+    root["serverip"] = authority.serverip;
 
     std::string writestring = writer.write(root);
 

@@ -64,6 +64,11 @@ std::vector<std::string> User::GetCookies() const
     return std::vector<std::string>();
 }
 
+void User::SetServerIp(const std::string& serverip)
+{
+    serverip_ = serverip;
+}
+
 //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
 void User::SetNormalNotify(NormalNotify normalNotify)
 {
@@ -130,6 +135,7 @@ uint32 User::GetClanId() const
 bool User::EnterRoom(uint32 roomid)
 {
     std::shared_ptr<Room> room(new Room(roomid));
+    room->SetServerIp(serverip_);
     std::vector<std::string> keys;
     keys.push_back("_fx_coin");
     keys.push_back("_fx_user");
