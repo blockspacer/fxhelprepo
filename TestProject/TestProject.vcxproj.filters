@@ -24,12 +24,24 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="TcpProxyClient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TestProject.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RSATest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BatchLoginTest.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpProxyClient.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

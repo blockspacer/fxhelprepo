@@ -13,6 +13,8 @@ TcpClient::~TcpClient()
 
 bool TcpClient::Initialize()
 {
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
     return true;
 }
 
@@ -54,7 +56,7 @@ bool TcpClient::Connect(const std::string& ip, unsigned short port)
     rc = connect(socket_, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
     if (SOCKET_ERROR == rc)
     {
-        assert(false);
+        int error = WSAGetLastError();
         return false;
     }
     

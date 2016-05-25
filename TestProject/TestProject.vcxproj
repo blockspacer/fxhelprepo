@@ -90,9 +90,13 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TcpProxyClient.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BatchLoginTest.cpp" />
+    <ClCompile Include="RSATest.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TcpProxyClient.cpp" />
     <ClCompile Include="TestProject.cpp" />
   </ItemGroup>
   <ItemGroup>
