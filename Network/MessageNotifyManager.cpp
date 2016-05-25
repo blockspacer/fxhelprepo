@@ -589,7 +589,13 @@ void MessageNotifyManager::DoRecv()
 {
     std::vector<char> buffer;
     if (!tcpClient_8080_->Recv(&buffer))
+    {
+        if (repeatingTimer_.IsRunning())
+            repeatingTimer_.Stop();
+        tcpClient_8080_->Finalize();
+        normalNotify_(L"Tcp Break Error!");
         return;// 如果返回错误，结束流程
+    }
 
     baseThread_.message_loop()->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoRecv, this));
