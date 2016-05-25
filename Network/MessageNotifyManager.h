@@ -42,22 +42,24 @@ struct RoomGiftInfo601
 
 typedef std::function<void(const RoomGiftInfo601& roomgiftinfo)> Notify601;
 typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify201;
+typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify501;
 
 typedef std::function<void(const std::wstring& data)> NormalNotify;
-class GiftNotifyManager 
-    : public std::enable_shared_from_this <GiftNotifyManager>
+class MessageNotifyManager 
+    : public std::enable_shared_from_this <MessageNotifyManager>
 {
 public:
-    GiftNotifyManager();
-    ~GiftNotifyManager();
+    MessageNotifyManager();
+    ~MessageNotifyManager();
 
     static void AddRef() {}
     static void Release() {}
 
     bool Initialize();
     void Finalize();
-
+    void SetServerIp(const std::string& serverip);
     void SetNotify201(Notify201 notify201);
+    void SetNotify501(Notify501 notify201);
     void SetNotify601(Notify601 notify601);
     void SetNormalNotify(NormalNotify normalNotify);
 
@@ -99,11 +101,20 @@ public:
     //}
     bool Connect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
 
+    bool Connect8080_NotLogin(uint32 roomid, uint32 userid, const std::string& nickname,
+        uint32 richlevel, uint32 ismaster, uint32 staruserid,
+        const std::string& key, const std::string& ext);
+
 private:
 
     void DoConnect843();
     void DoConnect8080(uint32 roomid, uint32 userid,
         const std::string& usertoken);
+
+    void DoConnect8080_NotLogin(uint32 roomid, uint32 userid, const std::string& nickname,
+        uint32 richlevel, uint32 ismaster, uint32 staruserid,
+        const std::string& key, const std::string& ext);
+
     void DoSendHeartBeat();
     void DoRecv();
 
@@ -111,13 +122,15 @@ private:
     std::vector<std::string> HandleMixPackage(const std::string& package);
 
     base::Thread baseThread_;
-    base::RepeatingTimer<GiftNotifyManager> repeatingTimer_;
+    base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;
+    std::string serverip_ = "192.168.0.1";
     std::string Packet_ = "";
     int position_ = 0;
 
     std::unique_ptr<TcpClient> tcpClient_8080_;
     std::unique_ptr<TcpClient> tcpClient_843_;
     Notify201 notify201_;
+    Notify501 notify501_;
     Notify601 notify601_;
     NormalNotify normalNotify_;
 };

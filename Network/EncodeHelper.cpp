@@ -10,6 +10,50 @@
 #include "third_party/chromium/base/strings/string_piece.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
+#include "third_party/cryptopp/cryptlib.h"
+#include "third_party/cryptopp/rsa.h"
+#include "third_party/cryptopp/aes.h"
+#include "third_party/cryptopp/modes.h"
+#include "third_party/cryptopp/filters.h"
+#include "third_party/cryptopp/files.h"
+#include "third_party/cryptopp/hex.h"
+#include "third_party/cryptopp/randpool.h"
+
+namespace
+{
+    static CryptoPP::OFB_Mode<CryptoPP::AES>::Encryption s_globalRNG;
+
+    CryptoPP::RandomNumberGenerator & GlobalRNG()
+    {
+        return s_globalRNG;
+    }
+
+    std::string RSADecryptString_(std::istream* privFilename, const std::string& ciphertext)
+    {
+        using namespace CryptoPP;
+        FileSource privFile(*privFilename, true, new HexDecoder);
+        RSAES_OAEP_SHA_Decryptor priv(privFile);
+
+        std::string result;
+        StringSource(ciphertext.c_str(), true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
+        return result;
+    }
+
+
+    std::string RSAEncryptString_(std::istream* pubFilename, const std::string& seed, const std::string& message)
+    {
+        using namespace CryptoPP;
+        FileSource pubFile(*pubFilename, true, new HexDecoder);
+        RSAES_OAEP_SHA_Encryptor pub(pubFile);
+
+        RandomPool randPool;
+        randPool.IncorporateEntropy((byte *)seed.c_str(), seed.length());
+
+        std::string result;
+        StringSource(message, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
+        return result;
+    }
+}
 static const wchar_t HEX[] = L"0123456789abcdef";
 std::wstring BinToHex(const void* bin, int len)
 {
@@ -329,4 +373,75 @@ double GetDoubleFromJsonValue(const Json::Value& jvalue, const std::string& name
 	}
 
 	return ret;
+}
+
+std::string RSADecryptString(std::istream* privFilename, const std::string& ciphertext)
+{
+    std::string seed = CryptoPP::IntToString(time(NULL));
+    seed.resize(16);
+    s_globalRNG.SetKeyWithIV((byte *)seed.data(), 16, (byte *)seed.data());
+
+    using namespace CryptoPP;
+    FileSource privFile(*privFilename, true, new HexDecoder);
+    RSAES_OAEP_SHA_Decryptor priv(privFile);
+
+    std::string decrypted;
+    std::string part = ciphertext;
+    auto pos = 0;
+    uint32 maxcipher = 256;
+    while (part.length() > maxcipher)
+    {
+        std::string temp = ciphertext.substr(pos, maxcipher);
+        std::string result;
+        StringSource(temp.c_str(), true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
+        decrypted += result;
+        pos += maxcipher;
+        part = ciphertext.substr(pos);
+    }
+
+    if (!part.empty())
+    {
+        std::string result;
+        StringSource(part.c_str(), true, new HexDecoder(new PK_DecryptorFilter(GlobalRNG(), priv, new StringSink(result))));
+        decrypted += result;
+    }
+
+    return decrypted;
+}
+
+std::string RSAEncryptString(std::istream* pubFilename, const std::string& message)
+{
+    std::string seed = CryptoPP::IntToString(time(NULL));
+    seed.resize(16);
+    s_globalRNG.SetKeyWithIV((byte *)seed.data(), 16, (byte *)seed.data());
+
+
+    using namespace CryptoPP;
+    FileSource pubFile(*pubFilename, true, new HexDecoder);
+    RSAES_OAEP_SHA_Encryptor pub(pubFile);
+
+    RandomPool randPool;
+    randPool.IncorporateEntropy((byte *)seed.c_str(), seed.length());
+
+    std::string ciphertext;
+    std::string part = message;
+    auto pos = 0;
+    uint32 maxplain = 86;
+    while (part.length() > maxplain)
+    {
+        std::string temp = message.substr(pos, maxplain);
+        std::string result;
+        StringSource(temp, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
+        ciphertext += result;
+        pos += maxplain;
+        part = message.substr(pos);
+    }
+
+    if (!part.empty())
+    {
+        std::string result;
+        StringSource(part, true, new PK_EncryptorFilter(randPool, pub, new HexEncoder(new StringSink(result))));
+        ciphertext += result;
+    }
+    return ciphertext;
 }

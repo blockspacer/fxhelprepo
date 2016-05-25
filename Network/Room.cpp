@@ -1,7 +1,6 @@
 #include "Room.h"
 #include "CurlWrapper.h"
-#include "FanXingUI/GiftInfoHelper.h"
-#include "GiftNotifyManager.h"
+#include "MessageNotifyManager.h"
 #include "CookiesHelper.h"
 #include "EncodeHelper.h"
 
@@ -11,16 +10,21 @@
 Room::Room(uint32 roomid)
     :roomid_(roomid)
     , curlWrapper_(new CurlWrapper)
-    , giftNotifyManager_(new GiftNotifyManager)
+    , messageNotifyManager_(new MessageNotifyManager)
     , cookiesHelper_(new CookiesHelper)
 {
-    giftNotifyManager_->Initialize();
+    messageNotifyManager_->Initialize();
 }
 
 
 Room::~Room()
 {
-    giftNotifyManager_->Finalize();
+    messageNotifyManager_->Finalize();
+}
+
+void Room::SetServerIp(const std::string& serverip)
+{
+    messageNotifyManager_->SetServerIp(serverip);
 }
 
 bool Room::Enter(const std::string& cookies, const std::string& usertoken, uint32 userid)
@@ -61,7 +65,7 @@ bool Room::Enter(const std::string& cookies, const std::string& usertoken, uint3
 
 bool Room::Exit()
 {
-    giftNotifyManager_->Finalize();
+    messageNotifyManager_->Finalize();
     return true;
 }
 
@@ -141,9 +145,6 @@ bool Room::GetViewerList(const std::string& cookies,
 bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
     const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    if (clanid_ != 3783)
-        return false;
-
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
     std::string url = std::string("http://fanxing.kugou.com");
     url += "/Services.php?act=RoomService.RoomManageService&mtd=kickOut&d=";
@@ -203,8 +204,6 @@ bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
 
 bool Room::BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    if (clanid_ != 3783)
-        return false;
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
     std::string url = std::string("http://fanxing.kugou.com");
     url += "/UServices/RoomService/RoomManageService/banChat/?d=";
@@ -256,8 +255,6 @@ bool Room::BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoo
 }
 bool Room::UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    if (clanid_ != 3783)
-        return false;
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
     std::string url = std::string("http://fanxing.kugou.com");
     url += "/UServices/RoomService/RoomManageService/undoBanChat/?d=";
@@ -310,12 +307,12 @@ bool Room::UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterR
 
 void Room::SetNormalNotify(NormalNotify normalNotify)
 {
-    giftNotifyManager_->SetNormalNotify(normalNotify);
+    messageNotifyManager_->SetNormalNotify(normalNotify);
 }
 
 void Room::SetNotify201(Notify201 notify201)
 {
-    giftNotifyManager_->SetNotify201(notify201);
+    messageNotifyManager_->SetNotify201(notify201);
 }
 
 bool Room::OpenRoom(const std::string& cookies)
@@ -555,22 +552,22 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     const std::string& usertoken)
 {
     bool ret = false;
-    ret = giftNotifyManager_->Connect843();
+    ret = messageNotifyManager_->Connect843();
     assert(ret);
 
     // 多用户版本不需要处理信息回调
-    //giftNotifyManager_->SetNotify201(
+    //messageNotifyManager_->SetNotify201(
     //    std::bind(&NetworkHelper::NotifyCallback201,
     //    this, std::placeholders::_1));
 
-    //giftNotifyManager_->SetNotify601(
+    //messageNotifyManager_->SetNotify601(
     //    std::bind(&NetworkHelper::NotifyCallback601,
     //    this, roomid, staruserid, std::placeholders::_1));
 
-    //giftNotifyManager_->SetNormalNotify(
+    //messageNotifyManager_->SetNormalNotify(
     //    std::bind(&NetworkHelper::NotifyCallback,
     //    this, std::placeholders::_1));
 
-    ret = giftNotifyManager_->Connect8080(roomid, userid, usertoken);
+    ret = messageNotifyManager_->Connect8080(roomid, userid, usertoken);
     return ret;
 }

@@ -1,4 +1,4 @@
-#include "GiftNotifyManager.h"
+#include "MessageNotifyManager.h"
 #include <assert.h>
 
 #include "TcpClient.h"
@@ -18,6 +18,7 @@ namespace
 {
 static int threadindex = 0;
 const char* targetip = "42.62.68.50";
+//const char* targetip = "114.54.2.205";
 const uint16 port843 = 843;
 const uint16 port8080 = 8080;
 struct cmd201package
@@ -40,6 +41,45 @@ bool GetFirstPackage(const cmd201package& package,
     root["roomid"] = package.roomid;
     root["kugouid"] = package.userid;
     root["token"] = package.usertoken;
+    root["appid"] = 1010;
+    std::string data = writer.write(root);
+    packagedata->assign(data.begin(), data.end());
+
+    return true;
+}
+
+struct cmd201package_notlogin
+{
+    uint32 cmd;
+    uint32 roomid;
+    uint32 userid;
+    std::string nickname;
+    uint32 richlevel;
+    uint32 ismaster;
+    uint32 staruserid;
+    std::string key;
+    uint32 keytime;
+    std::string ext;
+};
+
+bool GetFirstPackage_NotLogin(const cmd201package_notlogin& package,
+    std::vector<uint8> *packagedata)
+{
+    // 10位的时间截
+    //uint32 nowtime = static_cast<uint32>(base::Time::Now().ToDoubleT());
+
+    Json::FastWriter writer;
+    Json::Value root(Json::objectValue);
+    root["cmd"] = package.cmd;
+    root["roomid"] = package.roomid;
+    root["userid"] = package.userid;
+    root["nickname"] = package.nickname;
+    root["richlevel"] = package.richlevel;
+    root["ismaster"] = package.ismaster;
+    root["staruserid"] = package.staruserid;
+    root["key"] = package.key;
+    root["keytime"] = package.keytime;
+    root["ext"] = package.ext;
     root["appid"] = 1010;
     std::string data = writer.write(root);
     packagedata->assign(data.begin(), data.end());
@@ -170,7 +210,7 @@ bool CommandHandle_602(const Json::Value& jvalue, std::string* outmsg)
         uint32 addtime = GetInt32FromJsonValue(content, "addTime");
         uint32 istop = GetInt32FromJsonValue(content, "istop");
 
-        *outmsg = base::WideToUTF8(L"头条信息和次头条信息");
+        *outmsg = base::WideToUTF8(L"头条信息和跑道信息");
     }
     catch (...)
     {
@@ -219,28 +259,29 @@ bool CommandHandle_606(const Json::Value& jvalue, std::string* outmsg)
 }
 
 };
-GiftNotifyManager::GiftNotifyManager()
+MessageNotifyManager::MessageNotifyManager()
     :tcpClient_843_(new TcpClient),
     tcpClient_8080_(new TcpClient),
     notify201_(nullptr),
+    notify501_(nullptr),
     notify601_(nullptr),
     baseThread_("NetworkHelperThread" + base::IntToString(threadindex))
 {
 }
 
-GiftNotifyManager::~GiftNotifyManager()
+MessageNotifyManager::~MessageNotifyManager()
 {
     
 }
 
-bool GiftNotifyManager::Initialize()
+bool MessageNotifyManager::Initialize()
 {
     tcpClient_843_->Initialize();
     tcpClient_8080_->Initialize();
     baseThread_.Start();
     return true;
 }
-void GiftNotifyManager::Finalize()
+void MessageNotifyManager::Finalize()
 {
     if (repeatingTimer_.IsRunning())
         repeatingTimer_.Stop();
@@ -250,17 +291,27 @@ void GiftNotifyManager::Finalize()
     tcpClient_8080_->Finalize();  
 }
 
-void GiftNotifyManager::SetNotify201(Notify201 notify201)
+void MessageNotifyManager::SetServerIp(const std::string& serverip)
+{
+    serverip_ = serverip;
+}
+
+void MessageNotifyManager::SetNotify201(Notify201 notify201)
 {
     notify201_ = notify201;
 }
 
-void GiftNotifyManager::SetNotify601(Notify601 notify601)
+void MessageNotifyManager::SetNotify501(Notify201 notify501)
+{
+    notify501_ = notify501;
+}
+
+void MessageNotifyManager::SetNotify601(Notify601 notify601)
 {
     notify601_ = notify601;
 }
 
-void GiftNotifyManager::SetNormalNotify(NormalNotify normalNotify)
+void MessageNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 {
     normalNotify_ = normalNotify;
 }
@@ -286,7 +337,7 @@ void GiftNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 //        "giftid" : "41",
 //        "num" : "1",
 //        "type" : 2,
-void GiftNotifyManager::Notify(const std::vector<char>& data)
+void MessageNotifyManager::Notify(const std::vector<char>& data)
 {
     // 需要处理粘包问题
     std::string datastr(data.begin(), data.end());
@@ -405,41 +456,46 @@ void GiftNotifyManager::Notify(const std::vector<char>& data)
     }
 }
 
-bool GiftNotifyManager::Connect843()
+bool MessageNotifyManager::Connect843()
 {
     return baseThread_.message_loop_proxy()->PostTask(
         FROM_HERE, base::Bind(
-        &GiftNotifyManager::DoConnect843, this));
+        &MessageNotifyManager::DoConnect843, this));
     return true;
 }
 
-void GiftNotifyManager::DoConnect843()
+void MessageNotifyManager::DoConnect843()
 {
     // 843端口的连接数据没什么用
-    tcpClient_843_->Connect(targetip, port843);
+    //tcpClient_843_->Connect(targetip, port843);
+    tcpClient_843_->Connect(serverip_, port843);
     std::string str = "<policy-file-request/>";
     std::vector<char> data;
     data.assign(str.begin(), str.end());
     data.push_back(0);
     tcpClient_843_->Send(data);
+    std::vector<char> responsedata;
+    tcpClient_843_->Recv(&responsedata);
+    tcpClient_843_->Finalize();
 }
 
-bool GiftNotifyManager::Connect8080(uint32 roomid, uint32 userid,
+bool MessageNotifyManager::Connect8080(uint32 roomid, uint32 userid,
     const std::string& usertoken)
 {
     baseThread_.message_loop()->PostTask(FROM_HERE,
-        base::Bind(&GiftNotifyManager::DoConnect8080, this,
+        base::Bind(&MessageNotifyManager::DoConnect8080, this,
         roomid, userid, usertoken));
 
     return true;
 }
 
-void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid, 
+void MessageNotifyManager::DoConnect8080(uint32 roomid, uint32 userid, 
     const std::string& usertoken)
 {
     Packet_ = "";
     position_ = 0;
-    if (!tcpClient_8080_->Connect(targetip, port8080))
+    //if (!tcpClient_8080_->Connect(targetip, port8080))
+    if (!tcpClient_8080_->Connect(serverip_, port8080))
     {
         assert(false && L"socket连接失败");
         return ;
@@ -451,42 +507,98 @@ void GiftNotifyManager::DoConnect8080(uint32 roomid, uint32 userid,
     GetFirstPackage(package, &data_for_send);
     std::vector<char> data_8080;
     data_8080.assign(data_for_send.begin(), data_for_send.end());
-    data_8080.push_back(0);//这是必须加这个字节的
+    //data_8080.push_back(0);//这是必须加这个字节的
     tcpClient_8080_->Send(data_8080);
 
     // 启动发送心跳的timer;
     if (repeatingTimer_.IsRunning())
         repeatingTimer_.Stop();
     
+    //MessageNotifyManager::DoSendHeartBeat();
     // 默认是每10秒发送一次心跳
     repeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10), this,
-        &GiftNotifyManager::DoSendHeartBeat);
+        &MessageNotifyManager::DoSendHeartBeat);
 
     DoRecv();
     return ;
 }
 
-void GiftNotifyManager::DoSendHeartBeat()
+bool MessageNotifyManager::Connect8080_NotLogin(uint32 roomid, uint32 userid,
+    const std::string& nickname, uint32 richlevel, uint32 ismaster,
+    uint32 staruserid, const std::string& key,/* uint64 keytime, */
+    const std::string& ext)
+{
+    baseThread_.message_loop()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoConnect8080_NotLogin, this,
+        roomid, userid, nickname, richlevel,
+        ismaster, staruserid, key, ext));
+
+    return true;
+}
+
+void MessageNotifyManager::DoConnect8080_NotLogin(uint32 roomid, uint32 userid, 
+    const std::string& nickname, uint32 richlevel, uint32 ismaster, 
+    uint32 staruserid, const std::string& key, const std::string& ext)
+{
+    std::string decodestr = UrlDecode(ext);// 测试使用
+    Packet_ = "";
+    position_ = 0;
+    //if (!tcpClient_8080_->Connect(targetip, port8080))
+    if (!tcpClient_8080_->Connect(serverip_, port8080))
+    {
+        assert(false && L"socket连接失败");
+        return;
+    }
+    uint32 keytime = static_cast<uint32>(base::Time::Now().ToDoubleT());
+    std::vector<uint8> data_for_send;
+    cmd201package_notlogin package = {
+        201, roomid, userid, nickname, richlevel, ismaster, staruserid, key,
+        keytime, ext };
+    GetFirstPackage_NotLogin(package, &data_for_send);
+    std::vector<char> data_8080;
+    data_8080.assign(data_for_send.begin(), data_for_send.end());
+    data_8080.push_back(0);//这是必须加这个字节的
+    tcpClient_8080_->Send(data_8080);
+
+    // 启动发送心跳的timer;
+    if (repeatingTimer_.IsRunning())
+        repeatingTimer_.Stop();
+
+    // 默认是每10秒发送一次心跳
+    repeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10), this,
+        &MessageNotifyManager::DoSendHeartBeat);
+
+    DoRecv();
+    return;
+}
+
+void MessageNotifyManager::DoSendHeartBeat()
 {
     std::string heartbeat = "HEARTBEAT_REQUEST";
-    heartbeat.append("\r\n");
-    std::vector<char> heardbeadvec;
-    heardbeadvec.assign(heartbeat.begin(), heartbeat.end());
-    tcpClient_8080_->Send(heardbeadvec);
+    heartbeat.append("\n");
+    std::vector<char> heardbeatvec;
+    heardbeatvec.assign(heartbeat.begin(), heartbeat.end());
+    tcpClient_8080_->Send(heardbeatvec);
     if (normalNotify_)
     {
         normalNotify_(L"Send Heartbeat");
     }  
 }
 
-void GiftNotifyManager::DoRecv()
+void MessageNotifyManager::DoRecv()
 {
     std::vector<char> buffer;
     if (!tcpClient_8080_->Recv(&buffer))
+    {
+        if (repeatingTimer_.IsRunning())
+            repeatingTimer_.Stop();
+        tcpClient_8080_->Finalize();
+        normalNotify_(L"Tcp Break Error!");
         return;// 如果返回错误，结束流程
+    }
 
     baseThread_.message_loop()->PostTask(FROM_HERE,
-        base::Bind(&GiftNotifyManager::DoRecv, this));
+        base::Bind(&MessageNotifyManager::DoRecv, this));
 
     if (buffer.empty())
         return;
@@ -495,7 +607,7 @@ void GiftNotifyManager::DoRecv()
 }
 
 // 在网络积压数据包的时候，可能返回多个完整的数据包
-std::vector<std::string> GiftNotifyManager::HandleMixPackage(const std::string& package)
+std::vector<std::string> MessageNotifyManager::HandleMixPackage(const std::string& package)
 {
     std::vector<std::string> retVec;
     auto it = package.begin();

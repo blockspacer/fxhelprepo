@@ -9,6 +9,7 @@
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
+#include "Config.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/strings/utf_string_conversions.h"
 
@@ -66,7 +67,7 @@ END_MESSAGE_MAP()
 
 // CFanXingDlg 对话框
 
-#define NOPRIVILEGE_NOTICE L"你没有操作权限, 目前此功能只提供给指定家族成员操作"
+#define NOPRIVILEGE_NOTICE L"你没有操作权限"
 
 CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CFanXingDlg::IDD, pParent)
@@ -96,6 +97,8 @@ void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_EDIT_QUERY_KEYWORD, m_query_key);
     DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
     DDX_Control(pDX, IDC_LIST_USER_STATUS_BLACK, m_ListCtrl_Blacks);
+    DDX_Control(pDX, IDC_STATIC_AUTH_INFO, m_static_auth_info);
+    DDX_Control(pDX, IDC_STATIC_LOGIN_INFO, m_static_login_info);
 }
 
 BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
@@ -133,6 +136,8 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_LOAD_BLACK, &CFanXingDlg::OnBnClickedBtnLoadBlack)
     ON_BN_CLICKED(IDC_BTN_ADD_TO_BLACK, &CFanXingDlg::OnBnClickedBtnAddToBlack)
     ON_BN_CLICKED(IDC_BTN_SAVE_BLACK, &CFanXingDlg::OnBnClickedBtnSaveBlack)
+    ON_BN_CLICKED(IDC_BTN_CLEAR_INFO, &CFanXingDlg::OnBnClickedBtnClearInfo)
+    ON_BN_CLICKED(IDCANCEL, &CFanXingDlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -191,6 +196,29 @@ BOOL CFanXingDlg::OnInitDialog()
     for (const auto& it : blackcolumnlist)
         m_ListCtrl_Blacks.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
 
+    // 初始化保存数据
+    Config config;
+    bool remember = config.GetRemember();
+    if (remember)
+    {
+        m_check_remember.SetCheck(remember);
+        std::wstring username,password;
+        config.GetUserName(&username);
+        config.GetPassword(&password);
+        SetDlgItemText(IDC_EDIT_Username, username.c_str());
+        SetDlgItemText(IDC_EDIT_Password, password.c_str());
+    }
+
+    std::wstring roomid;
+    config.GetRoomid(&roomid);
+    SetDlgItemText(IDC_EDIT_NAV, roomid.c_str());
+
+    // 读取授权信息显示在界面上
+    AuthorityHelper authorityHelper;
+    std::wstring authorityDisplayInfo = L"软件未授权,操作受限";
+    authorityHelper.GetAuthorityDisplayInfo(&authorityDisplayInfo);
+    m_static_auth_info.SetWindowTextW(authorityDisplayInfo.c_str());
+    
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -257,16 +285,30 @@ void CFanXingDlg::OnBnClickedButtonLogin()
     CString password;
     GetDlgItemText(IDC_EDIT_Username, username);
     GetDlgItemText(IDC_EDIT_Password, password);
+    bool remember = !!m_check_remember.GetCheck();
 
     // 测试通过的curl登录方式
     bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
     std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
+    if (result)
+    {
+        std::wstring displayinfo;
+        network_->GetCurrentUserDisplay(&displayinfo);
+        m_static_login_info.SetWindowTextW(displayinfo.c_str());
+
+        Config config;
+        config.SaveUserInfo(username.GetBuffer(), password.GetBuffer(), remember);
+    }
+    
     Notify(message);
 }
 
 //跳转页面功能
 void CFanXingDlg::OnBnClickedButtonNav()
 {
+    if (!network_)
+        return;
+    
     // 先清空原来数据
     m_ListCtrl_Viewers.DeleteAllItems();
 
@@ -278,24 +320,39 @@ void CFanXingDlg::OnBnClickedButtonNav()
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
 
     network_->SetNotify201(
-        std::bind(&CFanXingDlg::Notify201, this, std::placeholders::_1));
+        std::bind(&CFanXingDlg::NotifyEnterRoom, this, std::placeholders::_1));
 
-    network_->EnterRoom(strRoomid.GetBuffer());
+    network_->SetNotify501(
+        std::bind(&CFanXingDlg::NotifyEnterRoom, this, std::placeholders::_1));
+
+    bool result = network_->EnterRoom(strRoomid.GetBuffer());
+    std::wstring message = std::wstring(L"Enter room ") + (result ? L"success" : L"failed");
+    if (result)
+    {
+        Config config;
+        config.SaveRoomId(strRoomid.GetBuffer());
+    }
 }
 
 // 送星星功能
 void CFanXingDlg::OnBnClickedButtonRewarstar()
 {
+    if (!network_)
+        return;
 }
 
 // 送礼物功能
 void CFanXingDlg::OnBnClickedButtonRewardgift()
 {
+    if (!network_)
+        return;
 }
 
 // 获取公屏信息
 void CFanXingDlg::OnBnClickedBtnGetmsg()
 {
+    if (!network_)
+        return;
 }
 
 // 用来做测试的函数
@@ -316,6 +373,25 @@ void CFanXingDlg::OnBnClickedBtnAdd()
         m_ListCtrl_Viewers.SetItemText(nitem, j, rowdata[j].c_str());
     }
 }
+void CFanXingDlg::SetHScroll()
+{
+    CDC* dc = GetDC();
+    
+    CString str;
+    int index = InfoList_.GetCount() - 1;
+    if (index>=0)
+    {
+        InfoList_.GetText(index, str);
+        SIZE s = dc->GetTextExtent(str);
+        long temp = (long)SendDlgItemMessage(IDC_LIST1, LB_GETHORIZONTALEXTENT, 0, 0); //temp得到滚动条的宽度
+        if (s.cx > temp)
+        {
+            SendDlgItemMessage(IDC_LIST1, LB_SETHORIZONTALEXTENT, (WPARAM)s.cx, 0);
+        }
+    }
+
+    ReleaseDC(dc);
+}
 
 void CFanXingDlg::Notify(const std::wstring& message)
 {
@@ -326,7 +402,7 @@ void CFanXingDlg::Notify(const std::wstring& message)
     this->PostMessage(WM_USER_01, 0, 0);
 }
 
-void CFanXingDlg::Notify201(const RowData& rowdata)
+void CFanXingDlg::NotifyEnterRoom(const RowData& rowdata)
 {
     // 发送数据给窗口
     viewerRowdataMutex_.lock();
@@ -345,16 +421,15 @@ bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstrin
     network_->Initialize();
     network_->SetNotify(
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
-
-    return network_->Login(username, password);
+    
+    bool result = network_->Login(username, password);
+    return result;
 }
 
 bool CFanXingDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
 {
 	if (!enterRoomUserInfos)
-	{
 		return false;
-	}
 
 	int count = m_ListCtrl_Viewers.GetItemCount();
 	for (int i = count - 1; i >= 0; --i)
@@ -382,9 +457,8 @@ bool CFanXingDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUser
 bool CFanXingDlg::GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
 {
     if (!enterRoomUserInfos)
-    {
         return false;
-    }
+
     int count = m_ListCtrl_Blacks.GetItemCount();
     for (int i = count - 1; i >= 0; --i)
     {
@@ -408,6 +482,9 @@ bool CFanXingDlg::KickOut_(
     const std::vector<EnterRoomUserInfo>& enterRoomUserInfos,
     KICK_TYPE kicktype)
 {
+    if (!network_)
+        return false;
+
     for (const auto& enterRoomUserInfo : enterRoomUserInfos)
     {
         std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
@@ -429,6 +506,9 @@ bool CFanXingDlg::KickOut_(
 
 bool CFanXingDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
 {
+    if (!network_)
+        return false;
+
     for (const auto& enterRoomUserInfo : enterRoomUserInfos)
     {
         std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
@@ -449,6 +529,9 @@ bool CFanXingDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserIn
 
 bool CFanXingDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
 {
+    if (!network_)
+        return false;
+
     for (const auto& enterRoomUserInfo : enterRoomUserInfos)
     {
         std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
@@ -574,6 +657,7 @@ LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
     }
     
     InfoList_.SetCurSel(infoListCount_-1);
+    SetHScroll();
     return 0;
 }
 
@@ -678,7 +762,11 @@ void CFanXingDlg::OnBnClickedBtnSelectReverse()
 
 void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 {
-    if (!network_->GetActionPrivilege())
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
     { 
         Notify(NOPRIVILEGE_NOTICE);
         return;
@@ -691,9 +779,14 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 
 void CFanXingDlg::OnBnClickedBtnKickoutHour()
 {
-    if (!network_->GetActionPrivilege())
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
         return;
     }
 	std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -704,9 +797,14 @@ void CFanXingDlg::OnBnClickedBtnKickoutHour()
 
 void CFanXingDlg::OnBnClickedBtnSilent()
 {
-    if (!network_->GetActionPrivilege())
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -716,9 +814,14 @@ void CFanXingDlg::OnBnClickedBtnSilent()
 
 void CFanXingDlg::OnBnClickedBtnUnsilent()
 {
-    if (!network_->GetActionPrivilege())
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -742,6 +845,9 @@ void CFanXingDlg::OnBnClickedBtnClear()
 
 void CFanXingDlg::OnBnClickedBtnGetViewerList()
 {
+    if (!network_)
+        return;
+
     std::vector<RowData> enterRoomUserInfoRowdata;
     if (!network_->GetViewerList(roomid_, &enterRoomUserInfoRowdata))
     {
@@ -760,9 +866,14 @@ void CFanXingDlg::OnBnClickedBtnGetViewerList()
 
 void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
 {
-    if (!network_->GetActionPrivilege())
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -773,9 +884,14 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
 
 void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
 {
-    if (!network_->GetActionPrivilege())
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -786,9 +902,14 @@ void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
 
 void CFanXingDlg::OnBnClickedBtnSilentBlack()
 {
-    if (!network_->GetActionPrivilege())
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -798,9 +919,14 @@ void CFanXingDlg::OnBnClickedBtnSilentBlack()
 
 void CFanXingDlg::OnBnClickedBtnUnsilentBlack()
 {
-    if (!network_->GetActionPrivilege())
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -912,4 +1038,20 @@ void CFanXingDlg::OnBnClickedBtnSaveBlack()
     }
 
     blacklistHelper_->SaveBlackList(rowdatas);
+}
+
+void CFanXingDlg::OnBnClickedBtnClearInfo()
+{
+    while (infoListCount_)
+    {
+        InfoList_.DeleteString(infoListCount_--);
+    }
+    InfoList_.DeleteString(0);
+}
+
+
+void CFanXingDlg::OnBnClickedCancel()
+{
+    // TODO:  在此添加控件通知处理程序代码
+    CDialogEx::OnCancel();
 }

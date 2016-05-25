@@ -4,10 +4,10 @@
 
 #include "third_party/chromium/base/basictypes.h"
 #include "CurlWrapper.h"
-#include "GiftNotifyManager.h"
+#include "MessageNotifyManager.h"
 
 class CurlWrapper;
-class GiftNotifyManager;
+class MessageNotifyManager;
 class CookiesHelper;
 class Room
 {
@@ -15,6 +15,7 @@ public:
     explicit Room(uint32 roomid);
     ~Room();
     
+    void SetServerIp(const std::string& serverip);
     bool Enter(const std::string& cookies, const std::string& usertoken, uint32 userid);
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
@@ -48,7 +49,7 @@ private:
     std::string nickname_;
     uint32 clanid_ = 0;
     std::unique_ptr<CurlWrapper> curlWrapper_;
-    std::unique_ptr<GiftNotifyManager> giftNotifyManager_;
+    std::unique_ptr<MessageNotifyManager> messageNotifyManager_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;
 };
 

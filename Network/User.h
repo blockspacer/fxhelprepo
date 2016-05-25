@@ -44,6 +44,8 @@ public:
     void SetCookies(const std::vector<std::string> cookies);
     std::vector<std::string> GetCookies() const;
 
+    void SetServerIp(const std::string& serverip);
+
     //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
@@ -53,6 +55,10 @@ public:
     bool Login(const std::string& username,
         const std::string& password);
     bool Logout();
+
+    uint32 GetServerTime() const;
+    uint32 GetFanxingId() const;
+    uint32 GetClanId() const;
 
     bool EnterRoom(uint32 roomid);
     bool ExitRoom(uint32 roomid);
@@ -66,15 +72,12 @@ public:
     bool GetViewerList(uint32 roomid, 
         std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
 
-    uint32 GetUserClanId() const;
 	bool KickoutUser(KICK_TYPE kicktype, uint32 roomid, 
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     
-
 private:
-
     bool LoginHttps(const std::string& username,
         const std::string& password);
 
@@ -83,13 +86,16 @@ private:
     bool LoginIndexServiceGetUserCenter();
     std::string username_;
     std::string password_;
+    std::string serverip_;
 
     // 登录后才能获得的用户信息
-    uint32 userid_ = 0;
+    uint32 kugouid_ = 0;
+    uint32 fanxingid_ = 0;
     uint32 clanid_ = 0;
     uint32 coin_ = 0;
-    std::string usertoken_;
-    std::string userkey_;
+    std::string usertoken_ = "";
+    std::string userkey_ = "";
+    uint32 servertime_ = 0xFFFFFFFF; // 这个值用来做权限控制的时间判断使用
 
     std::unique_ptr<CurlWrapper> curlWrapper_ = nullptr;
     std::unique_ptr<CookiesHelper> cookiesHelper_ = nullptr;

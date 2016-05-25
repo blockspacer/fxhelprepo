@@ -36,13 +36,13 @@
     <ClInclude Include="NetworkHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="DlgGiftNotify.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="GiftInfoHelper.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="BlacklistHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AuthorityHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,16 +56,16 @@
     <ClCompile Include="FanXingUI.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="NetworkHelper.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="DlgGiftNotify.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="GiftInfoHelper.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="BlacklistHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="AuthorityHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -64,6 +64,11 @@ std::vector<std::string> User::GetCookies() const
     return std::vector<std::string>();
 }
 
+void User::SetServerIp(const std::string& serverip)
+{
+    serverip_ = serverip;
+}
+
 //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
 void User::SetNormalNotify(NormalNotify normalNotify)
 {
@@ -112,9 +117,25 @@ bool User::Logout()
     return false;
 }
 
+uint32 User::GetServerTime() const
+{
+    return servertime_;
+}
+
+uint32 User::GetFanxingId() const
+{
+    return fanxingid_;
+}
+
+uint32 User::GetClanId() const
+{
+    return clanid_;
+}
+
 bool User::EnterRoom(uint32 roomid)
 {
     std::shared_ptr<Room> room(new Room(roomid));
+    room->SetServerIp(serverip_);
     std::vector<std::string> keys;
     keys.push_back("_fx_coin");
     keys.push_back("_fx_user");
@@ -137,7 +158,7 @@ bool User::EnterRoom(uint32 roomid)
     // 如果存在重复的房间，先断掉旧的
     this->ExitRoom(roomid);
 
-    if (!room->Enter(cookie,usertoken_,userid_))
+    if (!room->Enter(cookie,usertoken_,kugouid_))
     {
         return false;
     }
@@ -202,11 +223,6 @@ bool User::GetViewerList(uint32 roomid,
     std::string cookies = cookiesHelper_->GetCookies(keys);
     bool result = room->second->GetViewerList(cookies, enterRoomUserInfo);
     return result;
-}
-
-uint32 User::GetUserClanId() const
-{
-    return clanid_;
 }
 
 bool User::KickoutUser(KICK_TYPE kicktype, uint32 roomid,
@@ -331,7 +347,7 @@ bool User::LoginHttps(const std::string& username,
     // 暂时没有必要检测status的值
     Json::Value jvCmd(Json::ValueType::intValue);
     usertoken_ = logindata.get("token", "").asString();
-    userid_ = logindata.get("userid",0).asUInt();
+    kugouid_ = logindata.get("userid",0).asUInt();
 
     for (const auto& it : response.cookies)
     {
@@ -378,7 +394,8 @@ bool User::LoginUServiceGetMyUserDataInfo()
     {
         return false;
     }
-
+    uint32 servertime = GetInt32FromJsonValue(rootdata, "servertime");
+    servertime_ = servertime;
     Json::Value dataObject(Json::objectValue);
     dataObject = rootdata.get(std::string("data"), dataObject);
     if (dataObject.empty())
@@ -397,6 +414,10 @@ bool User::LoginUServiceGetMyUserDataInfo()
         else if (member.compare("coin") == 0)
         {
             coin_ = static_cast<uint32>(GetDoubleFromJsonValue(fxUserInfo, member));
+        }
+        else if (member.compare("userId")==0)
+        {
+            fanxingid_ = static_cast<uint32>(GetDoubleFromJsonValue(fxUserInfo, member));
         }
     }
 

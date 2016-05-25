@@ -8,6 +8,7 @@
 
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
+
 #include "afxwin.h"
 #include "afxcmn.h"
 
@@ -80,8 +81,9 @@ protected:
     LRESULT OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam);
 
 private:
+    void SetHScroll();
     void Notify(const std::wstring& message);
-    void Notify201(const RowData& rowdata);
+    void NotifyEnterRoom(const RowData& rowdata);
     bool LoginByRequest(const std::wstring& username, const std::wstring& password);
 	bool GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
     bool GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
@@ -115,6 +117,9 @@ private:
     CListCtrl m_ListCtrl_Blacks;
     std::unique_ptr<BlacklistHelper> blacklistHelper_;
 
-
-
+public:
+    afx_msg void OnBnClickedBtnClearInfo();
+    afx_msg void OnBnClickedCancel();
+    CStatic m_static_auth_info;
+    CStatic m_static_login_info;
 };

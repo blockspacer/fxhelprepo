@@ -5,7 +5,7 @@
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/files/file.h"
 
-#include "Network/GiftNotifyManager.h"
+#include "Network/MessageNotifyManager.h"
 
 enum class KICK_TYPE
 {
