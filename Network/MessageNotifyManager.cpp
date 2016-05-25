@@ -507,7 +507,7 @@ void MessageNotifyManager::DoConnect8080(uint32 roomid, uint32 userid,
     GetFirstPackage(package, &data_for_send);
     std::vector<char> data_8080;
     data_8080.assign(data_for_send.begin(), data_for_send.end());
-    data_8080.push_back(0);//这是必须加这个字节的
+    //data_8080.push_back(0);//这是必须加这个字节的
     tcpClient_8080_->Send(data_8080);
 
     // 启动发送心跳的timer;
