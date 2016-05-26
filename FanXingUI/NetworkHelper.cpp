@@ -28,6 +28,51 @@ namespace
     }
 };
 
+AntiStrategy::AntiStrategy()
+{
+
+}
+
+AntiStrategy::~AntiStrategy()
+{
+
+}
+
+HANDLE_TYPE AntiStrategy::GetUserHandleType(const std::string& nickname)
+{
+    for (const auto& it : vestnames_)
+    {
+        if (nickname.find(it) != std::string::npos)
+            return handletype_;
+    }
+    return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
+}
+
+void AntiStrategy::SetHandleType(HANDLE_TYPE handletype)
+{
+    handletype_ = handletype;
+}
+
+bool AntiStrategy::AddNickname(const std::string& vestname)
+{
+    if (vestnames_.end() != vestnames_.find(vestname))
+    {
+        return false;
+    }
+    vestnames_.insert(vestname);
+    return true;
+}
+
+bool AntiStrategy::RemoveNickname(const std::string& vestname)
+{
+    auto it = vestnames_.find(vestname);
+    if (it == vestnames_.end())
+        return false;
+
+    vestnames_.erase(it);
+    return true;  
+}
+
 NetworkHelper::NetworkHelper()
     : authority_(new Authority)
 {
@@ -56,6 +101,11 @@ void NetworkHelper::Finalize()
 {
     CurlWrapper::CurlCleanup();
     return;
+}
+
+void NetworkHelper::SetAntiStrategy(std::shared_ptr<AntiStrategy> antiStrategy)
+{
+    antiStrategy_ = antiStrategy;
 }
 
 void NetworkHelper::SetNotify(notifyfn fn)
@@ -250,6 +300,7 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, uint32 singerid, const Room
 
 void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    TryHandleUser(enterRoomUserInfo);
     if (!notify201_)
         return;
 
@@ -260,11 +311,30 @@ void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo
 
 void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    TryHandleUser(enterRoomUserInfo);
     if (!notify501_)
         return;
 
     enterRoomUserInfoMap_[enterRoomUserInfo.userid] = enterRoomUserInfo;
     RowData rowdata = EnterRoomUserInfoToRowdata(enterRoomUserInfo);
     notify501_(rowdata);
+}
+
+void NetworkHelper::TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    HANDLE_TYPE handletype = antiStrategy_->GetUserHandleType(enterRoomUserInfo.nickname);
+    bool result = true;
+    switch (handletype)
+    {
+    case HANDLE_TYPE::HANDLE_TYPE_BANCHAT:
+        result = BanChat(roomid_, enterRoomUserInfo);
+        break;
+    case HANDLE_TYPE::HANDLE_TYPE_KICKOUT:
+        result = KickoutUsers(KICK_TYPE::KICK_TYPE_HOUR, roomid_, enterRoomUserInfo);
+        break;
+    default:
+        break;
+    }
+    assert(result);
 }
 
