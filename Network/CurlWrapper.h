@@ -20,6 +20,7 @@ public:
     {
         HTTP_METHOD_GET = 0,
         HTTP_METHOD_POST = 1,
+        HTTP_METHOD_HTTPPOST = 2,
     };
     HTTP_METHOD method;
     std::vector<uint8> postdata;
@@ -29,6 +30,7 @@ public:
     std::string useragent;
     std::map<std::string, std::string> queries;
     std::map<std::string, std::string> headers;
+    std::string postfile;
     IpProxy ipproxy;
 };
 

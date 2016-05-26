@@ -177,6 +177,9 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, this);
 
+    struct curl_httppost* post = nullptr;
+    struct curl_httppost* last = nullptr;
+
     switch (request.method)
     {
     case HttpRequest::HTTP_METHOD::HTTP_METHOD_GET:
@@ -187,6 +190,15 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
         curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1L);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, request.postdata.size());
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, &request.postdata[0]);
+        break;
+    case HttpRequest::HTTP_METHOD::HTTP_METHOD_HTTPPOST:
+        assert(!request.postfile.empty());
+        if (!request.postfile.empty())
+        {
+            curl_formadd(&post, &last, CURLFORM_COPYNAME, "file",
+                         CURLFORM_FILE, request.postfile.c_str(), CURLFORM_END);
+            curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
+        }
         break;
     default:
         assert(false);
