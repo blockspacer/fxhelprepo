@@ -10,6 +10,7 @@
 #include "Network/CurlWrapper.h"
 
 class CurlWrapper;
+class CookiesHelper;
 class MessageNotifyManager;
 class GiftInfoHelper;
 class GiftInfo;
@@ -66,6 +67,7 @@ private:
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
     void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo);
 
+    bool EnterRoom_(uint32 roomid, uint32* singerid);
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
                                const std::string& nickname,
                                uint32 richlevel, uint32 ismaster,
@@ -73,7 +75,8 @@ private:
                                const std::string& key,
                                const std::string& ext);
 
-    std::unique_ptr<CurlWrapper> curlWrapper_;
+    std::unique_ptr<CurlWrapper> curlWrapper_ = nullptr;
+    std::unique_ptr<CookiesHelper> cookiesHelper_ = nullptr;
     std::unique_ptr<GiftInfoHelper> giftInfoHelper_;
     std::unique_ptr<MessageNotifyManager> messageNotifyManager_;
     std::map<uint32, EnterRoomUserInfo> enterRoomUserInfoMap_;

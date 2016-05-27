@@ -9,12 +9,43 @@
 #include "Network/MessageNotifyManager.h"
 #include "GiftInfoHelper.h"
 #include "Network/CurlWrapper.h"
+#include "Network/CookiesHelper.h"
 #include "Network/EncodeHelper.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 
+namespace
+{
+    bool ExtraSingerIdFrom_EnterRoom_Response_(const std::string& inputstr,
+                                               uint32* starId)
+    {
+        auto pos = inputstr.find("isClanRoom");
+        if (pos == std::string::npos)
+            return false;
+
+        pos = inputstr.find("starId", pos);
+        if (pos == std::string::npos)
+            return false;
+
+        pos = inputstr.find("\"", pos);
+        if (pos == std::string::npos)
+            return false;
+
+        auto begin = pos + 1;
+        auto end = inputstr.find("\"", begin);
+        if (pos == std::string::npos)
+            return false;
+        std::string temp = inputstr.substr(begin, end - begin);
+        if (!base::StringToUint(temp, starId))
+        {
+            return false;
+        }
+        return true;
+    }
+}
 GiftNetworkHelper::GiftNetworkHelper()
     :curlWrapper_(new CurlWrapper)
+    , cookiesHelper_(new CookiesHelper)
     , messageNotifyManager_(new MessageNotifyManager)
     , giftInfoHelper_(new GiftInfoHelper)
 {
@@ -112,7 +143,7 @@ bool GiftNetworkHelper::EnterRoom(uint32 roomid, uint32* singerid)
     std::string ext = "";
 
     bool ret = false;
-    ret = curlWrapper_->EnterRoom(roomid, &staruserid);
+    ret = EnterRoom_(roomid, &staruserid);
     assert(ret);
     assert(staruserid);
     if (!ret || !staruserid)
@@ -165,6 +196,7 @@ bool GiftNetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
         std::bind(&GiftNetworkHelper::NotifyCallback,
         this, std::placeholders::_1));
 
+    messageNotifyManager_->SetServerIp("42.62.68.50");
     ret = messageNotifyManager_->Connect8080_NotLogin(
         roomid, userid, nickname, richlevel, ismaster, staruserid, key, ext);
     return ret;
@@ -172,13 +204,44 @@ bool GiftNetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
 
 bool GiftNetworkHelper::GetGiftList(uint32 roomid)
 {
-    std::string responsedata;
-    if (!curlWrapper_->GetGiftList(roomid, &responsedata))
+    LOG(INFO) << __FUNCTION__ << L" roomid = " << base::UintToString(roomid);
+
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    HttpRequest request;
+    request.url = std::string("http://fanxing.kugou.com/") +
+        "/VServices/GiftService.GiftService.getGiftList/" +
+        base::UintToString(roomid_);
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/" + base::UintToString(roomid);
+    request.cookies = cookies;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
     {
         return false;
     }
 
-    return giftInfoHelper_->Initialize(responsedata);
+    for (const auto& it : response.cookies)
+    {
+        assert(false && L"这里应该是不会设置cookie的");
+        cookiesHelper_->SetCookies(it);
+    }
+
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+    if (content.empty())
+        return false;
+
+    return giftInfoHelper_->Initialize(content);
 }
 
 // messageNotifyManager_ 线程回调
@@ -226,3 +289,36 @@ void GiftNetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUser
         return;
 }
 
+bool GiftNetworkHelper::EnterRoom_(uint32 roomid, uint32* singerid)
+{
+    HttpRequest request;
+    request.url = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid_);
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/";
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+
+    for (const auto& it : response.cookies)
+    {
+        assert(false && L"这里应该是不会设置cookie的");
+        cookiesHelper_->SetCookies(it);
+    }
+
+    // 打开房间的功能不需要处理返回来的页面数据
+    if (content.empty())
+    {
+        return false;
+    }
+
+    bool result = ExtraSingerIdFrom_EnterRoom_Response_(content, singerid);
+    assert(*singerid);
+    return result;
+}

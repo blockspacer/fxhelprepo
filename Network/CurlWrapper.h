@@ -54,30 +54,9 @@ public:
     static void CurlCleanup();
     bool WriteCallback(const std::string& data);
     bool WriteResponseHeaderCallback(const std::string& data);
-    
-    // 在未登录状态下进入房间，并获取艺人id,供发起tcp连接使用
-    bool EnterRoom(uint32 roomid, uint32* singerid);
-
-	// 在进入房间以后，获取用户信息
-	bool Servies_Uservice_UserService_getCurrentUserInfo(uint32 roomid,
-        uint32* userid, std::string* nickname, uint32* richlevel);
-
-    // 抢星币的重要请求, 时机由flash收到601包礼物通知数据，601包里有key_601值
-    bool GiftService_GiftService(uint32 roomid,
-        const std::string& key_601, std::wstring* responsedata);
-
-    bool KickoutUser(uint32 singerid, KICK_TYPE kicktype, const EnterRoomUserInfo& enterRoomUserInfo);
-
-    // 获取礼物列表信息，为降低耦合，这里不解析数据
-    bool GetGiftList(uint32 roomid, std::string* outputstr);
-
     bool Execute(const HttpRequest& request, HttpResponse* reponse);
 
 private:
-    bool ParseGiftServiceResponse(const std::string& responsedata,
-        std::wstring* notifyinfo);
-
-    bool SetCookieFromString(const std::string& key, const std::string& cookiestring);
     std::string currentWriteData_;
     std::string currentResponseHeader_;
     std::string response_of_GiftService_GiftService_;
