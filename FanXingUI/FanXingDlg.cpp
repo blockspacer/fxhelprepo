@@ -91,6 +91,9 @@ CFanXingDlg::~CFanXingDlg()
 {
     if (network_)
     {
+        network_->RemoveNotify();
+        network_->RemoveNotify201();
+        network_->RemoveNotify501();
         network_->Finalize();
     }  
 }
@@ -438,6 +441,7 @@ bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstrin
 {
     if (network_)
     {
+        network_->RemoveNotify();
         network_->Finalize();
     }
     network_.reset(new NetworkHelper);

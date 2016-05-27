@@ -19,6 +19,7 @@ public:
     bool Enter(const std::string& cookies, const std::string& usertoken, uint32 userid);
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
+    void SetNotify501(Notify501 notify501);
     // 中断接收数据的连接
     bool Exit();
 

@@ -199,6 +199,8 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
 {
     user_->SetNotify201(std::bind(&NetworkHelper::NotifyCallback201, this,
         std::placeholders::_1));
+    user_->SetNotify501(std::bind(&NetworkHelper::NotifyCallback501, this,
+        std::placeholders::_1));
     user_->SetNormalNotify(std::bind(&NetworkHelper::NotifyCallback, this,
         std::placeholders::_1));
     roomid_ = roomid;

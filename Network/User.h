@@ -49,6 +49,7 @@ public:
     //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
+    void SetNotify501(Notify501 notify501);
 
     // 操作行为
     bool Login();
@@ -103,5 +104,6 @@ private:
 
     NormalNotify normalNotify_;
     Notify201 notify201_;
+    Notify501 notify501_;
 };
 

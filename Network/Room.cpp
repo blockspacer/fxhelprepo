@@ -315,6 +315,10 @@ void Room::SetNotify201(Notify201 notify201)
     messageNotifyManager_->SetNotify201(notify201);
 }
 
+void Room::SetNotify501(Notify501 notify501)
+{
+    messageNotifyManager_->SetNotify501(notify501);
+}
 bool Room::OpenRoom(const std::string& cookies)
 {
     HttpRequest request;

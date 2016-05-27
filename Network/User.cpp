@@ -80,6 +80,11 @@ void User::SetNotify201(Notify201 notify201)
     notify201_ = notify201;
 }
 
+void User::SetNotify501(Notify501 notify501)
+{
+    notify501_ = notify501;
+}
+
 bool User::Login()
 {
     return Login(username_, password_);
@@ -155,6 +160,10 @@ bool User::EnterRoom(uint32 roomid)
         room->SetNotify201(notify201_);
     }
 
+    if (notify501_)
+    {
+        room->SetNotify501(notify501_);
+    }
     // 如果存在重复的房间，先断掉旧的
     this->ExitRoom(roomid);
 
