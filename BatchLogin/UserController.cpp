@@ -20,7 +20,7 @@ bool UserController::AddUser(const std::string& username,
         assert(false && L"µÇÂ¼Ê§°Ü");
         return false;
     }
-    
+    shared_user->SetServerIp("42.62.68.50");
     users_.push_back(shared_user);
     return true;
 }
