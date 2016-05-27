@@ -297,6 +297,14 @@ void CFanXingDlg::OnClose()
         network_->RemoveNotify();
     }  
 }
+
+void CFanXingDlg::OnOK()
+{
+}
+
+void CFanXingDlg::OnCancel()
+{
+}
 //当用户拖动最小化窗口时系统调用此函数取得光标
 //显示。
 HCURSOR CFanXingDlg::OnQueryDragIcon()
@@ -576,6 +584,18 @@ bool CFanXingDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUser
         Notify(msg);
     }
     return true;
+}
+
+bool CFanXingDlg::SendChatMessage_(uint32 roomid, const std::wstring& message)
+{
+    if (!network_)
+        return false;
+
+    if (!roomid || message.empty())
+        return false;
+
+    std::string utf8message = base::WideToUTF8(message);
+    return network_->SendChatMessage(roomid, utf8message);
 }
 
 // 界面线程执行
@@ -1080,7 +1100,6 @@ void CFanXingDlg::OnBnClickedBtnClearInfo()
 
 void CFanXingDlg::OnBnClickedCancel()
 {
-    // TODO:  在此添加控件通知处理程序代码
     CDialogEx::OnCancel();
 }
 
@@ -1140,7 +1159,9 @@ void CFanXingDlg::OnBnClickedBtnRemoveVest()
 
 void CFanXingDlg::OnBnClickedBtnSendChat()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    CString message;
+    m_edit_chatmsg.GetWindowTextW(message);
+    SendChatMessage_(roomid_, message.GetBuffer());
 }
 
 

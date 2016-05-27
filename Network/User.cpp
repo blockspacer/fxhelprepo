@@ -193,9 +193,14 @@ bool User::ExitRooms()
     return false;
 }
 
-bool User::Chat(const std::string& message)
+bool User::SendChatMessage(uint32 roomid, const std::string& message)
 {
-    return false;
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+    return room->second->SendChatMessage(nickname_, richlevel_, message);
 }
 
 bool User::SendStar(uint32 count)
@@ -427,6 +432,14 @@ bool User::LoginUServiceGetMyUserDataInfo()
         else if (member.compare("userId")==0)
         {
             fanxingid_ = static_cast<uint32>(GetDoubleFromJsonValue(fxUserInfo, member));
+        }
+        else if (member.compare("nickName") == 0)
+        {
+            nickname_ = fxUserInfo.get(member, "nickname").asString();
+        }
+        else if (member.compare("richLevel") == 0)
+        {
+            richlevel_ = GetInt32FromJsonValue(fxUserInfo, member);
         }
     }
 

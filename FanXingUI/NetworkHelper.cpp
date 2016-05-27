@@ -246,6 +246,11 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
     return user_->UnbanChat(roomid, enterRoomUserInfo);
 }
 
+bool NetworkHelper::SendChatMessage(uint32 roomid, const std::string& message)
+{
+    return user_->SendChatMessage(roomid, message);
+}
+
 bool NetworkHelper::GetActionPrivilege(std::wstring* message)
 {
     if (user_->GetFanxingId() != authority_->userid)

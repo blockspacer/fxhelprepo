@@ -88,6 +88,7 @@ public:
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+    bool SendChatMessage(uint32 roomid, const std::string& message);
 
 private:
     void NotifyCallback(const std::wstring& message);

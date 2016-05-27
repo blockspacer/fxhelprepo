@@ -34,6 +34,8 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
     // 生成的消息映射函数
     virtual BOOL OnInitDialog();
+    virtual void OnOK();
+    virtual void OnCancel();
     afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
     afx_msg void OnPaint();
     afx_msg void OnClose();
@@ -91,7 +93,7 @@ private:
         KICK_TYPE kicktype);
     bool BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos);
     bool UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos);
-
+    bool SendChatMessage_(uint32 roomid, const std::wstring& message);
 
     HICON m_hIcon;
 

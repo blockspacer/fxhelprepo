@@ -65,7 +65,7 @@ public:
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
 
-    bool Chat(const std::string& message);
+    bool SendChatMessage(uint32 roomid, const std::string& message);
     bool SendStar(uint32 count);
     bool RetrieveStart();
     bool SendGift(uint32 giftid);
@@ -90,6 +90,8 @@ private:
     std::string serverip_;
 
     // 登录后才能获得的用户信息
+    std::string nickname_ = "";
+    uint32 richlevel_ = 0;
     uint32 kugouid_ = 0;
     uint32 fanxingid_ = 0;
     uint32 clanid_ = 0;
