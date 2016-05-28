@@ -25,15 +25,23 @@ public:
 
     bool LoadUserConfig(GridData* userpwd, uint32* total);
     bool LoadRoomConfig(GridData* roomgrid, uint32* total);
+    bool SaveUserLoginConfig();
 
     bool BatchLogUsers(const std::map<std::wstring, std::wstring>& userAccountPassword);
+    bool BatchLogUsersWithCookie(const std::map<std::wstring, std::wstring>& accountCookie);
     
     bool FillRooms(const std::vector<std::wstring>& roomids);
 
+    bool UpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
+
 protected:
+    void DoSaveUserLoginConfig();
     void DoBatchLogUsers(const std::map<std::wstring, std::wstring>& userAccountPassword);
+    void DoBatchLogUsersWithCookie(const std::map<std::wstring, std::wstring>& accountCookie);
     void DoFillRooms(const std::vector<uint32>& roomids);
     void FillSingleRoom(uint32 roomid);
+
+    void DoUpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
 
 private:
     base::Thread workerThread_;

@@ -64,4 +64,9 @@ private:
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;    
 
+public:
+    afx_msg void OnBnClickedBtnUpMvBillboard();
+    CEdit m_mv_collection_id;
+    CEdit m_mv_id;
+    afx_msg void OnBnClickedBtnSaveUserPwdCookie();
 };

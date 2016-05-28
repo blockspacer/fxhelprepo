@@ -50,18 +50,17 @@ std::string User::GetPassword() const
     return password_;
 }
 
-void User::SetCookies(const std::vector<std::string> cookies)
+void User::SetCookies(const std::string& cookies)
 {
-    for (const auto& it : cookies)
-    {
-        cookiesHelper_->SetCookies(it);
-    }
+    cookiesHelper_->SetCookies(cookies);
 }
 
-std::vector<std::string> User::GetCookies() const
+std::string User::GetCookies() const
 {
-    assert(false && L"暂时不实现");
-    return std::vector<std::string>();
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    std::string cookie = cookiesHelper_->GetCookies(keys);
+    return cookie;
 }
 
 void User::SetServerIp(const std::string& serverip)

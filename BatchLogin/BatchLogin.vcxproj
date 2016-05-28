@@ -107,6 +107,7 @@
   <ItemGroup>
     <ClInclude Include="BatchLogin.h" />
     <ClInclude Include="BatchLoginDlg.h" />
+    <ClInclude Include="MVBillboard.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RoomController.h" />
     <ClInclude Include="stdafx.h" />
@@ -117,6 +118,7 @@
   <ItemGroup>
     <ClCompile Include="BatchLogin.cpp" />
     <ClCompile Include="BatchLoginDlg.cpp" />
+    <ClCompile Include="MVBillboard.cpp" />
     <ClCompile Include="RoomController.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

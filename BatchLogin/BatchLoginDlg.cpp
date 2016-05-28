@@ -19,6 +19,7 @@ namespace{
     const wchar_t* usercolumnlist[] = {
         L"用户名",
         L"密码",
+        L"Cookie",
         L"用户id",
         L"昵称",
         L"财富等级",
@@ -54,6 +55,8 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_USERS, m_ListCtrl_Users);
     DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
     DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
+    DDX_Control(pDX, IDC_EDIT_MV_COLLECTION_ID, m_mv_collection_id);
+    DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -68,6 +71,8 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_MESSAGE(WM_USER_ROOM_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToRoomList)
 
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CBatchLoginDlg::OnBnClickedBtnLogin)
+    ON_BN_CLICKED(IDC_BTN_UP_MV_BILLBOARD, &CBatchLoginDlg::OnBnClickedBtnUpMvBillboard)
+    ON_BN_CLICKED(IDC_BTN_SAVE_USER_PWD_COOKIE, &CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie)
 END_MESSAGE_MAP()
 
 
@@ -191,14 +196,24 @@ void CBatchLoginDlg::OnBnClickedBtnImportUser()
 void CBatchLoginDlg::OnBnClickedBtnLogin()
 {
     int itemcount = m_ListCtrl_Users.GetItemCount();
-    std::map<std::wstring, std::wstring> userAccountPassword;
+    std::map<std::wstring, std::wstring> accountPassword;
+    std::map<std::wstring, std::wstring> accountCookies;
     for (int32 index = 0; index < itemcount; ++index)
     {
         CString account = m_ListCtrl_Users.GetItemText(index, 0);
         CString password = m_ListCtrl_Users.GetItemText(index, 1);
-        userAccountPassword[account.GetBuffer()] = password.GetBuffer();
+        CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
+        if (cookies.IsEmpty())
+            accountPassword[account.GetBuffer()] = password.GetBuffer();
+        else
+            accountCookies[account.GetBuffer()] = cookies.GetBuffer();
+        
     }
-    userRoomManager_->BatchLogUsers(userAccountPassword);
+    if (!accountPassword.empty())
+        userRoomManager_->BatchLogUsers(accountPassword);
+
+    if (!accountCookies.empty())
+        userRoomManager_->BatchLogUsersWithCookie(accountCookies);
 }
 
 void CBatchLoginDlg::OnBnClickedBtnImportRoom()
@@ -291,5 +306,16 @@ LRESULT CBatchLoginDlg::OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+void CBatchLoginDlg::OnBnClickedBtnUpMvBillboard()
+{
+    CString collectionid;
+    CString mvid;
+    m_mv_collection_id.GetWindowTextW(collectionid);
+    m_mv_id.GetWindowTextW(mvid);
+    userRoomManager_->UpMVBillboard(collectionid.GetBuffer(), mvid.GetBuffer());
+}
 
-
+void CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie()
+{
+    userRoomManager_->SaveUserLoginConfig();
+}

@@ -80,32 +80,35 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total)
 
     assert(!data.empty());
 
-    std::vector<std::string> userinfos = SplitString(data, "\r\n");
+    std::vector<std::string> userinfos = SplitString(data, "\n");
 
     *total = userinfos.size();
     for (const auto& it : userinfos)
     {
         std::vector<std::string> userinfo = SplitString(it, "\t");
-        if (userinfo.size()!=2) // 用户名和密码
+        if (userinfo.size() < 2) // 用户名和密码, 还有可能有cookie
         {
             assert(false && L"account info error!");
             continue;
         }
         std::string username = userinfo[0];
         std::string password = userinfo[1];
+        std::string cookies = "";
+        if (userinfo.size() > 2)
+        {
+            cookies = userinfo[2];
+        }
         RemoveSpace(&username);
         RemoveSpace(&password);
-        //if (!userController_->AddUser(username, password))
-        //    continue;
         RowData row;
         row.push_back(base::UTF8ToWide(username));
         row.push_back(base::UTF8ToWide(password));
+        row.push_back(base::UTF8ToWide(cookies));
         userpwd->push_back(row);
     }
     
     return true;
 }
-
 
 bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
 {
@@ -156,6 +159,38 @@ bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
     return true;
 }
 
+bool UserRoomManager::SaveUserLoginConfig()
+{
+    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserRoomManager::DoSaveUserLoginConfig, this));
+    return true;
+}
+
+void UserRoomManager::DoSaveUserLoginConfig()
+{
+    base::File accountCookieFile;
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = L"BatchLogin.User.Cookie.cfg";
+    base::FilePath pathname = dirPath.Append(filename);
+    accountCookieFile.Initialize(pathname,
+        base::File::FLAG_OPEN_ALWAYS | base::File::FLAG_APPEND);
+
+    if (!accountCookieFile.IsValid())
+        return;
+
+    std::vector<UserLoginInfo> userlogininfo;
+    userController_->GetUserLoginInfo(&userlogininfo);
+    for (const auto& info : userlogininfo)
+    {
+        std::string rowstring;
+        rowstring += info.accountname + "\t";
+        rowstring += info.passwod + "\t";
+        rowstring += info.cookies + "\n";
+        accountCookieFile.WriteAtCurrentPos((char*)rowstring.data(), rowstring.size());
+    }
+    accountCookieFile.Close();
+}
 bool UserRoomManager::BatchLogUsers(
     const std::map<std::wstring, std::wstring>& userAccountPassword)
 {
@@ -181,6 +216,30 @@ void UserRoomManager::DoBatchLogUsers(
     }
 }
 
+bool UserRoomManager::BatchLogUsersWithCookie(
+    const std::map<std::wstring, std::wstring>& accountCookie)
+{
+    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserRoomManager::DoBatchLogUsersWithCookie, this, accountCookie));
+    return true;
+}
+
+void UserRoomManager::DoBatchLogUsersWithCookie(
+    const std::map<std::wstring, std::wstring>& accountCookie)
+{
+    for (auto it : accountCookie)
+    {
+        std::string account = base::WideToUTF8(it.first);
+        std::string cookie = base::WideToUTF8(it.second);
+        bool result = userController_->AddUserWithCookies(account, cookie);
+        if (notify_)
+        {
+            std::wstring message = base::UTF8ToWide(account) + L" Login ";
+            message += result ? L"success!" : L"failed!";
+            notify_(message);
+        }
+    }
+}
 
 bool UserRoomManager::FillRooms(const std::vector<std::wstring>& roomids)
 {
@@ -224,5 +283,27 @@ void UserRoomManager::FillSingleRoom(uint32 roomid)
         message += result ? L"Success!" : L"Failed!";
         notify_(message);
     }
+}
 
+bool UserRoomManager::UpMVBillboard(const std::wstring& collectionid, 
+    const std::wstring& mvid)
+{
+    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserRoomManager::DoUpMVBillboard, this, collectionid,
+        mvid));
+    return true;
+}
+
+void UserRoomManager::DoUpMVBillboard(const std::wstring& collectionid,
+    const std::wstring& mvid)
+{
+    bool result = userController_->UpMVBillboard(
+        base::WideToUTF8(collectionid), base::WideToUTF8(mvid));
+    assert(result && L"打榜失败");
+    if (notify_)
+    {
+        std::wstring message = L"upgrade mv billboard ";
+        message += result ? L"Success!" : L"Failed!";
+        notify_(message);
+    }
 }
