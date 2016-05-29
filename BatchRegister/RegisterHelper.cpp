@@ -82,13 +82,15 @@ bool RegisterHelper::SaveVerifyCodeImage(const std::vector<uint8>& image,
 }
 
 bool RegisterHelper::SaveAccountToFile(const std::wstring& username,
-    const std::wstring& password)
+    const std::wstring& password, const std::string& cookies)
 {
     std::string utf8username = base::WideToUTF8(username);
     std::string utf8password = base::WideToUTF8(password);
     accountFile_->WriteAtCurrentPos((char*)utf8username.data(), utf8username.size());
     accountFile_->WriteAtCurrentPos("\t", 1);
     accountFile_->WriteAtCurrentPos((char*)utf8password.data(), utf8password.size());
+    accountFile_->WriteAtCurrentPos("\t", 1);
+    accountFile_->WriteAtCurrentPos((char*)cookies.data(), cookies.size());
     accountFile_->WriteAtCurrentPos("\n", 1);
     return true;
 }
@@ -128,11 +130,17 @@ std::wstring RegisterHelper::GetPassword() const
 
 bool RegisterHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
 {
-    std::string url = "http://www.kugou.com/reg/web/verifycode/t=" + GetNowTimeString();
+    // 之前使用过的数字验证码
+    //std::string url = "http://www.kugou.com/reg/web/verifycode/t=" + GetNowTimeString();
+    std::string url = "http://verifycode.service.kugou.com/v1/get_img_code";
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = url;
     request.referer = "http://www.kugou.com/reg/web/";
+    request.queries["type"] = "RegCheckCode";
+    request.queries["appid"] = "1014";
+    request.queries["codetype"] = "1";
+    request.queries["t"] = GetNowTimeString();
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
@@ -140,7 +148,8 @@ bool RegisterHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
         return false;
     }
 
-    //Set-Cookie: CheckCode=czozMjoiMTFmNzY4MDIyODhlODEyZmY0MjQxZjMzODI2MDJmYTQiOw%3D%3D; path=/
+    // Set-Cookie: CheckCode=czozMjoiMTFmNzY4MDIyODhlODEyZmY0MjQxZjMzODI2MDJmYTQiOw%3D%3D; path=/
+    // Set-Cookie: RegCheckCode=2f72ef708dabebb11790a7831bcc1cd8
     for (const auto& it : response.cookies)
     {
         cookiesHelper_->SetCookies(it);
@@ -230,21 +239,28 @@ bool RegisterHelper::RegisterCheckPassword(const std::wstring& username, const s
 //Cookie: CheckCode=czozMjoiMTFmNzY4MDIyODhlODEyZmY0MjQxZjMzODI2MDJmYTQiOw%3D%3D
 // PostData = userName=fanxingtest011&pwd=1233211234567&rePwd=1233211234567&verifyCode=upfill&UM_Sex=1
 bool RegisterHelper::RegisterUser(const std::wstring& username,
-    const std::wstring& password, const std::wstring& verifycode)
+    const std::wstring& password, const std::string& verifycode,
+    std::string* cookies)
 {
-
-    std::string postdata = "userName=" + UrlEncode(base::WideToUTF8(username))
-        + "&pwd=" + base::WideToUTF8(password) + "&rePwd="
-        + base::WideToUTF8(password) + "&verifyCode="
-        + base::WideToUTF8(verifycode) + "&UM_Sex=1";
-    std::string url = "http://www.kugou.com/reg/web/regbyusername";
+    std::string url = "https://reg-user.kugou.com/v2/reg/";
     HttpRequest request;
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_POST;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = url;
     request.referer = "http://www.kugou.com/reg/web/";
-    request.headers["Origin"] = "http://www.kugou.com";
-    request.cookies = cookiesHelper_->GetCookies("CheckCode");
-    request.postdata.assign(postdata.begin(), postdata.end());
+    request.cookies = cookiesHelper_->GetCookies("RegCheckCode");
+    request.queries["regtype"] = "username";
+    request.queries["appid"] = "1014";
+    request.queries["code"] = verifycode;
+    request.queries["expire_day"] = "1";
+    request.queries["username"] = UrlEncode(base::WideToUTF8(username));
+    request.queries["sex"] = "1";
+    request.queries["password"] = MakeMd5FromString(base::WideToUTF8(password));
+    request.queries["nickname"] = base::WideToUTF8(username);
+    request.queries["security_email"] = "";
+    request.queries["id_card"] = "";
+    request.queries["truename"] = "";
+    request.queries["callback"] = "RegByUserNameCallbackFn";
+    request.queries["codetype"] = "1";
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
     {
@@ -253,7 +269,7 @@ bool RegisterHelper::RegisterUser(const std::wstring& username,
 
     std::string content;
     content.assign(response.content.begin(), response.content.end());
-    if (content.find(R"("status":1)") == std::string::npos)
+    if (content.find(R"("nickname")") == std::string::npos)
     {
         return false;
     }
@@ -264,6 +280,11 @@ bool RegisterHelper::RegisterUser(const std::wstring& username,
         cookiesHelper_->SetCookies(it);
     }
 
+    *cookies = cookiesHelper_->GetCookies("KuGoo");
+
+    if (cookies->empty())
+        return false;
+        
     return true;
 }
 

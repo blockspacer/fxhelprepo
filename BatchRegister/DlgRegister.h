@@ -22,7 +22,6 @@ public:
         WM_USER_REGISTER_INFO = WM_USER + 1,
     };
 
-    
     afx_msg void OnPaint();
     afx_msg LRESULT OnHotKey(WPARAM wp, LPARAM lp);
     afx_msg void OnBnClickedBtnCheckExist();
@@ -31,6 +30,7 @@ public:
 protected:
     virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
+    virtual void OnOK();
 
 	DECLARE_MESSAGE_MAP()
 

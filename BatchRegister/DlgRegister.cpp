@@ -8,7 +8,46 @@
 #include "RegisterHelper.h"
 #include "Network/EncodeHelper.h"
 #include "third_party/chromium/base/basictypes.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
+namespace
+{
+    // 因为验证码位置对着小键盘有上下翻转的差别，所以适应键盘设计输入，然后在这里反转
+    bool TranslateVerifyCode(const std::string& src, std::string* dest)
+    {
+        if (src.size() != 4)
+            return false;
+        
+        for (auto& it : src)
+        {
+            switch (it)
+            {
+            case '1':
+                dest->push_back('7');
+                break;
+            case '2':
+                dest->push_back('8');
+                break;
+            case '3':
+                dest->push_back('9');
+                break;
+            case '7':
+                dest->push_back('1');
+                break;
+            case '8':
+                dest->push_back('2');
+                break;
+            case '9':
+                dest->push_back('3');
+                break;
+            default:
+                dest->push_back(it);
+                break;
+            }
+        }
+        return true;
+    }
+}
 // DlgRegister 对话框
 
 IMPLEMENT_DYNAMIC(CDlgRegister, CDialogEx)
@@ -53,6 +92,17 @@ void CDlgRegister::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_REGISTER_INFO, m_register_info_list);
 }
 
+void CDlgRegister::OnOK()
+{
+    // 快捷键盘功能：注册用户
+    OnBnClickedBtnRegister();
+    // 直接设置下一个用户名字和密码       
+    m_register_username.SetWindowTextW(registerHelper_->GetNewName().c_str());
+    m_register_password.SetWindowTextW(registerHelper_->GetPassword().c_str());
+    // 直接显示新的验证码
+    OnBnClickedBtnVerifyCode();
+    return;
+}
 
 BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_WM_PAINT()
@@ -72,8 +122,8 @@ BOOL CDlgRegister::OnInitDialog()
     CDialogEx::OnInitDialog();
 
     m_register_verifycode.SetFont(font18_.get(),FALSE);
-    RegisterHotKey(this->m_hWnd, 1001, 0, VK_F5);
-    RegisterHotKey(this->m_hWnd, 1002, 0, VK_RETURN);
+    //RegisterHotKey(this->m_hWnd, 1001, 0, VK_F5);
+    //RegisterHotKey(this->m_hWnd, 1002, 0, VK_RETURN);
 
     m_register_username.SetWindowTextW(registerHelper_->GetNewName().c_str());
     m_register_password.SetWindowTextW(registerHelper_->GetPassword().c_str());
@@ -178,24 +228,11 @@ void CDlgRegister::OnBnClickedBtnRegister()
         return;
     }
 
-    bool result = registerHelper_->RegisterCheckUserExist(username.GetBuffer());
-    if (!result)
-    {
-        Notify(L"网络出错或用户已经存在!");
-        return;
-    }
-    Notify(L"用户名可用");
-
-    if (!registerHelper_->RegisterCheckPassword(username.GetString(),
-        password.GetString()))
-    {
-        Notify(L"检测用户信息失败");
-        return;
-    }
-    Notify(L"检测用户信息成功");
-
+    std::string cookies;
+    std::string verifystr;
+    TranslateVerifyCode(base::WideToUTF8(verifycode.GetString()), &verifystr);
     if (!registerHelper_->RegisterUser(username.GetString(),
-        password.GetString(), verifycode.GetString()))
+        password.GetString(), verifystr, &cookies))
     {
         Notify(L"注册失败");
         return;
@@ -203,7 +240,7 @@ void CDlgRegister::OnBnClickedBtnRegister()
     Notify(L"注册成功");
 
     if (!registerHelper_->SaveAccountToFile(username.GetString(), 
-        password.GetString()))
+        password.GetString(), cookies))
     {
         Notify(L"保存注册信息到文件失败!");
     }

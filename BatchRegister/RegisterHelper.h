@@ -21,7 +21,7 @@ public:
     bool SaveVerifyCodeImage(
         const std::vector<uint8>& image, std::wstring* path);
     bool SaveAccountToFile(const std::wstring& username,
-        const std::wstring& password);
+        const std::wstring& password, const std::string& cookies);
     bool LoadAccountFromFile(
         std::vector<std::pair<std::wstring, std::wstring>>* accountinfo);
 
@@ -30,11 +30,14 @@ public:
 
     // 注册新号码，网络部分功能
     bool RegisterGetVerifyCode(std::vector<uint8>* picture);
+
+    // 在新版本里，这两个函数都改了，但目前刷起来，不需要这两个功能验证用户名密码
     bool RegisterCheckUserExist(const std::wstring& username);
     bool RegisterCheckPassword(const std::wstring& username, 
         const std::wstring& password);
+
     bool RegisterUser(const std::wstring& username, const std::wstring& password,
-        const std::wstring& verifycode);
+        const std::string& verifycode, std::string* cookies);
 
 private:
     std::unique_ptr<CurlWrapper> curlWrapper_;
