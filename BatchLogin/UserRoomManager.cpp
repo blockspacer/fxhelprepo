@@ -298,7 +298,8 @@ void UserRoomManager::DoUpMVBillboard(const std::wstring& collectionid,
     const std::wstring& mvid)
 {
     bool result = userController_->UpMVBillboard(
-        base::WideToUTF8(collectionid), base::WideToUTF8(mvid));
+        base::WideToUTF8(collectionid), base::WideToUTF8(mvid),
+        notify_);
     assert(result && L"¥Ú∞Ò ß∞‹");
     if (notify_)
     {

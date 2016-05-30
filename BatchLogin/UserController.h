@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <functional>
 #undef max
 #undef min
 #include "third_party/chromium/base/basictypes.h"
@@ -28,7 +29,8 @@ public:
 
     bool GetUserLoginInfo(std::vector<UserLoginInfo>* userlogininfo);
     bool FillRoom(uint32 roomid, uint32 count);
-    bool UpMVBillboard(const std::string& collectionid, const std::string& mvid);
+    bool UpMVBillboard(const std::string& collectionid, const std::string& mvid,
+                       std::function<void(const std::wstring&message)> callback);
 
     // 执行对应批量用户控制策略,暂时不处理进入房间的通知回调
     void Run();

@@ -2,6 +2,7 @@
 #include "UserController.h"
 #include "MVBillboard.h"
 #include "Network/User.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 namespace
 {
@@ -63,14 +64,28 @@ bool UserController::FillRoom(uint32 roomid, uint32 count)
 }
 
 bool UserController::UpMVBillboard(const std::string& collectionid,
-    const std::string& mvid)
+                                   const std::string& mvid,
+                                   std::function<void(const std::wstring&message)> callback)
 {
     uint32 successCount = 0;
     for (const auto& it : users_)
     {
+        std::wstring message = base::UTF8ToWide(it->GetUsername()) + L"´ò°ñ" + base::UTF8ToWide(mvid);
         std::string cookie = it->GetCookies();
+        
         if (mvBillboard_->UpMVBillboard(cookie, collectionid, mvid))
+        {
+            message += L"³É¹¦";
             successCount++;
+        }
+        else
+        {
+            message += L"Ê§°Ü";
+        }
+        if (callback)
+        {
+            callback(message);
+        }
     }
     assert(users_.size() == successCount);
     return successCount > 0;
