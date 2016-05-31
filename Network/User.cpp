@@ -326,8 +326,7 @@ bool User::LoginHttps(const std::string& username,
     if (responsedata.empty())
         return  false;
     std::string header = "loginSuccessCallback(";
-    responsedata = responsedata.substr(header.length(), 
-        responsedata.length() - header.length() - 2);
+    std::string jsondata = PickJson(responsedata);
     //std::string beginmark = R"("token":")";
     //auto beginpos = responsedata.find(beginmark);
     //if (beginpos == std::string::npos)
@@ -338,11 +337,13 @@ bool User::LoginHttps(const std::string& username,
 
     Json::Reader reader;
     Json::Value logindata(Json::objectValue);
-    if (!reader.parse(responsedata, logindata, false))
+    if (!reader.parse(jsondata, logindata, false))
     {
         return false;
     }
 
+    std::string errorMsg = logindata.get("errorMsg", "").asString();
+    std::wstring werrorMsg = base::UTF8ToWide(errorMsg);
     // 暂时没有必要检测status的值
     Json::Value jvCmd(Json::ValueType::intValue);
     usertoken_ = logindata.get("token", "").asString();

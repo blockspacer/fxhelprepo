@@ -87,7 +87,7 @@ BOOL CBatchLoginDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
-	ShowWindow(SW_MINIMIZE);
+	ShowWindow(SW_NORMAL);
 
     DWORD dwStyle = m_ListCtrl_Users.GetExtendedStyle();
     dwStyle |= LVS_EX_CHECKBOXES;
