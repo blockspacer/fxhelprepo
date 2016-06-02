@@ -51,6 +51,9 @@
     <ClInclude Include="MessageNotifyManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="IpProxy.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -81,6 +84,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MessageNotifyManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IpProxy.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
