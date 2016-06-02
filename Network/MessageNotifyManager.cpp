@@ -572,6 +572,34 @@ void MessageNotifyManager::DoConnect8080_NotLogin(uint32 roomid, uint32 userid,
     return;
 }
 
+bool MessageNotifyManager::SendChatMessage(const std::string& nickname, 
+    uint32 richlevel, const std::string& message)
+{
+    baseThread_.message_loop()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSendChatMessage, this,
+        nickname, richlevel, message));
+    return true;
+}
+
+void MessageNotifyManager::DoSendChatMessage(const std::string& nickname,
+    uint32 richlevel, const std::string& message)
+{
+    Json::FastWriter writer;
+    Json::Value root(Json::objectValue);
+    root["cmd"] = 501;
+    root["nickname"] = nickname;
+    root["richlevel"] = base::UintToString(richlevel);
+    root["receiverid"] = 0;
+    root["receivername"] = "";
+    root["chatmsg"] = message;
+    root["issecrect"] = 0;
+
+    std::string data = writer.write(root);
+    std::vector<char> msg;
+    msg.assign(data.begin(), data.end());
+    tcpClient_8080_->Send(msg);
+}
+
 void MessageNotifyManager::DoSendHeartBeat()
 {
     std::string heartbeat = "HEARTBEAT_REQUEST";

@@ -32,6 +32,10 @@ namespace
         L"昵称",
         L"用户id"
     };
+
+    const wchar_t* vestcolumnlist[] = {
+        L"马甲"
+    };
 }
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
@@ -76,8 +80,10 @@ CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
     , infoListCount_(0)
     , listCtrlRowIndex_(0)
     , m_query_key(_T(""))
+    , m_radiogroup(0)
 {
     blacklistHelper_.reset(new BlacklistHelper);
+    antiStrategy_.reset(new AntiStrategy);
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
 }
 
@@ -85,6 +91,9 @@ CFanXingDlg::~CFanXingDlg()
 {
     if (network_)
     {
+        network_->RemoveNotify();
+        network_->RemoveNotify201();
+        network_->RemoveNotify501();
         network_->Finalize();
     }  
 }
@@ -99,6 +108,10 @@ void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_USER_STATUS_BLACK, m_ListCtrl_Blacks);
     DDX_Control(pDX, IDC_STATIC_AUTH_INFO, m_static_auth_info);
     DDX_Control(pDX, IDC_STATIC_LOGIN_INFO, m_static_login_info);
+    DDX_Control(pDX, IDC_EDIT_VEST, m_edit_vest);
+    DDX_Control(pDX, IDC_EDIT_CHAT_MSG, m_edit_chatmsg);
+    DDX_Control(pDX, IDC_LIST_VEST, m_list_vest);
+    DDX_Radio(pDX, IDC_RADIO_NOACTION, m_radiogroup);
 }
 
 BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
@@ -138,6 +151,12 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_SAVE_BLACK, &CFanXingDlg::OnBnClickedBtnSaveBlack)
     ON_BN_CLICKED(IDC_BTN_CLEAR_INFO, &CFanXingDlg::OnBnClickedBtnClearInfo)
     ON_BN_CLICKED(IDCANCEL, &CFanXingDlg::OnBnClickedCancel)
+    ON_BN_CLICKED(IDC_BTN_ADD_VEST, &CFanXingDlg::OnBnClickedBtnAddVest)
+    ON_BN_CLICKED(IDC_BTN_REMOVE_VEST, &CFanXingDlg::OnBnClickedBtnRemoveVest)
+    ON_BN_CLICKED(IDC_BTN_SEND_CHAT, &CFanXingDlg::OnBnClickedBtnSendChat)
+    ON_BN_CLICKED(IDC_RADIO_NOACTION, &CFanXingDlg::OnBnClickedRadioNoaction)
+    ON_BN_CLICKED(IDC_RADIO_BANCHAT, &CFanXingDlg::OnBnClickedRadioNoaction)
+    ON_BN_CLICKED(IDC_RADIO_KICKOUT, &CFanXingDlg::OnBnClickedRadioNoaction)
 END_MESSAGE_MAP()
 
 
@@ -186,7 +205,7 @@ BOOL CFanXingDlg::OnInitDialog()
         m_ListCtrl_Viewers.DeleteColumn(i);
     uint32 index = 0;
     for (const auto& it : viewcolumnlist)
-        m_ListCtrl_Viewers.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
+        m_ListCtrl_Viewers.InsertColumn(index++, it, LVCFMT_LEFT, 80);//插入列
 
     m_ListCtrl_Blacks.SetExtendedStyle(dwStyle);
     nColumnCount = m_ListCtrl_Blacks.GetHeaderCtrl()->GetItemCount();
@@ -194,7 +213,7 @@ BOOL CFanXingDlg::OnInitDialog()
         m_ListCtrl_Blacks.DeleteColumn(i);
     index = 0;
     for (const auto& it : blackcolumnlist)
-        m_ListCtrl_Blacks.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
+        m_ListCtrl_Blacks.InsertColumn(index++, it, LVCFMT_LEFT, 80);//插入列
 
     // 初始化保存数据
     Config config;
@@ -218,7 +237,14 @@ BOOL CFanXingDlg::OnInitDialog()
     std::wstring authorityDisplayInfo = L"软件未授权,操作受限";
     authorityHelper.GetAuthorityDisplayInfo(&authorityDisplayInfo);
     m_static_auth_info.SetWindowTextW(authorityDisplayInfo.c_str());
-    
+
+    // 初始化马甲信息表头
+    m_list_vest.SetExtendedStyle(dwStyle);
+    index = 0;
+    for (const auto& it : vestcolumnlist)
+        m_list_vest.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列   
+    m_radiogroup = 1;
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -270,6 +296,14 @@ void CFanXingDlg::OnClose()
     {
         network_->RemoveNotify();
     }  
+}
+
+void CFanXingDlg::OnOK()
+{
+}
+
+void CFanXingDlg::OnCancel()
+{
 }
 //当用户拖动最小化窗口时系统调用此函数取得光标
 //显示。
@@ -415,10 +449,12 @@ bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstrin
 {
     if (network_)
     {
+        network_->RemoveNotify();
         network_->Finalize();
     }
     network_.reset(new NetworkHelper);
     network_->Initialize();
+    network_->SetAntiStrategy(antiStrategy_);
     network_->SetNotify(
         std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
     
@@ -548,6 +584,18 @@ bool CFanXingDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUser
         Notify(msg);
     }
     return true;
+}
+
+bool CFanXingDlg::SendChatMessage_(uint32 roomid, const std::wstring& message)
+{
+    if (!network_)
+        return false;
+
+    if (!roomid || message.empty())
+        return false;
+
+    std::string utf8message = base::WideToUTF8(message);
+    return network_->SendChatMessage(roomid, utf8message);
 }
 
 // 界面线程执行
@@ -1052,6 +1100,87 @@ void CFanXingDlg::OnBnClickedBtnClearInfo()
 
 void CFanXingDlg::OnBnClickedCancel()
 {
-    // TODO:  在此添加控件通知处理程序代码
     CDialogEx::OnCancel();
+}
+
+
+void CFanXingDlg::OnBnClickedBtnAddVest()
+{
+    CString vestname;
+    m_edit_vest.GetWindowTextW(vestname);
+    std::string utfvestname = base::WideToUTF8(vestname.GetBuffer());
+    if (!antiStrategy_->AddNickname(utfvestname))
+        return; // 已经存在，不需要重新添加
+
+    int itemcount = m_list_vest.GetItemCount();
+    bool exist = false;
+    // 检测是否存在相同用户id
+    for (int index = 0; index < itemcount; index++)
+    {
+        CString text = m_list_vest.GetItemText(index, 1);
+        if (vestname.CompareNoCase(text.GetBuffer()) == 0)
+        {
+            exist = true;
+            break;
+        }
+    }
+
+    if (!exist) // 如果不存在，需要插入新数据
+    {
+        int nitem = m_list_vest.InsertItem(itemcount + 1, vestname);
+        m_list_vest.SetItemText(nitem, 1, vestname);
+        CString msg = vestname + L"被加入到自动处理列表中";
+        Notify(msg.GetBuffer());
+    }
+}
+
+
+void CFanXingDlg::OnBnClickedBtnRemoveVest()
+{
+    int count = m_list_vest.GetItemCount();
+
+    // 从后往前删除
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_list_vest.GetCheck(i))
+        {
+            // 把要删除的消息发到日志记录列表上
+            CString itemtext = m_list_vest.GetItemText(i, 0);
+            std::string utfvestname = base::WideToUTF8(itemtext.GetBuffer());
+            antiStrategy_->RemoveNickname(utfvestname);
+            // 删除已经勾选的记录
+            m_list_vest.DeleteItem(i);
+            CString msg = itemtext + L"被从自动处理列表中删除";
+            Notify(msg.GetBuffer());
+        }
+    }
+}
+
+
+void CFanXingDlg::OnBnClickedBtnSendChat()
+{
+    CString message;
+    m_edit_chatmsg.GetWindowTextW(message);
+    SendChatMessage_(roomid_, message.GetBuffer());
+}
+
+
+void CFanXingDlg::OnBnClickedRadioNoaction()
+{
+    UpdateData(TRUE);
+    switch (m_radiogroup)
+    {
+    case 0:
+        antiStrategy_->SetHandleType(HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE);
+        break;
+    case 1:
+        antiStrategy_->SetHandleType(HANDLE_TYPE::HANDLE_TYPE_BANCHAT);
+        break;
+    case 2:
+        antiStrategy_->SetHandleType(HANDLE_TYPE::HANDLE_TYPE_KICKOUT);
+        break;
+    default:
+        antiStrategy_->SetHandleType(HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE);
+        break;
+    }
 }

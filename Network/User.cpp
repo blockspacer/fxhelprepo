@@ -79,6 +79,11 @@ void User::SetNotify201(Notify201 notify201)
     notify201_ = notify201;
 }
 
+void User::SetNotify501(Notify501 notify501)
+{
+    notify501_ = notify501;
+}
+
 bool User::Login()
 {
     return Login(username_, password_);
@@ -154,6 +159,10 @@ bool User::EnterRoom(uint32 roomid)
         room->SetNotify201(notify201_);
     }
 
+    if (notify501_)
+    {
+        room->SetNotify501(notify501_);
+    }
     // 如果存在重复的房间，先断掉旧的
     this->ExitRoom(roomid);
 
@@ -183,9 +192,14 @@ bool User::ExitRooms()
     return false;
 }
 
-bool User::Chat(const std::string& message)
+bool User::SendChatMessage(uint32 roomid, const std::string& message)
 {
-    return false;
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+    return room->second->SendChatMessage(nickname_, richlevel_, message);
 }
 
 bool User::SendStar(uint32 count)
@@ -418,6 +432,14 @@ bool User::LoginUServiceGetMyUserDataInfo()
         else if (member.compare("userId")==0)
         {
             fanxingid_ = static_cast<uint32>(GetDoubleFromJsonValue(fxUserInfo, member));
+        }
+        else if (member.compare("nickName") == 0)
+        {
+            nickname_ = fxUserInfo.get(member, "nickname").asString();
+        }
+        else if (member.compare("richLevel") == 0)
+        {
+            richlevel_ = GetInt32FromJsonValue(fxUserInfo, member);
         }
     }
 

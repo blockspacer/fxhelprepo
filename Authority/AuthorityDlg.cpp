@@ -91,7 +91,7 @@ BOOL CAuthorityDlg::OnInitDialog()
 	ShowWindow(SW_NORMAL);
 
 	// TODO:  在此添加额外的初始化代码
-    m_edit_serverip.SetWindowTextW(L"42.62.68.50");
+    m_edit_serverip.SetWindowTextW(L"114.54.2.205");
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 

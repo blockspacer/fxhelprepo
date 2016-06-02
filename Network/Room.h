@@ -19,6 +19,7 @@ public:
     bool Enter(const std::string& cookies, const std::string& usertoken, uint32 userid);
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
+    void SetNotify501(Notify501 notify501);
     // 中断接收数据的连接
     bool Exit();
 
@@ -30,6 +31,8 @@ public:
     bool BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo);
 
+    bool SendChatMessage(const std::string& nickname, uint32 richlevel,
+        const std::string& message);
 private:
     bool OpenRoom(const std::string& cookies);
 

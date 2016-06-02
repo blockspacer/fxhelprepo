@@ -105,15 +105,21 @@ public:
         uint32 richlevel, uint32 ismaster, uint32 staruserid,
         const std::string& key, const std::string& ext);
 
+    bool SendChatMessage(const std::string& nickname, uint32 richlevel,
+        const std::string& message);
 private:
 
     void DoConnect843();
     void DoConnect8080(uint32 roomid, uint32 userid,
         const std::string& usertoken);
 
-    void DoConnect8080_NotLogin(uint32 roomid, uint32 userid, const std::string& nickname,
+    void DoConnect8080_NotLogin(uint32 roomid, uint32 userid, 
+        const std::string& nickname,
         uint32 richlevel, uint32 ismaster, uint32 staruserid,
         const std::string& key, const std::string& ext);
+
+    void DoSendChatMessage(const std::string& nickname, uint32 richlevel,
+        const std::string& message);
 
     void DoSendHeartBeat();
     void DoRecv();

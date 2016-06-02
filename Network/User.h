@@ -49,6 +49,7 @@ public:
     //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
+    void SetNotify501(Notify501 notify501);
 
     // 操作行为
     bool Login();
@@ -64,7 +65,7 @@ public:
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
 
-    bool Chat(const std::string& message);
+    bool SendChatMessage(uint32 roomid, const std::string& message);
     bool SendStar(uint32 count);
     bool RetrieveStart();
     bool SendGift(uint32 giftid);
@@ -89,6 +90,8 @@ private:
     std::string serverip_;
 
     // 登录后才能获得的用户信息
+    std::string nickname_ = "";
+    uint32 richlevel_ = 0;
     uint32 kugouid_ = 0;
     uint32 fanxingid_ = 0;
     uint32 clanid_ = 0;
@@ -103,5 +106,6 @@ private:
 
     NormalNotify normalNotify_;
     Notify201 notify201_;
+    Notify501 notify501_;
 };
 

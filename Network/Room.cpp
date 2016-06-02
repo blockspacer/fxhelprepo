@@ -305,6 +305,12 @@ bool Room::UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterR
     return true;
 }
 
+bool Room::SendChatMessage(const std::string& nickname, uint32 richlevel,
+    const std::string& message)
+{
+    return messageNotifyManager_->SendChatMessage(nickname, richlevel, message);
+}
+
 void Room::SetNormalNotify(NormalNotify normalNotify)
 {
     messageNotifyManager_->SetNormalNotify(normalNotify);
@@ -315,6 +321,10 @@ void Room::SetNotify201(Notify201 notify201)
     messageNotifyManager_->SetNotify201(notify201);
 }
 
+void Room::SetNotify501(Notify501 notify501)
+{
+    messageNotifyManager_->SetNotify501(notify501);
+}
 bool Room::OpenRoom(const std::string& cookies)
 {
     HttpRequest request;
