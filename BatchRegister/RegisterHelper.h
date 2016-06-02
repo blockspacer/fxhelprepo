@@ -37,7 +37,7 @@ public:
         const std::wstring& password);
 
     bool RegisterUser(const std::wstring& username, const std::wstring& password,
-        const std::string& verifycode, std::string* cookies);
+        const std::string& verifycode, std::string* cookies, std::wstring* errormsg);
 
 private:
     std::unique_ptr<CurlWrapper> curlWrapper_;

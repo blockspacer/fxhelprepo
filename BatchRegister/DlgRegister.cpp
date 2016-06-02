@@ -230,11 +230,12 @@ void CDlgRegister::OnBnClickedBtnRegister()
 
     std::string cookies;
     std::string verifystr;
+    std::wstring errorMsg;
     TranslateVerifyCode(base::WideToUTF8(verifycode.GetString()), &verifystr);
     if (!registerHelper_->RegisterUser(username.GetString(),
-        password.GetString(), verifystr, &cookies))
+        password.GetString(), verifystr, &cookies, &errorMsg))
     {
-        Notify(L"×¢²áÊ§°Ü");
+        Notify(errorMsg + L" ×¢²áÊ§°Ü");
         return;
     }
     Notify(L"×¢²á³É¹¦");

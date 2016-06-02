@@ -240,7 +240,7 @@ bool RegisterHelper::RegisterCheckPassword(const std::wstring& username, const s
 // PostData = userName=fanxingtest011&pwd=1233211234567&rePwd=1233211234567&verifyCode=upfill&UM_Sex=1
 bool RegisterHelper::RegisterUser(const std::wstring& username,
     const std::wstring& password, const std::string& verifycode,
-    std::string* cookies)
+    std::string* cookies, std::wstring* errormsg)
 {
     std::string url = "https://reg-user.kugou.com/v2/reg/";
     HttpRequest request;
@@ -269,6 +269,23 @@ bool RegisterHelper::RegisterUser(const std::wstring& username,
 
     std::string content;
     content.assign(response.content.begin(), response.content.end());
+    content = PickJson(content);
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(content, rootdata, false))
+    {
+        return false;
+    }
+
+    // 暂时没有必要检测status的值
+    std::string utf8ErrorMsg = rootdata.get("errorMsg", "").asString();
+    std::wstring wErrorMsg = base::UTF8ToWide(utf8ErrorMsg);
+    if (!wErrorMsg.empty())
+    {
+        LOG(ERROR) << wErrorMsg;
+        *errormsg = wErrorMsg;
+        return false;
+    }
     if (content.find(R"("nickname")") == std::string::npos)
     {
         return false;
