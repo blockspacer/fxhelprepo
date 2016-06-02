@@ -5,6 +5,12 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <mutex>
+#include "afxcmn.h"
+
+#include "Network/EncodeHelper.h"
+#include "afxwin.h"
 
 class UserRoomManager;
 // CBatchLoginDlg 对话框
@@ -17,6 +23,12 @@ public:
 // 对话框数据
 	enum { IDD = IDD_BATCHLOGIN_DIALOG };
 
+    enum
+    {
+        WM_USER_NOTIFY_MESSAGE = WM_USER + 1,
+        WM_USER_USER_LIST_INFO = WM_USER + 2,
+        WM_USER_ROOM_LIST_INFO = WM_USER + 3,
+    };
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
@@ -29,14 +41,32 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
-	DECLARE_MESSAGE_MAP()
-public:
     afx_msg void OnBnClickedBtnImportUser();
-
-private:
-    std::unique_ptr<UserRoomManager> userRoomManager_;
-public:
+    afx_msg void OnBnClickedBtnLogin();
     afx_msg void OnBnClickedBtnGetProxy();
     afx_msg void OnBnClickedBtnBatchEnterRoom();
     afx_msg void OnBnClickedBtnImportRoom();
+
+	DECLARE_MESSAGE_MAP()
+
+private:
+    void Notify(const std::wstring& message);
+    LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
+    LRESULT OnDisplayDataToUserList(WPARAM wParam, LPARAM lParam);
+    LRESULT OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam);
+
+    std::unique_ptr<UserRoomManager> userRoomManager_;
+    CListCtrl m_ListCtrl_Users;
+    CListCtrl m_ListCtrl_Rooms;
+    CListBox InfoList_;
+    int infoListCount_ = 0;
+
+    std::mutex messageMutex_;
+    std::vector<std::wstring> messageQueen_;    
+
+public:
+    afx_msg void OnBnClickedBtnUpMvBillboard();
+    CEdit m_mv_collection_id;
+    CEdit m_mv_id;
+    afx_msg void OnBnClickedBtnSaveUserPwdCookie();
 };

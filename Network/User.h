@@ -41,8 +41,8 @@ public:
     void SetPassword(const std::string& password);
     std::string GetPassword() const;
 
-    void SetCookies(const std::vector<std::string> cookies);
-    std::vector<std::string> GetCookies() const;
+    void SetCookies(const std::string& cookies);
+    std::string GetCookies() const;
 
     void SetServerIp(const std::string& serverip);
 

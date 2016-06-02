@@ -7,6 +7,9 @@
 #include "third_party/json/json.h"
 #include "third_party/chromium/base/time/time.h"
 
+typedef std::vector<std::wstring> RowData;
+typedef std::vector<RowData> GridData;
+
 std::wstring BinToHex(const void* bin, int len);
 std::string BinToAnsiHex(const void* bin, int len);
 bool HexToBin(const wchar_t* hex, int hexLen, void* bin, int* binLen);

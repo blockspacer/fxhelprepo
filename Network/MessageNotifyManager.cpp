@@ -17,7 +17,7 @@
 namespace
 {
 static int threadindex = 0;
-const char* targetip = "42.62.68.50";
+const char* targetip = "114.54.2.204";
 //const char* targetip = "114.54.2.205";
 const uint16 port843 = 843;
 const uint16 port8080 = 8080;
