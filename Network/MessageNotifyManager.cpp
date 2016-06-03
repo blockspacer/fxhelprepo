@@ -609,7 +609,7 @@ void MessageNotifyManager::DoSendHeartBeat()
     tcpClient_8080_->Send(heardbeatvec);
     if (normalNotify_)
     {
-        normalNotify_(L"Send Heartbeat");
+        normalNotify_(L"房间状态正常");
     }  
 }
 
