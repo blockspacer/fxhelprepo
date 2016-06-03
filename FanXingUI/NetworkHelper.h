@@ -39,8 +39,10 @@ class AntiStrategy
 public:
     AntiStrategy();
     ~AntiStrategy();
-    HANDLE_TYPE GetUserHandleType(const std::string& nickname);
+    HANDLE_TYPE GetUserHandleType(const std::string& nickname) const;
+    HANDLE_TYPE GetHandleType() const;
     void SetHandleType(HANDLE_TYPE handletype);
+
     bool AddNickname(const std::string& vestname);
     bool RemoveNickname(const std::string& vestname);
 private:
@@ -81,6 +83,7 @@ public:
     bool GetViewerList(uint32 roomid,
         std::vector<RowData>* enterRoomUserInfoRowdata);
 
+    void SetHandleChatUsers(bool kick);
     // 判断用户是否有操作权限，暂时实现为只有公会成员才能操作。
     bool GetActionPrivilege(std::wstring* message);
 
@@ -96,11 +99,13 @@ private:
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
     void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo);
     void TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo);
+    void TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo);
 
     std::map<uint32, EnterRoomUserInfo> enterRoomUserInfoMap_;
     notifyfn notify_;
     notify201 notify201_;
-    notify201 notify501_;
+    notify501 notify501_;
+    bool handleall501_ = false;
     notify502 notify502_;
     notify601 notify601_;
     uint32 roomid_ = 0;

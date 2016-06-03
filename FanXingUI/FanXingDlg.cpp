@@ -112,6 +112,7 @@ void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_CHAT_MSG, m_edit_chatmsg);
     DDX_Control(pDX, IDC_LIST_VEST, m_list_vest);
     DDX_Radio(pDX, IDC_RADIO_NOACTION, m_radiogroup);
+    DDX_Control(pDX, IDC_CHK_HANDLE_ALL, m_chk_handle_all);
 }
 
 BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
@@ -157,6 +158,7 @@ BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
     ON_BN_CLICKED(IDC_RADIO_NOACTION, &CFanXingDlg::OnBnClickedRadioNoaction)
     ON_BN_CLICKED(IDC_RADIO_BANCHAT, &CFanXingDlg::OnBnClickedRadioNoaction)
     ON_BN_CLICKED(IDC_RADIO_KICKOUT, &CFanXingDlg::OnBnClickedRadioNoaction)
+    ON_BN_CLICKED(IDC_CHK_HANDLE_ALL, &CFanXingDlg::OnBnClickedChkHandleAll)
 END_MESSAGE_MAP()
 
 
@@ -1183,4 +1185,13 @@ void CFanXingDlg::OnBnClickedRadioNoaction()
         antiStrategy_->SetHandleType(HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE);
         break;
     }
+}
+
+
+void CFanXingDlg::OnBnClickedChkHandleAll()
+{
+    bool handleall = !!m_chk_handle_all.GetCheck();
+    if (!network_)
+        return;
+    network_->SetHandleChatUsers(handleall);
 }

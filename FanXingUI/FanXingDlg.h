@@ -134,4 +134,6 @@ public:
     CListCtrl m_list_vest;
     int m_radiogroup;
     afx_msg void OnBnClickedRadioNoaction();
+    CButton m_chk_handle_all;
+    afx_msg void OnBnClickedChkHandleAll();
 };

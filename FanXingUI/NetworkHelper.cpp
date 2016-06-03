@@ -38,7 +38,7 @@ AntiStrategy::~AntiStrategy()
 
 }
 
-HANDLE_TYPE AntiStrategy::GetUserHandleType(const std::string& nickname)
+HANDLE_TYPE AntiStrategy::GetUserHandleType(const std::string& nickname) const
 {
     for (const auto& it : vestnames_)
     {
@@ -46,6 +46,11 @@ HANDLE_TYPE AntiStrategy::GetUserHandleType(const std::string& nickname)
             return handletype_;
     }
     return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
+}
+
+HANDLE_TYPE AntiStrategy::GetHandleType() const
+{
+    return handletype_;
 }
 
 void AntiStrategy::SetHandleType(HANDLE_TYPE handletype)
@@ -251,6 +256,11 @@ bool NetworkHelper::SendChatMessage(uint32 roomid, const std::string& message)
     return user_->SendChatMessage(roomid, message);
 }
 
+void NetworkHelper::SetHandleChatUsers(bool handleall501)
+{
+    handleall501_ = handleall501;
+}
+
 bool NetworkHelper::GetActionPrivilege(std::wstring* message)
 {
     if (user_->GetFanxingId() != authority_->userid)
@@ -319,6 +329,7 @@ void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo
 void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo)
 {
     TryHandleUser(enterRoomUserInfo);
+    TryHandle501Msg(enterRoomUserInfo);
     if (!notify501_)
         return;
 
@@ -330,6 +341,27 @@ void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo
 void NetworkHelper::TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo)
 {
     HANDLE_TYPE handletype = antiStrategy_->GetUserHandleType(enterRoomUserInfo.nickname);
+    bool result = true;
+    switch (handletype)
+    {
+    case HANDLE_TYPE::HANDLE_TYPE_BANCHAT:
+        result = BanChat(roomid_, enterRoomUserInfo);
+        break;
+    case HANDLE_TYPE::HANDLE_TYPE_KICKOUT:
+        result = KickoutUsers(KICK_TYPE::KICK_TYPE_HOUR, roomid_, enterRoomUserInfo);
+        break;
+    default:
+        break;
+    }
+    assert(result);
+}
+
+void NetworkHelper::TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    if (!handleall501_)
+        return;
+
+    HANDLE_TYPE handletype = antiStrategy_->GetHandleType();
     bool result = true;
     switch (handletype)
     {

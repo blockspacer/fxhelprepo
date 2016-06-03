@@ -422,8 +422,8 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
 			
 			if (CommandHandle_501(rootdata, &enterRoomUserInfo, &outmsg))
             {
-				if (notify201_)
-					notify201_(enterRoomUserInfo);
+                if (notify501_)
+                    notify501_(enterRoomUserInfo);
             }
             
             break;
