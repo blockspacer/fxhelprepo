@@ -190,9 +190,34 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     }
     
     // 设置代理
-    //curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-    //curl_easy_setopt(curl, CURLOPT_PROXY, "127.0.0.1");
-    //curl_easy_setopt(curl, CURLOPT_PROXYPORT, 8888);
+    if (request.ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        uint32 proxytype = CURLPROXY_HTTP;
+        switch (request.ipproxy.GetProxyType())
+        {
+        case IpProxy::PROXY_TYPE::PROXY_TYPE_HTTP:
+            proxytype = CURLPROXY_HTTP;
+            break;
+        case IpProxy::PROXY_TYPE::PROXY_TYPE_SOCKS4:
+            proxytype = CURLPROXY_SOCKS4;
+            break;
+        case IpProxy::PROXY_TYPE::PROXY_TYPE_SOCKS4A:
+            proxytype = CURLPROXY_SOCKS4A;
+            break;
+        case IpProxy::PROXY_TYPE::PROXY_TYPE_SOCKS5:
+            proxytype = CURLPROXY_SOCKS5;
+            break;
+        default:
+            assert(false && L"参数错误");
+            break;
+        }
+        std::string proxyip = request.ipproxy.GetProxyIp();
+        uint16 proxyport = request.ipproxy.GetProxyPort();
+
+        curl_easy_setopt(curl, CURLOPT_PROXYTYPE, proxytype);
+        curl_easy_setopt(curl, CURLOPT_PROXY, proxyip.c_str());
+        curl_easy_setopt(curl, CURLOPT_PROXYPORT, proxyport);
+    }
 
     res = curl_easy_perform(curl);
     response->curlcode = res;

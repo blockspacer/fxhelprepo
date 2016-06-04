@@ -22,7 +22,7 @@ Room::~Room()
     messageNotifyManager_->Finalize();
 }
 
-void Room::SetServerIp(const std::string& serverip)
+void Room::SetRoomServerIp(const std::string& serverip)
 {
     messageNotifyManager_->SetServerIp(serverip);
 }

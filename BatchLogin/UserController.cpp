@@ -26,7 +26,7 @@ bool UserController::AddUser(const std::string& username,
         assert(false && L"µÇÂ¼Ê§°Ü");
         return false;
     }
-    shared_user->SetServerIp(serverip);
+    shared_user->SetRoomServerIp(serverip);
     users_.push_back(shared_user);
     return true;
 }
@@ -36,7 +36,7 @@ bool UserController::AddUserWithCookies(const std::string& username,
 {
     std::shared_ptr<User> shared_user(new User(username, ""));
     shared_user->SetCookies(cookies);
-    shared_user->SetServerIp(serverip);
+    shared_user->SetRoomServerIp(serverip);
     users_.push_back(shared_user);
     return true;
 }

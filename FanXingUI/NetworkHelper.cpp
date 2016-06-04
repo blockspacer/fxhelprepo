@@ -93,7 +93,7 @@ bool NetworkHelper::Initialize()
     AuthorityHelper authorityHelper;
     bool result = authorityHelper.Load(authority_.get());
     assert(!authority_->serverip.empty());
-    user_->SetServerIp(authority_->serverip);
+    user_->SetRoomServerIp(authority_->serverip);
     return result;
 }
 

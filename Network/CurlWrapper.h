@@ -2,10 +2,10 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <vector>
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/files/file.h"
-
-#include "Network/MessageNotifyManager.h"
+#include "Network/IpProxy.h"
 
 enum class KICK_TYPE
 {
@@ -28,6 +28,7 @@ public:
     std::string cookies;
     std::map<std::string, std::string> queries;
     std::map<std::string, std::string> headers;
+    IpProxy ipproxy;
 };
 
 class HttpResponse

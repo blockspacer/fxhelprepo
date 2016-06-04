@@ -44,7 +44,7 @@ public:
     void SetCookies(const std::string& cookies);
     std::string GetCookies() const;
 
-    void SetServerIp(const std::string& serverip);
+    void SetRoomServerIp(const std::string& serverip);
 
     //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
     void SetNormalNotify(NormalNotify normalNotify);

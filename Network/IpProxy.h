@@ -27,8 +27,8 @@ public:
     uint16 GetProxyPort() const;
 
 private:
-    PROXY_TYPE proxytype_;
-    std::string proxyip_;
-    uint16 proxyport_;
+    PROXY_TYPE proxytype_ = PROXY_TYPE::PROXY_TYPE_NONE;
+    std::string proxyip_ = "";
+    uint16 proxyport_ = 0;
 };
 
