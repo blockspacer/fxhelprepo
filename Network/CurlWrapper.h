@@ -26,6 +26,7 @@ public:
     std::string url;
     std::string referer;
     std::string cookies;
+    std::string useragent;
     std::map<std::string, std::string> queries;
     std::map<std::string, std::string> headers;
     IpProxy ipproxy;

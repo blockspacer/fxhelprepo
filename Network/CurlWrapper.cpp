@@ -154,7 +154,11 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
     curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
 
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+    if (!request.useragent.empty())
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, request.useragent.c_str());
+    else
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+    
     if (!request.referer.empty())
     {
         curl_easy_setopt(curl, CURLOPT_REFERER, request.referer.c_str());

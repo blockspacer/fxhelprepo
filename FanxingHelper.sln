@@ -61,6 +61,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Authority", "Authority\Auth
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GiftDisplay", "GiftDisplay\GiftDisplay.vcxproj", "{62403993-1B5A-4916-8B8D-E5F40470D370}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IpProxyAchiever", "IpProxyAchiever\IpProxyAchiever.vcxproj", "{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -183,6 +185,12 @@ Global
 		{62403993-1B5A-4916-8B8D-E5F40470D370}.Release|Win32.ActiveCfg = Release|Win32
 		{62403993-1B5A-4916-8B8D-E5F40470D370}.Release|Win32.Build.0 = Release|Win32
 		{62403993-1B5A-4916-8B8D-E5F40470D370}.Release|x64.ActiveCfg = Release|Win32
+		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Debug|Win32.Build.0 = Debug|Win32
+		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Debug|x64.ActiveCfg = Debug|Win32
+		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Release|Win32.ActiveCfg = Release|Win32
+		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Release|Win32.Build.0 = Release|Win32
+		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
