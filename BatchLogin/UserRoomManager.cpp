@@ -3,8 +3,10 @@
 #include <string>
 #include <map>
 #include <set>
+#include <fstream>
 
 #include "Network/EncodeHelper.h"
+#include "Network/IpProxy.h"
 #include "UserRoomManager.h"
 
 #undef max
@@ -164,6 +166,60 @@ bool UserRoomManager::SaveUserLoginConfig()
     workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
         base::Bind(&UserRoomManager::DoSaveUserLoginConfig, this));
     return true;
+}
+
+bool UserRoomManager::LoadIpProxy(GridData* proxyinfo)
+{
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = L"Proxy.txt";
+    base::FilePath pathname = dirPath.Append(filename);
+
+    std::ifstream ovrifs;
+    ovrifs.open(pathname.value());
+    if (!ovrifs)
+        return false;
+
+    std::stringstream ss;
+    ss << ovrifs.rdbuf();
+    if (ss.str().empty())
+        return false;
+
+    std::string data = ss.str();
+    try
+    {
+        Json::Reader reader;
+        Json::Value root(Json::objectValue);
+        if (!Json::Reader().parse(data.c_str(), root))
+        {
+            assert(false && L"Json::Reader().parse error");
+            return false;
+        }
+
+        if (!root.isArray())
+        {
+            assert(false && L"root is not array");
+            return false;
+        }
+
+        for (const auto& value : root)//for data
+        {
+            Json::Value temp;
+            uint32 proxytype = GetInt32FromJsonValue(value, "proxytype");
+            uint32 proxyport = GetInt32FromJsonValue(value, "port");
+            std::string proxyip = value.get("ip", "").asString();
+            IpProxy proxy;
+            proxy.SetProxyType(static_cast<IpProxy::PROXY_TYPE>(proxytype));
+            proxy.SetProxyIp(proxyip);
+            proxy.SetProxyPort(proxyport);
+            ipProxys_.push_back(proxy);
+        }
+    }
+    catch (...)
+    {
+        assert(false && L"∂¡»°¥ÌŒÛ");
+        return false;
+    }
 }
 
 void UserRoomManager::DoSaveUserLoginConfig()
