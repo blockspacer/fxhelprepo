@@ -212,7 +212,13 @@ bool UserRoomManager::LoadIpProxy(GridData* proxyinfo)
             proxy.SetProxyType(static_cast<IpProxy::PROXY_TYPE>(proxytype));
             proxy.SetProxyIp(proxyip);
             proxy.SetProxyPort(proxyport);
-            ipProxys_.push_back(proxy);
+            ipProxys_[proxyip] = proxy;
+
+            RowData row;
+            row.push_back(base::UintToString16(proxytype));
+            row.push_back(base::UTF8ToWide(proxyip));
+            row.push_back(base::UintToString16(proxyport));
+            proxyinfo->push_back(row);
         }
     }
     catch (...)
@@ -258,11 +264,15 @@ bool UserRoomManager::BatchLogUsers(
 void UserRoomManager::DoBatchLogUsers(
     const std::map<std::wstring, std::wstring>& userAccountPassword)
 {
+    IpProxy ipproxy;
+    if (!ipProxys_.empty())
+        ipproxy = ipProxys_.begin()->second;
+    
     for (auto it : userAccountPassword)
     {
         std::string account = base::WideToUTF8(it.first);
         std::string password = base::WideToUTF8(it.second);
-        bool result = userController_->AddUser(account, password);
+        bool result = userController_->AddUser(account, password, ipproxy);
         if (notify_)
         {
             std::wstring message = base::UTF8ToWide(account) + L" Login ";
@@ -283,11 +293,15 @@ bool UserRoomManager::BatchLogUsersWithCookie(
 void UserRoomManager::DoBatchLogUsersWithCookie(
     const std::map<std::wstring, std::wstring>& accountCookie)
 {
+    IpProxy ipproxy;
+    if (!ipProxys_.empty())
+        ipproxy = ipProxys_.begin()->second;
+
     for (auto it : accountCookie)
     {
         std::string account = base::WideToUTF8(it.first);
         std::string cookie = base::WideToUTF8(it.second);
-        bool result = userController_->AddUserWithCookies(account, cookie);
+        bool result = userController_->AddUserWithCookies(account, cookie, ipproxy);
         if (notify_)
         {
             std::wstring message = base::UTF8ToWide(account) + L" Login ";

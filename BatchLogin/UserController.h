@@ -8,6 +8,7 @@
 
 class User;
 class MVBillboard;
+class IpProxy;
 // 批量控制用户类
 struct UserLoginInfo
 {
@@ -23,9 +24,11 @@ public:
     ~UserController();
 
     // 在已经知道cookie的情况下不需要再做比较费时的登录操作了
-    bool AddUserWithCookies(const std::string& username, const std::string& cookies);
+    bool AddUserWithCookies(const std::string& username, 
+        const std::string& cookies, const IpProxy& ipproxy);
 
-    bool AddUser(const std::string& username, const std::string& password);
+    bool AddUser(const std::string& username, const std::string& password, 
+        const IpProxy& ipproxy);
 
     bool GetUserLoginInfo(std::vector<UserLoginInfo>* userlogininfo);
     bool FillRoom(uint32 roomid, uint32 count);

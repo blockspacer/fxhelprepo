@@ -32,6 +32,12 @@ namespace{
         L"显示人数",
         L"有效期",
     };
+
+    const wchar_t* proxycolumnlist[] = {
+        L"代理协议",
+        L"代理ip",
+        L"代理端口"
+    };
 }
 
 // CBatchLoginDlg 对话框
@@ -57,6 +63,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
     DDX_Control(pDX, IDC_EDIT_MV_COLLECTION_ID, m_mv_collection_id);
     DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
+    DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -110,6 +117,16 @@ BOOL CBatchLoginDlg::OnInitDialog()
     index = 0;
     for (const auto& it : roomcolumnlist)
         m_ListCtrl_Rooms.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
+
+    
+    m_list_proxy.SetExtendedStyle(dwStyle); //设置扩展风格
+    nColumnCount = m_list_proxy.GetHeaderCtrl()->GetItemCount();
+    for (int i = nColumnCount - 1; i >= 0; i--)
+        m_list_proxy.DeleteColumn(i);
+    index = 0;
+    for (const auto& it : proxycolumnlist)
+        m_list_proxy.InsertColumn(index++, it, LVCFMT_LEFT, 70);//插入列
+
 
     userRoomManager_->Initialize();
     userRoomManager_->SetNotify(
@@ -256,7 +273,36 @@ void CBatchLoginDlg::OnBnClickedBtnImportRoom()
 
 void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 {
+    GridData griddata;
+    if (!userRoomManager_->LoadIpProxy(&griddata))
+        return;
 
+    // 显示数据到界面
+    int itemcount = m_list_proxy.GetItemCount();
+
+    for (uint32 i = 0; i < griddata.size(); ++i)
+    {
+        bool exist = false;
+        // 检测是否存在相同ip
+        for (int index = 0; index < itemcount; index++)
+        {
+            CString text = m_list_proxy.GetItemText(index, 1);
+            if (griddata[i][1].compare(text.GetBuffer()) == 0) // 相同ip
+            {
+                exist = true;
+                break;
+            }
+        }
+
+        if (!exist) // 如果不存在，需要插入新数据
+        {
+            int nitem = m_list_proxy.InsertItem(itemcount + i, griddata[i][0].c_str());
+            for (uint32 j = 0; j < griddata[i].size(); ++j)
+            {
+                m_list_proxy.SetItemText(nitem, j, griddata[i][j].c_str());
+            }
+        }
+    }
 }
 
 void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()

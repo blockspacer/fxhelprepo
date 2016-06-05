@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include "Room.h"
+#include "Network/IpProxy.h"
 
 #undef max
 #undef min
@@ -40,6 +41,9 @@ public:
     
     void SetPassword(const std::string& password);
     std::string GetPassword() const;
+
+    void SetIpProxy(const IpProxy& ipproxy);
+    IpProxy GetIpProxy() const;
 
     void SetCookies(const std::string& cookies);
     std::string GetCookies() const;
@@ -88,6 +92,7 @@ private:
     std::string username_;
     std::string password_;
     std::string serverip_;
+    IpProxy ipproxy_;
 
     // 登录后才能获得的用户信息
     std::string nickname_ = "";
