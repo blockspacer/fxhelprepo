@@ -20,10 +20,10 @@ namespace base
 // 有关此类的实现，请参阅 FanXing.cpp
 //
 
-class CFanXingApp : public CWinApp
+class CAntiFloodApp : public CWinApp
 {
 public:
-	CFanXingApp();
+	CAntiFloodApp();
 
 // 重写
 public:
@@ -37,4 +37,4 @@ private:
     scoped_ptr<base::AtExitManager> atExitManager_;
 };
 
-extern CFanXingApp theApp;
+extern CAntiFloodApp theApp;

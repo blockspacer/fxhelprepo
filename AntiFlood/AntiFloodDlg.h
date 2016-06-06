@@ -14,12 +14,12 @@
 
 
 // CFanXingDlg 对话框
-class CFanXingDlg : public CDialogEx
+class CAntiFloodDlg : public CDialogEx
 {
 // 构造
 public:
-    CFanXingDlg(CWnd* pParent = NULL);
-    virtual ~CFanXingDlg();
+    CAntiFloodDlg(CWnd* pParent = NULL);
+    virtual ~CAntiFloodDlg();
 
 // 对话框数据
 	enum { IDD = IDD_FANXING_DIALOG };

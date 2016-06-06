@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "third_party", "third_party", "{5D2BA8C2-3BD9-49B6-AC01-A3C43CC2CA8E}"
 EndProject
@@ -37,8 +37,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zlib", "zlib", "{942CB7F3-B
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "third_party\chromium\third_party\zlib\zlib.vcxproj", "{57997958-0CDB-A2A6-B81A-C5CADFC6E484}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FanXingUI", "FanXingUI\FanXing.vcxproj", "{E9035218-3760-48C7-AC18-8FC5E5205BD0}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Network", "Network\Network.vcxproj", "{2147CB51-23F6-4022-8E4A-291B70570CB7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "openssl", "openssl", "{72CA0B3B-F617-42B3-A124-F05C1244398B}"
@@ -60,6 +58,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Authority", "Authority\Authority.vcxproj", "{04D939DC-6E04-4AA7-B169-D3DDD5F02FBC}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GiftDisplay", "GiftDisplay\GiftDisplay.vcxproj", "{62403993-1B5A-4916-8B8D-E5F40470D370}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AntiFlood", "AntiFlood\AntiFlood.vcxproj", "{E9035218-3760-48C7-AC18-8FC5E5205BD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,12 +121,6 @@ Global
 		{57997958-0CDB-A2A6-B81A-C5CADFC6E484}.Release|Win32.Build.0 = Release|Win32
 		{57997958-0CDB-A2A6-B81A-C5CADFC6E484}.Release|x64.ActiveCfg = Release|x64
 		{57997958-0CDB-A2A6-B81A-C5CADFC6E484}.Release|x64.Build.0 = Release|x64
-		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Debug|Win32.Build.0 = Debug|Win32
-		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Debug|x64.ActiveCfg = Debug|Win32
-		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Release|Win32.ActiveCfg = Release|Win32
-		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Release|Win32.Build.0 = Release|Win32
-		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Release|x64.ActiveCfg = Release|Win32
 		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Debug|Win32.ActiveCfg = Debug|Win32
 		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Debug|Win32.Build.0 = Debug|Win32
 		{2147CB51-23F6-4022-8E4A-291B70570CB7}.Debug|x64.ActiveCfg = Debug|Win32
@@ -183,6 +177,12 @@ Global
 		{62403993-1B5A-4916-8B8D-E5F40470D370}.Release|Win32.ActiveCfg = Release|Win32
 		{62403993-1B5A-4916-8B8D-E5F40470D370}.Release|Win32.Build.0 = Release|Win32
 		{62403993-1B5A-4916-8B8D-E5F40470D370}.Release|x64.ActiveCfg = Release|Win32
+		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Debug|Win32.Build.0 = Debug|Win32
+		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Debug|x64.ActiveCfg = Debug|Win32
+		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Release|Win32.ActiveCfg = Release|Win32
+		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Release|Win32.Build.0 = Release|Win32
+		{E9035218-3760-48C7-AC18-8FC5E5205BD0}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

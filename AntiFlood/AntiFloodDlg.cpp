@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 #include <xutility>
-#include "FanXing.h"
-#include "FanXingDlg.h"
+#include "AntiFlood.h"
+#include "AntiFloodDlg.h"
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
@@ -73,8 +73,8 @@ END_MESSAGE_MAP()
 
 #define NOPRIVILEGE_NOTICE L"你没有操作权限"
 
-CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(CFanXingDlg::IDD, pParent)
+CAntiFloodDlg::CAntiFloodDlg(CWnd* pParent /*=NULL*/)
+	: CDialogEx(CAntiFloodDlg::IDD, pParent)
     , network_(nullptr)
     , blacklistHelper_(nullptr)
     , infoListCount_(0)
@@ -87,7 +87,7 @@ CFanXingDlg::CFanXingDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
 }
 
-CFanXingDlg::~CFanXingDlg()
+CAntiFloodDlg::~CAntiFloodDlg()
 {
     if (network_)
     {
@@ -98,7 +98,7 @@ CFanXingDlg::~CFanXingDlg()
     }  
 }
 
-void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
+void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_LIST1, InfoList_);
@@ -115,56 +115,56 @@ void CFanXingDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_HANDLE_ALL, m_chk_handle_all);
 }
 
-BEGIN_MESSAGE_MAP(CFanXingDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_WM_SYSCOMMAND()
     ON_WM_PAINT()
     ON_WM_QUERYDRAGICON()
-    ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CFanXingDlg::OnBnClickedButtonLogin)
-    ON_BN_CLICKED(IDC_BUTTON_REWARSTAR, &CFanXingDlg::OnBnClickedButtonRewarstar)
-    ON_BN_CLICKED(IDC_BUTTON_REWARDGIFT, &CFanXingDlg::OnBnClickedButtonRewardgift)
-    ON_BN_CLICKED(IDC_BUTTON_NAV, &CFanXingDlg::OnBnClickedButtonNav)
+    ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CAntiFloodDlg::OnBnClickedButtonLogin)
+    ON_BN_CLICKED(IDC_BUTTON_REWARSTAR, &CAntiFloodDlg::OnBnClickedButtonRewarstar)
+    ON_BN_CLICKED(IDC_BUTTON_REWARDGIFT, &CAntiFloodDlg::OnBnClickedButtonRewardgift)
+    ON_BN_CLICKED(IDC_BUTTON_NAV, &CAntiFloodDlg::OnBnClickedButtonNav)
     ON_WM_LBUTTONDOWN()
-    ON_BN_CLICKED(IDC_BTN_GETMSG, &CFanXingDlg::OnBnClickedBtnGetmsg)
-    ON_BN_CLICKED(IDC_BTN_ADD, &CFanXingDlg::OnBnClickedBtnAdd)
-    ON_MESSAGE(WM_USER_01, &CFanXingDlg::OnNotifyMessage)
-    ON_MESSAGE(WM_USER_ADD_ENTER_ROOM_INFO, &CFanXingDlg::OnDisplayDataToViewerList)
-    ON_MESSAGE(WM_USER_ADD_TO_BLACK_LIST, &CFanXingDlg::OnDisplayDtatToBlackList)
-    ON_NOTIFY(HDN_ITEMCLICK, 0, &CFanXingDlg::OnHdnItemclickListUserStatus)
-    ON_BN_CLICKED(IDC_BUTTON_REMOVE, &CFanXingDlg::OnBnClickedButtonRemove)
-    ON_BN_CLICKED(IDC_BTN_QUERY, &CFanXingDlg::OnBnClickedBtnQuery)
-    ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CFanXingDlg::OnBnClickedBtnSelectAll)
-    ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE, &CFanXingDlg::OnBnClickedBtnSelectReverse)
-    ON_BN_CLICKED(IDC_BTN_KICKOUT_MONTH, &CFanXingDlg::OnBnClickedBtnKickoutMonth)
-    ON_BN_CLICKED(IDC_BTN_KICKOUT_HOUR, &CFanXingDlg::OnBnClickedBtnKickoutHour)
-    ON_BN_CLICKED(IDC_BTN_SILENT, &CFanXingDlg::OnBnClickedBtnSilent)
-    ON_BN_CLICKED(IDC_BTN_UNSILENT, &CFanXingDlg::OnBnClickedBtnUnsilent)
-    ON_BN_CLICKED(IDC_BTN_CLEAR, &CFanXingDlg::OnBnClickedBtnClear)
-    ON_BN_CLICKED(IDC_BTN_GET_VIEWER_LIST, &CFanXingDlg::OnBnClickedBtnGetViewerList)
-    ON_BN_CLICKED(IDC_BTN_KICKOUT_MONTH_BLACK, &CFanXingDlg::OnBnClickedBtnKickoutMonthBlack)
-    ON_BN_CLICKED(IDC_BTN_KICKOUT_HOUR_BLACK, &CFanXingDlg::OnBnClickedBtnKickoutHourBlack)
-    ON_BN_CLICKED(IDC_BTN_SILENT_BLACK, &CFanXingDlg::OnBnClickedBtnSilentBlack)
-    ON_BN_CLICKED(IDC_BTN_UNSILENT_BLACK, &CFanXingDlg::OnBnClickedBtnUnsilentBlack)
-    ON_BN_CLICKED(IDC_BTN_SELECT_ALL_BLACK, &CFanXingDlg::OnBnClickedBtnSelectAllBlack)
-    ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE_BLACK, &CFanXingDlg::OnBnClickedBtnSelectReverseBlack)
-    ON_BN_CLICKED(IDC_BTN_REMOVE_BLACK, &CFanXingDlg::OnBnClickedBtnRemoveBlack)
-    ON_BN_CLICKED(IDC_BTN_LOAD_BLACK, &CFanXingDlg::OnBnClickedBtnLoadBlack)
-    ON_BN_CLICKED(IDC_BTN_ADD_TO_BLACK, &CFanXingDlg::OnBnClickedBtnAddToBlack)
-    ON_BN_CLICKED(IDC_BTN_SAVE_BLACK, &CFanXingDlg::OnBnClickedBtnSaveBlack)
-    ON_BN_CLICKED(IDC_BTN_CLEAR_INFO, &CFanXingDlg::OnBnClickedBtnClearInfo)
-    ON_BN_CLICKED(IDCANCEL, &CFanXingDlg::OnBnClickedCancel)
-    ON_BN_CLICKED(IDC_BTN_ADD_VEST, &CFanXingDlg::OnBnClickedBtnAddVest)
-    ON_BN_CLICKED(IDC_BTN_REMOVE_VEST, &CFanXingDlg::OnBnClickedBtnRemoveVest)
-    ON_BN_CLICKED(IDC_BTN_SEND_CHAT, &CFanXingDlg::OnBnClickedBtnSendChat)
-    ON_BN_CLICKED(IDC_RADIO_NOACTION, &CFanXingDlg::OnBnClickedRadioNoaction)
-    ON_BN_CLICKED(IDC_RADIO_BANCHAT, &CFanXingDlg::OnBnClickedRadioNoaction)
-    ON_BN_CLICKED(IDC_RADIO_KICKOUT, &CFanXingDlg::OnBnClickedRadioNoaction)
-    ON_BN_CLICKED(IDC_CHK_HANDLE_ALL, &CFanXingDlg::OnBnClickedChkHandleAll)
+    ON_BN_CLICKED(IDC_BTN_GETMSG, &CAntiFloodDlg::OnBnClickedBtnGetmsg)
+    ON_BN_CLICKED(IDC_BTN_ADD, &CAntiFloodDlg::OnBnClickedBtnAdd)
+    ON_MESSAGE(WM_USER_01, &CAntiFloodDlg::OnNotifyMessage)
+    ON_MESSAGE(WM_USER_ADD_ENTER_ROOM_INFO, &CAntiFloodDlg::OnDisplayDataToViewerList)
+    ON_MESSAGE(WM_USER_ADD_TO_BLACK_LIST, &CAntiFloodDlg::OnDisplayDtatToBlackList)
+    ON_NOTIFY(HDN_ITEMCLICK, 0, &CAntiFloodDlg::OnHdnItemclickListUserStatus)
+    ON_BN_CLICKED(IDC_BUTTON_REMOVE, &CAntiFloodDlg::OnBnClickedButtonRemove)
+    ON_BN_CLICKED(IDC_BTN_QUERY, &CAntiFloodDlg::OnBnClickedBtnQuery)
+    ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CAntiFloodDlg::OnBnClickedBtnSelectAll)
+    ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE, &CAntiFloodDlg::OnBnClickedBtnSelectReverse)
+    ON_BN_CLICKED(IDC_BTN_KICKOUT_MONTH, &CAntiFloodDlg::OnBnClickedBtnKickoutMonth)
+    ON_BN_CLICKED(IDC_BTN_KICKOUT_HOUR, &CAntiFloodDlg::OnBnClickedBtnKickoutHour)
+    ON_BN_CLICKED(IDC_BTN_SILENT, &CAntiFloodDlg::OnBnClickedBtnSilent)
+    ON_BN_CLICKED(IDC_BTN_UNSILENT, &CAntiFloodDlg::OnBnClickedBtnUnsilent)
+    ON_BN_CLICKED(IDC_BTN_CLEAR, &CAntiFloodDlg::OnBnClickedBtnClear)
+    ON_BN_CLICKED(IDC_BTN_GET_VIEWER_LIST, &CAntiFloodDlg::OnBnClickedBtnGetViewerList)
+    ON_BN_CLICKED(IDC_BTN_KICKOUT_MONTH_BLACK, &CAntiFloodDlg::OnBnClickedBtnKickoutMonthBlack)
+    ON_BN_CLICKED(IDC_BTN_KICKOUT_HOUR_BLACK, &CAntiFloodDlg::OnBnClickedBtnKickoutHourBlack)
+    ON_BN_CLICKED(IDC_BTN_SILENT_BLACK, &CAntiFloodDlg::OnBnClickedBtnSilentBlack)
+    ON_BN_CLICKED(IDC_BTN_UNSILENT_BLACK, &CAntiFloodDlg::OnBnClickedBtnUnsilentBlack)
+    ON_BN_CLICKED(IDC_BTN_SELECT_ALL_BLACK, &CAntiFloodDlg::OnBnClickedBtnSelectAllBlack)
+    ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE_BLACK, &CAntiFloodDlg::OnBnClickedBtnSelectReverseBlack)
+    ON_BN_CLICKED(IDC_BTN_REMOVE_BLACK, &CAntiFloodDlg::OnBnClickedBtnRemoveBlack)
+    ON_BN_CLICKED(IDC_BTN_LOAD_BLACK, &CAntiFloodDlg::OnBnClickedBtnLoadBlack)
+    ON_BN_CLICKED(IDC_BTN_ADD_TO_BLACK, &CAntiFloodDlg::OnBnClickedBtnAddToBlack)
+    ON_BN_CLICKED(IDC_BTN_SAVE_BLACK, &CAntiFloodDlg::OnBnClickedBtnSaveBlack)
+    ON_BN_CLICKED(IDC_BTN_CLEAR_INFO, &CAntiFloodDlg::OnBnClickedBtnClearInfo)
+    ON_BN_CLICKED(IDCANCEL, &CAntiFloodDlg::OnBnClickedCancel)
+    ON_BN_CLICKED(IDC_BTN_ADD_VEST, &CAntiFloodDlg::OnBnClickedBtnAddVest)
+    ON_BN_CLICKED(IDC_BTN_REMOVE_VEST, &CAntiFloodDlg::OnBnClickedBtnRemoveVest)
+    ON_BN_CLICKED(IDC_BTN_SEND_CHAT, &CAntiFloodDlg::OnBnClickedBtnSendChat)
+    ON_BN_CLICKED(IDC_RADIO_NOACTION, &CAntiFloodDlg::OnBnClickedRadioNoaction)
+    ON_BN_CLICKED(IDC_RADIO_BANCHAT, &CAntiFloodDlg::OnBnClickedRadioNoaction)
+    ON_BN_CLICKED(IDC_RADIO_KICKOUT, &CAntiFloodDlg::OnBnClickedRadioNoaction)
+    ON_BN_CLICKED(IDC_CHK_HANDLE_ALL, &CAntiFloodDlg::OnBnClickedChkHandleAll)
 END_MESSAGE_MAP()
 
 
 // CFanXingDlg 消息处理程序
 
-BOOL CFanXingDlg::OnInitDialog()
+BOOL CAntiFloodDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
@@ -250,7 +250,7 @@ BOOL CFanXingDlg::OnInitDialog()
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
-void CFanXingDlg::OnSysCommand(UINT nID, LPARAM lParam)
+void CAntiFloodDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
 	{
@@ -267,7 +267,7 @@ void CFanXingDlg::OnSysCommand(UINT nID, LPARAM lParam)
 //  来绘制该图标。  对于使用文档/视图模型的 MFC 应用程序，
 //  这将由框架自动完成。
 
-void CFanXingDlg::OnPaint()
+void CAntiFloodDlg::OnPaint()
 {
 	if (IsIconic())
 	{
@@ -292,7 +292,7 @@ void CFanXingDlg::OnPaint()
 	}
 }
 
-void CFanXingDlg::OnClose()
+void CAntiFloodDlg::OnClose()
 {
     if (network_)
     {
@@ -300,22 +300,22 @@ void CFanXingDlg::OnClose()
     }  
 }
 
-void CFanXingDlg::OnOK()
+void CAntiFloodDlg::OnOK()
 {
 }
 
-void CFanXingDlg::OnCancel()
+void CAntiFloodDlg::OnCancel()
 {
 }
 //当用户拖动最小化窗口时系统调用此函数取得光标
 //显示。
-HCURSOR CFanXingDlg::OnQueryDragIcon()
+HCURSOR CAntiFloodDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
 // 登录功能
-void CFanXingDlg::OnBnClickedButtonLogin()
+void CAntiFloodDlg::OnBnClickedButtonLogin()
 {
     CString username;
     CString password;
@@ -340,7 +340,7 @@ void CFanXingDlg::OnBnClickedButtonLogin()
 }
 
 //跳转页面功能
-void CFanXingDlg::OnBnClickedButtonNav()
+void CAntiFloodDlg::OnBnClickedButtonNav()
 {
     if (!network_)
         return;
@@ -353,13 +353,13 @@ void CFanXingDlg::OnBnClickedButtonNav()
     base::StringToUint(strRoomid.GetBuffer(), &roomid_);
 
     network_->SetNotify(
-        std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
+        std::bind(&CAntiFloodDlg::Notify, this, std::placeholders::_1));
 
     network_->SetNotify201(
-        std::bind(&CFanXingDlg::NotifyEnterRoom, this, std::placeholders::_1));
+        std::bind(&CAntiFloodDlg::NotifyEnterRoom, this, std::placeholders::_1));
 
     network_->SetNotify501(
-        std::bind(&CFanXingDlg::NotifyEnterRoom, this, std::placeholders::_1));
+        std::bind(&CAntiFloodDlg::NotifyEnterRoom, this, std::placeholders::_1));
 
     bool result = network_->EnterRoom(strRoomid.GetBuffer());
     std::wstring message = std::wstring(L"Enter room ") + (result ? L"success" : L"failed");
@@ -371,28 +371,28 @@ void CFanXingDlg::OnBnClickedButtonNav()
 }
 
 // 送星星功能
-void CFanXingDlg::OnBnClickedButtonRewarstar()
+void CAntiFloodDlg::OnBnClickedButtonRewarstar()
 {
     if (!network_)
         return;
 }
 
 // 送礼物功能
-void CFanXingDlg::OnBnClickedButtonRewardgift()
+void CAntiFloodDlg::OnBnClickedButtonRewardgift()
 {
     if (!network_)
         return;
 }
 
 // 获取公屏信息
-void CFanXingDlg::OnBnClickedBtnGetmsg()
+void CAntiFloodDlg::OnBnClickedBtnGetmsg()
 {
     if (!network_)
         return;
 }
 
 // 用来做测试的函数
-void CFanXingDlg::OnBnClickedBtnAdd()
+void CAntiFloodDlg::OnBnClickedBtnAdd()
 {
     RowData rowdata;
     rowdata.push_back(L"1");
@@ -409,7 +409,7 @@ void CFanXingDlg::OnBnClickedBtnAdd()
         m_ListCtrl_Viewers.SetItemText(nitem, j, rowdata[j].c_str());
     }
 }
-void CFanXingDlg::SetHScroll()
+void CAntiFloodDlg::SetHScroll()
 {
     CDC* dc = GetDC();
     
@@ -429,7 +429,7 @@ void CFanXingDlg::SetHScroll()
     ReleaseDC(dc);
 }
 
-void CFanXingDlg::Notify(const std::wstring& message)
+void CAntiFloodDlg::Notify(const std::wstring& message)
 {
     // 发送数据给窗口
     messageMutex_.lock();
@@ -438,7 +438,7 @@ void CFanXingDlg::Notify(const std::wstring& message)
     this->PostMessage(WM_USER_01, 0, 0);
 }
 
-void CFanXingDlg::NotifyEnterRoom(const RowData& rowdata)
+void CAntiFloodDlg::NotifyEnterRoom(const RowData& rowdata)
 {
     // 发送数据给窗口
     viewerRowdataMutex_.lock();
@@ -447,7 +447,7 @@ void CFanXingDlg::NotifyEnterRoom(const RowData& rowdata)
     this->PostMessage(WM_USER_ADD_ENTER_ROOM_INFO, 0, 0);
 }
 
-bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstring& password)
+bool CAntiFloodDlg::LoginByRequest(const std::wstring& username, const std::wstring& password)
 {
     if (network_)
     {
@@ -458,13 +458,13 @@ bool CFanXingDlg::LoginByRequest(const std::wstring& username, const std::wstrin
     network_->Initialize();
     network_->SetAntiStrategy(antiStrategy_);
     network_->SetNotify(
-        std::bind(&CFanXingDlg::Notify, this, std::placeholders::_1));
+        std::bind(&CAntiFloodDlg::Notify, this, std::placeholders::_1));
     
     bool result = network_->Login(username, password);
     return result;
 }
 
-bool CFanXingDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
+bool CAntiFloodDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
 {
 	if (!enterRoomUserInfos)
 		return false;
@@ -492,7 +492,7 @@ bool CFanXingDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUser
 	return true;
 }
 
-bool CFanXingDlg::GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
+bool CAntiFloodDlg::GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
 {
     if (!enterRoomUserInfos)
         return false;
@@ -516,7 +516,7 @@ bool CFanXingDlg::GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserI
     return true;
 }
 
-bool CFanXingDlg::KickOut_(
+bool CAntiFloodDlg::KickOut_(
     const std::vector<EnterRoomUserInfo>& enterRoomUserInfos,
     KICK_TYPE kicktype)
 {
@@ -542,7 +542,7 @@ bool CFanXingDlg::KickOut_(
     return true;
 }
 
-bool CFanXingDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
+bool CAntiFloodDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
 {
     if (!network_)
         return false;
@@ -565,7 +565,7 @@ bool CFanXingDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserIn
     return true;
 }
 
-bool CFanXingDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
+bool CAntiFloodDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
 {
     if (!network_)
         return false;
@@ -601,7 +601,7 @@ bool CFanXingDlg::SendChatMessage_(uint32 roomid, const std::wstring& message)
 }
 
 // 界面线程执行
-LRESULT CFanXingDlg::OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam)
+LRESULT CAntiFloodDlg::OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam)
 {
     if (viewerRowdataQueue_.empty())
         return 0;
@@ -655,7 +655,7 @@ LRESULT CFanXingDlg::OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-LRESULT CFanXingDlg::OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam)
+LRESULT CAntiFloodDlg::OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam)
 {
     if (blackRowdataQueue_.empty())
         return 0;
@@ -694,7 +694,7 @@ LRESULT CFanXingDlg::OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
+LRESULT CAntiFloodDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 {
     std::vector<std::wstring> messages;
     messageMutex_.lock();
@@ -712,7 +712,7 @@ LRESULT CFanXingDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 }
 
 // 比较方法
-int CFanXingDlg::CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+int CAntiFloodDlg::CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
     CListCtrl* ctlList = reinterpret_cast <CListCtrl*> (lParamSort);
 
@@ -736,7 +736,7 @@ int CFanXingDlg::CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 }
 
 // 排序
-void CFanXingDlg::OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult)
+void CAntiFloodDlg::OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult)
 {
     LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
     
@@ -745,7 +745,7 @@ void CFanXingDlg::OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult)
     *pResult = 0;}
 
 
-void CFanXingDlg::OnBnClickedButtonRemove()
+void CAntiFloodDlg::OnBnClickedButtonRemove()
 {
     int count = m_ListCtrl_Viewers.GetItemCount();
 
@@ -765,7 +765,7 @@ void CFanXingDlg::OnBnClickedButtonRemove()
     }
 }
 
-void CFanXingDlg::OnBnClickedBtnQuery()
+void CAntiFloodDlg::OnBnClickedBtnQuery()
 {
     UpdateData(TRUE);
     CString key = m_query_key;
@@ -782,7 +782,7 @@ void CFanXingDlg::OnBnClickedBtnQuery()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnSelectAll()
+void CAntiFloodDlg::OnBnClickedBtnSelectAll()
 {
     int count = m_ListCtrl_Viewers.GetItemCount();
 
@@ -792,7 +792,7 @@ void CFanXingDlg::OnBnClickedBtnSelectAll()
     }
 }
 
-void CFanXingDlg::OnBnClickedBtnSelectReverse()
+void CAntiFloodDlg::OnBnClickedBtnSelectReverse()
 {
     int count = m_ListCtrl_Viewers.GetItemCount();
 
@@ -810,7 +810,7 @@ void CFanXingDlg::OnBnClickedBtnSelectReverse()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnKickoutMonth()
+void CAntiFloodDlg::OnBnClickedBtnKickoutMonth()
 {
     if (!network_)
         return;
@@ -827,7 +827,7 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonth()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnKickoutHour()
+void CAntiFloodDlg::OnBnClickedBtnKickoutHour()
 {
     if (!network_)
         return;
@@ -845,7 +845,7 @@ void CFanXingDlg::OnBnClickedBtnKickoutHour()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnSilent()
+void CAntiFloodDlg::OnBnClickedBtnSilent()
 {
     if (!network_)
         return;
@@ -862,7 +862,7 @@ void CFanXingDlg::OnBnClickedBtnSilent()
     BanChat_(enterRoomUserInfos);
 }
 
-void CFanXingDlg::OnBnClickedBtnUnsilent()
+void CAntiFloodDlg::OnBnClickedBtnUnsilent()
 {
     if (!network_)
         return;
@@ -879,7 +879,7 @@ void CFanXingDlg::OnBnClickedBtnUnsilent()
     UnbanChat_(enterRoomUserInfos);
 }
 
-void CFanXingDlg::OnBnClickedBtnClear()
+void CAntiFloodDlg::OnBnClickedBtnClear()
 {
     int count = m_ListCtrl_Viewers.GetItemCount();
     // 从后往前删除
@@ -893,7 +893,7 @@ void CFanXingDlg::OnBnClickedBtnClear()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnGetViewerList()
+void CAntiFloodDlg::OnBnClickedBtnGetViewerList()
 {
     if (!network_)
         return;
@@ -914,7 +914,7 @@ void CFanXingDlg::OnBnClickedBtnGetViewerList()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
+void CAntiFloodDlg::OnBnClickedBtnKickoutMonthBlack()
 {
     if (!network_)
         return;
@@ -932,7 +932,7 @@ void CFanXingDlg::OnBnClickedBtnKickoutMonthBlack()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
+void CAntiFloodDlg::OnBnClickedBtnKickoutHourBlack()
 {
     if (!network_)
         return;
@@ -950,7 +950,7 @@ void CFanXingDlg::OnBnClickedBtnKickoutHourBlack()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnSilentBlack()
+void CAntiFloodDlg::OnBnClickedBtnSilentBlack()
 {
     if (!network_)
         return;
@@ -967,7 +967,7 @@ void CFanXingDlg::OnBnClickedBtnSilentBlack()
     BanChat_(enterRoomUserInfos);
 }
 
-void CFanXingDlg::OnBnClickedBtnUnsilentBlack()
+void CAntiFloodDlg::OnBnClickedBtnUnsilentBlack()
 {
     if (!network_)
         return;
@@ -984,7 +984,7 @@ void CFanXingDlg::OnBnClickedBtnUnsilentBlack()
     UnbanChat_(enterRoomUserInfos);
 }
 
-void CFanXingDlg::OnBnClickedBtnSelectAllBlack()
+void CAntiFloodDlg::OnBnClickedBtnSelectAllBlack()
 {
     int count = m_ListCtrl_Blacks.GetItemCount();
 
@@ -995,7 +995,7 @@ void CFanXingDlg::OnBnClickedBtnSelectAllBlack()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnSelectReverseBlack()
+void CAntiFloodDlg::OnBnClickedBtnSelectReverseBlack()
 {
     int count = m_ListCtrl_Blacks.GetItemCount();
 
@@ -1012,7 +1012,7 @@ void CFanXingDlg::OnBnClickedBtnSelectReverseBlack()
     }
 }
 
-void CFanXingDlg::OnBnClickedBtnRemoveBlack()
+void CAntiFloodDlg::OnBnClickedBtnRemoveBlack()
 {
     int count = m_ListCtrl_Blacks.GetItemCount();
 
@@ -1032,7 +1032,7 @@ void CFanXingDlg::OnBnClickedBtnRemoveBlack()
     }
 }
 
-void CFanXingDlg::OnBnClickedBtnLoadBlack()
+void CAntiFloodDlg::OnBnClickedBtnLoadBlack()
 {
     std::vector<RowData> rowdatas;
     if (!blacklistHelper_->LoadBlackList(&rowdatas))
@@ -1054,7 +1054,7 @@ void CFanXingDlg::OnBnClickedBtnLoadBlack()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnAddToBlack()
+void CAntiFloodDlg::OnBnClickedBtnAddToBlack()
 {
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectViewers(&enterRoomUserInfos);
@@ -1073,7 +1073,7 @@ void CFanXingDlg::OnBnClickedBtnAddToBlack()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnSaveBlack()
+void CAntiFloodDlg::OnBnClickedBtnSaveBlack()
 {
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectBlacks(&enterRoomUserInfos);
@@ -1090,7 +1090,7 @@ void CFanXingDlg::OnBnClickedBtnSaveBlack()
     blacklistHelper_->SaveBlackList(rowdatas);
 }
 
-void CFanXingDlg::OnBnClickedBtnClearInfo()
+void CAntiFloodDlg::OnBnClickedBtnClearInfo()
 {
     while (infoListCount_)
     {
@@ -1100,13 +1100,13 @@ void CFanXingDlg::OnBnClickedBtnClearInfo()
 }
 
 
-void CFanXingDlg::OnBnClickedCancel()
+void CAntiFloodDlg::OnBnClickedCancel()
 {
     CDialogEx::OnCancel();
 }
 
 
-void CFanXingDlg::OnBnClickedBtnAddVest()
+void CAntiFloodDlg::OnBnClickedBtnAddVest()
 {
     CString vestname;
     m_edit_vest.GetWindowTextW(vestname);

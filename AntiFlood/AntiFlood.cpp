@@ -12,8 +12,8 @@
 #include "third_party/chromium/base/command_line.h"
 #include "third_party/chromium/base/at_exit.h"
 
-#include "FanXing.h"
-#include "FanXingDlg.h"
+#include "AntiFlood.h"
+#include "AntiFloodDlg.h"
 #include "NetworkHelper.h"
 #include "Network/EncodeHelper.h"
 
@@ -24,14 +24,14 @@
 
 // CFanXingApp
 
-BEGIN_MESSAGE_MAP(CFanXingApp, CWinApp)
+BEGIN_MESSAGE_MAP(CAntiFloodApp, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 
 // CFanXingApp 构造
 
-CFanXingApp::CFanXingApp()
+CAntiFloodApp::CAntiFloodApp()
     :atExitManager_(nullptr)
 {
 	// 支持重新启动管理器
@@ -47,12 +47,12 @@ CFanXingApp::CFanXingApp()
 
 // 唯一的一个 CFanXingApp 对象
 
-CFanXingApp theApp;
+CAntiFloodApp theApp;
 
 
 // CFanXingApp 初始化
 
-BOOL CFanXingApp::InitInstance()
+BOOL CAntiFloodApp::InitInstance()
 {
 	// 如果一个运行在 Windows XP 上的应用程序清单指定要
 	// 使用 ComCtl32.dll 版本 6 或更高版本来启用可视化方式，
@@ -85,7 +85,7 @@ BOOL CFanXingApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-    CFanXingDlg dlg;
+    CAntiFloodDlg dlg;
     //CDlgGiftNotify dlg;
     //CDlgRegister dlg;
 	m_pMainWnd = &dlg;
@@ -118,7 +118,7 @@ BOOL CFanXingApp::InitInstance()
 	return FALSE;
 }
 
-void CFanXingApp::InitAppLog()
+void CAntiFloodApp::InitAppLog()
 {
     CommandLine::Init(0, NULL);
     base::FilePath path;

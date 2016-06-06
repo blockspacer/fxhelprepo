@@ -14,7 +14,7 @@
     <ProjectGuid>{E9035218-3760-48C7-AC18-8FC5E5205BD0}</ProjectGuid>
     <RootNamespace>FanXing</RootNamespace>
     <Keyword>MFCProj</Keyword>
-    <ProjectName>FanXingUI</ProjectName>
+    <ProjectName>AntiFlood</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -114,8 +114,8 @@
     <ClInclude Include="AuthorityHelper.h" />
     <ClInclude Include="BlacklistHelper.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="FanXing.h" />
-    <ClInclude Include="FanXingDlg.h" />
+    <ClInclude Include="AntiFlood.h" />
+    <ClInclude Include="AntiFloodDlg.h" />
     <ClInclude Include="NetworkHelper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -125,8 +125,8 @@
     <ClCompile Include="AuthorityHelper.cpp" />
     <ClCompile Include="BlacklistHelper.cpp" />
     <ClCompile Include="Config.cpp" />
-    <ClCompile Include="FanXingUI.cpp" />
-    <ClCompile Include="FanXingDlg.cpp" />
+    <ClCompile Include="AntiFlood.cpp" />
+    <ClCompile Include="AntiFloodDlg.cpp" />
     <ClCompile Include="NetworkHelper.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
