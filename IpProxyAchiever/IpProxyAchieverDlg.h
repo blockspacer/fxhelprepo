@@ -4,7 +4,17 @@
 
 #pragma once
 #include <memory>
-class CurlWrapper;
+
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
+
+#include <afxcontrolbars.h>     // 功能区和控件条的 MFC 支持
+
 // CIpProxyAchieverDlg 对话框
 class CIpProxyAchieverDlg : public CDialogEx
 {
@@ -30,7 +40,4 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
     afx_msg void OnBnClickedBtnGetProxy();
-
-private:
-    std::unique_ptr<CurlWrapper> curlWrapper_;
 };

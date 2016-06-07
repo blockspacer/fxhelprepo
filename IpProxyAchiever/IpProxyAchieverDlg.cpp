@@ -3,14 +3,13 @@
 //
 
 #include "stdafx.h"
-#include <regex>
 #include "IpProxyAchiever.h"
-#include "IpProxyAchieverDlg.h"
-#include "afxdialogex.h"
-#undef min
-#undef max
+#include "YoudailiHelper.h"
 #include "Network/CurlWrapper.h"
-#include "Network/EncodeHelper.h"
+
+#include "afxdialogex.h"
+#include "IpProxyAchieverDlg.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -26,7 +25,6 @@ CIpProxyAchieverDlg::CIpProxyAchieverDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     CurlWrapper::CurlInit();
-    curlWrapper_.reset(new CurlWrapper);
 }
 
 void CIpProxyAchieverDlg::DoDataExchange(CDataExchange* pDX)
@@ -93,31 +91,16 @@ HCURSOR CIpProxyAchieverDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
 void CIpProxyAchieverDlg::OnBnClickedBtnGetProxy()
 {
     // TODO:  在此添加控件通知处理程序代码
-    HttpRequest request;
-    request.url = "http://www.youdaili.net/Daili/Socks/";
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.useragent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36";
-    HttpResponse response;
-    if (!curlWrapper_->Execute(request, &response))
-        return ;
-
-    std::string rootdata(response.content.begin(), response.content.end());
-    std::regex pattern(R"(http://www\.youdaili.net/Daili/Socks/[0-9]*\.html)");
-
-    std::string s = rootdata;
-    std::smatch match;
-    std::vector<std::string> urllist;
-    while (std::regex_search(s, match, pattern)) {
-        for (auto x : match)
-            urllist.push_back(x);
-        std::cout << std::endl;
-        s = match.suffix().str();
+    YoudailiHelper youdaili;
+    std::vector<IpProxy> ipproxys;
+    if (!youdaili.GetAllProxyInfo(&ipproxys))
+    {
+        MessageBox(L"获取代理失败", L"错误", 0);
+        return;
     }
-
-    return ;
+    
+    youdaili.SaveIpProxy(ipproxys);
 }
