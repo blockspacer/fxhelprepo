@@ -1,8 +1,10 @@
 #pragma once
 #include <string>
+#include <map>
 #include <functional>
 #include "UserController.h"
 #include "RoomController.h"
+#include "Network/IpProxy.h"
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/threading/thread.h"
 
@@ -27,6 +29,8 @@ public:
     bool LoadRoomConfig(GridData* roomgrid, uint32* total);
     bool SaveUserLoginConfig();
 
+    bool LoadIpProxy(GridData* proxyinfo);
+
     bool BatchLogUsers(const std::map<std::wstring, std::wstring>& userAccountPassword);
     bool BatchLogUsersWithCookie(const std::map<std::wstring, std::wstring>& accountCookie);
     
@@ -48,5 +52,6 @@ private:
     std::function<void(std::wstring)> notify_ = nullptr;
     std::unique_ptr<UserController> userController_ = nullptr;
     std::unique_ptr<RoomController> roomController_ = nullptr;
+    std::map<std::string, IpProxy> ipProxys_;
 };
 

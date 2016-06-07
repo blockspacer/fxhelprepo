@@ -2,6 +2,7 @@
 #include "UserController.h"
 #include "MVBillboard.h"
 #include "Network/User.h"
+#include "Network/IpProxy.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 namespace
@@ -18,25 +19,32 @@ UserController::~UserController()
 }
 
 bool UserController::AddUser(const std::string& username, 
-    const std::string& password)
+    const std::string& password, const IpProxy& ipproxy)
 {
     std::shared_ptr<User> shared_user(new User(username, password));
+    if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        shared_user->SetIpProxy(ipproxy);
+
     if (!shared_user->Login())
     {
         assert(false && L"µÇÂ¼Ê§°Ü");
         return false;
     }
-    shared_user->SetServerIp(serverip);
+   
+    shared_user->SetRoomServerIp(serverip);
     users_.push_back(shared_user);
     return true;
 }
 
 bool UserController::AddUserWithCookies(const std::string& username,
-    const std::string& cookies)
+    const std::string& cookies, const IpProxy& ipproxy)
 {
     std::shared_ptr<User> shared_user(new User(username, ""));
     shared_user->SetCookies(cookies);
-    shared_user->SetServerIp(serverip);
+    if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        shared_user->SetIpProxy(ipproxy);
+
+    shared_user->SetRoomServerIp(serverip);
     users_.push_back(shared_user);
     return true;
 }

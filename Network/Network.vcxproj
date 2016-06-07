@@ -89,6 +89,7 @@
     <ClInclude Include="CookiesHelper.h" />
     <ClInclude Include="CurlWrapper.h" />
     <ClInclude Include="EncodeHelper.h" />
+    <ClInclude Include="IpProxy.h" />
     <ClInclude Include="MessageNotifyManager.h" />
     <ClInclude Include="Network.h" />
     <ClInclude Include="Room.h" />
@@ -110,6 +111,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="EncodeHelper.cpp" />
+    <ClCompile Include="IpProxy.cpp" />
     <ClCompile Include="MessageNotifyManager.cpp" />
     <ClCompile Include="Network.cpp" />
     <ClCompile Include="Room.cpp" />

@@ -69,7 +69,7 @@ BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 
-// CFanXingDlg 对话框
+// CAntiFloodDlg 对话框
 
 #define NOPRIVILEGE_NOTICE L"你没有操作权限"
 
@@ -162,7 +162,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 
-// CFanXingDlg 消息处理程序
+// CAntiFloodDlg 消息处理程序
 
 BOOL CAntiFloodDlg::OnInitDialog()
 {
@@ -588,7 +588,7 @@ bool CAntiFloodDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUs
     return true;
 }
 
-bool CFanXingDlg::SendChatMessage_(uint32 roomid, const std::wstring& message)
+bool CAntiFloodDlg::SendChatMessage_(uint32 roomid, const std::wstring& message)
 {
     if (!network_)
         return false;
@@ -1137,7 +1137,7 @@ void CAntiFloodDlg::OnBnClickedBtnAddVest()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnRemoveVest()
+void CAntiFloodDlg::OnBnClickedBtnRemoveVest()
 {
     int count = m_list_vest.GetItemCount();
 
@@ -1159,7 +1159,7 @@ void CFanXingDlg::OnBnClickedBtnRemoveVest()
 }
 
 
-void CFanXingDlg::OnBnClickedBtnSendChat()
+void CAntiFloodDlg::OnBnClickedBtnSendChat()
 {
     CString message;
     m_edit_chatmsg.GetWindowTextW(message);
@@ -1167,7 +1167,7 @@ void CFanXingDlg::OnBnClickedBtnSendChat()
 }
 
 
-void CFanXingDlg::OnBnClickedRadioNoaction()
+void CAntiFloodDlg::OnBnClickedRadioNoaction()
 {
     UpdateData(TRUE);
     switch (m_radiogroup)
@@ -1188,7 +1188,7 @@ void CFanXingDlg::OnBnClickedRadioNoaction()
 }
 
 
-void CFanXingDlg::OnBnClickedChkHandleAll()
+void CAntiFloodDlg::OnBnClickedChkHandleAll()
 {
     bool handleall = !!m_chk_handle_all.GetCheck();
     if (!network_)

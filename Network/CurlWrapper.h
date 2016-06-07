@@ -2,10 +2,10 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <vector>
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/files/file.h"
-
-#include "Network/MessageNotifyManager.h"
+#include "Network/IpProxy.h"
 
 enum class KICK_TYPE
 {
@@ -20,14 +20,18 @@ public:
     {
         HTTP_METHOD_GET = 0,
         HTTP_METHOD_POST = 1,
+        HTTP_METHOD_HTTPPOST = 2,
     };
     HTTP_METHOD method;
     std::vector<uint8> postdata;
     std::string url;
     std::string referer;
     std::string cookies;
+    std::string useragent;
     std::map<std::string, std::string> queries;
     std::map<std::string, std::string> headers;
+    std::string postfile;
+    IpProxy ipproxy;
 };
 
 class HttpResponse

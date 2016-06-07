@@ -15,7 +15,7 @@ public:
     explicit Room(uint32 roomid);
     ~Room();
     
-    void SetServerIp(const std::string& serverip);
+    void SetRoomServerIp(const std::string& serverip);
     bool Enter(const std::string& cookies, const std::string& usertoken, uint32 userid);
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);

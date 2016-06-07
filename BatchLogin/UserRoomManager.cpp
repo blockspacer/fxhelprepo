@@ -3,8 +3,10 @@
 #include <string>
 #include <map>
 #include <set>
+#include <fstream>
 
 #include "Network/EncodeHelper.h"
+#include "Network/IpProxy.h"
 #include "UserRoomManager.h"
 
 #undef max
@@ -166,6 +168,66 @@ bool UserRoomManager::SaveUserLoginConfig()
     return true;
 }
 
+bool UserRoomManager::LoadIpProxy(GridData* proxyinfo)
+{
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = L"Proxy.txt";
+    base::FilePath pathname = dirPath.Append(filename);
+
+    std::ifstream ovrifs;
+    ovrifs.open(pathname.value());
+    if (!ovrifs)
+        return false;
+
+    std::stringstream ss;
+    ss << ovrifs.rdbuf();
+    if (ss.str().empty())
+        return false;
+
+    std::string data = ss.str();
+    try
+    {
+        Json::Reader reader;
+        Json::Value root(Json::objectValue);
+        if (!Json::Reader().parse(data.c_str(), root))
+        {
+            assert(false && L"Json::Reader().parse error");
+            return false;
+        }
+
+        if (!root.isArray())
+        {
+            assert(false && L"root is not array");
+            return false;
+        }
+
+        for (const auto& value : root)//for data
+        {
+            Json::Value temp;
+            uint32 proxytype = GetInt32FromJsonValue(value, "proxytype");
+            uint32 proxyport = GetInt32FromJsonValue(value, "port");
+            std::string proxyip = value.get("ip", "").asString();
+            IpProxy proxy;
+            proxy.SetProxyType(static_cast<IpProxy::PROXY_TYPE>(proxytype));
+            proxy.SetProxyIp(proxyip);
+            proxy.SetProxyPort(proxyport);
+            ipProxys_[proxyip] = proxy;
+
+            RowData row;
+            row.push_back(base::UintToString16(proxytype));
+            row.push_back(base::UTF8ToWide(proxyip));
+            row.push_back(base::UintToString16(proxyport));
+            proxyinfo->push_back(row);
+        }
+    }
+    catch (...)
+    {
+        assert(false && L"∂¡»°¥ÌŒÛ");
+        return false;
+    }
+}
+
 void UserRoomManager::DoSaveUserLoginConfig()
 {
     base::File accountCookieFile;
@@ -202,11 +264,15 @@ bool UserRoomManager::BatchLogUsers(
 void UserRoomManager::DoBatchLogUsers(
     const std::map<std::wstring, std::wstring>& userAccountPassword)
 {
+    IpProxy ipproxy;
+    if (!ipProxys_.empty())
+        ipproxy = ipProxys_.begin()->second;
+    
     for (auto it : userAccountPassword)
     {
         std::string account = base::WideToUTF8(it.first);
         std::string password = base::WideToUTF8(it.second);
-        bool result = userController_->AddUser(account, password);
+        bool result = userController_->AddUser(account, password, ipproxy);
         if (notify_)
         {
             std::wstring message = base::UTF8ToWide(account) + L" Login ";
@@ -227,11 +293,15 @@ bool UserRoomManager::BatchLogUsersWithCookie(
 void UserRoomManager::DoBatchLogUsersWithCookie(
     const std::map<std::wstring, std::wstring>& accountCookie)
 {
+    IpProxy ipproxy;
+    if (!ipProxys_.empty())
+        ipproxy = ipProxys_.begin()->second;
+
     for (auto it : accountCookie)
     {
         std::string account = base::WideToUTF8(it.first);
         std::string cookie = base::WideToUTF8(it.second);
-        bool result = userController_->AddUserWithCookies(account, cookie);
+        bool result = userController_->AddUserWithCookies(account, cookie, ipproxy);
         if (notify_)
         {
             std::wstring message = base::UTF8ToWide(account) + L" Login ";

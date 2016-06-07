@@ -50,6 +50,16 @@ std::string User::GetPassword() const
     return password_;
 }
 
+void User::SetIpProxy(const IpProxy& ipproxy)
+{
+    ipproxy_ = ipproxy;
+}
+
+IpProxy User::GetIpProxy() const
+{
+    return ipproxy_;
+}
+
 void User::SetCookies(const std::string& cookies)
 {
     cookiesHelper_->SetCookies(cookies);
@@ -63,7 +73,7 @@ std::string User::GetCookies() const
     return cookie;
 }
 
-void User::SetServerIp(const std::string& serverip)
+void User::SetRoomServerIp(const std::string& serverip)
 {
     serverip_ = serverip;
 }
@@ -139,7 +149,7 @@ uint32 User::GetClanId() const
 bool User::EnterRoom(uint32 roomid)
 {
     std::shared_ptr<Room> room(new Room(roomid));
-    room->SetServerIp(serverip_);
+    room->SetRoomServerIp(serverip_);
     std::vector<std::string> keys;
     keys.push_back("_fx_coin");
     keys.push_back("_fx_user");
@@ -308,6 +318,9 @@ bool User::LoginHttps(const std::string& username,
     request.url = loginuserurl;
     request.referer = "http://www.fanxing.kugou.com";
     request.cookies = "";
+    if (ipproxy_.GetProxyType()!=IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
     auto& queries = request.queries;
     queries["appid"] = "1010";
     queries["username"] = UrlEncode(username);
@@ -379,7 +392,10 @@ bool User::LoginUServiceGetMyUserDataInfo()
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = GetMyUserDataInfoUrl;
     request.referer = "http://www.fanxing.kugou.com";
-    request.cookies = cookiesHelper_->GetCookies("KuGoo");;
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
     auto& queries = request.queries;
     queries["args"] = "[]";
     queries["_"] = GetNowTimeString();
@@ -458,7 +474,10 @@ bool User::LoginIndexServiceGetUserCenter()
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = GetMyUserDataInfoUrl;
     request.referer = "http://www.fanxing.kugou.com";
-    request.cookies = cookiesHelper_->GetCookies("KuGoo");;
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
     auto& queries = request.queries;
     queries["args"] = "[%22%22]";
     queries["_"] = GetNowTimeString();

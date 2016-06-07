@@ -46,7 +46,8 @@ protected:
     afx_msg void OnBnClickedBtnGetProxy();
     afx_msg void OnBnClickedBtnBatchEnterRoom();
     afx_msg void OnBnClickedBtnImportRoom();
-
+    afx_msg void OnBnClickedBtnUpMvBillboard();
+    afx_msg void OnBnClickedBtnSaveUserPwdCookie();
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -58,15 +59,13 @@ private:
     std::unique_ptr<UserRoomManager> userRoomManager_;
     CListCtrl m_ListCtrl_Users;
     CListCtrl m_ListCtrl_Rooms;
+    CListCtrl m_list_proxy;
+    CEdit m_mv_collection_id;
+    CEdit m_mv_id;
     CListBox InfoList_;
     int infoListCount_ = 0;
 
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;    
 
-public:
-    afx_msg void OnBnClickedBtnUpMvBillboard();
-    CEdit m_mv_collection_id;
-    CEdit m_mv_id;
-    afx_msg void OnBnClickedBtnSaveUserPwdCookie();
 };
