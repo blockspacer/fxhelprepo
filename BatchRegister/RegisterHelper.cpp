@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <fstream>
 #include "RegisterHelper.h"
 #include "Network/Network.h"
 #include "Network/CurlWrapper.h"
@@ -99,6 +100,61 @@ bool RegisterHelper::LoadAccountFromFile(
     std::vector<std::pair<std::wstring, std::wstring>>* accountinfo)
 {
     return false;
+}
+
+bool RegisterHelper::LoadIpProxy(std::vector<IpProxy>* ipproxys)
+{
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = L"Proxy.txt";
+    base::FilePath pathname = dirPath.Append(filename);
+
+    std::ifstream ovrifs;
+    ovrifs.open(pathname.value());
+    if (!ovrifs)
+        return false;
+
+    std::stringstream ss;
+    ss << ovrifs.rdbuf();
+    if (ss.str().empty())
+        return false;
+
+    std::string data = ss.str();
+    try
+    {
+        Json::Reader reader;
+        Json::Value root(Json::objectValue);
+        if (!Json::Reader().parse(data.c_str(), root))
+        {
+            assert(false && L"Json::Reader().parse error");
+            return false;
+        }
+
+        if (!root.isArray())
+        {
+            assert(false && L"root is not array");
+            return false;
+        }
+
+        for (const auto& value : root)//for data
+        {
+            Json::Value temp;
+            uint32 proxytype = GetInt32FromJsonValue(value, "proxytype");
+            uint32 proxyport = GetInt32FromJsonValue(value, "port");
+            std::string proxyip = value.get("ip", "").asString();
+            IpProxy proxy;
+            proxy.SetProxyType(static_cast<IpProxy::PROXY_TYPE>(proxytype));
+            proxy.SetProxyIp(proxyip);
+            proxy.SetProxyPort(proxyport);
+            ipproxys->push_back(proxy);
+        }
+    }
+    catch (...)
+    {
+        assert(false && L"∂¡»°¥ÌŒÛ");
+        return false;
+    }
+    return true;
 }
 
 std::wstring RegisterHelper::GetNewName() const

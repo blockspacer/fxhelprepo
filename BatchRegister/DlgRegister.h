@@ -4,6 +4,8 @@
 #include <mutex>
 #include "resource.h"
 #include "afxwin.h"
+#include "afxcmn.h"
+#include "Network/IpProxy.h"
 
 class NetworkHelper;
 class RegisterHelper;
@@ -27,6 +29,7 @@ public:
     afx_msg void OnBnClickedBtnCheckExist();
     afx_msg void OnBnClickedBtnRegister();
     afx_msg void OnBnClickedBtnVerifyCode();
+    afx_msg void OnBnClickedBtnImportProxy();
 protected:
     virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
@@ -42,12 +45,18 @@ private:
     CEdit m_register_password;
     CEdit m_register_verifycode;
     CImage image;
+    CListBox m_register_info_list;
+    CListCtrl m_listctrl_ip_proxy;
+
     std::unique_ptr<RegisterHelper> registerHelper_;
+    std::vector<IpProxy> ipProxys_;
 
     int infoListCount_;
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;
-    CListBox m_register_info_list;
-
     std::unique_ptr<CFont> font18_;
+    
+;
+public:
+    afx_msg void OnBnClickedBtnChangeProxy();
 };

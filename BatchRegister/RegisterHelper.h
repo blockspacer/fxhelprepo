@@ -7,6 +7,8 @@
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/files/file.h"
 
+#include "Network/IpProxy.h"
+
 class CurlWrapper;
 class CookiesHelper;
 class RegisterHelper
@@ -24,6 +26,7 @@ public:
         const std::wstring& password, const std::string& cookies);
     bool LoadAccountFromFile(
         std::vector<std::pair<std::wstring, std::wstring>>* accountinfo);
+    bool LoadIpProxy(std::vector<IpProxy>* ipproxys);
 
     std::wstring GetNewName() const;
     std::wstring GetPassword() const;
@@ -42,6 +45,7 @@ public:
 private:
     std::unique_ptr<CurlWrapper> curlWrapper_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;
+    
     std::unique_ptr<base::File> accountFile_;
     std::vector<std::string> namepost;
 };

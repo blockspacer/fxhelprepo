@@ -226,6 +226,7 @@ bool UserRoomManager::LoadIpProxy(GridData* proxyinfo)
         assert(false && L"¶ÁÈ¡´íÎó");
         return false;
     }
+    return true;
 }
 
 void UserRoomManager::DoSaveUserLoginConfig()
