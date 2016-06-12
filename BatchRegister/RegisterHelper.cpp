@@ -214,7 +214,8 @@ std::wstring RegisterHelper::GetPassword() const
 //Accept-Encoding: gzip, deflate, sdch
 //Accept-Language: zh-CN,zh;q=0.8
 
-bool RegisterHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
+bool RegisterHelper::RegisterGetVerifyCode(
+    const IpProxy& ipproxy, std::vector<uint8>* picture)
 {
     // 之前使用过的数字验证码
     //std::string url = "http://www.kugou.com/reg/web/verifycode/t=" + GetNowTimeString();
@@ -227,7 +228,10 @@ bool RegisterHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
     request.queries["appid"] = "1014";
     request.queries["codetype"] = "1";
     request.queries["t"] = GetNowTimeString();
-
+    if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        request.ipproxy = ipproxy;
+    }
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
     {
@@ -254,7 +258,8 @@ bool RegisterHelper::RegisterGetVerifyCode(std::vector<uint8>* picture)
 //Accept-Encoding: gzip, deflate, sdch
 //Accept-Language: zh-CN,zh;q=0.8
 //Cookie: CheckCode=czozMjoiMTFmNzY4MDIyODhlODEyZmY0MjQxZjMzODI2MDJmYTQiOw%3D%3D
-bool RegisterHelper::RegisterCheckUserExist(const std::wstring& username)
+bool RegisterHelper::RegisterCheckUserExist(
+    const IpProxy& ipproxy, const std::wstring& username)
 {
     std::string url = "http://www.kugou.com/reg/web/checkusername/";
     HttpRequest request;
@@ -263,6 +268,10 @@ bool RegisterHelper::RegisterCheckUserExist(const std::wstring& username)
     request.referer = "http://www.kugou.com/reg/web/";
     request.queries["userName"] = UrlEncode(base::WideToUTF8(username));
     request.queries["t"] = GetNowTimeString();
+    if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        request.ipproxy = ipproxy;
+    }
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
     {
@@ -286,7 +295,8 @@ bool RegisterHelper::RegisterCheckUserExist(const std::wstring& username)
 //Referer: http://www.kugou.com/reg/web/
 //Accept-Encoding: gzip, deflate, sdch
 //Accept-Language: zh-CN,zh;q=0.8
-bool RegisterHelper::RegisterCheckPassword(const std::wstring& username, const std::wstring& password)
+bool RegisterHelper::RegisterCheckPassword(const IpProxy& ipproxy, 
+    const std::wstring& username, const std::wstring& password)
 {
     std::string url = "http://userinfo.user.kugou.com/check_str";
     HttpRequest request;
@@ -296,6 +306,10 @@ bool RegisterHelper::RegisterCheckPassword(const std::wstring& username, const s
     request.queries["str"] = UrlEncode(base::WideToUTF8(password));
     request.queries["appid"] = "1014";
     request.queries["callback"] = "checkPwWithPort";
+    if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        request.ipproxy = ipproxy;
+    }
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
     {

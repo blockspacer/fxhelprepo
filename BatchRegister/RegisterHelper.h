@@ -33,11 +33,14 @@ public:
     std::wstring GetPassword() const;
 
     // 注册新号码，网络部分功能
-    bool RegisterGetVerifyCode(std::vector<uint8>* picture);
+    bool RegisterGetVerifyCode(
+        const IpProxy& ipproxy, std::vector<uint8>* picture);
 
     // 在新版本里，这两个函数都改了，但目前刷起来，不需要这两个功能验证用户名密码
-    bool RegisterCheckUserExist(const std::wstring& username);
-    bool RegisterCheckPassword(const std::wstring& username, 
+    bool RegisterCheckUserExist(
+        const IpProxy& ipproxy, const std::wstring& username);
+    bool RegisterCheckPassword(
+        const IpProxy& ipproxy, const std::wstring& username,
         const std::wstring& password);
 
     bool RegisterUser(

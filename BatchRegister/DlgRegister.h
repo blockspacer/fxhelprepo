@@ -38,6 +38,8 @@ public:
     afx_msg void OnBnClickedBtnSelectAll();
     afx_msg void OnBnClickedBtnSelectReverse();
     afx_msg void OnBnClickedBtnRemoveSelect();
+    afx_msg void OnBnClickedBtnSaveProxy();
+
 protected:
     virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
@@ -48,6 +50,8 @@ protected:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     void Notify(const std::wstring& message);
 private:
+
+    bool GetIpProxy(IpProxy* ipproxy);
     CStatic m_static_verifycode;
     CEdit m_register_username;
     CEdit m_register_password;
@@ -64,7 +68,4 @@ private:
     std::vector<std::wstring> messageQueen_;
     std::unique_ptr<CFont> font18_;
     CButton m_use_proxy;
-
-public:
-    afx_msg void OnBnClickedBtnSaveProxy();
 };

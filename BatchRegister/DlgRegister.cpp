@@ -246,9 +246,15 @@ void CDlgRegister::Notify(const std::wstring& message)
 
 void CDlgRegister::OnBnClickedBtnCheckExist()
 {
+    IpProxy ipProxy;
+    if (m_use_proxy.GetCheck())
+    {
+        GetIpProxy(&ipProxy);
+    }
     CString username;
     m_register_username.GetWindowTextW(username);
-    bool result = registerHelper_->RegisterCheckUserExist(username.GetBuffer());
+    bool result = registerHelper_->RegisterCheckUserExist(ipProxy,
+        username.GetBuffer());
     if (!result)
     {
         Notify(L"网络出错或用户已经存在!");
@@ -278,34 +284,7 @@ void CDlgRegister::OnBnClickedBtnRegister()
     IpProxy ipProxy;
     if (m_use_proxy.GetCheck())
     {
-        // 获取代理信息
-        CString csProxyType;
-        GetDlgItemText(IDC_EDIT_PROXY_TYPE, csProxyType);
-        CString csIP;
-        GetDlgItemText(IDC_EDIT_IP, csIP);
-        CString csPort;
-        GetDlgItemText(IDC_EDIT_PORT, csPort);
-        uint32 proxytype;
-        if (!base::StringToUint(base::WideToUTF8(csProxyType.GetBuffer()), &proxytype))
-        {
-            MessageBox(L"代理类型错误", L"错误", 0);
-            return;
-        }
-
-        std::string ip = base::WideToUTF8(csIP.GetBuffer());
-        uint32 port;
-        if (!base::StringToUint(base::WideToUTF8(csPort.GetBuffer()), &port))
-        {
-            MessageBox(L"代理端口数据错误", L"错误", 0);
-            return;
-        }
-        ipProxy.SetProxyType(static_cast<IpProxy::PROXY_TYPE>(proxytype));
-        ipProxy.SetProxyIp(ip);
-        ipProxy.SetProxyPort(static_cast<uint16>(port));
-
-        Notify(L"使用代理信息" + 
-               std::wstring(csIP.GetBuffer()) + L":" + 
-               std::wstring(csPort.GetBuffer()));
+        GetIpProxy(&ipProxy);
     }
 
     std::string cookies;
@@ -331,8 +310,14 @@ void CDlgRegister::OnBnClickedBtnRegister()
 
 void CDlgRegister::OnBnClickedBtnVerifyCode()
 {
+    IpProxy ipProxy;
+    if (m_use_proxy.GetCheck())
+    {
+        GetIpProxy(&ipProxy);
+    }
+
     std::vector<uint8> picture;
-    registerHelper_->RegisterGetVerifyCode(&picture);
+    registerHelper_->RegisterGetVerifyCode(ipProxy, &picture);
     std::wstring pathname;
     if (!registerHelper_->SaveVerifyCodeImage(picture, &pathname))
     {
@@ -592,4 +577,37 @@ void CDlgRegister::OnBnClickedBtnSaveProxy()
         return;
     }
     Notify(L"保存代理信息成功");
+}
+
+bool CDlgRegister::GetIpProxy(IpProxy* ipproxy)
+{
+    // 获取代理信息
+    CString csProxyType;
+    GetDlgItemText(IDC_EDIT_PROXY_TYPE, csProxyType);
+    CString csIP;
+    GetDlgItemText(IDC_EDIT_IP, csIP);
+    CString csPort;
+    GetDlgItemText(IDC_EDIT_PORT, csPort);
+    uint32 proxytype;
+    if (!base::StringToUint(base::WideToUTF8(csProxyType.GetBuffer()), &proxytype))
+    {
+        MessageBox(L"代理类型错误", L"错误", 0);
+        return false;
+    }
+
+    std::string ip = base::WideToUTF8(csIP.GetBuffer());
+    uint32 port;
+    if (!base::StringToUint(base::WideToUTF8(csPort.GetBuffer()), &port))
+    {
+        MessageBox(L"代理端口数据错误", L"错误", 0);
+        return false;
+    }
+    ipproxy->SetProxyType(static_cast<IpProxy::PROXY_TYPE>(proxytype));
+    ipproxy->SetProxyIp(ip);
+    ipproxy->SetProxyPort(static_cast<uint16>(port));
+
+    Notify(L"使用代理信息" +
+        std::wstring(csIP.GetBuffer()) + L":" +
+        std::wstring(csPort.GetBuffer()));
+    return true;
 }
