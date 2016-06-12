@@ -157,6 +157,36 @@ bool RegisterHelper::LoadIpProxy(std::vector<IpProxy>* ipproxys)
     return true;
 }
 
+bool RegisterHelper::SaveIpProxy(const std::vector<IpProxy>& ipproxys)
+{
+    Json::FastWriter writer;
+    Json::Value root(Json::arrayValue);
+
+    for (const auto& proxy : ipproxys)
+    {
+        Json::Value jproxy(Json::objectValue);
+        jproxy["proxytype"] = static_cast<uint32>(proxy.GetProxyType());
+        jproxy["ip"] = proxy.GetProxyIp();
+        jproxy["port"] = proxy.GetProxyPort();
+        root.append(jproxy);
+    }
+
+    std::string writestring = writer.write(root);
+
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = L"Proxy.txt";
+    base::FilePath pathname = dirPath.Append(filename);
+    std::ofstream ofs(pathname.value(), std::ios_base::out);
+    if (!ofs)
+        return false;
+
+    ofs << writestring;
+    ofs.flush();
+    ofs.close();
+    return true;
+}
+
 std::wstring RegisterHelper::GetNewName() const
 {
     std::string timestring = GetNowTimeString().substr(4);
@@ -294,7 +324,8 @@ bool RegisterHelper::RegisterCheckPassword(const std::wstring& username, const s
 //Accept-Language: zh-CN,zh;q=0.8
 //Cookie: CheckCode=czozMjoiMTFmNzY4MDIyODhlODEyZmY0MjQxZjMzODI2MDJmYTQiOw%3D%3D
 // PostData = userName=fanxingtest011&pwd=1233211234567&rePwd=1233211234567&verifyCode=upfill&UM_Sex=1
-bool RegisterHelper::RegisterUser(const std::wstring& username,
+bool RegisterHelper::RegisterUser(
+    const IpProxy& ipproxy, const std::wstring& username,
     const std::wstring& password, const std::string& verifycode,
     std::string* cookies, std::wstring* errormsg)
 {
@@ -317,6 +348,11 @@ bool RegisterHelper::RegisterUser(const std::wstring& username,
     request.queries["truename"] = "";
     request.queries["callback"] = "RegByUserNameCallbackFn";
     request.queries["codetype"] = "1";
+    if (ipproxy.GetProxyType()!=IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        request.ipproxy = ipproxy;
+    }
+    
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
     {

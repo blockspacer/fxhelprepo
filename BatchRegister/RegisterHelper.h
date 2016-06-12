@@ -27,6 +27,7 @@ public:
     bool LoadAccountFromFile(
         std::vector<std::pair<std::wstring, std::wstring>>* accountinfo);
     bool LoadIpProxy(std::vector<IpProxy>* ipproxys);
+    bool SaveIpProxy(const std::vector<IpProxy>& ipproxys);
 
     std::wstring GetNewName() const;
     std::wstring GetPassword() const;
@@ -39,7 +40,9 @@ public:
     bool RegisterCheckPassword(const std::wstring& username, 
         const std::wstring& password);
 
-    bool RegisterUser(const std::wstring& username, const std::wstring& password,
+    bool RegisterUser(
+        const IpProxy& ipproxy,
+        const std::wstring& username, const std::wstring& password,
         const std::string& verifycode, std::string* cookies, std::wstring* errormsg);
 
 private:

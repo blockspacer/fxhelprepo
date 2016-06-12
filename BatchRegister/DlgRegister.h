@@ -29,7 +29,15 @@ public:
     afx_msg void OnBnClickedBtnCheckExist();
     afx_msg void OnBnClickedBtnRegister();
     afx_msg void OnBnClickedBtnVerifyCode();
+    afx_msg void OnNMCustomdrawListIpProxy(NMHDR *pNMHDR, LRESULT *pResult);
+
+    // 代理列表操作
     afx_msg void OnBnClickedBtnImportProxy();
+    afx_msg void OnNMClickListIpProxy(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnBnClickedBtnAddProxy();
+    afx_msg void OnBnClickedBtnSelectAll();
+    afx_msg void OnBnClickedBtnSelectReverse();
+    afx_msg void OnBnClickedBtnRemoveSelect();
 protected:
     virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
@@ -55,9 +63,8 @@ private:
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;
     std::unique_ptr<CFont> font18_;
-    
-;
+    CButton m_use_proxy;
+
 public:
-    afx_msg void OnNMCustomdrawListIpProxy(NMHDR *pNMHDR, LRESULT *pResult);
-    afx_msg void OnBnClickedBtnAddProxy();
+    afx_msg void OnBnClickedBtnSaveProxy();
 };

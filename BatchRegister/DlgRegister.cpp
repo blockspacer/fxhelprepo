@@ -115,6 +115,7 @@ void CDlgRegister::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_STATIC_VERIFYCODE, m_static_verifycode);
     DDX_Control(pDX, IDC_LIST_REGISTER_INFO, m_register_info_list);
     DDX_Control(pDX, IDC_LIST_IP_PROXY, m_listctrl_ip_proxy);
+    DDX_Control(pDX, IDC_CHK_USE_PROX, m_use_proxy);
 }
 
 void CDlgRegister::OnOK()
@@ -139,6 +140,11 @@ BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_IMPORT_PROXY, &CDlgRegister::OnBnClickedBtnImportProxy)
     ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_IP_PROXY, &CDlgRegister::OnNMCustomdrawListIpProxy)
     ON_BN_CLICKED(IDC_BTN_ADD_PROXY, &CDlgRegister::OnBnClickedBtnAddProxy)
+    ON_NOTIFY(NM_CLICK, IDC_LIST_IP_PROXY, &CDlgRegister::OnNMClickListIpProxy)
+    ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CDlgRegister::OnBnClickedBtnSelectAll)
+    ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE, &CDlgRegister::OnBnClickedBtnSelectReverse)
+    ON_BN_CLICKED(IDC_BTN_REMOVE_SELECT, &CDlgRegister::OnBnClickedBtnRemoveSelect)
+    ON_BN_CLICKED(IDC_BTN_SAVE_PROXY, &CDlgRegister::OnBnClickedBtnSaveProxy)
 END_MESSAGE_MAP()
 
 
@@ -153,7 +159,7 @@ BOOL CDlgRegister::OnInitDialog()
     //RegisterHotKey(this->m_hWnd, 1001, 0, VK_F5);
     //RegisterHotKey(this->m_hWnd, 1002, 0, VK_RETURN);
     DWORD dwStyle = m_listctrl_ip_proxy.GetExtendedStyle();
-    //dwStyle |= LVS_EX_CHECKBOXES;
+    dwStyle |= LVS_EX_CHECKBOXES;
     dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
     dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
 
@@ -181,8 +187,8 @@ void CDlgRegister::OnPaint()
         CRect rc;
         m_static_verifycode.GetWindowRect(&rc);
         ScreenToClient(rc);
-        image.Draw(GetDC()->m_hDC, CRect(rc.left + 20, rc.top + 30, rc.left + width + 20,
-            rc.top + hight + 30));
+        image.Draw(GetDC()->m_hDC, CRect(rc.left + 20, rc.top + 18, rc.left + width + 20,
+            rc.top + hight + 18));
         m_register_verifycode.SetFocus();
     }
     CDialogEx::OnPaint();
@@ -268,11 +274,45 @@ void CDlgRegister::OnBnClickedBtnRegister()
         return;
     }
 
+
+    IpProxy ipProxy;
+    if (m_use_proxy.GetCheck())
+    {
+        // 获取代理信息
+        CString csProxyType;
+        GetDlgItemText(IDC_EDIT_PROXY_TYPE, csProxyType);
+        CString csIP;
+        GetDlgItemText(IDC_EDIT_IP, csIP);
+        CString csPort;
+        GetDlgItemText(IDC_EDIT_PORT, csPort);
+        uint32 proxytype;
+        if (!base::StringToUint(base::WideToUTF8(csProxyType.GetBuffer()), &proxytype))
+        {
+            MessageBox(L"代理类型错误", L"错误", 0);
+            return;
+        }
+
+        std::string ip = base::WideToUTF8(csIP.GetBuffer());
+        uint32 port;
+        if (!base::StringToUint(base::WideToUTF8(csPort.GetBuffer()), &port))
+        {
+            MessageBox(L"代理端口数据错误", L"错误", 0);
+            return;
+        }
+        ipProxy.SetProxyType(static_cast<IpProxy::PROXY_TYPE>(proxytype));
+        ipProxy.SetProxyIp(ip);
+        ipProxy.SetProxyPort(static_cast<uint16>(port));
+
+        Notify(L"使用代理信息" + 
+               std::wstring(csIP.GetBuffer()) + L":" + 
+               std::wstring(csPort.GetBuffer()));
+    }
+
     std::string cookies;
     std::string verifystr;
     std::wstring errorMsg;
     TranslateVerifyCode(base::WideToUTF8(verifycode.GetString()), &verifystr);
-    if (!registerHelper_->RegisterUser(username.GetString(),
+    if (!registerHelper_->RegisterUser(ipProxy, username.GetString(),
         password.GetString(), verifystr, &cookies, &errorMsg))
     {
         Notify(errorMsg + L" 注册失败");
@@ -438,4 +478,118 @@ void CDlgRegister::OnBnClickedBtnAddProxy()
             }
         }
     }
+}
+
+
+void CDlgRegister::OnNMClickListIpProxy(NMHDR *pNMHDR, LRESULT *pResult)
+{
+    LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+    POSITION pos = m_listctrl_ip_proxy.GetFirstSelectedItemPosition();
+    if (pos == NULL)
+    {
+        TRACE0("No items were selected!\n");
+        return;
+    }
+    else
+    {
+        while (pos)
+        {
+            int nItem = m_listctrl_ip_proxy.GetNextSelectedItem(pos);
+            TRACE1("Item %d was selected!\n", nItem);
+            // you could do your own processing on nItem here
+            CString csProxyType = m_listctrl_ip_proxy.GetItemText(nItem, 0);
+            CString csIP = m_listctrl_ip_proxy.GetItemText(nItem, 1);
+            CString csPort = m_listctrl_ip_proxy.GetItemText(nItem, 2);
+            SetDlgItemText(IDC_EDIT_PROXY_TYPE, csProxyType);
+            SetDlgItemText(IDC_EDIT_IP, csIP);
+            SetDlgItemText(IDC_EDIT_PORT, csPort);
+        }
+    }
+
+    *pResult = 0;
+}
+
+
+void CDlgRegister::OnBnClickedBtnSelectAll()
+{
+    int count = m_listctrl_ip_proxy.GetItemCount();
+
+    for (int i = count - 1; i >= 0; --i)
+    {
+        m_listctrl_ip_proxy.SetCheck(i, 1);
+    }
+}
+
+
+void CDlgRegister::OnBnClickedBtnSelectReverse()
+{
+    int count = m_listctrl_ip_proxy.GetItemCount();
+
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_listctrl_ip_proxy.GetCheck(i))
+        {
+            m_listctrl_ip_proxy.SetCheck(i, FALSE);
+        }
+        else
+        {
+            m_listctrl_ip_proxy.SetCheck(i, TRUE);
+        }
+    }
+}
+
+
+void CDlgRegister::OnBnClickedBtnRemoveSelect()
+{
+    int count = m_listctrl_ip_proxy.GetItemCount();
+    // 从后往前删除
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_listctrl_ip_proxy.GetCheck(i))
+        {
+            // 把要删除的消息发到日志记录列表上
+            CString itemtext = m_listctrl_ip_proxy.GetItemText(i, 1);
+            itemtext += L"被从IP代理列表中删除";
+            Notify(itemtext.GetBuffer());
+
+            // 删除已经勾选的记录
+            m_listctrl_ip_proxy.DeleteItem(i);
+        }
+    }
+}
+
+
+void CDlgRegister::OnBnClickedBtnSaveProxy()
+{
+    std::vector<IpProxy> ipproxys;
+
+    int count = m_listctrl_ip_proxy.GetItemCount();
+    // 从后往前删除
+    for (int i = 0; i < count; ++i)
+    {
+        CString csProxyType = m_listctrl_ip_proxy.GetItemText(i, 0);
+        CString csIP = m_listctrl_ip_proxy.GetItemText(i, 1);
+        CString csPort = m_listctrl_ip_proxy.GetItemText(i, 2);
+        uint32 proxytype;
+        if (!base::StringToUint(base::WideToUTF8(csProxyType.GetBuffer()), &proxytype))
+            continue;
+
+        std::string ip = base::WideToUTF8(csIP.GetBuffer());
+        uint32 port;
+        if (!base::StringToUint(base::WideToUTF8(csPort.GetBuffer()), &port))
+            continue;
+
+        IpProxy ipproxy;
+        ipproxy.SetProxyType(static_cast<IpProxy::PROXY_TYPE>(proxytype));
+        ipproxy.SetProxyIp(ip);
+        ipproxy.SetProxyPort(static_cast<uint16>(port));
+        ipproxys.push_back(ipproxy);
+    }
+
+    if (!registerHelper_->SaveIpProxy(ipproxys))
+    {
+        Notify(L"保存代理信息失败");
+        return;
+    }
+    Notify(L"保存代理信息成功");
 }
