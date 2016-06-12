@@ -217,8 +217,6 @@ std::wstring RegisterHelper::GetPassword() const
 bool RegisterHelper::RegisterGetVerifyCode(
     const IpProxy& ipproxy, std::vector<uint8>* picture)
 {
-    // 之前使用过的数字验证码
-    //std::string url = "http://www.kugou.com/reg/web/verifycode/t=" + GetNowTimeString();
     std::string url = "http://verifycode.service.kugou.com/v1/get_img_code";
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
@@ -226,7 +224,7 @@ bool RegisterHelper::RegisterGetVerifyCode(
     request.referer = "http://www.kugou.com/reg/web/";
     request.queries["type"] = "RegCheckCode";
     request.queries["appid"] = "1014";
-    request.queries["codetype"] = "1";
+    request.queries["codetype"] = "1";// 这个是九宫格的接口
     request.queries["t"] = GetNowTimeString();
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
     {
@@ -249,6 +247,38 @@ bool RegisterHelper::RegisterGetVerifyCode(
     return true;
 }
 
+bool RegisterHelper::RegisterGetVerifyCodeByEmail(
+    const IpProxy& ipproxy, std::vector<uint8>* picture)
+{
+    std::string url = "http://verifycode.service.kugou.com/v1/get_img_code";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://www.kugou.com/reg/web/";
+    request.queries["type"] = "RegCheckCode";
+    request.queries["appid"] = "1014";
+    request.queries["codetype"] = "0"; // 这个是正常字母的验证接口
+    request.queries["t"] = GetNowTimeString();
+    if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        request.ipproxy = ipproxy;
+    }
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    // Set-Cookie: CheckCode=czozMjoiMTFmNzY4MDIyODhlODEyZmY0MjQxZjMzODI2MDJmYTQiOw%3D%3D; path=/
+    // Set-Cookie: RegCheckCode=2f72ef708dabebb11790a7831bcc1cd8
+    for (const auto& it : response.cookies)
+    {
+        cookiesHelper_->SetCookies(it);
+    }
+
+    *picture = response.content;
+    return true;
+}
 //GET /reg/web/checkusername/?userName=fanxingtest011&t=1460916361431 HTTP/1.1
 //Host: www.kugou.com
 //Connection: keep-alive
@@ -408,6 +438,79 @@ bool RegisterHelper::RegisterUser(
     if (cookies->empty())
         return false;
         
+    return true;
+}
+
+bool RegisterHelper::RegisterUserByEmail(
+    const IpProxy& ipproxy,
+    const std::wstring& email, const std::wstring& password,
+    const std::string& verifycode, std::string* cookies, std::wstring* errormsg)
+{
+    std::string url = "https://reg-user.kugou.com/v2/reg/";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://www.kugou.com/reg/web/";
+    request.cookies = cookiesHelper_->GetCookies("RegCheckCode");
+    request.queries["regtype"] = "email";
+    request.queries["appid"] = "1014";
+    request.queries["code"] = verifycode;
+    request.queries["expire_day"] = "1";
+    request.queries["email"] = UrlEncode(base::WideToUTF8(email));
+    request.queries["sex"] = "1";
+    request.queries["password"] = MakeMd5FromString(base::WideToUTF8(password));
+    request.queries["nickname"] = UrlEncode(base::WideToUTF8(email));
+    //request.queries["security_email"] = "";
+    //request.queries["id_card"] = "";
+    //request.queries["truename"] = "";
+    request.queries["callback"] = "RegByEmailCallbackFn";
+    request.queries["codetype"] = "0";
+    if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        request.ipproxy = ipproxy;
+    }
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+    content = PickJson(content);
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(content, rootdata, false))
+    {
+        return false;
+    }
+
+    // 暂时没有必要检测status的值
+    std::string utf8ErrorMsg = rootdata.get("errorMsg", "").asString();
+    std::wstring wErrorMsg = base::UTF8ToWide(utf8ErrorMsg);
+    if (!wErrorMsg.empty())
+    {
+        LOG(ERROR) << wErrorMsg;
+        *errormsg = wErrorMsg;
+        return false;
+    }
+    if (content.find(R"("nickname")") == std::string::npos)
+    {
+        return false;
+    }
+
+    // Set-Cookie: KuGoo=KugooID=801240286&KugooPwd=563A0A9D74800D644BD72A561180B675&NickName=%u0066%u0061%u006e%u0078%u0069%u006e%u0067%u0074%u0065%u0073%u0074%u0030%u0031%u0031&Pic=&RegState=1&RegFrom=&t=31d9b29c7975f07a2e79c47661fa2dfd19c3387274d087cc0b4309560bf27662&a_id=1014&ct=1460916377&UserName=%u0066%u0061%u006e%u0078%u0069%u006e%u0067%u0074%u0065%u0073%u0074%u0030%u0031%u0031; expires=Mon, 18-Apr-2016 18:06:17 GMT; path=/; domain=.kugou.com
+    for (const auto& it : response.cookies)
+    {
+        cookiesHelper_->SetCookies(it);
+    }
+
+    *cookies = cookiesHelper_->GetCookies("KuGoo");
+
+    if (cookies->empty())
+        return false;
+
     return true;
 }
 

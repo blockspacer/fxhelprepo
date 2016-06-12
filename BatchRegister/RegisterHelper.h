@@ -36,6 +36,9 @@ public:
     bool RegisterGetVerifyCode(
         const IpProxy& ipproxy, std::vector<uint8>* picture);
 
+    bool RegisterGetVerifyCodeByEmail(
+        const IpProxy& ipproxy, std::vector<uint8>* picture);
+
     // 在新版本里，这两个函数都改了，但目前刷起来，不需要这两个功能验证用户名密码
     bool RegisterCheckUserExist(
         const IpProxy& ipproxy, const std::wstring& username);
@@ -46,6 +49,11 @@ public:
     bool RegisterUser(
         const IpProxy& ipproxy,
         const std::wstring& username, const std::wstring& password,
+        const std::string& verifycode, std::string* cookies, std::wstring* errormsg);
+
+    bool RegisterUserByEmail(
+        const IpProxy& ipproxy,
+        const std::wstring& email, const std::wstring& password,
         const std::string& verifycode, std::string* cookies, std::wstring* errormsg);
 
 private:
