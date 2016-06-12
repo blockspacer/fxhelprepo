@@ -75,9 +75,36 @@ bool YoudailiHelper::GetDailyProxys(const std::string& url,
         return false;
 
     std::string rootdata(response.content.begin(), response.content.end());
+    ParseDailyProxys(rootdata, ipproxy);
+    return true;
+}
+
+bool YoudailiHelper::ParseWebFile(const std::wstring& filepath, 
+                                  std::vector<IpProxy>* ipproxy)
+{
+    base::FilePath pathname(filepath);
+
+    std::ifstream ovrifs;
+    ovrifs.open(pathname.value());
+    if (!ovrifs)
+        return false;
+
+    std::stringstream ss;
+    ss << ovrifs.rdbuf();
+    if (ss.str().empty())
+        return false;
+
+    std::string webdata = ss.str();
+    return ParseDailyProxys(webdata, ipproxy);
+}
+
+
+bool YoudailiHelper::ParseDailyProxys(const std::string& webdata,
+                                      std::vector<IpProxy>* ipproxy)
+{
     std::regex pattern(R"((?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9]):[0-9]*@SOCKS\d)");
 
-    std::string s = rootdata;
+    std::string s = webdata;
     std::smatch match;
     while (std::regex_search(s, match, pattern))
     {
@@ -93,10 +120,10 @@ bool YoudailiHelper::GetDailyProxys(const std::string& url,
             beginpos = endpos;
             endpos = str.find("@");
             uint32 port = 0;
-            base::StringToUint(str.substr(beginpos+1, endpos-beginpos), &port);
+            base::StringToUint(str.substr(beginpos + 1, endpos - beginpos), &port);
             proxy.SetProxyPort(static_cast<uint16>(port));
             beginpos = endpos;
-            std::string sockstype = str.substr(beginpos+1);
+            std::string sockstype = str.substr(beginpos + 1);
             if (sockstype.compare("SOCKS5") == 0)
             {
                 proxy.SetProxyType(IpProxy::PROXY_TYPE::PROXY_TYPE_SOCKS5);

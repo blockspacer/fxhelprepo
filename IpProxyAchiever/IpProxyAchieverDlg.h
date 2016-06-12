@@ -14,6 +14,7 @@
 #endif
 
 #include <afxcontrolbars.h>     // 功能区和控件条的 MFC 支持
+#include "youdailihelper.h"
 
 // CIpProxyAchieverDlg 对话框
 class CIpProxyAchieverDlg : public CDialogEx
@@ -40,4 +41,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
     afx_msg void OnBnClickedBtnGetProxy();
+    afx_msg void OnBnClickedBtnParseWebData();
+
+private:
+    std::unique_ptr<YoudailiHelper> youdailiHelper_;
 };

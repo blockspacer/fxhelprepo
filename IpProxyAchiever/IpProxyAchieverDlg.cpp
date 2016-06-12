@@ -9,6 +9,7 @@
 
 #include "afxdialogex.h"
 #include "IpProxyAchieverDlg.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 
 #ifdef _DEBUG
@@ -22,7 +23,9 @@
 
 CIpProxyAchieverDlg::CIpProxyAchieverDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CIpProxyAchieverDlg::IDD, pParent)
+    , youdailiHelper_(nullptr)
 {
+    youdailiHelper_.reset(new YoudailiHelper);
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     CurlWrapper::CurlInit();
 }
@@ -36,6 +39,7 @@ BEGIN_MESSAGE_MAP(CIpProxyAchieverDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BTN_GET_PROXY, &CIpProxyAchieverDlg::OnBnClickedBtnGetProxy)
+    ON_BN_CLICKED(IDC_BTN_PARSE_WEB_DATA, &CIpProxyAchieverDlg::OnBnClickedBtnParseWebData)
 END_MESSAGE_MAP()
 
 
@@ -93,14 +97,41 @@ HCURSOR CIpProxyAchieverDlg::OnQueryDragIcon()
 
 void CIpProxyAchieverDlg::OnBnClickedBtnGetProxy()
 {
-    // TODO:  在此添加控件通知处理程序代码
-    YoudailiHelper youdaili;
     std::vector<IpProxy> ipproxys;
-    if (!youdaili.GetAllProxyInfo(&ipproxys))
+    if (!youdailiHelper_->GetAllProxyInfo(&ipproxys))
     {
         MessageBox(L"获取代理失败", L"错误", 0);
         return;
     }
     
-    youdaili.SaveIpProxy(ipproxys);
+    youdailiHelper_->SaveIpProxy(ipproxys);
+}
+
+
+void CIpProxyAchieverDlg::OnBnClickedBtnParseWebData()
+{
+    CString FilePathName;
+    CFileDialog dlg(TRUE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+                    NULL,
+                    NULL,
+                    OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+                    (LPCTSTR)_TEXT("TXT Files (*.txt)|*.txt|All Files (*.*)|*.*||"),
+                    NULL);
+
+    if (dlg.DoModal() != IDOK)
+        return;
+
+    FilePathName = dlg.GetPathName(); //文件名保存在了FilePathName里
+
+    std::vector<IpProxy> ipproxys;
+    if (!youdailiHelper_->ParseWebFile(FilePathName.GetBuffer(), &ipproxys))
+    {
+        MessageBox(L"解析文件失败", L"错误", 0);
+        return;
+    }
+    if (!youdailiHelper_->SaveIpProxy(ipproxys))
+    {
+        MessageBox(L"保存文件失败", L"错误", 0);
+    }
+    MessageBox(L"解析文件成功,保存文件成功", L"完成", 0);
 }
