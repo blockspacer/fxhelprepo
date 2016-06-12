@@ -291,7 +291,8 @@ void CDlgRegister::OnBnClickedBtnRegister()
     std::string cookies;
     std::string verifystr;
     std::wstring errorMsg;
-    TranslateVerifyCode(base::WideToUTF8(verifycode.GetString()), &verifystr);
+    //TranslateVerifyCode(base::WideToUTF8(verifycode.GetString()), &verifystr);
+    verifystr = base::WideToUTF8(verifycode.GetString());
     if (!registerHelper_->RegisterUser(ipProxy, username.GetString(),
         password.GetString(), verifystr, &cookies, &errorMsg))
     {

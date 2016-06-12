@@ -224,7 +224,8 @@ bool RegisterHelper::RegisterGetVerifyCode(
     request.referer = "http://www.kugou.com/reg/web/";
     request.queries["type"] = "RegCheckCode";
     request.queries["appid"] = "1014";
-    request.queries["codetype"] = "1";// 这个是九宫格的接口
+    //request.queries["codetype"] = "1";// 这个是九宫格的接口
+    request.queries["codetype"] = "0";// 这个是字母接口
     request.queries["t"] = GetNowTimeString();
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
     {
@@ -391,7 +392,8 @@ bool RegisterHelper::RegisterUser(
     request.queries["id_card"] = "";
     request.queries["truename"] = "";
     request.queries["callback"] = "RegByUserNameCallbackFn";
-    request.queries["codetype"] = "1";
+    //request.queries["codetype"] = "1";
+    request.queries["codetype"] = "0";
     if (ipproxy.GetProxyType()!=IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
     {
         request.ipproxy = ipproxy;
