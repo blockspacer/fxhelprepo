@@ -39,6 +39,7 @@ public:
     afx_msg void OnBnClickedBtnSelectReverse();
     afx_msg void OnBnClickedBtnRemoveSelect();
     afx_msg void OnBnClickedBtnSaveProxy();
+    afx_msg void OnBnClickedBtnChkProxy();
 
 protected:
     virtual BOOL OnInitDialog();

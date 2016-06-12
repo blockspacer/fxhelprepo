@@ -145,6 +145,7 @@ BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE, &CDlgRegister::OnBnClickedBtnSelectReverse)
     ON_BN_CLICKED(IDC_BTN_REMOVE_SELECT, &CDlgRegister::OnBnClickedBtnRemoveSelect)
     ON_BN_CLICKED(IDC_BTN_SAVE_PROXY, &CDlgRegister::OnBnClickedBtnSaveProxy)
+    ON_BN_CLICKED(IDC_BTN_CHK_PROXY, &CDlgRegister::OnBnClickedBtnChkProxy)
 END_MESSAGE_MAP()
 
 
@@ -317,7 +318,12 @@ void CDlgRegister::OnBnClickedBtnVerifyCode()
     }
 
     std::vector<uint8> picture;
-    registerHelper_->RegisterGetVerifyCode(ipProxy, &picture);
+    if (!registerHelper_->RegisterGetVerifyCode(ipProxy, &picture))
+    {
+        Notify(L"获取验证码失败");
+        return;
+    }
+    
     std::wstring pathname;
     if (!registerHelper_->SaveVerifyCodeImage(picture, &pathname))
     {
@@ -549,7 +555,6 @@ void CDlgRegister::OnBnClickedBtnSaveProxy()
     std::vector<IpProxy> ipproxys;
 
     int count = m_listctrl_ip_proxy.GetItemCount();
-    // 从后往前删除
     for (int i = 0; i < count; ++i)
     {
         CString csProxyType = m_listctrl_ip_proxy.GetItemText(i, 0);
@@ -610,4 +615,57 @@ bool CDlgRegister::GetIpProxy(IpProxy* ipproxy)
         std::wstring(csIP.GetBuffer()) + L":" +
         std::wstring(csPort.GetBuffer()));
     return true;
+}
+
+void CDlgRegister::OnBnClickedBtnChkProxy()
+{
+    std::vector<IpProxy> ipproxys;
+    uint32 aviliable = 0;
+    int count = m_listctrl_ip_proxy.GetItemCount();
+    for (int i = 0; i < count; ++i)
+    {
+        CString csProxyType = m_listctrl_ip_proxy.GetItemText(i, 0);
+        CString csIP = m_listctrl_ip_proxy.GetItemText(i, 1);
+        CString csPort = m_listctrl_ip_proxy.GetItemText(i, 2);
+        uint32 proxytype;
+        if (!base::StringToUint(base::WideToUTF8(csProxyType.GetBuffer()), &proxytype))
+            continue;
+
+        std::string ip = base::WideToUTF8(csIP.GetBuffer());
+        uint32 port;
+        if (!base::StringToUint(base::WideToUTF8(csPort.GetBuffer()), &port))
+            continue;
+
+        IpProxy ipproxy;
+        ipproxy.SetProxyType(static_cast<IpProxy::PROXY_TYPE>(proxytype));
+        ipproxy.SetProxyIp(ip);
+        ipproxy.SetProxyPort(static_cast<uint16>(port));
+
+        std::vector<uint8> picture;
+        if (!registerHelper_->RegisterGetVerifyCode(ipproxy, &picture))
+        {
+            Notify(L"IP代理不可用" + std::wstring(csIP.GetBuffer()));
+            m_listctrl_ip_proxy.SetCheck(i, TRUE);//失败的勾选上,然后要批量删除
+            continue;
+        }
+        Notify(L"IP代理检测可用--" + std::wstring(csIP.GetBuffer()));
+        aviliable++;
+    }
+    Notify(L"IP代理检测全部完成,有效IP数量: " + base::UintToString16(aviliable) 
+        + L"/" + base::UintToString16(count));
+
+    // 从后往前删除
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_listctrl_ip_proxy.GetCheck(i))
+        {
+            // 把要删除的消息发到日志记录列表上
+            CString itemtext = m_listctrl_ip_proxy.GetItemText(i, 1);
+            itemtext += L"无效,被从IP代理列表中删除";
+            Notify(itemtext.GetBuffer());
+
+            // 删除已经勾选的记录
+            m_listctrl_ip_proxy.DeleteItem(i);
+        }
+    }
 }
