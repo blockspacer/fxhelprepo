@@ -235,6 +235,8 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
         curl_easy_setopt(curl, CURLOPT_PROXYPORT, proxyport);
     }
 
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 12L);
+
     res = curl_easy_perform(curl);
     response->curlcode = res;
     if (res != CURLE_OK)
