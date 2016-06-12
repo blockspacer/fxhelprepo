@@ -137,7 +137,8 @@ BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_VERIFY_CODE, &CDlgRegister::OnBnClickedBtnVerifyCode)
     ON_MESSAGE(WM_USER_REGISTER_INFO, &CDlgRegister::OnNotifyMessage)
     ON_BN_CLICKED(IDC_BTN_IMPORT_PROXY, &CDlgRegister::OnBnClickedBtnImportProxy)
-    ON_BN_CLICKED(IDC_BTN_CHANGE_PROXY, &CDlgRegister::OnBnClickedBtnChangeProxy)
+    ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_IP_PROXY, &CDlgRegister::OnNMCustomdrawListIpProxy)
+    ON_BN_CLICKED(IDC_BTN_ADD_PROXY, &CDlgRegister::OnBnClickedBtnAddProxy)
 END_MESSAGE_MAP()
 
 
@@ -162,7 +163,7 @@ BOOL CDlgRegister::OnInitDialog()
         m_listctrl_ip_proxy.DeleteColumn(i);
     uint32 index = 0;
     for (const auto& it : proxycolumnlist)
-        m_listctrl_ip_proxy.InsertColumn(index++, it, LVCFMT_LEFT, 70);//插入列
+        m_listctrl_ip_proxy.InsertColumn(index++, it, LVCFMT_LEFT, 120);//插入列
 
     m_register_username.SetWindowTextW(registerHelper_->GetNewName().c_str());
     m_register_password.SetWindowTextW(registerHelper_->GetPassword().c_str());
@@ -353,7 +354,88 @@ void CDlgRegister::OnBnClickedBtnImportProxy()
     }
 }
 
-void CDlgRegister::OnBnClickedBtnChangeProxy()
+void CDlgRegister::OnNMCustomdrawListIpProxy(NMHDR *pNMHDR, LRESULT *pResult)
 {
-    m_listctrl_ip_proxy.GetFirstSelectedItemPosition();
+    NMLVCUSTOMDRAW* pNMCD = reinterpret_cast<NMLVCUSTOMDRAW*>(pNMHDR);
+
+    *pResult = CDRF_DODEFAULT;
+
+    if (CDDS_PREPAINT == pNMCD->nmcd.dwDrawStage)
+    {
+        *pResult = CDRF_NOTIFYITEMDRAW;
+    }
+    else if (CDDS_ITEMPREPAINT == pNMCD->nmcd.dwDrawStage)
+    {
+        *pResult = CDRF_NOTIFYSUBITEMDRAW;
+    }
+    else if ((CDDS_ITEMPREPAINT | CDDS_SUBITEM) == pNMCD->nmcd.dwDrawStage)
+    {
+
+        COLORREF clrNewTextColor, clrNewBkColor;
+
+        int nItem = static_cast<int>(pNMCD->nmcd.dwItemSpec);
+
+        POSITION pos = m_listctrl_ip_proxy.GetFirstSelectedItemPosition();
+        int index = m_listctrl_ip_proxy.GetNextSelectedItem(pos);
+
+        if (index == nItem)//如果要刷新的项为当前选择的项，则将文字设为白色，背景色设为蓝色
+        {
+            clrNewTextColor = RGB(255, 255, 255);		//Set the text to white
+            clrNewBkColor = RGB(49, 106, 197);		//Set the background color to blue
+        }
+        else
+        {
+            clrNewTextColor = RGB(0, 0, 0);		//set the text black
+            clrNewBkColor = RGB(255, 255, 255);	//leave the background color white
+        }
+
+        pNMCD->clrText = clrNewTextColor;
+        pNMCD->clrTextBk = clrNewBkColor;
+
+        *pResult = CDRF_DODEFAULT;
+    }
+}
+
+
+void CDlgRegister::OnBnClickedBtnAddProxy()
+{
+    CString csProxyType;
+    GetDlgItemText(IDC_EDIT_PROXY_TYPE, csProxyType);
+    CString csIP;
+    GetDlgItemText(IDC_EDIT_IP, csIP);
+    CString csPort;
+    GetDlgItemText(IDC_EDIT_PORT, csPort);
+
+    GridData griddata;
+    RowData rowdata;
+    rowdata.push_back(csProxyType.GetBuffer());
+    rowdata.push_back(csIP.GetBuffer());
+    rowdata.push_back(csPort.GetBuffer());
+    griddata.push_back(rowdata);
+
+    int itemcount = m_listctrl_ip_proxy.GetItemCount();
+
+    for (uint32 i = 0; i < griddata.size(); ++i)
+    {
+        bool exist = false;
+        // 检测是否存在相同用户id
+        for (int index = 0; index < itemcount; index++)
+        {
+            CString text = m_listctrl_ip_proxy.GetItemText(index, 1);
+            if (griddata[i][1].compare(text.GetBuffer()) == 0) // 相同用户id
+            {
+                exist = true;
+                break;
+            }
+        }
+
+        if (!exist) // 如果不存在，需要插入新数据
+        {
+            int nitem = m_listctrl_ip_proxy.InsertItem(itemcount + i, griddata[i][0].c_str());
+            for (uint32 j = 0; j < griddata[i].size(); ++j)
+            {
+                m_listctrl_ip_proxy.SetItemText(nitem, j, griddata[i][j].c_str());
+            }
+        }
+    }
 }

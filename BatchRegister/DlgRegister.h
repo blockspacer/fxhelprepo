@@ -58,5 +58,6 @@ private:
     
 ;
 public:
-    afx_msg void OnBnClickedBtnChangeProxy();
+    afx_msg void OnNMCustomdrawListIpProxy(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnBnClickedBtnAddProxy();
 };
