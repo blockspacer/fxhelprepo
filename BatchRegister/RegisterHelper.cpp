@@ -193,8 +193,7 @@ std::wstring RegisterHelper::GetNewName() const
     uint32 time32 = 0;
     base::StringToUint(timestring, &time32);
     std::string post = namepost[time32%namepost.size()];
-    std::string pre;
-    pre.push_back('A' + (time32 % 25));
+    std::string pre = "fanxing";
     return base::UTF8ToWide(pre + timestring + post).substr(0,19);
 }
 
