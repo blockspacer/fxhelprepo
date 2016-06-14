@@ -14,7 +14,6 @@ class RegisterHelper;
 class CDlgRegister : public CDialogEx
 {
 	DECLARE_DYNAMIC(CDlgRegister)
-
 public:
 	CDlgRegister(CWnd* pParent = NULL);   // 标准构造函数
 	virtual ~CDlgRegister();
@@ -22,6 +21,7 @@ public:
 // 对话框数据
 	enum { IDD = IDD_DLG_REGISTER ,
         WM_USER_REGISTER_INFO = WM_USER + 1,
+        WM_USER_CHECK_PROXY_INFO = WM_USER + 2,
     };
 
     afx_msg void OnPaint();
@@ -41,16 +41,21 @@ public:
     afx_msg void OnBnClickedBtnSaveProxy();
     afx_msg void OnBnClickedBtnChkProxy();
 
+    afx_msg void OnClose();
+
 protected:
     virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
     virtual void OnOK();
-
+    //virtual void OnClose();
 	DECLARE_MESSAGE_MAP()
 
+private:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     void Notify(const std::wstring& message);
-private:
+   
+    LRESULT OnCheckProxyInfo(WPARAM wParam, LPARAM lParam);
+    void CheckProxyCallback(bool result, const IpProxy& ipproxy, const std::wstring& message);
 
     bool GetIpProxy(IpProxy* ipproxy);
     CStatic m_static_verifycode;
@@ -62,11 +67,14 @@ private:
     CListCtrl m_listctrl_ip_proxy;
 
     std::unique_ptr<RegisterHelper> registerHelper_;
-    std::vector<IpProxy> ipProxys_;
 
     int infoListCount_;
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;
+
+    std::mutex ipproxyresultMutex_;
+    std::vector<IpProxy> ipProxys_;
+
     std::unique_ptr<CFont> font18_;
     CButton m_use_proxy;
 };

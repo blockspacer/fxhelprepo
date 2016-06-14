@@ -14,6 +14,7 @@
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/bind.h"
 
 namespace
 {
@@ -23,6 +24,7 @@ RegisterHelper::RegisterHelper()
     :curlWrapper_(new CurlWrapper)
     , cookiesHelper_(new CookiesHelper)
     , accountFile_(new base::File)
+    , workerThread_("RegisterHelperThread")
 {
     namepost = { "qqcom", "163com", "sinacom",
         "hotmailcom", "yahoocom", "gmailcom", "tomcom", "126com" };
@@ -47,10 +49,18 @@ bool RegisterHelper::Initialize()
     {
         return false;
     }
-    return NetworkInitialize();
+    
+    if (!NetworkInitialize())
+    {
+        return false;
+    }
+    
+    return workerThread_.Start();
 }
 void RegisterHelper::Finalize()
 {
+    cancelflag_ = true;
+    workerThread_.Stop();
     NetworkFainalize();
 }
 
@@ -368,10 +378,10 @@ bool RegisterHelper::RegisterCheckPassword(const IpProxy& ipproxy,
 //Accept-Language: zh-CN,zh;q=0.8
 //Cookie: CheckCode=czozMjoiMTFmNzY4MDIyODhlODEyZmY0MjQxZjMzODI2MDJmYTQiOw%3D%3D
 // PostData = userName=fanxingtest011&pwd=1233211234567&rePwd=1233211234567&verifyCode=upfill&UM_Sex=1
-bool RegisterHelper::RegisterUser(
+void RegisterHelper::DoRegisterUser(
     const IpProxy& ipproxy, const std::wstring& username,
     const std::wstring& password, const std::string& verifycode,
-    std::string* cookies, std::wstring* errormsg)
+    std::function<void(const std::wstring& message)> callback)
 {
     std::string url = "https://reg-user.kugou.com/v2/reg/";
     HttpRequest request;
@@ -398,48 +408,84 @@ bool RegisterHelper::RegisterUser(
         request.ipproxy = ipproxy;
     }
     
+    std::string cookies;
+    std::wstring errormsg = L"注册成功";
+    bool result = false;
     HttpResponse response;
-    if (!curlWrapper_->Execute(request, &response))
+    do 
     {
-        return false;
-    }
+        if (!curlWrapper_->Execute(request, &response))
+        {
+            errormsg = L"http请求错误，注册失败";
+            break;
+        }
 
-    std::string content;
-    content.assign(response.content.begin(), response.content.end());
-    content = PickJson(content);
-    Json::Reader reader;
-    Json::Value rootdata(Json::objectValue);
-    if (!reader.parse(content, rootdata, false))
+        std::string content;
+        content.assign(response.content.begin(), response.content.end());
+        content = PickJson(content);
+        Json::Reader reader;
+        Json::Value rootdata(Json::objectValue);
+        if (!reader.parse(content, rootdata, false))
+        {
+            errormsg = L"无法解析Json数据，注册失败";
+            break;
+        }
+
+        // 暂时没有必要检测status的值
+        std::string utf8ErrorMsg = rootdata.get("errorMsg", "").asString();
+        std::wstring wErrorMsg = base::UTF8ToWide(utf8ErrorMsg);
+        if (!wErrorMsg.empty())
+        {
+            LOG(ERROR) << wErrorMsg;
+            errormsg = wErrorMsg;
+            break;
+        }
+        if (content.find(R"("nickname")") == std::string::npos)
+        {
+            errormsg = L"无法找到nickname, 注册失败";
+            break;
+        }
+
+        for (const auto& it : response.cookies)
+        {
+            cookiesHelper_->SetCookies(it);
+        }
+
+        cookies = cookiesHelper_->GetCookies("KuGoo");
+        if (cookies.empty())
+        {
+            errormsg = L"没有返回cookies, 注册失败";
+            break;
+        }
+        result = true;
+    } while (0);
+
+    callback(errormsg);
+
+    if (!result)
     {
-        return false;
+        callback(L"——注册失败");
+        return;
     }
-
-    // 暂时没有必要检测status的值
-    std::string utf8ErrorMsg = rootdata.get("errorMsg", "").asString();
-    std::wstring wErrorMsg = base::UTF8ToWide(utf8ErrorMsg);
-    if (!wErrorMsg.empty())
-    {
-        LOG(ERROR) << wErrorMsg;
-        *errormsg = wErrorMsg;
-        return false;
-    }
-    if (content.find(R"("nickname")") == std::string::npos)
-    {
-        return false;
-    }
-
-    // Set-Cookie: KuGoo=KugooID=801240286&KugooPwd=563A0A9D74800D644BD72A561180B675&NickName=%u0066%u0061%u006e%u0078%u0069%u006e%u0067%u0074%u0065%u0073%u0074%u0030%u0031%u0031&Pic=&RegState=1&RegFrom=&t=31d9b29c7975f07a2e79c47661fa2dfd19c3387274d087cc0b4309560bf27662&a_id=1014&ct=1460916377&UserName=%u0066%u0061%u006e%u0078%u0069%u006e%u0067%u0074%u0065%u0073%u0074%u0030%u0031%u0031; expires=Mon, 18-Apr-2016 18:06:17 GMT; path=/; domain=.kugou.com
-    for (const auto& it : response.cookies)
-    {
-        cookiesHelper_->SetCookies(it);
-    }
-
-    *cookies = cookiesHelper_->GetCookies("KuGoo");
-
-    if (cookies->empty())
-        return false;
         
-    return true;
+    if (!SaveAccountToFile(username, password, cookies))
+    {
+        callback(L"保存注册信息失败!");
+    }
+    callback(L"保存注册信息成功!");
+
+}
+
+bool RegisterHelper::AsyncRegisterUser(
+    const IpProxy& ipproxy,
+    const std::wstring& username, const std::wstring& password,
+    const std::string& verifycode,
+    std::function<void(const std::wstring& message)> callback)
+{
+    return workerThread_.message_loop_proxy()->PostTask(
+        FROM_HERE, 
+        base::Bind(&RegisterHelper::DoRegisterUser, this, 
+        ipproxy, username, password, verifycode, callback));
 }
 
 bool RegisterHelper::RegisterUserByEmail(
@@ -513,5 +559,31 @@ bool RegisterHelper::RegisterUserByEmail(
         return false;
 
     return true;
+}
+
+bool RegisterHelper::AsyncCheckIpProxy(const std::vector<IpProxy>& ipproxys,
+                                       std::function<void(bool, const IpProxy&, const std::wstring&)> callback)
+{
+    for (const auto& ipproxy : ipproxys)
+    {
+        workerThread_.message_loop_proxy()->PostTask(
+            FROM_HERE, base::Bind(&RegisterHelper::DoCheckIpProxy, this, ipproxy, callback));
+    }
+    return true;
+}
+
+void RegisterHelper::DoCheckIpProxy(const IpProxy& ipproxy,
+                                    std::function<void(bool, const IpProxy&, const std::wstring&)> callback)
+{
+    std::vector<uint8> picture;
+    if (!RegisterGetVerifyCode(ipproxy, &picture))
+    {
+        callback(false, ipproxy, L"IP代理不可用" + base::UTF8ToWide(ipproxy.GetProxyIp()));
+        return;
+    }
+    callback(true, ipproxy, L"IP代理检测可用" + base::UTF8ToWide(ipproxy.GetProxyIp()));
+    //IpProxy ipproxy;
+    //callback(true, ipproxy, L"IP代理检测全部完成,有效IP数量: " + base::UintToString16(aviliable)
+    //         + L"/" + base::UintToString16(ipproxys.size()));
 }
 
