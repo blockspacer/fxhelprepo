@@ -63,6 +63,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AntiFlood", "AntiFlood\Anti
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IpProxyAchiever", "IpProxyAchiever\IpProxyAchiever.vcxproj", "{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RechargeAgent", "RechargeAgent\RechargeAgent.vcxproj", "{C875F512-330F-4FBE-93BA-BB1581648A44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -191,6 +193,12 @@ Global
 		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Release|Win32.ActiveCfg = Release|Win32
 		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Release|Win32.Build.0 = Release|Win32
 		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Release|x64.ActiveCfg = Release|Win32
+		{C875F512-330F-4FBE-93BA-BB1581648A44}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C875F512-330F-4FBE-93BA-BB1581648A44}.Debug|Win32.Build.0 = Debug|Win32
+		{C875F512-330F-4FBE-93BA-BB1581648A44}.Debug|x64.ActiveCfg = Debug|Win32
+		{C875F512-330F-4FBE-93BA-BB1581648A44}.Release|Win32.ActiveCfg = Release|Win32
+		{C875F512-330F-4FBE-93BA-BB1581648A44}.Release|Win32.Build.0 = Release|Win32
+		{C875F512-330F-4FBE-93BA-BB1581648A44}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
