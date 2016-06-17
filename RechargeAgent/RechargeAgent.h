@@ -9,11 +9,17 @@
 #endif
 
 #include "resource.h"		// 主符号
+#include "third_party/chromium/base/memory/scoped_ptr.h"
 
 
 // CRechargeAgentApp: 
 // 有关此类的实现，请参阅 RechargeAgent.cpp
 //
+
+namespace base
+{
+    class AtExitManager;
+}
 
 class CRechargeAgentApp : public CWinApp
 {
@@ -26,7 +32,10 @@ public:
 
 // 实现
 
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
+private:
+    void InitAppLog();
+    scoped_ptr<base::AtExitManager> atExitManager_;
 };
 
 extern CRechargeAgentApp theApp;
