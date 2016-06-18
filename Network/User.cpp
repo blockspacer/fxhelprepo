@@ -1,3 +1,4 @@
+#include <regex>
 #include "User.h"
 #include "Room.h"
 #include "CurlWrapper.h"
@@ -113,6 +114,63 @@ bool User::Login(const std::string& username,
         return false;
     }
     
+    if (!LoginUServiceGetMyUserDataInfo())
+    {
+        return false;
+    }
+
+    if (!LoginIndexServiceGetUserCenter())
+    {
+        return false;
+    }
+
+    return true;
+}
+
+// KuGoo=KugooID=641607819&KugooPwd=8AAB7C888611C4D2ACE635A44B5FC273&
+//NickName=%u0066%u0061%u006e%u0078%u0069%u006e%u0067%u0074%u0065%u0073%u0074%u0030%u0030%u0031&
+//Pic=http://imge.kugou.com/kugouicon/165/20100101/20100101192931478054.jpg&
+//RegState=1&RegFrom=&t=20c7dd5dbfdea2e25846e666f820d64ab70eb771b034e8ae568e578c8154450d&
+//a_id=1010&ct=1466237656&UserName=%u0066%u0061%u006e%u0078%u0069%u006e%u0067%u0074%u0065%u0073%u0074%u0030%u0030%u0031
+bool User::LoginWithCookies(const std::string& cookies)
+{
+    std::regex pattern1(R"(KugooID=[0-9]*)");
+
+    std::string KugooID;
+    std::string s = cookies;
+    std::smatch match;
+    while (std::regex_search(s, match, pattern1))
+    {
+        for (auto x : match)
+            KugooID = x;
+        s = match.suffix().str();
+    }
+
+    if (KugooID.length()<7)
+        return false;
+    
+    KugooID = KugooID.substr(8);
+    std::regex pattern2(R"(t=[0-9a-f]{64})");
+
+    std::string token;
+    s = cookies;
+    while (std::regex_search(s, match, pattern2))
+    {
+        for (auto x : match)
+            token = x;
+        s = match.suffix().str();
+    }
+
+    if (token.length() < 3)
+        return false;
+
+    token = token.substr(2);
+    assert(token.size() == 64);
+    usertoken_ = token;
+    base::StringToUint(KugooID, &kugouid_);
+
+    cookiesHelper_->SetCookies(cookies);
+
     if (!LoginUServiceGetMyUserDataInfo())
     {
         return false;

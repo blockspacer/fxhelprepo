@@ -62,6 +62,7 @@ public:
     bool Login();
     bool Login(const std::string& username,
         const std::string& password);
+    bool LoginWithCookies(const std::string& cookies);
     bool Logout();
 
     uint32 GetServerTime() const;

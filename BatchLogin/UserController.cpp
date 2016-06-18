@@ -43,7 +43,7 @@ bool UserController::AddUserWithCookies(const std::string& username,
 {
     std::shared_ptr<User> shared_user(new User);
     shared_user->SetUsername(username);
-    shared_user->SetCookies(cookies);
+    shared_user->LoginWithCookies(cookies);
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         shared_user->SetIpProxy(ipproxy);
 
