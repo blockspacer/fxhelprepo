@@ -124,11 +124,11 @@ bool TcpManager::Initialize()
 void TcpManager::Finalize()
 {
     stopflag = true;
-    baseThread_.message_loop_proxy()->PostTask(
-        FROM_HERE, base::Bind(&TcpManager::DoRemoveAllClient, this));
 
     if (baseThread_.IsRunning())
     {
+        baseThread_.message_loop_proxy()->PostTask(
+            FROM_HERE, base::Bind(&TcpManager::DoRemoveAllClient, this));
         baseThread_.Stop();
     }
 }

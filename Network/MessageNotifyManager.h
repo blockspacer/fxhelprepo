@@ -77,7 +77,8 @@ public:
         const std::string& message);
 
     // 使用新的高效的多路tcp请求分发模式
-    bool NewConnect843();
+    bool NewConnect843(uint32 roomid, uint32 userid,
+        const std::string& usertoken);
     bool NewConnect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
     bool NewSendChatMessage(const std::string& nickname, uint32 richlevel,
                          const std::string& message);
@@ -106,9 +107,11 @@ private:
     void NewConnect8080Callback(uint32 roomid, uint32 userid,
                              const std::string& usertoken,
                              bool result, TcpHandle handle);
-
-    void NewData843Callback(bool result, const std::vector<char>& data);
+    void NewData843Callback(uint32 roomid, uint32 userid,
+        const std::string& usertoken, bool result, const std::vector<char>& data);
     void NewData8080Callback(bool result, const std::vector<char>& data);
+
+    void NewSendHeartBeat(TcpHandle handle);
 
     base::Thread baseThread_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;
@@ -128,5 +131,6 @@ private:
     NormalNotify normalNotify_;
 
     TcpManager* tcpManager_;
+    base::RepeatingTimer<MessageNotifyManager> newRepeatingTimer_;
 };
 

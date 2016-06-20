@@ -286,7 +286,12 @@ void MessageNotifyManager::Finalize()
     if (repeatingTimer_.IsRunning())
         repeatingTimer_.Stop();
     
-    baseThread_.Stop();
+    if (newRepeatingTimer_.IsRunning())
+        newRepeatingTimer_.Stop();
+
+    if (baseThread_.IsRunning())
+        baseThread_.Stop();
+    
     tcpClient_843_->Finalize();
     tcpClient_8080_->Finalize();  
 }
@@ -678,13 +683,14 @@ std::vector<std::string> MessageNotifyManager::HandleMixPackage(const std::strin
     return retVec;
 }
 
-bool MessageNotifyManager::NewConnect843()
+bool MessageNotifyManager::NewConnect843(uint32 roomid, uint32 userid,
+    const std::string& usertoken)
 {
     tcpManager_->AddClient(
         std::bind(&MessageNotifyManager::NewConnect843Callback, this, std::placeholders::_1,
         std::placeholders::_2), serverip_, port843,
-        std::bind(&MessageNotifyManager::NewData843Callback, this, std::placeholders::_1,
-        std::placeholders::_2));
+        std::bind(&MessageNotifyManager::NewData843Callback, this,roomid,userid, 
+        usertoken, std::placeholders::_1, std::placeholders::_2));
     return true;
 }
 
@@ -702,11 +708,10 @@ void MessageNotifyManager::NewConnect843Callback(bool result, TcpHandle handle)
 bool MessageNotifyManager::NewConnect8080(uint32 roomid, uint32 userid,
                                           const std::string& usertoken)
 {
-
     tcpManager_->AddClient(
         std::bind(&MessageNotifyManager::NewConnect8080Callback, this, roomid,
         userid, usertoken, std::placeholders::_1, std::placeholders::_2),
-        serverip_, port843,
+        serverip_, port8080,
         std::bind(&MessageNotifyManager::NewData8080Callback, this, std::placeholders::_1,
         std::placeholders::_2));
     return true;
@@ -723,12 +728,22 @@ void MessageNotifyManager::NewConnect8080Callback(uint32 roomid, uint32 userid,
     GetFirstPackage(package, &data_for_send);
     std::vector<char> data_8080;
     data_8080.assign(data_for_send.begin(), data_for_send.end());
+    tcpManager_->Send(handle, data_8080);
+
+    if (newRepeatingTimer_.IsRunning())
+        newRepeatingTimer_.Stop();
+
+    newRepeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10), 
+        base::Bind(&MessageNotifyManager::NewSendHeartBeat, this, handle));
+
     return;
 }
 
-void MessageNotifyManager::NewData843Callback(bool result, const std::vector<char>& data)
+void MessageNotifyManager::NewData843Callback(uint32 roomid, uint32 userid,
+    const std::string& usertoken, bool result, const std::vector<char>& data)
 {
     tcpManager_->RemoveClient(tcphandle_843_);
+    NewConnect8080(roomid, userid, usertoken);
 }
 
 void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<char>& data)
@@ -743,6 +758,19 @@ void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<ch
         return;
 
     Notify(data);
+}
+
+void MessageNotifyManager::NewSendHeartBeat(TcpHandle handle)
+{
+    std::string heartbeat = "HEARTBEAT_REQUEST";
+    heartbeat.append("\n");
+    std::vector<char> heardbeatvec;
+    heardbeatvec.assign(heartbeat.begin(), heartbeat.end());
+    tcpManager_->Send(handle, heardbeatvec);
+    if (normalNotify_)
+    {
+        normalNotify_(L"房间状态正常");
+    }
 }
 
 bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint32 richlevel,
@@ -763,4 +791,3 @@ bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint3
     msg.assign(data.begin(), data.end());
     return tcpManager_->Send(tcphandle_8080_, msg);
 }
-

@@ -566,7 +566,8 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     const std::string& usertoken)
 {
     bool ret = false;
-    ret = messageNotifyManager_->Connect843();
+    //ret = messageNotifyManager_->Connect843();
+    ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken);
     assert(ret);
 
     // 多用户版本不需要处理信息回调
@@ -582,6 +583,6 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     //    std::bind(&NetworkHelper::NotifyCallback,
     //    this, std::placeholders::_1));
 
-    ret = messageNotifyManager_->Connect8080(roomid, userid, usertoken);
+    //ret = messageNotifyManager_->Connect8080(roomid, userid, usertoken);
     return ret;
 }

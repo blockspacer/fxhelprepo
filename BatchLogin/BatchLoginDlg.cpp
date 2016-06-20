@@ -130,7 +130,7 @@ BOOL CBatchLoginDlg::OnInitDialog()
     for (const auto& it : proxycolumnlist)
         m_list_proxy.InsertColumn(index++, it, LVCFMT_LEFT, 70);//²åÈëÁÐ
 
-
+    tcpManager_->Initialize();
     userRoomManager_->Initialize();
     userRoomManager_->SetNotify(
         std::bind(&CBatchLoginDlg::Notify,this,std::placeholders::_1));
