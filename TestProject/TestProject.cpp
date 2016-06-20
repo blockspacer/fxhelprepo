@@ -2,52 +2,50 @@
 //
 
 #include "stdafx.h"
+#include "Network/TcpClient.h"
 #include <iostream>
 #include <assert.h>
 #include "third_party/chromium/base/at_exit.h"
-#include "Network/CurlWrapper.h"
-#include "TcpProxyClient.h"
+#include "third_party/chromium/base/run_loop.h"
 
-bool TcpProxyTest(const std::string& proxyip)
+
+TcpHandle g_handle;
+void tcpclientcallback(TcpManager* tcpmanager, bool result, TcpHandle handle)
 {
-    TcpProxyClient client;
-    client.SetProxy(proxyip.c_str(), 1080);
-    return client.ConnectToProxy("42.62.68.50", 843);
+    if (!result)
+        return;
+    g_handle = handle;
+    std::string str = "<policy-file-request/>";
+    std::vector<char> data;
+    data.assign(str.begin(), str.end());
+    data.push_back(0);
+    tcpmanager->Send(handle, data);
 }
-void SingleUserSingleRoomTest();
 
-// ≤‚ ‘Õ®π˝
-void CurlTest()
+void clientcallback(bool result, const std::vector<char>& data)
 {
-    CurlWrapper curlWrapper;
-    curlWrapper.CurlInit();
-    HttpRequest request;
-    request.url = "http://www.kugou.com/kf/client/app/i/stream.php?qid=5255440";
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_HTTPPOST;
-    request.postfile = "C:/Users/Administrator/AppData/Roaming/KuGou8/7643-1-83e43a6ceccefebffdf4da4403291e87-2014-10-18_01_51_09.dmp";
-    HttpResponse response;
-    bool result = curlWrapper.Execute(request, &response);
-
+    std::string str(data.begin(), data.end());
+    std::cout << str;
 }
+
+bool TcpManagerTest()
+{
+    TcpManager tcpmanager;
+    tcpmanager.Initialize();
+
+    tcpmanager.AddClient(
+        std::bind(tcpclientcallback, &tcpmanager, std::placeholders::_1, std::placeholders::_2),
+        "114.54.2.204", 843, clientcallback);
+
+    Sleep(10000);
+    tcpmanager.RemoveClient(g_handle);
+    while (1);
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {   
     base::AtExitManager atExitManager;
-    SingleUserSingleRoomTest();
-    //std::vector<std::string> ipvector =
-    //{
-    //    //"61.157.198.67",
-    //    //"24.196.69.180",
-    //    //"37.32.44.1",
-    //    "42.159.244.217"
-    //};
-    //for (auto it : ipvector)
-    //{
-    //    if (TcpProxyTest(it))
-    //    {
-    //        std::cout << it.c_str() << " connect success";
-    //    }
-    //}
-
+    TcpManagerTest();
 	return 0;
 }
 

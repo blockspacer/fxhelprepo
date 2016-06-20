@@ -97,7 +97,9 @@
     <ClCompile Include="RSATest.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TcpProxyClient.cpp" />
-    <ClCompile Include="TestProject.cpp" />
+    <ClCompile Include="TestProject.cpp">
+      <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Cdecl</CallingConvention>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Network\Network.vcxproj">
