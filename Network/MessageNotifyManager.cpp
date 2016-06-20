@@ -291,6 +291,11 @@ void MessageNotifyManager::Finalize()
     tcpClient_8080_->Finalize();  
 }
 
+void MessageNotifyManager::SetTcpManager(TcpManager* tcpManager)
+{
+    tcpManager_ = tcpManager;
+}
+
 void MessageNotifyManager::SetServerIp(const std::string& serverip)
 {
     serverip_ = serverip;
@@ -461,7 +466,6 @@ bool MessageNotifyManager::Connect843()
     return baseThread_.message_loop_proxy()->PostTask(
         FROM_HERE, base::Bind(
         &MessageNotifyManager::DoConnect843, this));
-    return true;
 }
 
 void MessageNotifyManager::DoConnect843()
@@ -672,5 +676,91 @@ std::vector<std::string> MessageNotifyManager::HandleMixPackage(const std::strin
     }
 
     return retVec;
+}
+
+bool MessageNotifyManager::NewConnect843()
+{
+    tcpManager_->AddClient(
+        std::bind(&MessageNotifyManager::NewConnect843Callback, this, std::placeholders::_1,
+        std::placeholders::_2), serverip_, port843,
+        std::bind(&MessageNotifyManager::NewData843Callback, this, std::placeholders::_1,
+        std::placeholders::_2));
+    return true;
+}
+
+void MessageNotifyManager::NewConnect843Callback(bool result, TcpHandle handle)
+{
+    std::string str = "<policy-file-request/>";
+    std::vector<char> data;
+    data.assign(str.begin(), str.end());
+    data.push_back(0);
+    tcphandle_843_ = handle;
+    tcpManager_->Send(handle, data);
+}
+
+
+bool MessageNotifyManager::NewConnect8080(uint32 roomid, uint32 userid,
+                                          const std::string& usertoken)
+{
+
+    tcpManager_->AddClient(
+        std::bind(&MessageNotifyManager::NewConnect8080Callback, this, roomid,
+        userid, usertoken, std::placeholders::_1, std::placeholders::_2),
+        serverip_, port843,
+        std::bind(&MessageNotifyManager::NewData8080Callback, this, std::placeholders::_1,
+        std::placeholders::_2));
+    return true;
+}
+
+void MessageNotifyManager::NewConnect8080Callback(uint32 roomid, uint32 userid,
+                                               const std::string& usertoken,
+                                               bool result, TcpHandle handle)
+{
+    uint32 keytime = static_cast<uint32>(base::Time::Now().ToDoubleT());
+    std::vector<uint8> data_for_send;
+    cmd201package package = {
+        201, roomid, userid, usertoken };
+    GetFirstPackage(package, &data_for_send);
+    std::vector<char> data_8080;
+    data_8080.assign(data_for_send.begin(), data_for_send.end());
+    return;
+}
+
+void MessageNotifyManager::NewData843Callback(bool result, const std::vector<char>& data)
+{
+    tcpManager_->RemoveClient(tcphandle_843_);
+}
+
+void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<char>& data)
+{
+    if (!result)
+    {
+        tcpManager_->RemoveClient(tcphandle_8080_);
+        return;
+    }
+
+    if (data.empty())
+        return;
+
+    Notify(data);
+}
+
+bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint32 richlevel,
+                                              const std::string& message)
+{
+    Json::FastWriter writer;
+    Json::Value root(Json::objectValue);
+    root["cmd"] = 501;
+    root["nickname"] = nickname;
+    root["richlevel"] = base::UintToString(richlevel);
+    root["receiverid"] = 0;
+    root["receivername"] = "";
+    root["chatmsg"] = message;
+    root["issecrect"] = 0;
+
+    std::string data = writer.write(root);
+    std::vector<char> msg;
+    msg.assign(data.begin(), data.end());
+    return tcpManager_->Send(tcphandle_8080_, msg);
 }
 

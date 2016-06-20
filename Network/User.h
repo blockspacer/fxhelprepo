@@ -22,6 +22,7 @@ enum class ROOM_STATE
     IN_ROOM = 1
 };
 
+class TcpManager;
 class CurlWrapper;
 class CookiesHelper;
 class Room;
@@ -32,7 +33,7 @@ class User
 {
 public:
     User();
-    User(const std::string& username, const std::string& password);
+    //User(const std::string& username, const std::string& password);
     ~User();
 
     // 设置参数
@@ -49,6 +50,8 @@ public:
     std::string GetCookies() const;
 
     void SetRoomServerIp(const std::string& serverip);
+
+    void SetTcpManager(TcpManager* tcpManager);
 
     //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
     void SetNormalNotify(NormalNotify normalNotify);
@@ -89,6 +92,8 @@ private:
     bool LoginUServiceGetMyUserDataInfo();
 
     bool LoginIndexServiceGetUserCenter();
+
+    TcpManager* tcpManager_;
     std::string username_;
     std::string password_;
     std::string serverip_;

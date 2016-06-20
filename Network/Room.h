@@ -16,6 +16,7 @@ public:
     ~Room();
     
     void SetRoomServerIp(const std::string& serverip);
+    void SetTcpManager(TcpManager* tcpManager);
     bool Enter(const std::string& cookies, const std::string& usertoken, uint32 userid);
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);

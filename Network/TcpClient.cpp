@@ -124,6 +124,9 @@ bool TcpManager::Initialize()
 void TcpManager::Finalize()
 {
     stopflag = true;
+    baseThread_.message_loop_proxy()->PostTask(
+        FROM_HERE, base::Bind(&TcpManager::DoRemoveAllClient, this));
+
     if (baseThread_.IsRunning())
     {
         baseThread_.Stop();
@@ -213,7 +216,7 @@ void TcpManager::DoRecv()
 {
     do 
     {
-        std::vector<char> temp(1024);
+        std::vector<char> temp(4096);
         int len = 0;
         fd_set rfdset;
         FD_ZERO(&rfdset);
@@ -264,4 +267,9 @@ void TcpManager::DoRecv()
 
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
                                                base::Bind(&TcpManager::DoRecv, this));
+}
+
+void TcpManager::DoRemoveAllClient()
+{
+    callbacks_.clear();
 }

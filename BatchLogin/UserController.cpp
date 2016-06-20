@@ -9,9 +9,11 @@ namespace
 {
     const char* serverip = "42.62.68.50";
 }
-UserController::UserController()
+UserController::UserController(TcpManager* tcpManager)
     : mvBillboard_(new MVBillboard)
+    , tcpManager_(tcpManager)
 {
+    assert(tcpManager_);
 }
 
 UserController::~UserController()
@@ -21,11 +23,11 @@ UserController::~UserController()
 bool UserController::AddUser(const std::string& username, 
     const std::string& password, const IpProxy& ipproxy)
 {
-    std::shared_ptr<User> shared_user(new User(username, password));
+    std::shared_ptr<User> shared_user(new User);
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         shared_user->SetIpProxy(ipproxy);
-
-    if (!shared_user->Login())
+    shared_user->SetTcpManager(tcpManager_);
+    if (!shared_user->Login(username, password))
     {
         assert(false && L"µÇÂ¼Ê§°Ü");
         return false;
@@ -39,11 +41,13 @@ bool UserController::AddUser(const std::string& username,
 bool UserController::AddUserWithCookies(const std::string& username,
     const std::string& cookies, const IpProxy& ipproxy)
 {
-    std::shared_ptr<User> shared_user(new User(username, ""));
+    std::shared_ptr<User> shared_user(new User);
+    shared_user->SetUsername(username);
     shared_user->SetCookies(cookies);
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         shared_user->SetIpProxy(ipproxy);
 
+    shared_user->SetTcpManager(tcpManager_);
     shared_user->SetRoomServerIp(serverip);
     users_.push_back(shared_user);
     return true;

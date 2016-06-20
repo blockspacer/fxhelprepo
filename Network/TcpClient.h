@@ -42,7 +42,7 @@ class TcpManager
 public:
 
     typedef std::function<void(bool, TcpHandle)> AddClientCallback;
-    typedef std::function<void(bool, const std::vector<char>& data)> ClientCallback;
+    typedef std::function<void(bool, const std::vector<char>&)> ClientCallback;
 
     TcpManager();
     ~TcpManager();
@@ -62,7 +62,7 @@ private:
     void DoRemoveClient(TcpHandle handle);
     void DoSend(TcpHandle handle, const std::vector<char>& data);
     void DoRecv();
-
+    void DoRemoveAllClient();
     std::map<TcpHandle, ClientCallback> callbacks_;
     bool stopflag = false;
     base::Thread baseThread_;

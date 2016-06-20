@@ -6,6 +6,7 @@
 #undef min
 #include "third_party/chromium/base/basictypes.h"
 
+class TcpManager;
 class User;
 class MVBillboard;
 class IpProxy;
@@ -20,7 +21,7 @@ struct UserLoginInfo
 class UserController
 {
 public:
-    UserController();
+    UserController(TcpManager* tcpManager);
     ~UserController();
 
     // 在已经知道cookie的情况下不需要再做比较费时的登录操作了
@@ -39,6 +40,7 @@ public:
     void Run();
 
 private:
+    TcpManager* tcpManager_;
     std::vector<std::shared_ptr<User> > users_;
     std::unique_ptr<MVBillboard> mvBillboard_;
 };

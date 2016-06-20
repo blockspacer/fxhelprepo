@@ -14,14 +14,14 @@ User::User()
 {
 }
 
-User::User(const std::string& username,
-    const std::string& password)
-    : curlWrapper_(new CurlWrapper)
-    , cookiesHelper_(new CookiesHelper)
-{
-    username_ = username;
-    password_ = password;
-}
+//User::User(const std::string& username,
+//    const std::string& password)
+//    : curlWrapper_(new CurlWrapper)
+//    , cookiesHelper_(new CookiesHelper)
+//{
+//    username_ = username;
+//    password_ = password;
+//}
 
 
 User::~User()
@@ -76,6 +76,11 @@ std::string User::GetCookies() const
 void User::SetRoomServerIp(const std::string& serverip)
 {
     serverip_ = serverip;
+}
+
+void User::SetTcpManager(TcpManager* tcpManager)
+{
+    tcpManager_ = tcpManager;
 }
 
 //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
@@ -149,6 +154,7 @@ uint32 User::GetClanId() const
 bool User::EnterRoom(uint32 roomid)
 {
     std::shared_ptr<Room> room(new Room(roomid));
+    room->SetTcpManager(tcpManager_);
     room->SetRoomServerIp(serverip_);
     std::vector<std::string> keys;
     keys.push_back("_fx_coin");

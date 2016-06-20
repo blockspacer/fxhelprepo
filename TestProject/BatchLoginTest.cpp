@@ -32,7 +32,9 @@ void MultiUserMultiRoomTest()
     {
         std::string username = it.first;
         std::string password = it.second;
-        std::shared_ptr<User> shared_user(new User(username, password));
+        std::shared_ptr<User> shared_user(new User);
+        shared_user->SetUsername(username);
+        shared_user->SetPassword(password);
         userlist.push_back(shared_user);
         SingleUserMultiRoomTest(shared_user);
     }

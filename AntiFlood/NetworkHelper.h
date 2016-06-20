@@ -16,6 +16,7 @@ class GiftNotifyManager;
 class GiftInfoHelper;
 class GiftInfo;
 class User;
+class TcpManager;
 
 typedef std::function<void(const std::wstring&)> notifyfn;
 
@@ -112,5 +113,6 @@ private:
     std::unique_ptr<User> user_;
     std::unique_ptr<Authority> authority_;
     std::shared_ptr<AntiStrategy> antiStrategy_;
+    std::unique_ptr<TcpManager> tcpmanager_;
 };
 

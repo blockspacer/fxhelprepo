@@ -5,7 +5,7 @@
 
 #undef max // 因为微软这个二比在某些头文件定义了max宏
 #undef min // 因为微软这个二比在某些头文件定义了min宏
-
+#include "Network/TcpClient.h"
 #include "Network/MessageNotifyManager.h"
 #include "Network/CurlWrapper.h"
 #include "Network/EncodeHelper.h"
@@ -80,21 +80,20 @@ bool AntiStrategy::RemoveNickname(const std::string& vestname)
 
 NetworkHelper::NetworkHelper()
     : authority_(new Authority)
+    , tcpmanager_(new TcpManager)
 {
-    
 }
 
 
 NetworkHelper::~NetworkHelper()
 {
-    
 }
 
 bool NetworkHelper::Initialize()
 {
     CurlWrapper::CurlInit();
     user_.reset(new User);
-
+    tcpmanager_->Initialize();
     AuthorityHelper authorityHelper;
     bool result = authorityHelper.Load(authority_.get());
     assert(!authority_->serverip.empty());
@@ -104,6 +103,7 @@ bool NetworkHelper::Initialize()
 
 void NetworkHelper::Finalize()
 {
+    tcpmanager_->Finalize();
     CurlWrapper::CurlCleanup();
     return;
 }
