@@ -41,24 +41,24 @@ bool Room::Enter(const std::string& cookies, const std::string& usertoken, uint3
     //std::string key = "";
     //std::string ext = "";
 
-    if (!OpenRoom(cookies))
-    {
-        return false;
-    }
+    //if (!OpenRoom(cookies))
+    //{
+    //    return false;
+    //}
 
-    if (!GetStarInfo(cookies))
-    {
-        return false;
-    }
+    //if (!GetStarInfo(cookies))
+    //{
+    //    return false;
+    //}
     //if (!GetCurrentUserInfo(cookies, &userid, &nickname, &richlevel))
     //{
     //    return false;
     //}
 
-    if (!EnterRoom(cookies, userid, usertoken))
-    {
-        return false;
-    }
+    //if (!EnterRoom(cookies, userid, usertoken))
+    //{
+    //    return false;
+    //}
     
     if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
     {

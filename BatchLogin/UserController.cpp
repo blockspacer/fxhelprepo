@@ -7,7 +7,8 @@
 
 namespace
 {
-    const char* serverip = "42.62.68.50";
+    //const char* serverip = "42.62.68.50";
+    const char* serverip = "114.54.2.205";
 }
 UserController::UserController(TcpManager* tcpManager)
     : mvBillboard_(new MVBillboard)
@@ -21,35 +22,55 @@ UserController::~UserController()
 }
 
 bool UserController::AddUser(const std::string& username, 
-    const std::string& password, const IpProxy& ipproxy)
+    const std::string& password, const IpProxy& ipproxy, std::string* errormsg)
 {
+    if (users_.find(username) != users_.end())
+    {
+        *errormsg = "ÖØ¸´µÇÂ¼";
+        return false;
+    }
     std::shared_ptr<User> shared_user(new User);
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         shared_user->SetIpProxy(ipproxy);
-    shared_user->SetTcpManager(tcpManager_);
-    if (!shared_user->Login(username, password))
+    
+    if (!shared_user->Login(username, password, errormsg))
     {
+        std::wstring werror = base::UTF8ToWide(*errormsg);
         assert(false && L"µÇÂ¼Ê§°Ü");
         return false;
     }
    
+    shared_user->SetTcpManager(tcpManager_);
     shared_user->SetRoomServerIp(serverip);
-    users_.push_back(shared_user);
+    users_[username] = shared_user;
+
     return true;
 }
 
 bool UserController::AddUserWithCookies(const std::string& username,
-    const std::string& cookies, const IpProxy& ipproxy)
+    const std::string& cookies, const IpProxy& ipproxy, std::string* errormsg)
 {
+    if (users_.find(username)!=users_.end())
+    {
+        *errormsg = "ÖØ¸´µÇÂ¼";
+        return false;
+    }
     std::shared_ptr<User> shared_user(new User);
     shared_user->SetUsername(username);
-    shared_user->LoginWithCookies(cookies);
+    if (!shared_user->LoginWithCookies(cookies, errormsg))
+    {
+        std::wstring werror = base::UTF8ToWide(*errormsg);
+        assert(false && L"µÇÂ¼Ê§°Ü");
+        return false;
+    }
+    
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         shared_user->SetIpProxy(ipproxy);
 
     shared_user->SetTcpManager(tcpManager_);
     shared_user->SetRoomServerIp(serverip);
-    users_.push_back(shared_user);
+    users_[username] = shared_user;
+
     return true;
 }
 
@@ -58,9 +79,9 @@ bool UserController::GetUserLoginInfo(std::vector<UserLoginInfo>* userlogininfo)
     for (const auto& it : users_)
     {
         UserLoginInfo logininfo;
-        logininfo.accountname = it->GetUsername();
-        logininfo.passwod = it->GetPassword();
-        logininfo.cookies = it->GetCookies();
+        logininfo.accountname = it.second->GetUsername();
+        logininfo.passwod = it.second->GetPassword();
+        logininfo.cookies = it.second->GetCookies();
         userlogininfo->push_back(logininfo);
     }
     return true;
@@ -70,7 +91,7 @@ bool UserController::FillRoom(uint32 roomid, uint32 count)
 {
     for (const auto& it : users_)
     {
-        it->EnterRoom(roomid);
+        it.second->EnterRoom(roomid);
     }
     return true;
 }
@@ -82,8 +103,8 @@ bool UserController::UpMVBillboard(const std::string& collectionid,
     uint32 successCount = 0;
     for (const auto& it : users_)
     {
-        std::wstring message = base::UTF8ToWide(it->GetUsername()) + L"´ò°ñ" + base::UTF8ToWide(mvid);
-        std::string cookie = it->GetCookies();
+        std::wstring message = base::UTF8ToWide(it.second->GetUsername()) + L"´ò°ñ" + base::UTF8ToWide(mvid);
+        std::string cookie = it.second->GetCookies();
         
         if (mvBillboard_->UpMVBillboard(cookie, collectionid, mvid))
         {

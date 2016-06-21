@@ -223,11 +223,13 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
         CString account = m_ListCtrl_Users.GetItemText(index, 0);
         CString password = m_ListCtrl_Users.GetItemText(index, 1);
         CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
+
+        // 暂时全部走用户名密码登录流程
+        //accountPassword[account.GetBuffer()] = password.GetBuffer();
         if (cookies.IsEmpty())
             accountPassword[account.GetBuffer()] = password.GetBuffer();
         else
-            accountCookies[account.GetBuffer()] = cookies.GetBuffer();
-        
+            accountCookies[account.GetBuffer()] = cookies.GetBuffer();        
     }
     if (!accountPassword.empty())
         userRoomManager_->BatchLogUsers(accountPassword);
@@ -310,7 +312,7 @@ void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 
 void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
 {
-    int itemcount = m_ListCtrl_Users.GetItemCount();
+    int itemcount = m_ListCtrl_Rooms.GetItemCount();
     std::vector<std::wstring> roomids;
     for (int32 index = 0; index < itemcount; ++index)
     {

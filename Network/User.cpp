@@ -102,25 +102,30 @@ void User::SetNotify501(Notify501 notify501)
 
 bool User::Login()
 {
-    return Login(username_, password_);
+    std::string msg;
+    return Login(username_, password_, &msg);
 }
 
 // ²Ù×÷ÐÐÎª
 bool User::Login(const std::string& username,
-    const std::string& password)
+    const std::string& password, std::string* errormsg)
 {
-    if (!LoginHttps(username, password))
+    std::string msg;
+    if (!LoginHttps(username, password, &msg))
     {
+        *errormsg = msg;
         return false;
     }
     
-    if (!LoginUServiceGetMyUserDataInfo())
+    if (!LoginUServiceGetMyUserDataInfo(&msg))
     {
+        *errormsg = msg;
         return false;
     }
 
-    if (!LoginIndexServiceGetUserCenter())
+    if (!LoginIndexServiceGetUserCenter(&msg))
     {
+        *errormsg = msg;
         return false;
     }
 
@@ -132,7 +137,7 @@ bool User::Login(const std::string& username,
 //Pic=http://imge.kugou.com/kugouicon/165/20100101/20100101192931478054.jpg&
 //RegState=1&RegFrom=&t=20c7dd5dbfdea2e25846e666f820d64ab70eb771b034e8ae568e578c8154450d&
 //a_id=1010&ct=1466237656&UserName=%u0066%u0061%u006e%u0078%u0069%u006e%u0067%u0074%u0065%u0073%u0074%u0030%u0030%u0031
-bool User::LoginWithCookies(const std::string& cookies)
+bool User::LoginWithCookies(const std::string& cookies, std::string* errormsg)
 {
     std::regex pattern1(R"(KugooID=[0-9]*)");
 
@@ -171,13 +176,16 @@ bool User::LoginWithCookies(const std::string& cookies)
 
     cookiesHelper_->SetCookies(cookies);
 
-    if (!LoginUServiceGetMyUserDataInfo())
+    std::string msg;
+    if (!LoginUServiceGetMyUserDataInfo(&msg))
     {
+        *errormsg = msg;
         return false;
     }
 
-    if (!LoginIndexServiceGetUserCenter())
+    if (!LoginIndexServiceGetUserCenter(&msg))
     {
+        *errormsg = msg;
         return false;
     }
 
@@ -374,7 +382,7 @@ bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
 }
 
 bool User::LoginHttps(const std::string& username,
-    const std::string& password)
+    const std::string& password, std::string* errormsg)
 {
     const char* loginuserurl = "https://login-user.kugou.com/v1/login/";
     HttpRequest request;
@@ -449,7 +457,7 @@ bool User::LoginHttps(const std::string& username,
     return true;
 }
 
-bool User::LoginUServiceGetMyUserDataInfo()
+bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
 {
     const char* GetMyUserDataInfoUrl = "http://fanxing.kugou.com/UServices/UserService/UserService/getMyUserDataInfo";
     HttpRequest request;
@@ -486,6 +494,8 @@ bool User::LoginUServiceGetMyUserDataInfo()
     uint32 status = GetInt32FromJsonValue(rootdata, "status");
     if (status != 1)
     {
+        std::string errorMsg = rootdata.get("errorcode", "").asString();
+        std::wstring werrorMsg = base::UTF8ToWide(errorMsg);
         return false;
     }
     uint32 servertime = GetInt32FromJsonValue(rootdata, "servertime");
@@ -531,7 +541,7 @@ bool User::LoginUServiceGetMyUserDataInfo()
     return true;
 }
 
-bool User::LoginIndexServiceGetUserCenter()
+bool User::LoginIndexServiceGetUserCenter(std::string* errormsg)
 {
     const char* GetMyUserDataInfoUrl = "http://fanxing.kugou.com/Services/IndexService/IndexService/getUserCenter";
     HttpRequest request;

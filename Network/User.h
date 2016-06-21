@@ -61,8 +61,8 @@ public:
     // ²Ù×÷ÐÐÎª
     bool Login();
     bool Login(const std::string& username,
-        const std::string& password);
-    bool LoginWithCookies(const std::string& cookies);
+        const std::string& password, std::string* errormsg);
+    bool LoginWithCookies(const std::string& cookies, std::string* errormsg);
     bool Logout();
 
     uint32 GetServerTime() const;
@@ -88,11 +88,11 @@ public:
     
 private:
     bool LoginHttps(const std::string& username,
-        const std::string& password);
+        const std::string& password, std::string* errormsg);
 
-    bool LoginUServiceGetMyUserDataInfo();
+    bool LoginUServiceGetMyUserDataInfo(std::string* errormsg);
 
-    bool LoginIndexServiceGetUserCenter();
+    bool LoginIndexServiceGetUserCenter(std::string* errormsg);
 
     TcpManager* tcpManager_;
     std::string username_;

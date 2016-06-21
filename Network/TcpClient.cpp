@@ -1,6 +1,7 @@
 #include <assert.h>
 #include "TcpClient.h"
 #include "EncodeHelper.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 
 TcpClient::TcpClient()
     : socket_(0)
@@ -182,7 +183,7 @@ void TcpManager::DoAddClient(AddClientCallback addcallback,
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&flag, len);
     int keepalivetime = 10;
     setsockopt(sock, IPPROTO_TCP, SO_KEEPALIVE,
-               (const char FAR *)&keepalivetime, sizeof(keepalivetime));
+        (const char FAR *)&keepalivetime, sizeof(keepalivetime));
     rc = connect(sock, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
     if (SOCKET_ERROR == rc)
     {
@@ -209,6 +210,12 @@ void TcpManager::DoRemoveClient(TcpHandle handle)
 void TcpManager::DoSend(TcpHandle handle, const std::vector<char>& data)
 {
     int len = send(handle, data.data(), data.size(), 0);
+    if (len<0)
+    {
+        int errorcode = WSAGetLastError();
+        LOG(ERROR) << base::IntToString(errorcode);
+    }
+    
     assert(len == data.size());
 }
 
@@ -226,7 +233,7 @@ void TcpManager::DoRecv()
             FD_SET(sock, &rfdset);
         }
 
-        timeval timeout = { 0, 10000 };
+        timeval timeout = { 0, 1 };
         int ret = select(0, &rfdset, 0, 0, &timeout);
         if (ret == 0)//timeout
         {
@@ -234,6 +241,8 @@ void TcpManager::DoRecv()
         }
         else if (ret == -1)
         {
+            int errorcode = WSAGetLastError();
+            LOG(ERROR) << base::IntToString(errorcode);
             break;
         }
 
@@ -246,6 +255,8 @@ void TcpManager::DoRecv()
                 len = recv(sock, &temp[0], temp.size(), 0);
                 if (SOCKET_ERROR == len)
                 {
+                    int errorcode = WSAGetLastError();
+                    LOG(ERROR) << base::IntToString(errorcode);
                     callback.second(false, buffer);
                     continue;
                 }
@@ -262,8 +273,8 @@ void TcpManager::DoRecv()
     if (stopflag)
         return;
 
-    if (callbacks_.empty()) // 没有任务的情况下不要轮询了
-        return;
+    //if (callbacks_.empty()) // 没有任务的情况下不要轮询了
+    //    return;
 
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
                                                base::Bind(&TcpManager::DoRecv, this));

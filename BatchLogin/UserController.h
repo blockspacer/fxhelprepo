@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <vector>
 #include <memory>
 #include <functional>
@@ -26,10 +27,11 @@ public:
 
     // 在已经知道cookie的情况下不需要再做比较费时的登录操作了
     bool AddUserWithCookies(const std::string& username, 
-        const std::string& cookies, const IpProxy& ipproxy);
+        const std::string& cookies, const IpProxy& ipproxy, 
+        std::string* errormsg);
 
     bool AddUser(const std::string& username, const std::string& password, 
-        const IpProxy& ipproxy);
+        const IpProxy& ipproxy, std::string* errormsg);
 
     bool GetUserLoginInfo(std::vector<UserLoginInfo>* userlogininfo);
     bool FillRoom(uint32 roomid, uint32 count);
@@ -41,7 +43,7 @@ public:
 
 private:
     TcpManager* tcpManager_;
-    std::vector<std::shared_ptr<User> > users_;
+    std::map<std::string, std::shared_ptr<User> > users_;
     std::unique_ptr<MVBillboard> mvBillboard_;
 };
 

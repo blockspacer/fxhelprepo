@@ -168,7 +168,8 @@ bool NetworkHelper::Login(const std::wstring& username,
 {
     std::string strusername = base::WideToUTF8(username);
     std::string strpassword = base::WideToUTF8(password);
-    return user_->Login(strusername, strpassword);
+    std::string errormsg;
+    return user_->Login(strusername, strpassword, &errormsg);
 }
 bool NetworkHelper::GetCurrentUserDisplay(std::wstring* display)
 {

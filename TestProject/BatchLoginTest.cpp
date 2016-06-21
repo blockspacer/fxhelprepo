@@ -8,7 +8,8 @@ void SingleUserSingleRoomTest()
 {
     bool result = true;
     User user;
-    result &= user.Login("fanxingtest001", "123321");
+    std::string errormsg;
+    result &= user.Login("fanxingtest001", "123321", &errormsg);
     result &= user.EnterRoom(1084594);
 
     while (1);

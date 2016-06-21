@@ -285,7 +285,10 @@ void MessageNotifyManager::Finalize()
 {
     if (repeatingTimer_.IsRunning())
         repeatingTimer_.Stop();
-    
+
+    // 这个时候，tcpManager_的线程已经结束，不要再抛任务了
+    //tcpManager_->RemoveClient(tcphandle_843_);
+    //tcpManager_->RemoveClient(tcphandle_8080_);
     if (newRepeatingTimer_.IsRunning())
         newRepeatingTimer_.Stop();
 
@@ -721,6 +724,7 @@ void MessageNotifyManager::NewConnect8080Callback(uint32 roomid, uint32 userid,
                                                const std::string& usertoken,
                                                bool result, TcpHandle handle)
 {
+    tcphandle_8080_ = handle;
     uint32 keytime = static_cast<uint32>(base::Time::Now().ToDoubleT());
     std::vector<uint8> data_for_send;
     cmd201package package = {
@@ -728,13 +732,13 @@ void MessageNotifyManager::NewConnect8080Callback(uint32 roomid, uint32 userid,
     GetFirstPackage(package, &data_for_send);
     std::vector<char> data_8080;
     data_8080.assign(data_for_send.begin(), data_for_send.end());
-    tcpManager_->Send(handle, data_8080);
+    tcpManager_->Send(tcphandle_8080_, data_8080);
 
     if (newRepeatingTimer_.IsRunning())
         newRepeatingTimer_.Stop();
 
     newRepeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10), 
-        base::Bind(&MessageNotifyManager::NewSendHeartBeat, this, handle));
+        base::Bind(&MessageNotifyManager::NewSendHeartBeat, this, tcphandle_8080_));
 
     return;
 }
@@ -750,6 +754,7 @@ void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<ch
 {
     if (!result)
     {
+        newRepeatingTimer_.Stop();
         tcpManager_->RemoveClient(tcphandle_8080_);
         return;
     }
@@ -757,7 +762,7 @@ void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<ch
     if (data.empty())
         return;
 
-    Notify(data);
+    //Notify(data);
 }
 
 void MessageNotifyManager::NewSendHeartBeat(TcpHandle handle)

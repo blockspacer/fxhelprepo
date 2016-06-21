@@ -273,11 +273,19 @@ void UserRoomManager::DoBatchLogUsers(
     {
         std::string account = base::WideToUTF8(it.first);
         std::string password = base::WideToUTF8(it.second);
-        bool result = userController_->AddUser(account, password, ipproxy);
+        std::string errormsg;
+        std::wstring message = base::UTF8ToWide(account) + L" µÇÂ¼";
+        if (!userController_->AddUser(account, password, ipproxy, &errormsg))
+        {
+            message += L"Ê§°Ü," + base::UTF8ToWide(errormsg);
+        }
+        else
+        {
+            message += L"³É¹¦!";
+        }
+
         if (notify_)
         {
-            std::wstring message = base::UTF8ToWide(account) + L" Login ";
-            message += result ? L"success!" : L"failed!";
             notify_(message);
         }
     }
@@ -302,11 +310,19 @@ void UserRoomManager::DoBatchLogUsersWithCookie(
     {
         std::string account = base::WideToUTF8(it.first);
         std::string cookie = base::WideToUTF8(it.second);
-        bool result = userController_->AddUserWithCookies(account, cookie, ipproxy);
+        std::string errormsg;
+        std::wstring message = base::UTF8ToWide(account) + L" cµÇÂ¼";
+        if (!userController_->AddUserWithCookies(account, cookie, ipproxy, &errormsg))
+        {
+            message += L"Ê§°Ü," + base::UTF8ToWide(errormsg);
+        }
+        else
+        {
+            message += L"³É¹¦!";
+        }
+
         if (notify_)
         {
-            std::wstring message = base::UTF8ToWide(account) + L" Login ";
-            message += result ? L"success!" : L"failed!";
             notify_(message);
         }
     }
