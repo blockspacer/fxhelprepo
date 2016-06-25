@@ -22,7 +22,92 @@ void TcpProxyClient::SetProxy(const std::string& ip, uint16 port)
     proxyPort_ = port;
 }
 
-bool TcpProxyClient::ConnectToProxy(const std::string& ip, uint16 port)
+bool TcpProxyClient::ConnectToSocks4Proxy(const std::string& ip, uint16 port)
+{
+    assert(!proxyIp_.empty() && proxyPort_);
+    if (!tcpClient_->Connect(proxyIp_, proxyPort_))
+    {
+        return false;
+    }
+
+    uint32 u32Ip = inet_addr(ip.c_str());
+    char ip0 = u32Ip >> 24;
+    char ip1 = u32Ip << 8 >> 24;
+    char ip2 = u32Ip << 16 >> 24;
+    char ip3 = u32Ip & 0xFF;
+    char port0 = port >> 8;
+    char port1 = port & 0xFF;
+    // socks4–≠“È
+        //+---- + ---- + ---- + ---- + ---- + ---- + ---- + ---- + ---- + ---- + .... + ---- +
+        //| VN | CD | DSTPORT | DSTIP | USERID | NULL |
+        //+---- + ---- + ---- + ---- + ---- + ---- + ---- + ---- + ---- + ---- + .... + ---- +
+//#of bytes :1    1      2        4      variable  1
+    std::vector<char> socks4_version_send_pack;
+    //VN is the SOCKS protocol version number and should be 4. CD is the
+    //    SOCKS command code and should be 1 for CONNECT request.NULL is a byte
+    //    of all zero bits.
+    socks4_version_send_pack.push_back(0x04);
+    socks4_version_send_pack.push_back(0x01);
+    socks4_version_send_pack.push_back(port0);
+    socks4_version_send_pack.push_back(port1);
+    socks4_version_send_pack.push_back(ip3);
+    socks4_version_send_pack.push_back(ip2);
+    socks4_version_send_pack.push_back(ip1);
+    socks4_version_send_pack.push_back(ip0);
+    socks4_version_send_pack.push_back(0x00);
+
+    if (!tcpClient_->Send(socks4_version_send_pack))
+        return false;
+
+    std::vector<char> socks4_version_recv_pack;
+    if (!tcpClient_->Recv(&socks4_version_recv_pack))
+        return false;
+
+    //The SOCKS server checks to see whether such a request should be granted
+    //based on any combination of source IP address, destination IP address,
+    //destination port number, the userid, and information it may obtain by
+    //consulting IDENT, cf. RFC 1413.  If the request is granted, the SOCKS
+    //server makes a connection to the specified port of the destination host.
+    //A reply packet is sent to the client when this connection is established,
+    //or when the request is rejected or the operation fails. 
+ //           +---- + ---- + ---- + ---- + ---- + ---- + ---- + ---- +
+ //           | VN | CD | DSTPORT | DSTIP |
+ //           +---- + ---- + ---- + ---- + ---- + ---- + ---- + ---- +
+ //# of bytes : 1    1      2         4
+    if (socks4_version_recv_pack.size() != 8)
+        return false;
+
+    //VN is the version of the reply code and should be 0. CD is the result
+    //code with one of the following values :
+    if (socks4_version_recv_pack[0] != 0x00)
+        return false;
+
+    //90 : request granted
+    //91 : request rejected or failed
+    //92 : request rejected becasue SOCKS server cannot connect to
+    //identd on the client
+    //93 : request rejected because the client program and identd
+    //report different user - ids
+    if (socks4_version_recv_pack[1] != 0x5a) // 0x5a == 90
+        return false;
+    //==========================================================================
+
+    std::string str = "<policy-file-request/>";
+    std::vector<char> data;
+    data.assign(str.begin(), str.end());
+    data.push_back(0);
+
+    if (!tcpClient_->Send(data))
+        return false;
+
+    std::vector<char> flashresponse;
+    if (!tcpClient_->Recv(&flashresponse))
+        return false;
+
+    return true;
+}
+
+bool TcpProxyClient::ConnectToSocks5Proxy(const std::string& ip, uint16 port)
 {
     assert(!proxyIp_.empty() && proxyPort_);
     if (!tcpClient_->Connect(proxyIp_, proxyPort_))

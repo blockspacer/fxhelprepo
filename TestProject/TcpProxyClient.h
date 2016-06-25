@@ -10,7 +10,8 @@ public:
     ~TcpProxyClient();
 
     void SetProxy(const std::string& ip, uint16 port);
-    bool ConnectToProxy(const std::string& ip, uint16 port);
+    bool ConnectToSocks4Proxy(const std::string& ip, uint16 port);
+    bool ConnectToSocks5Proxy(const std::string& ip, uint16 port);
     bool Send(const std::vector<uint8>& data);
     bool Recv(std::vector<uint8>* buffer);
 

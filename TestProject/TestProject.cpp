@@ -3,49 +3,23 @@
 
 #include "stdafx.h"
 #include "Network/TcpClient.h"
+#include "TcpProxyClient.h"
 #include <iostream>
 #include <assert.h>
 #include "third_party/chromium/base/at_exit.h"
 #include "third_party/chromium/base/run_loop.h"
 
-
-TcpHandle g_handle;
-void tcpclientcallback(TcpManager* tcpmanager, bool result, TcpHandle handle)
+void TcpProxyClientTest()
 {
-    if (!result)
-        return;
-    g_handle = handle;
-    std::string str = "<policy-file-request/>";
-    std::vector<char> data;
-    data.assign(str.begin(), str.end());
-    data.push_back(0);
-    tcpmanager->Send(handle, data);
-}
-
-void clientcallback(bool result, const std::vector<char>& data)
-{
-    std::string str(data.begin(), data.end());
-    std::cout << str;
-}
-
-bool TcpManagerTest()
-{
-    TcpManager tcpmanager;
-    tcpmanager.Initialize();
-
-    tcpmanager.AddClient(
-        std::bind(tcpclientcallback, &tcpmanager, std::placeholders::_1, std::placeholders::_2),
-        "114.54.2.204", 843, clientcallback);
-
-    Sleep(10000);
-    tcpmanager.RemoveClient(g_handle);
-    while (1);
+    TcpProxyClient proxyClient;
+    proxyClient.SetProxy("61.177.248.202", 1080);
+    proxyClient.ConnectToSocks4Proxy("114.54.2.205", 843);
 }
 
 int _tmain(int argc, _TCHAR* argv[])
 {   
     base::AtExitManager atExitManager;
-    TcpManagerTest();
+    TcpProxyClientTest();
 	return 0;
 }
 
