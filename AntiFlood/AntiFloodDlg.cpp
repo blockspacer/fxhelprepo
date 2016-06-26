@@ -10,8 +10,8 @@
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
 #include "Config.h"
-#include "base/strings/string_number_conversions.h"
-#include "base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -113,6 +113,8 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_VEST, m_list_vest);
     DDX_Radio(pDX, IDC_RADIO_NOACTION, m_radiogroup);
     DDX_Control(pDX, IDC_CHK_HANDLE_ALL, m_chk_handle_all);
+    DDX_Control(pDX, IDC_EDIT_VERIFYCODE, m_edit_verifycode);
+    DDX_Control(pDX, IDC_STATIC_VERIFYCODE, m_static_verifycode);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -269,6 +271,19 @@ void CAntiFloodDlg::OnSysCommand(UINT nID, LPARAM lParam)
 
 void CAntiFloodDlg::OnPaint()
 {
+    if (!image.IsNull())
+    {
+        int hight = image.GetHeight();
+        int width = image.GetWidth();
+        CRect rc;
+        m_static_verifycode.GetWindowRect(&rc);
+        ScreenToClient(rc);
+        image.Draw(GetDC()->m_hDC, CRect(rc.left, rc.top, rc.left + width,
+            rc.top + hight));
+        m_edit_verifycode.SetFocus();
+        //CDialogEx::OnPaint();
+    }
+
 	if (IsIconic())
 	{
 		CPaintDC dc(this); // 用于绘制的设备上下文
@@ -286,10 +301,10 @@ void CAntiFloodDlg::OnPaint()
 		// 绘制图标
 		dc.DrawIcon(x, y, m_hIcon);
 	}
-	else
-	{
+	//else
+	//{
 		CDialogEx::OnPaint();
-	}
+	//}
 }
 
 void CAntiFloodDlg::OnClose()
@@ -319,13 +334,16 @@ void CAntiFloodDlg::OnBnClickedButtonLogin()
 {
     CString username;
     CString password;
+    CString verifycode;
     GetDlgItemText(IDC_EDIT_Username, username);
     GetDlgItemText(IDC_EDIT_Password, password);
+    m_edit_verifycode.GetWindowTextW(verifycode);
     bool remember = !!m_check_remember.GetCheck();
 
     // 测试通过的curl登录方式
-    bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer());
-    std::wstring message = std::wstring(L"login ") + (result ? L"success" : L"failed");
+    bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer(),
+        verifycode.GetBuffer());
+    std::wstring message = std::wstring(L"登录 ") + (result ? L"成功" : L"失败");
     if (result)
     {
         std::wstring displayinfo;
@@ -447,21 +465,72 @@ void CAntiFloodDlg::NotifyEnterRoom(const RowData& rowdata)
     this->PostMessage(WM_USER_ADD_ENTER_ROOM_INFO, 0, 0);
 }
 
-bool CAntiFloodDlg::LoginByRequest(const std::wstring& username, const std::wstring& password)
+bool CAntiFloodDlg::LoginByRequest(const std::wstring& username, 
+    const std::wstring& password, const std::wstring& verifycode)
 {
-    if (network_)
+    if (username_ != username)
     {
-        network_->RemoveNotify();
-        network_->Finalize();
+        if (network_)
+        {
+            network_->RemoveNotify();
+            network_->Finalize();
+        }
+        network_.reset(new NetworkHelper);
+        network_->Initialize();
+        network_->SetAntiStrategy(antiStrategy_);
+        network_->SetNotify(
+            std::bind(&CAntiFloodDlg::Notify, this, std::placeholders::_1));
+        username_ = username;
     }
-    network_.reset(new NetworkHelper);
-    network_->Initialize();
-    network_->SetAntiStrategy(antiStrategy_);
-    network_->SetNotify(
-        std::bind(&CAntiFloodDlg::Notify, this, std::placeholders::_1));
+  
+    std::string errormsg;
+    bool result = network_->Login(username, password, verifycode, &errormsg);
+
+    std::wstring message = username + L" 登录";
+    if (!result)
+    {
+        message += L"失败," + base::UTF8ToWide(errormsg);
+    }
+    else
+    {
+        message += L"成功!";
+    }
+    Notify(message);
+
+    if (base::UTF8ToWide(errormsg).compare(L"验证码错误")==0)
+    {
+        RefreshVerifyCode();
+    }
     
-    bool result = network_->Login(username, password);
     return result;
+}
+
+bool CAntiFloodDlg::RefreshVerifyCode()
+{
+    std::vector<uint8> picture;
+    if (!network_->LoginGetVerifyCode(&picture))
+    {
+        return false;
+    }
+
+    // 显示验证码
+    if (!image.IsNull())
+    {
+        image.Destroy();
+    }
+    COleStreamFile osf;
+    osf.CreateMemoryStream(NULL);
+    osf.Write(picture.data(), picture.size());
+    osf.SeekToBegin();
+    image.Load(osf.GetStream());
+    int hight = image.GetHeight();
+    int width = image.GetWidth();
+    CRect rc;
+    m_static_verifycode.GetWindowRect(&rc);
+    ScreenToClient(rc);
+    image.Draw(GetDC()->m_hDC, CRect(rc.left, rc.top, rc.left + width,
+        rc.top + hight));
+    m_static_verifycode.SetWindowTextW(L"");
 }
 
 bool CAntiFloodDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)

@@ -86,7 +86,9 @@ private:
     void SetHScroll();
     void Notify(const std::wstring& message);
     void NotifyEnterRoom(const RowData& rowdata);
-    bool LoginByRequest(const std::wstring& username, const std::wstring& password);
+    bool LoginByRequest(const std::wstring& username, 
+        const std::wstring& password, const std::wstring& verifycode);
+    bool RefreshVerifyCode();
 	bool GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
     bool GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
     bool KickOut_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos,
@@ -96,6 +98,7 @@ private:
     bool SendChatMessage_(uint32 roomid, const std::wstring& message);
 
     HICON m_hIcon;
+    CImage image;
 
     std::unique_ptr<NetworkHelper> network_;
     std::shared_ptr<AntiStrategy> antiStrategy_;
@@ -113,6 +116,7 @@ private:
     CButton m_check_remember;
     uint32 roomid_ = 0;
     uint32 singerid_ = 0;
+    std::wstring username_;
 
     CString m_query_key;
     CListBox InfoList_;
@@ -136,4 +140,6 @@ public:
     afx_msg void OnBnClickedRadioNoaction();
     CButton m_chk_handle_all;
     afx_msg void OnBnClickedChkHandleAll();
+    CEdit m_edit_verifycode;
+    CStatic m_static_verifycode;
 };

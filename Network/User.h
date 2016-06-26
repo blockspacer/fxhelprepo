@@ -61,9 +61,14 @@ public:
     // ²Ù×÷ÐÐÎª
     bool Login();
     bool Login(const std::string& username,
-        const std::string& password, std::string* errormsg);
-    bool LoginWithCookies(const std::string& cookies, std::string* errormsg);
+               const std::string& password, 
+               const std::string& verifycode,
+               std::string* errormsg);
+
+    bool LoginWithCookies(const std::string& cookies, 
+                          std::string* errormsg);
     bool Logout();
+    bool LoginGetVerifyCode(std::vector<uint8>* picture);
 
     uint32 GetServerTime() const;
     uint32 GetFanxingId() const;
@@ -87,8 +92,9 @@ public:
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     
 private:
-    bool LoginHttps(const std::string& username,
-        const std::string& password, std::string* errormsg);
+    bool CheckVerifyCode(const std::string& verifycode, std::string* errormsg);
+    bool LoginHttps(const std::string& username, const std::string& password, 
+        const std::string& verifycode, std::string* errormsg);
 
     bool LoginUServiceGetMyUserDataInfo(std::string* errormsg);
 

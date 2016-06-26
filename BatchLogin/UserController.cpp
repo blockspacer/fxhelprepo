@@ -33,10 +33,10 @@ bool UserController::AddUser(const std::string& username,
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         shared_user->SetIpProxy(ipproxy);
     
-    if (!shared_user->Login(username, password, errormsg))
+    if (!shared_user->Login(username, password, "", errormsg))
     {
         std::wstring werror = base::UTF8ToWide(*errormsg);
-        assert(false && L"µÇÂ¼Ê§°Ü");
+        //assert(false && L"µÇÂ¼Ê§°Ü");
         return false;
     }
    

@@ -103,15 +103,23 @@ void User::SetNotify501(Notify501 notify501)
 bool User::Login()
 {
     std::string msg;
-    return Login(username_, password_, &msg);
+    return Login(username_, password_, "", &msg);
 }
 
 // 操作行为
-bool User::Login(const std::string& username,
-    const std::string& password, std::string* errormsg)
+bool User::Login(const std::string& username, const std::string& password, 
+    const std::string& verifycode, std::string* errormsg)
 {
+    if (!verifycode.empty())
+    {
+        if (!CheckVerifyCode(verifycode, errormsg))
+        {
+            return false;
+        }
+    }
+
     std::string msg;
-    if (!LoginHttps(username, password, &msg))
+    if (!LoginHttps(username, password, verifycode, &msg))
     {
         *errormsg = msg;
         return false;
@@ -128,7 +136,8 @@ bool User::Login(const std::string& username,
         *errormsg = msg;
         return false;
     }
-
+    username_ = username;
+    password_ = password;
     return true;
 }
 
@@ -200,6 +209,32 @@ bool User::Logout()
         room.second->Exit();
     }
     return false;
+}
+
+bool User::LoginGetVerifyCode(std::vector<uint8>* picture)
+{
+    std::string url = "http://verifycode.service.kugou.com/v1/get_img_code";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://fanxing.kugou.com/";
+    request.queries["type"] = "LoginCheckCode";
+    request.queries["appid"] = "1010";
+    request.queries["codetype"] = "0";
+    request.queries["t"] = GetNowTimeString();
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    for (const auto& it : response.cookies)
+    {
+        cookiesHelper_->SetCookies(it);
+    }
+
+    *picture = response.content;
+    return true;
 }
 
 uint32 User::GetServerTime() const
@@ -381,15 +416,62 @@ bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
     return room->second->UnbanChat(cookies, enterRoomUserInfo);
 }
 
-bool User::LoginHttps(const std::string& username,
-    const std::string& password, std::string* errormsg)
+bool User::CheckVerifyCode(const std::string& verifycode, std::string* errormsg)
+{
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = "http://verifycode.service.kugou.com/v1/check_img_code/";
+    request.referer = "http://www.fanxing.kugou.com/";
+    request.cookies = cookiesHelper_->GetCookies("LoginCheckCode");;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    queries["appid"] = "1010";;
+    queries["code"] = verifycode;
+    queries["ct"] = base::UintToString(
+        static_cast<uint32>(base::Time::Now().ToDoubleT()));
+    queries["type"] = "LoginCheckCode";
+    queries["callback"] = "checkCodeForLoginCallback";
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string responsedata;
+    responsedata.assign(response.content.begin(), response.content.end());
+    if (responsedata.empty())
+        return  false;
+
+    std::string jsondata = PickJson(responsedata);
+    Json::Reader reader;
+    Json::Value logindata(Json::objectValue);
+    if (!reader.parse(jsondata, logindata, false))
+    {
+        return false;
+    }
+
+    *errormsg = logindata.get("errorMsg", "").asString();
+    if (!errormsg->empty())
+    {
+        std::wstring werrorMsg = base::UTF8ToWide(*errormsg);
+        return false;
+    }
+
+    return true;
+}
+
+bool User::LoginHttps(const std::string& username, const std::string& password, 
+    const std::string& verifycode, std::string* errormsg)
 {
     const char* loginuserurl = "https://login-user.kugou.com/v1/login/";
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = loginuserurl;
-    request.referer = "http://www.fanxing.kugou.com";
-    request.cookies = "";
+    request.referer = "http://www.fanxing.kugou.com"; 
+    request.cookies = cookiesHelper_->GetCookies("LoginCheckCode");;
     if (ipproxy_.GetProxyType()!=IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
@@ -397,7 +479,7 @@ bool User::LoginHttps(const std::string& username,
     queries["appid"] = "1010";
     queries["username"] = UrlEncode(username);
     queries["pwd"] = MakeMd5FromString(password);;
-    queries["code"] = "";
+    queries["code"] = verifycode;
     queries["clienttime"] = base::UintToString(
         static_cast<uint32>(base::Time::Now().ToDoubleT()));
     queries["expire_day"] = "3";
@@ -441,9 +523,13 @@ bool User::LoginHttps(const std::string& username,
         return false;
     }
 
-    std::string errorMsg = logindata.get("errorMsg", "").asString();
-    std::wstring werrorMsg = base::UTF8ToWide(errorMsg);
-    // 暂时没有必要检测status的值
+    *errormsg = logindata.get("errorMsg", "").asString();
+    if (!errormsg->empty())
+    {
+        std::wstring werrorMsg = base::UTF8ToWide(*errormsg);
+        return false;
+    }
+
     Json::Value jvCmd(Json::ValueType::intValue);
     usertoken_ = logindata.get("token", "").asString();
     kugouid_ = logindata.get("userid",0).asUInt();
@@ -453,7 +539,6 @@ bool User::LoginHttps(const std::string& username,
         cookiesHelper_->SetCookies(it);
     }
 
-    // response.content在这里不用处理。
     return true;
 }
 
@@ -495,6 +580,7 @@ bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
     if (status != 1)
     {
         std::string errorMsg = rootdata.get("errorcode", "").asString();
+        *errormsg = errorMsg;
         std::wstring werrorMsg = base::UTF8ToWide(errorMsg);
         return false;
     }

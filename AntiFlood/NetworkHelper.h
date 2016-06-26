@@ -77,7 +77,10 @@ public:
     void SetNotify601(notify601 fn);
     void RemoveNotify601();
 
-    bool Login(const std::wstring& username, const std::wstring& password);
+    bool Login(const std::wstring& username, const std::wstring& password,
+               const std::wstring& verifycode,std::string* errormsg);
+    bool LoginGetVerifyCode(std::vector<uint8>* picture);
+
     bool GetCurrentUserDisplay(std::wstring* display);
     bool EnterRoom(const std::wstring& roomid);
     bool EnterRoom(uint32 roomid);

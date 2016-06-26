@@ -164,13 +164,20 @@ void NetworkHelper::RemoveNotify601()
 }
 
 bool NetworkHelper::Login(const std::wstring& username, 
-    const std::wstring& password)
+    const std::wstring& password, const std::wstring& verifycode,
+    std::string* errormsg)
 {
     std::string strusername = base::WideToUTF8(username);
     std::string strpassword = base::WideToUTF8(password);
-    std::string errormsg;
-    return user_->Login(strusername, strpassword, &errormsg);
+    std::string strverifycode = base::WideToUTF8(verifycode);
+    return user_->Login(strusername, strpassword, strverifycode, errormsg);
 }
+
+bool NetworkHelper::LoginGetVerifyCode(std::vector<uint8>* picture)
+{
+    return user_->LoginGetVerifyCode(picture);
+}
+
 bool NetworkHelper::GetCurrentUserDisplay(std::wstring* display)
 {
     uint32 clanid = user_->GetClanId();
