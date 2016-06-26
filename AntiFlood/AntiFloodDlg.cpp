@@ -497,7 +497,7 @@ bool CAntiFloodDlg::LoginByRequest(const std::wstring& username,
     }
     Notify(message);
 
-    if (base::UTF8ToWide(errormsg).compare(L"验证码错误")==0)
+    if (base::UTF8ToWide(errormsg).find(L"验证码")!=std::string::npos)
     {
         RefreshVerifyCode();
     }
@@ -530,7 +530,8 @@ bool CAntiFloodDlg::RefreshVerifyCode()
     ScreenToClient(rc);
     image.Draw(GetDC()->m_hDC, CRect(rc.left, rc.top, rc.left + width,
         rc.top + hight));
-    m_static_verifycode.SetWindowTextW(L"");
+    m_edit_verifycode.SetWindowTextW(L"");
+    return true;
 }
 
 bool CAntiFloodDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
