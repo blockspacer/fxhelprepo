@@ -103,7 +103,6 @@ CDlgRegister::CDlgRegister(CWnd* pParent /*=NULL*/)
 
 CDlgRegister::~CDlgRegister()
 {
-    registerHelper_->Finalize();
 }
 
 void CDlgRegister::DoDataExchange(CDataExchange* pDX)
@@ -130,6 +129,12 @@ void CDlgRegister::OnOK()
     return;
 }
 
+void CDlgRegister::OnClose()
+{
+    registerHelper_->Finalize();
+    CDialogEx::OnClose();
+}
+
 BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_WM_PAINT()
     ON_MESSAGE(WM_HOTKEY, OnHotKey)//注册热键
@@ -137,6 +142,7 @@ BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_REGISTER, &CDlgRegister::OnBnClickedBtnRegister)
     ON_BN_CLICKED(IDC_BTN_VERIFY_CODE, &CDlgRegister::OnBnClickedBtnVerifyCode)
     ON_MESSAGE(WM_USER_REGISTER_INFO, &CDlgRegister::OnNotifyMessage)
+    ON_MESSAGE(WM_USER_CHECK_PROXY_INFO,&CDlgRegister::OnCheckProxyInfo)
     ON_BN_CLICKED(IDC_BTN_IMPORT_PROXY, &CDlgRegister::OnBnClickedBtnImportProxy)
     ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_IP_PROXY, &CDlgRegister::OnNMCustomdrawListIpProxy)
     ON_BN_CLICKED(IDC_BTN_ADD_PROXY, &CDlgRegister::OnBnClickedBtnAddProxy)
@@ -146,6 +152,7 @@ BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_REMOVE_SELECT, &CDlgRegister::OnBnClickedBtnRemoveSelect)
     ON_BN_CLICKED(IDC_BTN_SAVE_PROXY, &CDlgRegister::OnBnClickedBtnSaveProxy)
     ON_BN_CLICKED(IDC_BTN_CHK_PROXY, &CDlgRegister::OnBnClickedBtnChkProxy)
+    ON_WM_CLOSE(&CDlgRegister::OnClose)
 END_MESSAGE_MAP()
 
 
@@ -245,6 +252,64 @@ void CDlgRegister::Notify(const std::wstring& message)
     this->PostMessage(WM_USER_REGISTER_INFO, 0, 0);
 }
 
+LRESULT CDlgRegister::OnCheckProxyInfo(WPARAM wParam, LPARAM lParam)
+{
+    IpProxy ipproxy;
+    ipproxyresultMutex_.lock();
+    if (!ipProxys_.empty())
+    {
+        ipproxy = *ipProxys_.begin();
+        ipProxys_.erase(ipProxys_.begin());
+    }
+    ipproxyresultMutex_.unlock();
+
+    if (ipproxy.GetProxyType()==IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        return 0;
+    }
+
+    //搜索到对应的代理数据，删除该项
+    int itemcount = m_listctrl_ip_proxy.GetItemCount();
+    std::wstring currentip = base::UTF8ToWide(ipproxy.GetProxyIp());
+    for (int i = 0; i < itemcount; ++i)
+    {
+        bool exist = false;
+        for (int index = 0; index < itemcount; index++)
+        {
+            CString text = m_listctrl_ip_proxy.GetItemText(index, 1);
+            if (currentip.compare(text.GetBuffer()) == 0)
+            {
+                exist = true;
+                break;
+            }
+        }
+
+        if (exist)
+        {
+            CString itemtext = m_listctrl_ip_proxy.GetItemText(i, 1);
+            itemtext += L"被从IP代理列表中删除";
+            Notify(itemtext.GetBuffer());
+            m_listctrl_ip_proxy.DeleteItem(i);
+            break;
+        }
+    }
+    return 0;
+}
+
+void CDlgRegister::CheckProxyCallback(bool result, const IpProxy& ipproxy, const std::wstring& message)
+{
+    Notify(message);
+    if (result)
+    {
+        return;
+    }
+    
+    ipproxyresultMutex_.lock();
+    ipProxys_.push_back(ipproxy);
+    ipproxyresultMutex_.unlock();
+    this->PostMessage(WM_USER_CHECK_PROXY_INFO, 0, 0);
+}
+
 void CDlgRegister::OnBnClickedBtnCheckExist()
 {
     IpProxy ipProxy;
@@ -291,23 +356,17 @@ void CDlgRegister::OnBnClickedBtnRegister()
     std::string cookies;
     std::string verifystr;
     std::wstring errorMsg;
-    TranslateVerifyCode(base::WideToUTF8(verifycode.GetString()), &verifystr);
-    if (!registerHelper_->RegisterUser(ipProxy, username.GetString(),
-        password.GetString(), verifystr, &cookies, &errorMsg))
+    //TranslateVerifyCode(base::WideToUTF8(verifycode.GetString()), &verifystr);
+    verifystr = base::WideToUTF8(verifycode.GetString());
+    if (!registerHelper_->AsyncRegisterUser(ipProxy, username.GetString(),
+        password.GetString(), verifystr, 
+        std::bind(&CDlgRegister::Notify,this,std::placeholders::_1)))
     {
-        Notify(errorMsg + L" 注册失败");
+        Notify(std::wstring(L"无法开始注册"));
         return;
     }
-    Notify(L"注册成功");
-
-    if (!registerHelper_->SaveAccountToFile(username.GetString(), 
-        password.GetString(), cookies))
-    {
-        Notify(L"保存注册信息到文件失败!");
-    }
-    Notify(L"保存注册信息到文件成功!");
+    Notify(std::wstring(L"开始注册") + username.GetBuffer());
 }
-
 
 void CDlgRegister::OnBnClickedBtnVerifyCode()
 {
@@ -349,15 +408,14 @@ void CDlgRegister::OnBnClickedBtnVerifyCode()
 
 void CDlgRegister::OnBnClickedBtnImportProxy()
 {
-    ipProxys_.clear();
-    if (!registerHelper_->LoadIpProxy(&ipProxys_))
+    std::vector<IpProxy> ipProxys;
+    if (!registerHelper_->LoadIpProxy(&ipProxys))
         return;
 
     GridData griddata;
-    IpProxysToGridData(ipProxys_, &griddata);
+    IpProxysToGridData(ipProxys, &griddata);
 
     // 显示在界面
-
     int itemcount = m_listctrl_ip_proxy.GetItemCount();
 
     for (uint32 i = 0; i < griddata.size(); ++i)
@@ -620,7 +678,6 @@ bool CDlgRegister::GetIpProxy(IpProxy* ipproxy)
 void CDlgRegister::OnBnClickedBtnChkProxy()
 {
     std::vector<IpProxy> ipproxys;
-    uint32 aviliable = 0;
     int count = m_listctrl_ip_proxy.GetItemCount();
     for (int i = 0; i < count; ++i)
     {
@@ -641,18 +698,12 @@ void CDlgRegister::OnBnClickedBtnChkProxy()
         ipproxy.SetProxyIp(ip);
         ipproxy.SetProxyPort(static_cast<uint16>(port));
 
-        std::vector<uint8> picture;
-        if (!registerHelper_->RegisterGetVerifyCode(ipproxy, &picture))
-        {
-            Notify(L"IP代理不可用" + std::wstring(csIP.GetBuffer()));
-            m_listctrl_ip_proxy.SetCheck(i, TRUE);//失败的勾选上,然后要批量删除
-            continue;
-        }
-        Notify(L"IP代理检测可用--" + std::wstring(csIP.GetBuffer()));
-        aviliable++;
+        ipproxys.push_back(ipproxy);
     }
-    Notify(L"IP代理检测全部完成,有效IP数量: " + base::UintToString16(aviliable) 
-        + L"/" + base::UintToString16(count));
+    // 投递任务
+    registerHelper_->AsyncCheckIpProxy(
+        ipproxys, std::bind(&CDlgRegister::CheckProxyCallback, this, 
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
     // 从后往前删除
     for (int i = count - 1; i >= 0; --i)
