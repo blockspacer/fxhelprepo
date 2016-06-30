@@ -5,6 +5,13 @@ IpProxy::IpProxy()
 {
 }
 
+IpProxy::IpProxy(const IpProxy& ipproxy)
+{
+    proxytype_ = ipproxy.proxytype_;
+    proxyip_ = ipproxy.proxyip_;
+    proxyport_ = ipproxy.proxyport_;
+}
+
 IpProxy::~IpProxy()
 {
 }

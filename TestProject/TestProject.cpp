@@ -11,7 +11,7 @@
 
 void TcpProxyClientTest()
 {
-    TcpProxyClient proxyClient;
+    MyTcpProxyClient proxyClient;
     proxyClient.SetProxy("61.177.248.202", 1080);
     proxyClient.ConnectToSocks4Proxy("114.54.2.205", 843);
 }

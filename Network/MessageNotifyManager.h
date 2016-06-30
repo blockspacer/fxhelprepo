@@ -9,10 +9,11 @@
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/timer/timer.h"
 #include "third_party/chromium/base/threading/thread.h"
+#include "Network/IpProxy.h"
 #include "Network/TcpClient.h"
 
-
 class TcpClient;
+class TcpManager;
 
 // 201消息回来解析后出去的数据包
 struct EnterRoomUserInfo 
@@ -60,11 +61,11 @@ public:
     void Finalize();
     void SetTcpManager(TcpManager* tcpManager);
     void SetServerIp(const std::string& serverip);
+    void SetIpProxy(const IpProxy& ipproxy);
     void SetNotify201(Notify201 notify201);
     void SetNotify501(Notify501 notify201);
     void SetNotify601(Notify601 notify601);
     void SetNormalNotify(NormalNotify normalNotify);
-
     
     bool Connect843();// 固定的请求，不需要带其他参数
     bool Connect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
@@ -108,14 +109,15 @@ private:
                              const std::string& usertoken,
                              bool result, TcpHandle handle);
     void NewData843Callback(uint32 roomid, uint32 userid,
-        const std::string& usertoken, bool result, const std::vector<char>& data);
-    void NewData8080Callback(bool result, const std::vector<char>& data);
+        const std::string& usertoken, bool result, const std::vector<uint8>& data);
+    void NewData8080Callback(bool result, const std::vector<uint8>& data);
 
     void NewSendHeartBeat(TcpHandle handle);
 
     base::Thread baseThread_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;
     std::string serverip_ = "192.168.0.1";
+    IpProxy ipProxy_;
     std::string Packet_ = "";
     int position_ = 0;
 

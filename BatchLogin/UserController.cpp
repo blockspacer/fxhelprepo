@@ -57,6 +57,9 @@ bool UserController::AddUserWithCookies(const std::string& username,
     }
     std::shared_ptr<User> shared_user(new User);
     shared_user->SetUsername(username);
+    if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        shared_user->SetIpProxy(ipproxy);
+
     if (!shared_user->LoginWithCookies(cookies, errormsg))
     {
         std::wstring werror = base::UTF8ToWide(*errormsg);
@@ -64,8 +67,7 @@ bool UserController::AddUserWithCookies(const std::string& username,
         return false;
     }
     
-    if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
-        shared_user->SetIpProxy(ipproxy);
+
 
     shared_user->SetTcpManager(tcpManager_);
     shared_user->SetRoomServerIp(serverip);
@@ -91,7 +93,7 @@ bool UserController::FillRoom(uint32 roomid, uint32 count)
 {
     for (const auto& it : users_)
     {
-        it.second->EnterRoom(roomid);
+        it.second->EnterRoomFopAlive(roomid);
     }
     return true;
 }

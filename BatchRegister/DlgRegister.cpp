@@ -152,7 +152,7 @@ BEGIN_MESSAGE_MAP(CDlgRegister, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_REMOVE_SELECT, &CDlgRegister::OnBnClickedBtnRemoveSelect)
     ON_BN_CLICKED(IDC_BTN_SAVE_PROXY, &CDlgRegister::OnBnClickedBtnSaveProxy)
     ON_BN_CLICKED(IDC_BTN_CHK_PROXY, &CDlgRegister::OnBnClickedBtnChkProxy)
-    ON_WM_CLOSE(&CDlgRegister::OnClose)
+    ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 

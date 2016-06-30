@@ -15,6 +15,7 @@ public:
     };
 
     IpProxy();
+    IpProxy(const IpProxy& ipproxy);
     ~IpProxy();
 
     void SetProxyType(PROXY_TYPE proxytype);

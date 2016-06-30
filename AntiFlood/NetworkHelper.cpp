@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "NetworkHelper.h"
+
+#include "Network/TcpManager.h"
 #include "Network/User.h"
 #include "third_party/chromium/base/strings/sys_string_conversions.h"
 
@@ -98,6 +100,7 @@ bool NetworkHelper::Initialize()
     bool result = authorityHelper.Load(authority_.get());
     assert(!authority_->serverip.empty());
     user_->SetRoomServerIp(authority_->serverip);
+    user_->SetTcpManager(tcpmanager_.get());
     return result;
 }
 
@@ -217,7 +220,7 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
     user_->SetNormalNotify(std::bind(&NetworkHelper::NotifyCallback, this,
         std::placeholders::_1));
     roomid_ = roomid;
-    return user_->EnterRoom(roomid);
+    return user_->EnterRoomFopOperation(roomid);
 }
 
 bool NetworkHelper::GetViewerList(uint32 roomid,

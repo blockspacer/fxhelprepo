@@ -8,6 +8,7 @@
 #include "BatchLogin.h"
 #include "BatchLoginDlg.h"
 #include "UserRoomManager.h"
+#include "Network/TcpManager.h"
 #include "Network/TcpClient.h"
 #include "afxdialogex.h"
 #
@@ -224,12 +225,12 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
         CString password = m_ListCtrl_Users.GetItemText(index, 1);
         CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
 
-        // 暂时全部走用户名密码登录流程
-        accountPassword[account.GetBuffer()] = password.GetBuffer();
-        //if (cookies.IsEmpty())
-        //    accountPassword[account.GetBuffer()] = password.GetBuffer();
-        //else
-        //    accountCookies[account.GetBuffer()] = cookies.GetBuffer();
+        //// 暂时全部走用户名密码登录流程
+        //accountPassword[account.GetBuffer()] = password.GetBuffer();
+        if (cookies.IsEmpty())
+            accountPassword[account.GetBuffer()] = password.GetBuffer();
+        else
+            accountCookies[account.GetBuffer()] = cookies.GetBuffer();
     }
     if (!accountPassword.empty())
         userRoomManager_->BatchLogUsers(accountPassword);

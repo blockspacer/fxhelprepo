@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <memory>
-
+#include "IpProxy.h"
 #include "third_party/chromium/base/basictypes.h"
 #include "CurlWrapper.h"
 #include "MessageNotifyManager.h"
@@ -15,9 +15,15 @@ public:
     explicit Room(uint32 roomid);
     ~Room();
     
+    void SetIpProxy(const IpProxy& ipproxy);
     void SetRoomServerIp(const std::string& serverip);
     void SetTcpManager(TcpManager* tcpManager);
-    bool Enter(const std::string& cookies, const std::string& usertoken, uint32 userid);
+
+    // 需要获得房间信息来做下一步操作的函数
+    bool EnterForOperation(const std::string& cookies, const std::string& usertoken, uint32 userid);
+
+    // 不需要获取房间信息，仅仅为了连接，不做业务操作的进房请求
+    bool EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid);
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
     void SetNotify501(Notify501 notify501);
@@ -37,8 +43,8 @@ public:
 private:
     bool OpenRoom(const std::string& cookies);
 
-    //bool GetCurrentUserInfo(const std::string& cookies,
-    //    uint32* userid, std::string* nickname, uint32* richlevel);
+    bool GetCurrentUserInfo(const std::string& cookies,
+        uint32* userid, std::string* nickname, uint32* richlevel);
 
     bool GetStarInfo(const std::string& cookies);
     bool EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken);
@@ -48,6 +54,7 @@ private:
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
         const std::string& usertoken);
 
+    IpProxy ipproxy_;
     uint32 roomid_ = 0;
     uint32 singerid_ = 0;
     std::string nickname_;

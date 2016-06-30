@@ -15,16 +15,6 @@ User::User()
 {
 }
 
-//User::User(const std::string& username,
-//    const std::string& password)
-//    : curlWrapper_(new CurlWrapper)
-//    , cookiesHelper_(new CookiesHelper)
-//{
-//    username_ = username;
-//    password_ = password;
-//}
-
-
 User::~User()
 {
     Logout();
@@ -222,6 +212,9 @@ bool User::LoginGetVerifyCode(std::vector<uint8>* picture)
     request.queries["appid"] = "1010";
     request.queries["codetype"] = "0";
     request.queries["t"] = GetNowTimeString();
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
     {
@@ -252,7 +245,7 @@ uint32 User::GetClanId() const
     return clanid_;
 }
 
-bool User::EnterRoom(uint32 roomid)
+bool User::EnterRoomFopOperation(uint32 roomid)
 {
     std::shared_ptr<Room> room(new Room(roomid));
     room->SetTcpManager(tcpManager_);
@@ -283,7 +276,12 @@ bool User::EnterRoom(uint32 roomid)
     // 如果存在重复的房间，先断掉旧的
     this->ExitRoom(roomid);
 
-    if (!room->Enter(cookie,usertoken_,kugouid_))
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        room->SetIpProxy(ipproxy_);
+    }
+
+    if (!room->EnterForOperation(cookie,usertoken_,kugouid_))
     {
         return false;
     }
@@ -292,6 +290,50 @@ bool User::EnterRoom(uint32 roomid)
     return true;
 }
 
+bool User::EnterRoomFopAlive(uint32 roomid)
+{
+    std::shared_ptr<Room> room(new Room(roomid));
+    room->SetTcpManager(tcpManager_);
+    room->SetRoomServerIp(serverip_);
+    std::vector<std::string> keys;
+    keys.push_back("_fx_coin");
+    keys.push_back("_fx_user");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    keys.push_back("KuGoo");
+    std::string cookie = cookiesHelper_->GetCookies(keys);
+    if (normalNotify_)
+    {
+        room->SetNormalNotify(normalNotify_);
+    }
+    if (notify201_)
+    {
+        room->SetNotify201(notify201_);
+    }
+
+    if (notify501_)
+    {
+        room->SetNotify501(notify501_);
+    }
+    // 如果存在重复的房间，先断掉旧的
+    this->ExitRoom(roomid);
+
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        room->SetIpProxy(ipproxy_);
+    }
+
+    if (!room->EnterForAlive(cookie, usertoken_, kugouid_))
+    {
+        return false;
+    }
+
+    rooms_[roomid] = room;
+    return true;
+}
 bool User::ExitRoom(uint32 roomid)
 {
     auto it = rooms_.find(roomid);
@@ -437,19 +479,25 @@ bool User::CheckVerifyCode(const std::string& verifycode, std::string* errormsg)
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
     {
+        *errormsg = "http request error";
         return false;
     }
 
     std::string responsedata;
     responsedata.assign(response.content.begin(), response.content.end());
     if (responsedata.empty())
+    {
+        *errormsg = "http response data empty";
         return  false;
+    }
+
 
     std::string jsondata = PickJson(responsedata);
     Json::Reader reader;
     Json::Value logindata(Json::objectValue);
     if (!reader.parse(jsondata, logindata, false))
     {
+        *errormsg = "json parse error";
         return false;
     }
 
@@ -520,6 +568,7 @@ bool User::LoginHttps(const std::string& username, const std::string& password,
     Json::Value logindata(Json::objectValue);
     if (!reader.parse(jsondata, logindata, false))
     {
+        *errormsg = "json parse error";
         return false;
     }
 
@@ -560,6 +609,7 @@ bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
     {
+        *errormsg = "http request error";
         return false;
     }
 
@@ -572,6 +622,7 @@ bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
     Json::Value rootdata(Json::objectValue);
     if (!reader.parse(responsedata, rootdata, false))
     {
+        *errormsg = "json parse error";
         return false;
     }
 
@@ -590,6 +641,7 @@ bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
     dataObject = rootdata.get(std::string("data"), dataObject);
     if (dataObject.empty())
     {
+        *errormsg = "json parse error";
         return false;
     }
 

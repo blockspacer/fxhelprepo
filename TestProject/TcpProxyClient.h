@@ -3,11 +3,11 @@
 #include <vector>
 #include "third_party/chromium/base/basictypes.h"
 class TcpClient;
-class TcpProxyClient
+class MyTcpProxyClient
 {
 public:
-    TcpProxyClient();
-    ~TcpProxyClient();
+    MyTcpProxyClient();
+    ~MyTcpProxyClient();
 
     void SetProxy(const std::string& ip, uint16 port);
     bool ConnectToSocks4Proxy(const std::string& ip, uint16 port);

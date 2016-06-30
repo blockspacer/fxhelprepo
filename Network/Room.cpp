@@ -21,6 +21,11 @@ Room::~Room()
     messageNotifyManager_->Finalize();
 }
 
+void Room::SetIpProxy(const IpProxy& ipproxy)
+{
+    ipproxy_ = ipproxy;
+}
+
 void Room::SetRoomServerIp(const std::string& serverip)
 {
     messageNotifyManager_->SetServerIp(serverip);
@@ -31,35 +36,44 @@ void Room::SetTcpManager(TcpManager* tcpManager)
     messageNotifyManager_->SetTcpManager(tcpManager);
 }
 
-bool Room::Enter(const std::string& cookies, const std::string& usertoken, uint32 userid)
+bool Room::EnterForOperation(const std::string& cookies, const std::string& usertoken, uint32 userid)
 {
-    //uint32 userid = 0;
-    //std::string nickname = "";
-    //uint32 richlevel = 0;
-    //uint32 ismaster = 0;
-    //uint32 singerid = 0;
-    //std::string key = "";
-    //std::string ext = "";
+    std::string nickname = "";
+    uint32 richlevel = 0;
+    uint32 ismaster = 0;
+    uint32 singerid = 0;
+    std::string key = "";
+    std::string ext = "";
 
-    //if (!OpenRoom(cookies))
-    //{
-    //    return false;
-    //}
+    if (!OpenRoom(cookies))
+    {
+        return false;
+    }
 
-    //if (!GetStarInfo(cookies))
-    //{
-    //    return false;
-    //}
+    if (!GetStarInfo(cookies))
+    {
+        return false;
+    }
+
     //if (!GetCurrentUserInfo(cookies, &userid, &nickname, &richlevel))
     //{
     //    return false;
     //}
 
-    //if (!EnterRoom(cookies, userid, usertoken))
-    //{
-    //    return false;
-    //}
+    if (!EnterRoom(cookies, userid, usertoken))
+    {
+        return false;
+    }
     
+    if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
+    {
+        return false;
+    }
+    return true;
+}
+
+bool Room::EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid)
+{
     if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
     {
         return false;
@@ -85,6 +99,8 @@ bool Room::GetViewerList(const std::string& cookies,
     request.referer = std::string("http://fanxing.kugou.com/") +
         base::UintToString(roomid_);
     request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
@@ -182,6 +198,8 @@ bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
     request.referer = std::string("http://fanxing.kugou.com/") +
         base::UintToString(roomid_);
     request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
@@ -234,6 +252,8 @@ bool Room::BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoo
     request.referer = std::string("http://fanxing.kugou.com/") +
         base::UintToString(roomid_);
     request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
@@ -285,6 +305,8 @@ bool Room::UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterR
     request.referer = std::string("http://fanxing.kugou.com/") +
         base::UintToString(roomid_);
     request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
@@ -312,7 +334,8 @@ bool Room::UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterR
 bool Room::SendChatMessage(const std::string& nickname, uint32 richlevel,
     const std::string& message)
 {
-    return messageNotifyManager_->SendChatMessage(nickname, richlevel, message);
+    //return messageNotifyManager_->SendChatMessage(nickname, richlevel, message);
+    return messageNotifyManager_->NewSendChatMessage(nickname, richlevel, message);
 }
 
 void Room::SetNormalNotify(NormalNotify normalNotify)
@@ -337,6 +360,8 @@ bool Room::OpenRoom(const std::string& cookies)
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.referer = "http://fanxing.kugou.com/";
     request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
@@ -388,6 +413,8 @@ bool Room::GetStarInfo(const std::string& cookies)
     request.referer = std::string("http://fanxing.kugou.com/") +
         base::UintToString(roomid_);
     request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
@@ -453,6 +480,8 @@ bool Room::EnterRoom(const std::string& cookies, uint32 userid, const std::strin
         base::IntToString(static_cast<int>(roomid_))+
         "%22,%22%22,%22%22,%22web%22]";
     request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
@@ -503,6 +532,8 @@ bool Room::EnterRoom(const std::string& cookies, uint32 userid, const std::strin
 //    request.queries["args"] = "%5B%5D";
 //    request.queries["test"] = "3";
 //    request.cookies = cookies;
+//    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+//        request.ipproxy = ipproxy_;
 //
 //    HttpResponse response;
 //    if (!curlWrapper_->Execute(request, &response))
@@ -567,6 +598,11 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
 {
     bool ret = false;
     //ret = messageNotifyManager_->Connect843();
+    if (ipproxy_.GetProxyType()!= IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        messageNotifyManager_->SetIpProxy(ipproxy_);
+    }
+    
     ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken);
     assert(ret);
 

@@ -4,25 +4,25 @@
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
 
-TcpProxyClient::TcpProxyClient()
+MyTcpProxyClient::MyTcpProxyClient()
     :tcpClient_(nullptr)
 {
     tcpClient_.reset(new TcpClient);
     tcpClient_->Initialize();
 }
 
-TcpProxyClient::~TcpProxyClient()
+MyTcpProxyClient::~MyTcpProxyClient()
 {
     tcpClient_->Finalize();
 }
 
-void TcpProxyClient::SetProxy(const std::string& ip, uint16 port)
+void MyTcpProxyClient::SetProxy(const std::string& ip, uint16 port)
 {
     proxyIp_ = ip;
     proxyPort_ = port;
 }
 
-bool TcpProxyClient::ConnectToSocks4Proxy(const std::string& ip, uint16 port)
+bool MyTcpProxyClient::ConnectToSocks4Proxy(const std::string& ip, uint16 port)
 {
     assert(!proxyIp_.empty() && proxyPort_);
     if (!tcpClient_->Connect(proxyIp_, proxyPort_))
@@ -107,7 +107,7 @@ bool TcpProxyClient::ConnectToSocks4Proxy(const std::string& ip, uint16 port)
     return true;
 }
 
-bool TcpProxyClient::ConnectToSocks5Proxy(const std::string& ip, uint16 port)
+bool MyTcpProxyClient::ConnectToSocks5Proxy(const std::string& ip, uint16 port)
 {
     assert(!proxyIp_.empty() && proxyPort_);
     if (!tcpClient_->Connect(proxyIp_, proxyPort_))
@@ -215,12 +215,12 @@ bool TcpProxyClient::ConnectToSocks5Proxy(const std::string& ip, uint16 port)
     return true;
 }
 
-bool TcpProxyClient::Send(const std::vector<uint8>& data)
+bool MyTcpProxyClient::Send(const std::vector<uint8>& data)
 {
     return false;
 }
 
-bool TcpProxyClient::Recv(std::vector<uint8>* buffer)
+bool MyTcpProxyClient::Recv(std::vector<uint8>* buffer)
 {
     return false;
 }

@@ -1,7 +1,8 @@
 #include "MessageNotifyManager.h"
 #include <assert.h>
 
-#include "TcpClient.h"
+#include "IpProxy.h"
+#include "TcpManager.h"
 #include "EncodeHelper.h"
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/time/time.h"
@@ -307,6 +308,14 @@ void MessageNotifyManager::SetTcpManager(TcpManager* tcpManager)
 void MessageNotifyManager::SetServerIp(const std::string& serverip)
 {
     serverip_ = serverip;
+}
+
+void MessageNotifyManager::SetIpProxy(const IpProxy& ipproxy)
+{
+    assert(ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE);
+    ipProxy_.SetProxyType(ipproxy.GetProxyType());
+    ipProxy_.SetProxyIp(ipproxy.GetProxyIp());
+    ipProxy_.SetProxyPort(ipproxy.GetProxyPort());
 }
 
 void MessageNotifyManager::SetNotify201(Notify201 notify201)
@@ -691,7 +700,7 @@ bool MessageNotifyManager::NewConnect843(uint32 roomid, uint32 userid,
 {
     tcpManager_->AddClient(
         std::bind(&MessageNotifyManager::NewConnect843Callback, this, std::placeholders::_1,
-        std::placeholders::_2), serverip_, port843,
+        std::placeholders::_2), ipProxy_, serverip_, port843,
         std::bind(&MessageNotifyManager::NewData843Callback, this,roomid,userid, 
         usertoken, std::placeholders::_1, std::placeholders::_2));
     return true;
@@ -699,12 +708,22 @@ bool MessageNotifyManager::NewConnect843(uint32 roomid, uint32 userid,
 
 void MessageNotifyManager::NewConnect843Callback(bool result, TcpHandle handle)
 {
+    if (!result)
+    {
+        assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        return;
+    }
+
     std::string str = "<policy-file-request/>";
     std::vector<char> data;
     data.assign(str.begin(), str.end());
     data.push_back(0);
     tcphandle_843_ = handle;
-    tcpManager_->Send(handle, data);
+    if (!tcpManager_->Send(handle, data))
+    {
+        assert(false && L"发送数据错误，要结束流程");
+    }
+    
 }
 
 
@@ -714,7 +733,7 @@ bool MessageNotifyManager::NewConnect8080(uint32 roomid, uint32 userid,
     tcpManager_->AddClient(
         std::bind(&MessageNotifyManager::NewConnect8080Callback, this, roomid,
         userid, usertoken, std::placeholders::_1, std::placeholders::_2),
-        serverip_, port8080,
+        ipProxy_, serverip_, port8080,
         std::bind(&MessageNotifyManager::NewData8080Callback, this, std::placeholders::_1,
         std::placeholders::_2));
     return true;
@@ -724,6 +743,12 @@ void MessageNotifyManager::NewConnect8080Callback(uint32 roomid, uint32 userid,
                                                const std::string& usertoken,
                                                bool result, TcpHandle handle)
 {
+    if (!result)
+    {
+        assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        return;
+    }
+
     tcphandle_8080_ = handle;
     uint32 keytime = static_cast<uint32>(base::Time::Now().ToDoubleT());
     std::vector<uint8> data_for_send;
@@ -744,13 +769,19 @@ void MessageNotifyManager::NewConnect8080Callback(uint32 roomid, uint32 userid,
 }
 
 void MessageNotifyManager::NewData843Callback(uint32 roomid, uint32 userid,
-    const std::string& usertoken, bool result, const std::vector<char>& data)
+    const std::string& usertoken, bool result, const std::vector<uint8>& data)
 {
     tcpManager_->RemoveClient(tcphandle_843_);
+    if (!result)
+    {
+        assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        return;
+    }
+
     NewConnect8080(roomid, userid, usertoken);
 }
 
-void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<char>& data)
+void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<uint8>& data)
 {
     if (!result)
     {
@@ -761,8 +792,9 @@ void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<ch
 
     if (data.empty())
         return;
-
-    //Notify(data);
+    
+    std::vector<char> temp(data.begin(), data.end());
+    Notify(temp);
 }
 
 void MessageNotifyManager::NewSendHeartBeat(TcpHandle handle)

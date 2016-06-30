@@ -10,7 +10,7 @@ void SingleUserSingleRoomTest()
     User user;
     std::string errormsg;
     result &= user.Login("fanxingtest001", "123321","", &errormsg);
-    result &= user.EnterRoom(1084594);
+    result &= user.EnterRoomFopOperation(1084594);
 
     while (1);
 }
@@ -19,8 +19,8 @@ void SingleUserMultiRoomTest(std::shared_ptr<User> user)
 {
     bool result = true;
     result &= user->Login();
-    result &= user->EnterRoom(1084594);
-    result &= user->EnterRoom(1053564);
+    result &= user->EnterRoomFopOperation(1084594);
+    result &= user->EnterRoomFopOperation(1053564);
 }
 
 void MultiUserMultiRoomTest()

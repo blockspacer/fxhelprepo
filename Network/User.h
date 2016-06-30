@@ -74,7 +74,8 @@ public:
     uint32 GetFanxingId() const;
     uint32 GetClanId() const;
 
-    bool EnterRoom(uint32 roomid);
+    bool EnterRoomFopOperation(uint32 roomid);
+    bool EnterRoomFopAlive(uint32 roomid);
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
 
