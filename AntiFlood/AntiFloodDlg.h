@@ -142,4 +142,6 @@ public:
     afx_msg void OnBnClickedChkHandleAll();
     CEdit m_edit_verifycode;
     CStatic m_static_verifycode;
+    CButton m_chk_robot;
+    afx_msg void OnBnClickedChkRobot();
 };

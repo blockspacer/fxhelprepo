@@ -97,19 +97,28 @@ public:
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool SendChatMessage(uint32 roomid, const std::string& message);
 
+    void SetRobotHandle(bool enable);
+    bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
+
 private:
     void NotifyCallback(const std::wstring& message);
     void NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo);
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
-    void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo);
+    void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
+        const RoomChatMessage& roomChatMessage);
     void TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo);
     void TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo);
+
+    void RobotHandleEnterRoom(const EnterRoomUserInfo& enterRoomUserInfo);
+    void RobotHandleChatMessage(const EnterRoomUserInfo& enterRoomUserInfo,
+        const RoomChatMessage& roomChatMessage);
 
     std::map<uint32, EnterRoomUserInfo> enterRoomUserInfoMap_;
     notifyfn notify_;
     notify201 notify201_;
     notify501 notify501_;
     bool handleall501_ = false;
+    bool robotstate_ = false;
     notify502 notify502_;
     notify601 notify601_;
     uint32 roomid_ = 0;

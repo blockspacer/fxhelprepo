@@ -65,7 +65,8 @@ private:
     void NotifyCallback(const std::wstring& message);
     void NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo);
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
-    void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo);
+    void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
+        const RoomChatMessage& roomChatMessage);
 
     bool EnterRoom_(uint32 roomid, uint32* singerid);
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,

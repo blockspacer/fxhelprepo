@@ -115,6 +115,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_HANDLE_ALL, m_chk_handle_all);
     DDX_Control(pDX, IDC_EDIT_VERIFYCODE, m_edit_verifycode);
     DDX_Control(pDX, IDC_STATIC_VERIFYCODE, m_static_verifycode);
+    DDX_Control(pDX, IDC_CHK_ROBOT, m_chk_robot);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -161,6 +162,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_RADIO_BANCHAT, &CAntiFloodDlg::OnBnClickedRadioNoaction)
     ON_BN_CLICKED(IDC_RADIO_KICKOUT, &CAntiFloodDlg::OnBnClickedRadioNoaction)
     ON_BN_CLICKED(IDC_CHK_HANDLE_ALL, &CAntiFloodDlg::OnBnClickedChkHandleAll)
+    ON_BN_CLICKED(IDC_CHK_ROBOT, &CAntiFloodDlg::OnBnClickedChkRobot)
 END_MESSAGE_MAP()
 
 
@@ -1264,4 +1266,13 @@ void CAntiFloodDlg::OnBnClickedChkHandleAll()
     if (!network_)
         return;
     network_->SetHandleChatUsers(handleall);
+}
+
+
+void CAntiFloodDlg::OnBnClickedChkRobot()
+{
+    bool enablerobot = !!m_chk_robot.GetCheck();
+    if (!network_)
+        return;
+    network_->SetRobotHandle(enablerobot);
 }

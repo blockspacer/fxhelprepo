@@ -20,4 +20,11 @@ private:
     std::string proxyIp_;
     uint16 proxyPort_;
 };
+//
+//void TcpProxyClientTest()
+//{
+//    MyTcpProxyClient proxyClient;
+//    proxyClient.SetProxy("61.177.248.202", 1080);
+//    proxyClient.ConnectToSocks4Proxy("114.54.2.205", 843);
+//}
 

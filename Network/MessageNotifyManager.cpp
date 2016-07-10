@@ -152,7 +152,9 @@ bool CommandHandle_315(const Json::Value& jvalue, std::string* outmsg)
     return false;
 }
 
-bool CommandHandle_501(const Json::Value& jvalue, EnterRoomUserInfo* enterRoomUserInfo, std::string* outmsg)
+bool CommandHandle_501(const Json::Value& jvalue, 
+    EnterRoomUserInfo* enterRoomUserInfo, RoomChatMessage* roomChatMessage, 
+    std::string* outmsg)
 {
     // 房间聊天消息
     try
@@ -167,6 +169,7 @@ bool CommandHandle_501(const Json::Value& jvalue, EnterRoomUserInfo* enterRoomUs
         Json::Value jvString("");
         uint32 receiverid = GetInt32FromJsonValue(content, "receiverid");
         uint32 senderid = GetInt32FromJsonValue(content, "senderid");
+        uint32 senderkugouid = GetInt32FromJsonValue(content, "senderkugouid");
 		uint32 senderrichlevel = GetInt32FromJsonValue(content, "senderrichlevel");
         uint32 issecrect = GetInt32FromJsonValue(content, "issecrect");//是否私聊
         std::string chatmsg = content.get("chatmsg", jvString).asString();
@@ -180,6 +183,14 @@ bool CommandHandle_501(const Json::Value& jvalue, EnterRoomUserInfo* enterRoomUs
 		enterRoomUserInfo->nickname = sendername;
 		enterRoomUserInfo->richlevel = senderrichlevel;
 		enterRoomUserInfo->userid = senderid;
+
+        roomChatMessage->roomid = GetInt32FromJsonValue(jvalue, "roomid");
+        roomChatMessage->senderid = senderid;
+        roomChatMessage->sendername = sendername;
+        roomChatMessage->receiverid = receiverid;
+        roomChatMessage->receivername = receivername;
+        roomChatMessage->chatmessage = chatmsg;
+        roomChatMessage->issecrect = !!issecrect;
     }
     catch (...)
     {
@@ -323,7 +334,7 @@ void MessageNotifyManager::SetNotify201(Notify201 notify201)
     notify201_ = notify201;
 }
 
-void MessageNotifyManager::SetNotify501(Notify201 notify501)
+void MessageNotifyManager::SetNotify501(Notify501 notify501)
 {
     notify501_ = notify501;
 }
@@ -441,14 +452,15 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
             CommandHandle_315(rootdata, &outmsg);
             break;
         case 501:
-			
-			if (CommandHandle_501(rootdata, &enterRoomUserInfo, &outmsg))
+        {
+            RoomChatMessage roomChatMessage;
+            if (CommandHandle_501(rootdata, &enterRoomUserInfo, &roomChatMessage, &outmsg))
             {
                 if (notify501_)
-                    notify501_(enterRoomUserInfo);
+                    notify501_(enterRoomUserInfo, roomChatMessage);
             }
-            
             break;
+        }
         case 601:
             CommandHandle_601(rootdata, &outmsg);
             break;
@@ -822,6 +834,24 @@ bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint3
     root["receivername"] = "";
     root["chatmsg"] = message;
     root["issecrect"] = 0;
+
+    std::string data = writer.write(root);
+    std::vector<char> msg;
+    msg.assign(data.begin(), data.end());
+    return tcpManager_->Send(tcphandle_8080_, msg);
+}
+
+bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomChatMessage)
+{
+    Json::FastWriter writer;
+    Json::Value root(Json::objectValue);
+    root["cmd"] = 501;
+    root["nickname"] = roomChatMessage.sendername;
+    root["richlevel"] = base::UintToString(roomChatMessage.richlevel);
+    root["receiverid"] = roomChatMessage.receiverid;
+    root["receivername"] = roomChatMessage.receivername;
+    root["chatmsg"] = roomChatMessage.chatmessage;
+    root["issecrect"] = roomChatMessage.issecrect;
 
     std::string data = writer.write(root);
     std::vector<char> msg;

@@ -338,6 +338,11 @@ bool Room::SendChatMessage(const std::string& nickname, uint32 richlevel,
     return messageNotifyManager_->NewSendChatMessage(nickname, richlevel, message);
 }
 
+bool Room::SendChatMessage(const RoomChatMessage& roomChatMessage)
+{
+    return messageNotifyManager_->NewSendChatMessageRobot(roomChatMessage);
+}
+
 void Room::SetNormalNotify(NormalNotify normalNotify)
 {
     messageNotifyManager_->SetNormalNotify(normalNotify);

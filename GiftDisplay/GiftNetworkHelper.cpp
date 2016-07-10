@@ -186,7 +186,7 @@ bool GiftNetworkHelper::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
 
     messageNotifyManager_->SetNotify501(
         std::bind(&GiftNetworkHelper::NotifyCallback501,
-        this, std::placeholders::_1));
+        this, std::placeholders::_1, std::placeholders::_2));
 
     messageNotifyManager_->SetNotify601(
         std::bind(&GiftNetworkHelper::NotifyCallback601,
@@ -283,7 +283,8 @@ void GiftNetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUser
         return;
 }
 
-void GiftNetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo)
+void GiftNetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
+    const RoomChatMessage& roomChatMessage)
 {
     if (!notify501_)
         return;

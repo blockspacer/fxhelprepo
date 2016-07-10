@@ -216,7 +216,7 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
     user_->SetNotify201(std::bind(&NetworkHelper::NotifyCallback201, this,
         std::placeholders::_1));
     user_->SetNotify501(std::bind(&NetworkHelper::NotifyCallback501, this,
-        std::placeholders::_1));
+        std::placeholders::_1, std::placeholders::_2));
     user_->SetNormalNotify(std::bind(&NetworkHelper::NotifyCallback, this,
         std::placeholders::_1));
     roomid_ = roomid;
@@ -265,6 +265,16 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
 bool NetworkHelper::SendChatMessage(uint32 roomid, const std::string& message)
 {
     return user_->SendChatMessage(roomid, message);
+}
+
+void NetworkHelper::SetRobotHandle(bool enable)
+{
+    robotstate_ = enable;
+}
+
+bool NetworkHelper::SendChatMessageRobot(const RoomChatMessage& roomChatMessage)
+{
+    return user_->SendChatMessageRobot(roomChatMessage);
 }
 
 void NetworkHelper::SetHandleChatUsers(bool handleall501)
@@ -337,9 +347,11 @@ void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo
     notify201_(rowdata);
 }
 
-void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo)
+void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
+    const RoomChatMessage& roomChatMessage)
 {
     TryHandleUser(enterRoomUserInfo);
+    RobotHandleChatMessage(enterRoomUserInfo, roomChatMessage);
     TryHandle501Msg(enterRoomUserInfo);
     if (!notify501_)
         return;
@@ -386,5 +398,42 @@ void NetworkHelper::TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo)
         break;
     }
     assert(result);
+}
+
+void NetworkHelper::RobotHandleEnterRoom(const EnterRoomUserInfo& enterRoomUserInfo)
+{
+
+}
+
+void NetworkHelper::RobotHandleChatMessage(
+    const EnterRoomUserInfo& enterRoomUserInfo, 
+    const RoomChatMessage& roomChatMessage)
+{
+    if (!robotstate_)
+        return;
+
+    // 不是对这个用户说的消息不要处理
+    if (user_->GetFanxingId() != roomChatMessage.receiverid)
+        return;
+
+    // 从接口获取回复信息
+    std::string response;
+    if (!user_->RequestRobot(roomChatMessage.senderid,
+        roomChatMessage. chatmessage, &response))
+    {
+        return;
+    }
+    
+    RoomChatMessage responseChat;
+    responseChat.roomid = roomChatMessage.roomid;
+    responseChat.senderid = roomChatMessage.receiverid;
+    responseChat.sendername = roomChatMessage.receivername;
+    responseChat.richlevel = roomChatMessage.richlevel;
+    responseChat.receiverid = roomChatMessage.senderid;
+    responseChat.receivername = roomChatMessage.sendername;
+    responseChat.issecrect = roomChatMessage.issecrect;
+    responseChat.chatmessage = response;
+
+    SendChatMessageRobot(responseChat);
 }
 

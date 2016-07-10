@@ -79,7 +79,10 @@ public:
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
 
+    bool RobotRequest(const RoomChatMessage& roomChatMessage);
     bool SendChatMessage(uint32 roomid, const std::string& message);
+    bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
+    bool RequestRobot(uint32 senderid, const std::string& request, std::string* response);
     bool SendStar(uint32 count);
     bool RetrieveStart();
     bool SendGift(uint32 giftid);

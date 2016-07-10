@@ -25,6 +25,18 @@ struct EnterRoomUserInfo
     uint32 userid = 0;
 };
 
+struct RoomChatMessage
+{
+    uint32 roomid = 0;
+    uint32 senderid = 0;
+    uint32 richlevel = 0;
+    std::string sendername = "";
+    uint32 receiverid = 0;
+    std::string receivername = "";
+    bool issecrect = false;
+    std::string chatmessage = "";
+};
+
 struct RoomGiftInfo601
 {
     uint32 time;
@@ -44,7 +56,8 @@ struct RoomGiftInfo601
 
 typedef std::function<void(const RoomGiftInfo601& roomgiftinfo)> Notify601;
 typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify201;
-typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify501;
+typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo,
+    const RoomChatMessage& roomChatMessage)> Notify501;
 
 typedef std::function<void(const std::wstring& data)> NormalNotify;
 class MessageNotifyManager 
@@ -83,6 +96,9 @@ public:
     bool NewConnect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
     bool NewSendChatMessage(const std::string& nickname, uint32 richlevel,
                          const std::string& message);
+
+    bool NewSendChatMessageRobot(const RoomChatMessage& roomChatMessage);
+
 private:
 
     void DoConnect843();

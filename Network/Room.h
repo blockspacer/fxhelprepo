@@ -40,6 +40,8 @@ public:
 
     bool SendChatMessage(const std::string& nickname, uint32 richlevel,
         const std::string& message);
+
+    bool SendChatMessage(const RoomChatMessage& roomChatMessage);
 private:
     bool OpenRoom(const std::string& cookies);
 

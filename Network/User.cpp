@@ -9,6 +9,30 @@
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 
+namespace
+{
+    bool MakePostdata(const std::map<std::string, std::string>& postmap,
+        std::vector<uint8>* postdata)
+    {
+        if (postmap.empty())
+            return false;
+
+        std::string temp;
+        bool first = true;
+        for (const auto& param : postmap)
+        {
+            if (first)
+                first = false;
+            else
+                temp += "&";
+
+            temp += param.first + "=" + UrlEncode(param.second);
+        }
+        postdata->assign(temp.begin(), temp.end());
+        return true;
+    }
+}
+
 User::User()
     :curlWrapper_(new CurlWrapper)
     , cookiesHelper_(new CookiesHelper)
@@ -361,6 +385,53 @@ bool User::SendChatMessage(uint32 roomid, const std::string& message)
     return room->second->SendChatMessage(nickname_, richlevel_, message);
 }
 
+bool User::SendChatMessageRobot(const RoomChatMessage& roomChatMessage)
+{
+    auto room = rooms_.find(roomChatMessage.roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+    return room->second->SendChatMessage(roomChatMessage);
+}
+
+bool User::RequestRobot(uint32 senderid, const std::string& request, std::string* response)
+{
+    if (!response || !senderid || request.empty())
+        return false;
+
+    HttpRequest httpRequest;
+    httpRequest.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_POST;
+    httpRequest.url = "http://www.tuling123.com//openapi/api";
+    std::map<std::string, std::string> postmap;
+    postmap["key"] = "21ef7a39254642f721736081e8e2226d";
+    postmap["info"] = request;
+    postmap["userid"] = base::UintToString(senderid);
+    MakePostdata(postmap, &httpRequest.postdata);
+
+    HttpResponse httpResponse;
+    if (!curlWrapper_->Execute(httpRequest, &httpResponse))
+    {
+        return false;
+    }
+    
+    std::string responsedata(httpResponse.content.begin(), httpResponse.content.end());
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        return false;
+    }
+
+    uint32 code = GetInt32FromJsonValue(rootdata, "code");
+    if (code != 100000)
+    {
+        *response = base::WideToUTF8(L"别闹, 我的智商不够用了");
+        return false;
+    }
+    *response = rootdata.get("text", "").asString();
+    return true;
+}
 bool User::SendStar(uint32 count)
 {
     return false;
