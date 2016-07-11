@@ -410,16 +410,25 @@ bool User::SendChatMessageRobot(const RoomChatMessage& roomChatMessage)
     return room->second->SendChatMessage(roomChatMessage);
 }
 
+void User::SetRobotApiKey(const std::string& apikey)
+{
+    apikey_ = apikey;
+}
+
 bool User::RequestRobot(uint32 senderid, const std::string& request, std::string* response)
 {
     if (!response || !senderid || request.empty())
         return false;
 
+    assert(!apikey_.empty());
+    if (apikey_.empty())
+        return false;
+
     HttpRequest httpRequest;
     httpRequest.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_POST;
-    httpRequest.url = "http://www.tuling123.com//openapi/api";
+    httpRequest.url = "http://www.tuling123.com/openapi/api";
     std::map<std::string, std::string> postmap;
-    postmap["key"] = "21ef7a39254642f721736081e8e2226d";
+    postmap["key"] = apikey_;
     postmap["info"] = request;
     postmap["userid"] = base::UintToString(senderid);
     MakePostdata(postmap, &httpRequest.postdata);

@@ -119,6 +119,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_VERIFYCODE, m_edit_verifycode);
     DDX_Control(pDX, IDC_STATIC_VERIFYCODE, m_static_verifycode);
     DDX_Control(pDX, IDC_CHK_ROBOT, m_chk_robot);
+    DDX_Control(pDX, IDC_EDIT_API_KEY, m_edit_api_key);
     DDX_Control(pDX, IDC_CHK_WELCOME, m_chk_welcome);
     DDX_Control(pDX, IDC_CHK_THANKS, m_chk_thanks);
 }
@@ -130,7 +131,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CAntiFloodDlg::OnBnClickedButtonLogin)
     ON_BN_CLICKED(IDC_BUTTON_REWARSTAR, &CAntiFloodDlg::OnBnClickedButtonRewarstar)
     ON_BN_CLICKED(IDC_BUTTON_REWARDGIFT, &CAntiFloodDlg::OnBnClickedButtonRewardgift)
-    ON_BN_CLICKED(IDC_BUTTON_NAV, &CAntiFloodDlg::OnBnClickedButtonNav)
+    ON_BN_CLICKED(IDC_BUTTON_NAV, &CAntiFloodDlg::OnBnClickedButtonEnterRoom)
     ON_WM_LBUTTONDOWN()
     ON_BN_CLICKED(IDC_BTN_GETMSG, &CAntiFloodDlg::OnBnClickedBtnGetmsg)
     ON_BN_CLICKED(IDC_BTN_ADD, &CAntiFloodDlg::OnBnClickedBtnAdd)
@@ -244,6 +245,10 @@ BOOL CAntiFloodDlg::OnInitDialog()
     std::wstring roomid;
     config.GetRoomid(&roomid);
     SetDlgItemText(IDC_EDIT_NAV, roomid.c_str());
+
+    std::wstring apikey;
+    config.GetApiKey(&apikey);
+    m_edit_api_key.SetWindowTextW(apikey.c_str());
 
     // 读取授权信息显示在界面上
     AuthorityHelper authorityHelper;
@@ -367,7 +372,7 @@ void CAntiFloodDlg::OnBnClickedButtonLogin()
 }
 
 //跳转页面功能
-void CAntiFloodDlg::OnBnClickedButtonNav()
+void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
 {
     if (!network_)
         return;
@@ -1274,6 +1279,7 @@ void CAntiFloodDlg::OnBnClickedChkHandleAll()
     bool handleall = !!m_chk_handle_all.GetCheck();
     if (!network_)
         return;
+
     network_->SetHandleChatUsers(handleall);
 }
 
@@ -1283,7 +1289,26 @@ void CAntiFloodDlg::OnBnClickedChkRobot()
     bool enablerobot = !!m_chk_robot.GetCheck();
     if (!network_)
         return;
+
+    if (!enablerobot)
+    {
     network_->SetRobotHandle(enablerobot);
+        return;
+    }
+
+    CString apiKey;
+    m_edit_api_key.GetWindowTextW(apiKey);
+    if (apiKey.GetLength() != 32)
+    {
+        Notify(L"机器人Key不正确,无法启用机器人");
+        m_chk_robot.SetCheck(FALSE);
+        return;
+    }
+
+    network_->SetRobotApiKey(apiKey.GetBuffer());
+    network_->SetRobotHandle(enablerobot);
+    Config config;
+    config.SaveApiKey(apiKey.GetBuffer());
 }
 
 void CAntiFloodDlg::OnBnClickedChkThanks()

@@ -354,6 +354,12 @@ void NetworkHelper::SetRobotHandle(bool enable)
     robotstate_ = enable;
 }
 
+void NetworkHelper::SetRobotApiKey(const std::wstring& apikey)
+{
+    std::string utf8key = base::WideToUTF8(apikey);
+    user_->SetRobotApiKey(utf8key);
+}
+
 bool NetworkHelper::SendChatMessageRobot(const RoomChatMessage& roomChatMessage)
 {
     return user_->SendChatMessageRobot(roomChatMessage);

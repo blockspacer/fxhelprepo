@@ -42,12 +42,16 @@ protected:
     afx_msg HCURSOR OnQueryDragIcon();
     DECLARE_MESSAGE_MAP()
     
+    afx_msg void OnBnClickedCancel();
+
     // 界面操作函数
     afx_msg void OnBnClickedButtonLogin();
     afx_msg void OnBnClickedButtonRewarstar();
     afx_msg void OnBnClickedButtonRewardgift();
-    afx_msg void OnBnClickedButtonNav();
+    afx_msg void OnBnClickedButtonEnterRoom();
     afx_msg void OnBnClickedBtnGetmsg();
+    afx_msg void OnBnClickedBtnClearInfo();
+    afx_msg void OnBnClickedBtnSendChat();
     
     // 观众列表操作
     afx_msg void OnBnClickedBtnAdd();
@@ -73,6 +77,16 @@ protected:
     afx_msg void OnBnClickedBtnLoadBlack();
     afx_msg void OnBnClickedBtnAddToBlack();
     afx_msg void OnBnClickedBtnSaveBlack();
+
+    //自动处理消息区功能
+    
+    afx_msg void OnBnClickedBtnAddVest();
+    afx_msg void OnBnClickedBtnRemoveVest();
+    afx_msg void OnBnClickedRadioNoaction();
+    afx_msg void OnBnClickedChkHandleAll();
+
+    // 聊天机器人操作
+    afx_msg void OnBnClickedChkRobot();
 
     // 点击列头排序
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
@@ -127,25 +141,22 @@ private:
     CListCtrl m_ListCtrl_Blacks;
     std::unique_ptr<BlacklistHelper> blacklistHelper_;
 
-public:
-    afx_msg void OnBnClickedBtnClearInfo();
-    afx_msg void OnBnClickedCancel();
     CStatic m_static_auth_info;
     CStatic m_static_login_info;
-    afx_msg void OnBnClickedBtnAddVest();
-    afx_msg void OnBnClickedBtnRemoveVest();
-    afx_msg void OnBnClickedBtnSendChat();
+
     CEdit m_edit_vest;
     CEdit m_edit_chatmsg;
     CListCtrl m_list_vest;
     int m_radiogroup;
-    afx_msg void OnBnClickedRadioNoaction();
+
     CButton m_chk_handle_all;
-    afx_msg void OnBnClickedChkHandleAll();
+
     CEdit m_edit_verifycode;
     CStatic m_static_verifycode;
+
+    //聊天机器人设置
     CButton m_chk_robot;
-    afx_msg void OnBnClickedChkRobot();
+    CEdit m_edit_api_key;
     afx_msg void OnBnClickedChkThanks();
     CButton m_chk_welcome;
     CButton m_chk_thanks;

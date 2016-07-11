@@ -129,6 +129,7 @@ public:
     bool SendChatMessage(uint32 roomid, const std::string& message);
 
     void SetRobotHandle(bool enable);
+    void SetRobotApiKey(const std::wstring& apikey);
     bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
 
 private:

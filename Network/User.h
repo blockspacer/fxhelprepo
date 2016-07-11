@@ -80,7 +80,7 @@ public:
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
 
-    bool RobotRequest(const RoomChatMessage& roomChatMessage);
+    void SetRobotApiKey(const std::string& apikey);
     bool SendChatMessage(uint32 roomid, const std::string& message);
     bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
     bool RequestRobot(uint32 senderid, const std::string& request, std::string* response);
@@ -110,6 +110,9 @@ private:
     std::string password_;
     std::string serverip_;
     IpProxy ipproxy_;
+
+    // 图灵机器人使用的接口key
+    std::string apikey_;
 
     // 登录后才能获得的用户信息
     std::string nickname_ = "";

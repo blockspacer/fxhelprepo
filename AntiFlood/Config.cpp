@@ -115,3 +115,25 @@ bool Config::SaveRoomId(const std::wstring& roomid) const
         filepath_.c_str());
     return true;
 }
+
+bool Config::SaveApiKey(const std::wstring& apikey) const
+{
+    WritePrivateProfileString(L"Robot", L"ApiKey", Encrypt(apikey).c_str(),
+                              filepath_.c_str());
+    return true;
+}
+
+bool Config::GetApiKey(std::wstring* apikey) const
+{
+    wchar_t temp[128] = { 0 };
+    int32 count = GetPrivateProfileString(L"Robot", L"ApiKey", L"",
+                                          temp, 128, filepath_.c_str());
+    if (count >= 128 || count <= 0)
+    {
+        return false;
+    }
+    std::wstring tempstr;
+    tempstr.assign(temp, temp + count);
+    *apikey = Decrypt(tempstr);
+    return true;
+}
