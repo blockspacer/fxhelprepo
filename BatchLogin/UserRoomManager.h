@@ -40,6 +40,7 @@ public:
     bool UpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
 
 protected:
+    void Notify(const std::wstring& msg);
     void DoSaveUserLoginConfig();
     void DoBatchLogUsers(const std::map<std::wstring, std::wstring>& userAccountPassword);
     void DoBatchLogUsersWithCookie(const std::map<std::wstring, std::wstring>& accountCookie);
