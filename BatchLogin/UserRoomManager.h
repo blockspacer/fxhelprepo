@@ -26,8 +26,8 @@ public:
 
     void SetNotify(std::function<void(std::wstring)> notify);
 
-    bool LoadUserConfig(GridData* userpwd, uint32* total);
-    bool LoadRoomConfig(GridData* roomgrid, uint32* total);
+    bool LoadUserConfig(GridData* userpwd, uint32* total) const;
+    bool LoadRoomConfig(GridData* roomgrid, uint32* total) const;
     bool SaveUserLoginConfig();
 
     bool LoadIpProxy(GridData* proxyinfo);

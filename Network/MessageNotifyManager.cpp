@@ -731,11 +731,12 @@ void MessageNotifyManager::NewConnect843Callback(bool result, TcpHandle handle)
     data.assign(str.begin(), str.end());
     data.push_back(0);
     tcphandle_843_ = handle;
-    if (!tcpManager_->Send(handle, data))
+    if (!tcpManager_->Send(handle, data,
+        std::bind(&MessageNotifyManager::NewSendDataCallback,
+        this, tcphandle_843_, std::placeholders::_1)))
     {
         assert(false && L"发送数据错误，要结束流程");
     }
-    
 }
 
 
@@ -769,7 +770,9 @@ void MessageNotifyManager::NewConnect8080Callback(uint32 roomid, uint32 userid,
     GetFirstPackage(package, &data_for_send);
     std::vector<char> data_8080;
     data_8080.assign(data_for_send.begin(), data_for_send.end());
-    tcpManager_->Send(tcphandle_8080_, data_8080);
+    tcpManager_->Send(tcphandle_8080_, data_8080,
+        std::bind(&MessageNotifyManager::NewSendDataCallback,
+        this, tcphandle_8080_, std::placeholders::_1));
 
     if (newRepeatingTimer_.IsRunning())
         newRepeatingTimer_.Stop();
@@ -815,11 +818,23 @@ void MessageNotifyManager::NewSendHeartBeat(TcpHandle handle)
     heartbeat.append("\n");
     std::vector<char> heardbeatvec;
     heardbeatvec.assign(heartbeat.begin(), heartbeat.end());
-    tcpManager_->Send(handle, heardbeatvec);
-    if (normalNotify_)
+    tcpManager_->Send(handle, heardbeatvec, 
+        std::bind(&MessageNotifyManager::NewSendDataCallback,
+        this, handle, std::placeholders::_1));
+}
+
+void MessageNotifyManager::NewSendDataCallback(TcpHandle handle, bool result)
+{
+    std::wstring state = L"房间状态正常";
+    if (!result)
     {
-        normalNotify_(L"房间状态正常");
+        state = L"房间状态异常";
+        newRepeatingTimer_.Stop();
+        tcpManager_->RemoveClient(handle);
     }
+
+    if (normalNotify_)
+        normalNotify_(state);
 }
 
 bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint32 richlevel,
@@ -838,7 +853,9 @@ bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint3
     std::string data = writer.write(root);
     std::vector<char> msg;
     msg.assign(data.begin(), data.end());
-    return tcpManager_->Send(tcphandle_8080_, msg);
+    return tcpManager_->Send(tcphandle_8080_, msg, 
+        std::bind(&MessageNotifyManager::NewSendDataCallback,
+        this, tcphandle_8080_, std::placeholders::_1));
 }
 
 bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomChatMessage)
@@ -856,5 +873,7 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
     std::string data = writer.write(root);
     std::vector<char> msg;
     msg.assign(data.begin(), data.end());
-    return tcpManager_->Send(tcphandle_8080_, msg);
+    return tcpManager_->Send(tcphandle_8080_, msg,
+        std::bind(&MessageNotifyManager::NewSendDataCallback,
+        this, tcphandle_8080_, std::placeholders::_1));
 }

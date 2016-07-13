@@ -124,11 +124,13 @@ private:
     void NewConnect8080Callback(uint32 roomid, uint32 userid,
                              const std::string& usertoken,
                              bool result, TcpHandle handle);
+    
     void NewData843Callback(uint32 roomid, uint32 userid,
         const std::string& usertoken, bool result, const std::vector<uint8>& data);
     void NewData8080Callback(bool result, const std::vector<uint8>& data);
 
     void NewSendHeartBeat(TcpHandle handle);
+    void NewSendDataCallback(TcpHandle handle, bool result);
 
     base::Thread baseThread_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;

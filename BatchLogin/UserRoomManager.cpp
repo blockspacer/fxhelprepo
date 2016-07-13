@@ -52,7 +52,7 @@ void UserRoomManager::SetNotify(std::function<void(std::wstring)> notify)
     notify_ = notify;
 }
 
-bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total)
+bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total) const
 {
     // ¶ÁÎÄ¼þ
     base::FilePath path;
@@ -112,7 +112,7 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total)
     return true;
 }
 
-bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
+bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total) const
 {
     base::FilePath path;
     PathService::Get(base::DIR_EXE, &path);
@@ -153,7 +153,6 @@ bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
             LOG(ERROR) << L"roomid change error! " << it;
             continue;
         }
-        //roomController_->AddRoom(roomid);
         RowData row;
         row.push_back(base::UintToString16(roomid));
         roomgrid->push_back(row);
@@ -270,18 +269,27 @@ bool UserRoomManager::BatchLogUsers(
 
 void UserRoomManager::DoBatchLogUsers(
     const std::map<std::wstring, std::wstring>& userAccountPassword)
-{
-    IpProxy ipproxy;
-    if (!ipProxys_.empty())
-        ipproxy = ipProxys_.begin()->second;
-    
+{    
+    auto current = ipProxys_.begin();
+
     for (auto it : userAccountPassword)
     {
         std::string account = base::WideToUTF8(it.first);
         std::string password = base::WideToUTF8(it.second);
         std::string errormsg;
         std::wstring message = base::UTF8ToWide(account) + L" µÇÂ¼";
-        if (!userController_->AddUser(account, password, ipproxy, &errormsg))
+
+        IpProxy ipProxy;
+        if (!ipProxys_.empty())
+        {
+            if (current == ipProxys_.end())
+                current = ipProxys_.begin();
+
+            ipProxy = current->second;
+            current++;
+        }
+
+        if (!userController_->AddUser(account, password, ipProxy, &errormsg))
         {
             message += L"Ê§°Ü," + base::UTF8ToWide(errormsg);
         }
