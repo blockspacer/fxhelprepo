@@ -1,5 +1,5 @@
 #include "TcpManager.h"
-
+#include <set>
 #include <assert.h>
 
 #include "EncodeHelper.h"
@@ -162,6 +162,7 @@ void TcpManager::DoRecv()
             break;
         }
 
+        std::set<SocketHandle> eraseset;
         for (const auto& callback : newcallbacks_)
         {
             std::vector<uint8> buffer;
@@ -173,6 +174,7 @@ void TcpManager::DoRecv()
                     int errorcode = WSAGetLastError();
                     LOG(ERROR) << base::IntToString(errorcode);
                     callback.second.second(false, buffer);
+                    eraseset.insert(callback.first);
                     continue;
                 }
                 else if (buffer.size() > 0)
@@ -180,6 +182,10 @@ void TcpManager::DoRecv()
                     callback.second.second(true, buffer);
                 }
             }
+        }
+        for (auto eraseit : eraseset)
+        {
+            newcallbacks_.erase(eraseit);
         }
     }
     while (0);
