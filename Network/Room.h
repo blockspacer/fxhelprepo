@@ -44,14 +44,9 @@ public:
     bool SendChatMessage(const RoomChatMessage& roomChatMessage);
 private:
     bool OpenRoom(const std::string& cookies);
-
-    bool GetCurrentUserInfo(const std::string& cookies,
-        uint32* userid, std::string* nickname, uint32* richlevel);
-
     bool GetStarInfo(const std::string& cookies);
     bool EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken);
-
-    bool GetSingerInfo();
+    bool GetStarGuard();
 
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
         const std::string& usertoken);
@@ -61,6 +56,7 @@ private:
     uint32 singerid_ = 0;
     std::string nickname_;
     uint32 clanid_ = 0;
+    std::vector<uint32> guarduserids_;
     std::unique_ptr<CurlWrapper> curlWrapper_;
     std::unique_ptr<MessageNotifyManager> messageNotifyManager_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;

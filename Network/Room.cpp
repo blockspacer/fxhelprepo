@@ -55,10 +55,10 @@ bool Room::EnterForOperation(const std::string& cookies, const std::string& user
         return false;
     }
 
-    //if (!GetCurrentUserInfo(cookies, &userid, &nickname, &richlevel))
-    //{
-    //    return false;
-    //}
+    if (!GetStarGuard())
+    {
+        return false;
+    }
 
     if (!EnterRoom(cookies, userid, usertoken))
     {
@@ -524,80 +524,72 @@ bool Room::EnterRoom(const std::string& cookies, uint32 userid, const std::strin
     return true;
 }
 
-//bool Room::GetCurrentUserInfo(const std::string& cookies,
-//    uint32* userid, std::string* nickname, uint32* richlevel)
-//{
-//    HttpRequest request;
-//    request.url = std::string("http://fanxing.kugou.com/Services.php");
-//    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-//    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_);;
-//    request.queries["d"] = GetNowTimeString();
-//    request.queries["act"] = "UserService.UserService";
-//    request.queries["mtd"] = "getCurrentUserInfo";
-//    request.queries["args"] = "%5B%5D";
-//    request.queries["test"] = "3";
-//    request.cookies = cookies;
-//    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
-//        request.ipproxy = ipproxy_;
-//
-//    HttpResponse response;
-//    if (!curlWrapper_->Execute(request, &response))
-//    {
-//        return false;
-//    }
-//
-//    std::string contents(response.content.begin(), response.content.end());
-//
-//    if (contents.empty())
-//    {
-//        return false;
-//    }
-//
-//    const std::string& data = contents;
-//    //解析json数据
-//    Json::Reader reader;
-//    Json::Value rootdata(Json::objectValue);
-//    if (!reader.parse(data, rootdata, false))
-//    {
-//        return false;
-//    }
-//
-//    // 有必要检测status的值
-//    uint32 status = rootdata.get(std::string("status"), 0).asInt();
-//    if (status == 0)
-//    {
-//        return false;
-//    }
-//
-//    Json::Value dataObject(Json::objectValue);
-//    dataObject = rootdata.get(std::string("data"), dataObject);
-//    if (dataObject.empty())
-//    {
-//        return false;
-//    }
-//
-//    Json::Value fxUserInfoObject(Json::objectValue);
-//    fxUserInfoObject = dataObject.get("fxUserInfo", fxUserInfoObject);
-//    if (fxUserInfoObject.empty())
-//    {
-//        return false;
-//    }
-//
-//    std::string struserid = fxUserInfoObject["userId"].asString();
-//    if (!base::StringToUint(struserid, userid))
-//    {
-//        return false;
-//    }
-//
-//    *nickname = fxUserInfoObject["nickName"].asString();
-//    std::string strrichLevel = fxUserInfoObject["richLevel"].asString();
-//    if (!base::StringToUint(strrichLevel, richlevel))
-//    {
-//        return false;
-//    }
-//    return true;
-//}
+bool Room::GetStarGuard()
+{
+    assert(singerid_ && roomid_);
+    std::string url = "http://visitor.fanxing.kugou.com/VServices/GuardService.GuardService.getRoomGuardLst/";
+    url += base::UintToString(singerid_) + "-" + base::UintToString(roomid_);
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_);
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
 
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+
+    for (const auto& it : response.cookies)
+        cookiesHelper_->SetCookies(it);
+
+    if (content.empty())
+        return false;
+
+    const std::string& rootdata = PickJson(content);
+    //解析json数据
+    Json::Reader reader;
+    Json::Value root(Json::objectValue);
+    if (!reader.parse(rootdata, root, false))
+        return false;
+
+    uint32 status = GetInt32FromJsonValue(root, "status");
+    if (status != 1)
+        return false;
+
+    Json::Value defaultval(Json::objectValue);
+    auto data = root.get("data", defaultval);
+    if (!data.isObject())
+    {
+        return false;
+    }
+
+    auto guardlist = data.get("list", defaultval);
+    if (!guardlist.isArray())
+    {
+        return false;
+    }
+
+    for (auto guardinfo : guardlist)
+    {
+        std::string nickName = guardinfo.get("nickName", "").asString();
+        std::string userLogo = guardinfo.get("userLogo", "").asString();
+        uint32 roomId = GetInt32FromJsonValue(guardinfo, "roomId");
+        uint32 guardLevel = GetInt32FromJsonValue(guardinfo, "guardLevel");
+        uint32 annualFee = GetInt32FromJsonValue(guardinfo, "annualFee");
+        std::string guardLvIcon = guardinfo.get("guardLvIcon", "").asString();
+        uint32 userid = GetInt32FromJsonValue(guardinfo, "userId");
+        uint32 online = GetInt32FromJsonValue(guardinfo, "online");
+        guarduserids_.push_back(userid);
+    }
+
+    return true;
+}
 bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     const std::string& usertoken)
 {
@@ -611,19 +603,5 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken);
     assert(ret);
 
-    // 多用户版本不需要处理信息回调
-    //messageNotifyManager_->SetNotify201(
-    //    std::bind(&NetworkHelper::NotifyCallback201,
-    //    this, std::placeholders::_1));
-
-    //messageNotifyManager_->SetNotify601(
-    //    std::bind(&NetworkHelper::NotifyCallback601,
-    //    this, roomid, staruserid, std::placeholders::_1));
-
-    //messageNotifyManager_->SetNormalNotify(
-    //    std::bind(&NetworkHelper::NotifyCallback,
-    //    this, std::placeholders::_1));
-
-    //ret = messageNotifyManager_->Connect8080(roomid, userid, usertoken);
     return ret;
 }

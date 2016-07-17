@@ -23,6 +23,9 @@ struct EnterRoomUserInfo
     uint32 roomid = 0;
     uint32 unixtime = 0;
     uint32 userid = 0;
+    bool isAdmin = false;
+    bool isUserGuard = false;
+    bool isGoldFans = false;
 };
 
 struct RoomChatMessage

@@ -424,6 +424,34 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
             Json::Value jvContent(Json::ValueType::objectValue);
             enterRoomUserInfo.roomid = GetInt32FromJsonValue(rootdata,"roomid");
             enterRoomUserInfo.unixtime = GetInt32FromJsonValue(rootdata, "time");
+            std::string extentinfo = rootdata.get("ext", "").asString();
+            std::string decodeext = UrlDecode(extentinfo);
+
+            Json::Value jvDefault;
+            Json::Value extdata(Json::objectValue);
+            if (reader.parse(decodeext, extdata, false))
+            {
+                Json::Value stli = extdata.get("stli", jvDefault);
+                auto members = stli.getMemberNames();
+                for (const auto& member : members)
+                {
+                    if (member.compare("isAdmin")==0)
+                    {
+                        uint32 isAdmin = stli.get(member, 0).asInt();
+                        enterRoomUserInfo.isAdmin = !!isAdmin;
+                    }
+                }
+            }
+
+            auto jvArray = rootdata.get("userGuard", jvDefault);
+            if (jvArray.isArray())
+            {
+                for (auto guard : jvArray)
+                {
+                    assert(false && L"参考一下这个守护的数据");
+                }
+            }
+
             Json::Value  content = rootdata.get("content", jvContent);
                 
             if (!content.isNull())
