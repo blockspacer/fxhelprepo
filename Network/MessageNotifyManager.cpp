@@ -655,7 +655,7 @@ void MessageNotifyManager::DoNewConnect843Callback(bool result, TcpHandle handle
 {
     if (!result)
     {
-        assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        //assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
         return;
     }
 
@@ -721,7 +721,7 @@ void MessageNotifyManager::DoNewData843Callback(uint32 roomid, uint32 userid,
     tcpManager_->RemoveClient(tcphandle_843_);
     if (!result)
     {
-        assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        //assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
         return;
     }
 

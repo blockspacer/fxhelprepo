@@ -80,6 +80,62 @@ bool AntiStrategy::RemoveNickname(const std::string& vestname)
     return true;  
 }
 
+GiftStrategy::GiftStrategy()
+{
+
+}
+
+GiftStrategy::~GiftStrategy()
+{
+
+}
+
+void GiftStrategy::SetThanksFlag(bool enable)
+{
+    thanksflag_ = enable;
+}
+
+bool GiftStrategy::GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage)
+{
+    if (!thanksflag_)
+        return false;
+
+    std::wstring thanks = L"感谢" + base::UTF8ToWide(giftinfo.sendername) + 
+        L"送来的" + base::UintToString16(giftinfo.gitfnumber) + 
+        L"个" + base::UTF8ToWide(giftinfo.giftname);
+
+    chatmessage->assign(thanks.begin(), thanks.end());
+
+    return true;
+}
+
+EnterRoomStrategy::EnterRoomStrategy()
+{
+
+}
+
+EnterRoomStrategy::~EnterRoomStrategy()
+{
+
+}
+
+void EnterRoomStrategy::SetWelcomeFlag(bool enable)
+{
+    welcomeflag_ = enable;
+}
+
+bool EnterRoomStrategy::GetEnterWelcome(const EnterRoomUserInfo& enterinfo, 
+    std::wstring* chatmessage)
+{
+    if (!welcomeflag_)
+        return false;
+
+    std::wstring msg = L"欢迎" + base::UTF8ToWide(enterinfo.nickname) + L"进入直播间";
+    chatmessage->assign(msg.begin(), msg.end());
+    return true;
+}
+
+
 NetworkHelper::NetworkHelper()
     : authority_(new Authority)
     , tcpmanager_(new TcpManager)
@@ -114,6 +170,26 @@ void NetworkHelper::Finalize()
 void NetworkHelper::SetAntiStrategy(std::shared_ptr<AntiStrategy> antiStrategy)
 {
     antiStrategy_ = antiStrategy;
+}
+
+void NetworkHelper::SetGiftStrategy(std::shared_ptr<GiftStrategy> giftStrategy)
+{
+    giftStrategy_ = giftStrategy;
+}
+
+void NetworkHelper::SetGiftThanks(bool enable)
+{
+    giftStrategy_->SetThanksFlag(enable);
+}
+
+void NetworkHelper::SetEnterRoomStrategy(std::shared_ptr<EnterRoomStrategy> enterRoomStrategy)
+{
+    enterRoomStrategy_ = enterRoomStrategy;
+}
+
+void NetworkHelper::SetRoomWelcome(bool enable)
+{
+    enterRoomStrategy_->SetWelcomeFlag(enable);
 }
 
 void NetworkHelper::SetNotify(notifyfn fn)
@@ -218,6 +294,11 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
         std::placeholders::_1));
     user_->SetNotify501(std::bind(&NetworkHelper::NotifyCallback501, this,
         std::placeholders::_1, std::placeholders::_2));
+
+    user_->SetNotify601(
+        std::bind(&NetworkHelper::NotifyCallback601,
+        this, roomid, std::placeholders::_1));
+
     user_->SetNormalNotify(std::bind(&NetworkHelper::NotifyCallback, this,
         std::placeholders::_1));
     roomid_ = roomid;
@@ -317,29 +398,30 @@ bool NetworkHelper::GetActionPrivilege(std::wstring* message)
 }
 
 // messageNotifyManager_ 线程回调
-void NetworkHelper::NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo601)
+void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& roomgiftinfo601)
 {
-    if (!notify601_)
-        return;
-
-    // 如果不是在本房间送给主播的消息，过滤掉不回调
-    if ((roomid!=roomgiftinfo601.roomid)
-        ||(singerid != roomgiftinfo601.receiverid))
-    {
-        return;
-    }
-
     if (!roomgiftinfo601.token.empty())
     {
         // 原本是抢币的动作，目前不做这类功能
     }
 
-    //notify601_(roomgiftinfo601, giftinfo);
+    std::wstring chatmsg;
+    if (giftStrategy_->GetGiftThanks(roomgiftinfo601, &chatmsg))
+    {
+        user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
+    }
 }
 
 void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo)
 {
     TryHandleUser(enterRoomUserInfo);
+
+    std::wstring chatmsg;
+    if (enterRoomStrategy_->GetEnterWelcome(enterRoomUserInfo, &chatmsg))
+    {
+        user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
+    }
+
     if (!notify201_)
         return;
 

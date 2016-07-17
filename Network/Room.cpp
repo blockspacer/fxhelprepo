@@ -46,29 +46,19 @@ bool Room::EnterForOperation(const std::string& cookies, const std::string& user
     std::string ext = "";
 
     if (!OpenRoom(cookies))
-    {
         return false;
-    }
 
     if (!GetStarInfo(cookies))
-    {
         return false;
-    }
 
-    if (!GetStarGuard())
-    {
-        return false;
-    }
+    GetStarGuard();
 
     if (!EnterRoom(cookies, userid, usertoken))
-    {
         return false;
-    }
     
     if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
-    {
         return false;
-    }
+
     return true;
 }
 
@@ -357,6 +347,14 @@ void Room::SetNotify501(Notify501 notify501)
 {
     messageNotifyManager_->SetNotify501(notify501);
 }
+
+void Room::SetNotify601(Notify601 notify601)
+{
+    notify601transfer_ = notify601;
+    messageNotifyManager_->SetNotify601(
+        std::bind(&Room::TranferNotify601,this,std::placeholders::_1));
+}
+
 bool Room::OpenRoom(const std::string& cookies)
 {
     HttpRequest request;
@@ -590,6 +588,21 @@ bool Room::GetStarGuard()
 
     return true;
 }
+
+void Room::TranferNotify601(const RoomGiftInfo601& roomgiftinfo)
+{
+    // 如果不是在本房间送给主播的消息，过滤掉不回调
+    if ((roomid_ != roomgiftinfo.roomid)
+        || (singerid_ != roomgiftinfo.receiverid))
+    {
+        return;
+    }
+    if (!notify601transfer_)
+        return;
+
+    notify601transfer_(roomgiftinfo);
+}
+
 bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     const std::string& usertoken)
 {

@@ -48,9 +48,8 @@ bool TcpManager::AddClient(AddClientCallback addcallback,
     }
 
     return baseThread_.message_loop_proxy()->PostTask(
-        FROM_HERE,
-        base::Bind(&TcpManager::DoAddClient, this, client, addcallback, callback));
-    return true;
+        FROM_HERE, base::Bind(&TcpManager::DoAddClient, this, client, 
+        addcallback, callback));
 }
 
 void TcpManager::RemoveClient(TcpHandle handle)
@@ -117,7 +116,7 @@ void TcpManager::DoRecv()
             FD_SET(sock, &rfdset);
         }
 
-        timeval timeout = { 10, 0 };
+        timeval timeout = { 1, 0 };
         int ret = select(0, &rfdset, 0, 0, &timeout);
         if (ret == 0)//timeout
         {

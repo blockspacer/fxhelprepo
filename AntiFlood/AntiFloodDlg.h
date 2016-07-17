@@ -102,6 +102,8 @@ private:
 
     std::unique_ptr<NetworkHelper> network_;
     std::shared_ptr<AntiStrategy> antiStrategy_;
+    std::shared_ptr<GiftStrategy> giftStrategy_;
+    std::shared_ptr<EnterRoomStrategy> enterRoomStrategy_;
 
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;
@@ -144,4 +146,8 @@ public:
     CStatic m_static_verifycode;
     CButton m_chk_robot;
     afx_msg void OnBnClickedChkRobot();
+    afx_msg void OnBnClickedChkThanks();
+    CButton m_chk_welcome;
+    CButton m_chk_thanks;
+    afx_msg void OnBnClickedChkWelcome();
 };

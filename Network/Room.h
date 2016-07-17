@@ -27,6 +27,7 @@ public:
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
     void SetNotify501(Notify501 notify501);
+    void SetNotify601(Notify601 notify601);
     // 中断接收数据的连接
     bool Exit();
 
@@ -47,6 +48,7 @@ private:
     bool GetStarInfo(const std::string& cookies);
     bool EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken);
     bool GetStarGuard();
+    void TranferNotify601(const RoomGiftInfo601& roomgiftinfo);
 
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
         const std::string& usertoken);
@@ -57,6 +59,7 @@ private:
     std::string nickname_;
     uint32 clanid_ = 0;
     std::vector<uint32> guarduserids_;
+    Notify601 notify601transfer_;
     std::unique_ptr<CurlWrapper> curlWrapper_;
     std::shared_ptr<MessageNotifyManager> messageNotifyManager_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;

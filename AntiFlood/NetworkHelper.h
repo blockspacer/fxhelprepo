@@ -51,6 +51,33 @@ private:
     HANDLE_TYPE handletype_ = HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 };
 
+class GiftStrategy
+    :public std::enable_shared_from_this <GiftStrategy>
+{
+public:
+    GiftStrategy();
+    ~GiftStrategy();
+
+    void SetThanksFlag(bool enable);
+    bool GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage);
+private:
+    bool thanksflag_ = false;
+};
+
+class EnterRoomStrategy
+    :public std::enable_shared_from_this<EnterRoomStrategy>
+{
+public:
+    EnterRoomStrategy();
+    ~EnterRoomStrategy();
+
+    void SetWelcomeFlag(bool enable);
+    bool GetEnterWelcome(const EnterRoomUserInfo& enterinfo, std::wstring* chatmessage);
+
+private:
+    bool welcomeflag_ = false;
+};
+
 class NetworkHelper
 {
 public:
@@ -61,6 +88,10 @@ public:
     void Finalize();// Ω· ¯œﬂ≥Ã
 
     void SetAntiStrategy(std::shared_ptr<AntiStrategy> antiStrategy);
+    void SetGiftStrategy(std::shared_ptr<GiftStrategy> giftStrategy);
+    void SetGiftThanks(bool enable);
+    void SetEnterRoomStrategy(std::shared_ptr<EnterRoomStrategy> enterRoomStrategy);
+    void SetRoomWelcome(bool enable);
 
     void SetNotify(notifyfn fn);
     void RemoveNotify();
@@ -102,7 +133,7 @@ public:
 
 private:
     void NotifyCallback(const std::wstring& message);
-    void NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo);
+    void NotifyCallback601(uint32 roomid, const RoomGiftInfo601& roomgiftinfo);
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
     void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
         const RoomChatMessage& roomChatMessage);
@@ -125,6 +156,8 @@ private:
     std::unique_ptr<User> user_;
     std::unique_ptr<Authority> authority_;
     std::shared_ptr<AntiStrategy> antiStrategy_;
+    std::shared_ptr<GiftStrategy> giftStrategy_;
+    std::shared_ptr<EnterRoomStrategy> enterRoomStrategy_;
     std::unique_ptr<TcpManager> tcpmanager_;
 };
 

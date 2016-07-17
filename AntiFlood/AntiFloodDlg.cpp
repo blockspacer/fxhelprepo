@@ -84,6 +84,9 @@ CAntiFloodDlg::CAntiFloodDlg(CWnd* pParent /*=NULL*/)
 {
     blacklistHelper_.reset(new BlacklistHelper);
     antiStrategy_.reset(new AntiStrategy);
+    giftStrategy_.reset(new GiftStrategy);
+    enterRoomStrategy_.reset(new EnterRoomStrategy);
+
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
 }
 
@@ -116,6 +119,8 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_VERIFYCODE, m_edit_verifycode);
     DDX_Control(pDX, IDC_STATIC_VERIFYCODE, m_static_verifycode);
     DDX_Control(pDX, IDC_CHK_ROBOT, m_chk_robot);
+    DDX_Control(pDX, IDC_CHK_WELCOME, m_chk_welcome);
+    DDX_Control(pDX, IDC_CHK_THANKS, m_chk_thanks);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -163,6 +168,8 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_RADIO_KICKOUT, &CAntiFloodDlg::OnBnClickedRadioNoaction)
     ON_BN_CLICKED(IDC_CHK_HANDLE_ALL, &CAntiFloodDlg::OnBnClickedChkHandleAll)
     ON_BN_CLICKED(IDC_CHK_ROBOT, &CAntiFloodDlg::OnBnClickedChkRobot)
+    ON_BN_CLICKED(IDC_CHK_THANKS, &CAntiFloodDlg::OnBnClickedChkThanks)
+    ON_BN_CLICKED(IDC_CHK_WELCOME, &CAntiFloodDlg::OnBnClickedChkWelcome)
 END_MESSAGE_MAP()
 
 
@@ -480,6 +487,8 @@ bool CAntiFloodDlg::LoginByRequest(const std::wstring& username,
         network_.reset(new NetworkHelper);
         network_->Initialize();
         network_->SetAntiStrategy(antiStrategy_);
+        network_->SetGiftStrategy(giftStrategy_);
+        network_->SetEnterRoomStrategy(enterRoomStrategy_);
         network_->SetNotify(
             std::bind(&CAntiFloodDlg::Notify, this, std::placeholders::_1));
         username_ = username;
@@ -1275,4 +1284,21 @@ void CAntiFloodDlg::OnBnClickedChkRobot()
     if (!network_)
         return;
     network_->SetRobotHandle(enablerobot);
+}
+
+void CAntiFloodDlg::OnBnClickedChkThanks()
+{
+    bool enable = !!m_chk_thanks.GetCheck();
+    if (!network_)
+        return;
+    network_->SetGiftThanks(enable);
+}
+
+
+void CAntiFloodDlg::OnBnClickedChkWelcome()
+{
+    bool enable = !!m_chk_welcome.GetCheck();
+    if (!network_)
+        return;
+    network_->SetRoomWelcome(enable);
 }

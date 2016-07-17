@@ -57,6 +57,7 @@ public:
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
     void SetNotify501(Notify501 notify501);
+    void SetNotify601(Notify601 notify601);
 
     // ²Ù×÷ÐÐÎª
     bool Login();
@@ -128,5 +129,6 @@ private:
     NormalNotify normalNotify_;
     Notify201 notify201_;
     Notify501 notify501_;
+    Notify601 notify601_;
 };
 
