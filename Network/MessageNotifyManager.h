@@ -82,16 +82,6 @@ public:
     void SetNotify501(Notify501 notify201);
     void SetNotify601(Notify601 notify601);
     void SetNormalNotify(NormalNotify normalNotify);
-    
-    bool Connect843();// 固定的请求，不需要带其他参数
-    bool Connect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
-
-    bool Connect8080_NotLogin(uint32 roomid, uint32 userid, const std::string& nickname,
-        uint32 richlevel, uint32 ismaster, uint32 staruserid,
-        const std::string& key, const std::string& ext);
-
-    bool SendChatMessage(const std::string& nickname, uint32 richlevel,
-        const std::string& message);
 
     // 使用新的高效的多路tcp请求分发模式
     bool NewConnect843(uint32 roomid, uint32 userid,
@@ -103,22 +93,6 @@ public:
     bool NewSendChatMessageRobot(const RoomChatMessage& roomChatMessage);
 
 private:
-
-    void DoConnect843();
-    void DoConnect8080(uint32 roomid, uint32 userid,
-        const std::string& usertoken);
-
-    void DoConnect8080_NotLogin(uint32 roomid, uint32 userid, 
-        const std::string& nickname,
-        uint32 richlevel, uint32 ismaster, uint32 staruserid,
-        const std::string& key, const std::string& ext);
-
-    void DoSendChatMessage(const std::string& nickname, uint32 richlevel,
-        const std::string& message);
-
-    void DoSendHeartBeat();
-    void DoRecv();
-
     void Notify(const std::vector<char>& data);
     std::vector<std::string> HandleMixPackage(const std::string& package);
 

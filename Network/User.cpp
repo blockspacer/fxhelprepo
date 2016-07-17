@@ -372,7 +372,12 @@ bool User::ExitRoom(uint32 roomid)
 
 bool User::ExitRooms()
 {
-    return false;
+    for (auto it : rooms_)
+    {
+        it.second->Exit();
+    }
+    rooms_.clear();
+    return true;
 }
 
 bool User::SendChatMessage(uint32 roomid, const std::string& message)
