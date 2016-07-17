@@ -1,5 +1,6 @@
 #include "MessageNotifyManager.h"
 #include <assert.h>
+#include <memory>
 
 #include "IpProxy.h"
 #include "TcpManager.h"
@@ -332,19 +333,45 @@ void MessageNotifyManager::SetIpProxy(const IpProxy& ipproxy)
 void MessageNotifyManager::SetNotify201(Notify201 notify201)
 {
     notify201_ = notify201;
+    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSetNotify201, this, notify201));
 }
 
 void MessageNotifyManager::SetNotify501(Notify501 notify501)
 {
-    notify501_ = notify501;
+    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSetNotify501, this, notify501));
 }
 
 void MessageNotifyManager::SetNotify601(Notify601 notify601)
 {
     notify601_ = notify601;
+    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSetNotify601, this, notify601));
 }
 
 void MessageNotifyManager::SetNormalNotify(NormalNotify normalNotify)
+{
+    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSetNormalNotify, this, normalNotify));
+}
+
+void MessageNotifyManager::DoSetNotify201(Notify201 notify201)
+{
+    notify201_ = notify201;
+}
+
+void MessageNotifyManager::DoSetNotify501(Notify501 notify501)
+{
+    notify501_ = notify501;
+}
+
+void MessageNotifyManager::DoSetNotify601(Notify601 notify601)
+{
+    notify601_ = notify601;
+}
+
+void MessageNotifyManager::DoSetNormalNotify(NormalNotify normalNotify)
 {
     normalNotify_ = normalNotify;
 }
@@ -558,18 +585,73 @@ std::vector<std::string> MessageNotifyManager::HandleMixPackage(const std::strin
     return retVec;
 }
 
-bool MessageNotifyManager::NewConnect843(uint32 roomid, uint32 userid,
+bool MessageNotifyManager::NewConnect843(
+    uint32 roomid, uint32 userid,
     const std::string& usertoken)
 {
     tcpManager_->AddClient(
-        std::bind(&MessageNotifyManager::NewConnect843Callback, this, std::placeholders::_1,
-        std::placeholders::_2), ipProxy_, serverip_, port843,
-        std::bind(&MessageNotifyManager::NewData843Callback, this,roomid,userid, 
-        usertoken, std::placeholders::_1, std::placeholders::_2));
+        std::bind(&MessageNotifyManager::NewConnect843Callback, 
+        std::weak_ptr<MessageNotifyManager>(shared_from_this()),
+        std::placeholders::_1, std::placeholders::_2), 
+        ipProxy_, serverip_, port843,
+        std::bind(&MessageNotifyManager::NewData843Callback, 
+        std::weak_ptr<MessageNotifyManager>(shared_from_this()), 
+        roomid, userid, usertoken, 
+        std::placeholders::_1, std::placeholders::_2));
     return true;
 }
 
-void MessageNotifyManager::NewConnect843Callback(bool result, TcpHandle handle)
+void MessageNotifyManager::NewConnect843Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+    bool result, TcpHandle handle)
+{
+    auto obj = weakptr.lock();
+    if (!obj)
+        return;
+
+    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoNewConnect843Callback, 
+                   obj.get(), result, handle));
+}
+
+void MessageNotifyManager::NewConnect8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+    uint32 roomid, uint32 userid,
+    const std::string& usertoken,
+    bool result, TcpHandle handle)
+{
+    auto obj = weakptr.lock();
+    if (!obj)
+        return;
+
+    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoNewConnect8080Callback,
+        obj.get(), roomid, userid, usertoken, result, handle));
+}
+
+void MessageNotifyManager::NewData843Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+    uint32 roomid, uint32 userid,
+    const std::string& usertoken, bool result, const std::vector<uint8>& data)
+{
+    auto obj = weakptr.lock();
+    if (!obj)
+        return;
+
+    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoNewData843Callback,
+        obj.get(), roomid, userid, usertoken, result, data));
+}
+void MessageNotifyManager::NewData8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+    bool result, const std::vector<uint8>& data)
+{
+    auto obj = weakptr.lock();
+    if (!obj)
+        return;
+
+    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoNewData8080Callback,
+        obj.get(), result, data));
+}
+
+void MessageNotifyManager::DoNewConnect843Callback(bool result, TcpHandle handle)
 {
     if (!result)
     {
@@ -585,8 +667,7 @@ void MessageNotifyManager::NewConnect843Callback(bool result, TcpHandle handle)
     if (!tcpManager_->Send(handle, data))
     {
         assert(false && L"发送数据错误，要结束流程");
-    }
-    
+    }  
 }
 
 
@@ -594,15 +675,18 @@ bool MessageNotifyManager::NewConnect8080(uint32 roomid, uint32 userid,
                                           const std::string& usertoken)
 {
     tcpManager_->AddClient(
-        std::bind(&MessageNotifyManager::NewConnect8080Callback, this, roomid,
+        std::bind(&MessageNotifyManager::NewConnect8080Callback, 
+        std::weak_ptr<MessageNotifyManager>(shared_from_this()), roomid,
         userid, usertoken, std::placeholders::_1, std::placeholders::_2),
         ipProxy_, serverip_, port8080,
-        std::bind(&MessageNotifyManager::NewData8080Callback, this, std::placeholders::_1,
+        std::bind(&MessageNotifyManager::NewData8080Callback, 
+        std::weak_ptr<MessageNotifyManager>(shared_from_this()), 
+        std::placeholders::_1,
         std::placeholders::_2));
     return true;
 }
 
-void MessageNotifyManager::NewConnect8080Callback(uint32 roomid, uint32 userid,
+void MessageNotifyManager::DoNewConnect8080Callback(uint32 roomid, uint32 userid,
                                                const std::string& usertoken,
                                                bool result, TcpHandle handle)
 {
@@ -626,12 +710,12 @@ void MessageNotifyManager::NewConnect8080Callback(uint32 roomid, uint32 userid,
         newRepeatingTimer_.Stop();
 
     newRepeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10), 
-        base::Bind(&MessageNotifyManager::NewSendHeartBeat, this, tcphandle_8080_));
+        base::Bind(&MessageNotifyManager::DoNewSendHeartBeat, this, tcphandle_8080_));
 
     return;
 }
 
-void MessageNotifyManager::NewData843Callback(uint32 roomid, uint32 userid,
+void MessageNotifyManager::DoNewData843Callback(uint32 roomid, uint32 userid,
     const std::string& usertoken, bool result, const std::vector<uint8>& data)
 {
     tcpManager_->RemoveClient(tcphandle_843_);
@@ -644,7 +728,7 @@ void MessageNotifyManager::NewData843Callback(uint32 roomid, uint32 userid,
     NewConnect8080(roomid, userid, usertoken);
 }
 
-void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<uint8>& data)
+void MessageNotifyManager::DoNewData8080Callback(bool result, const std::vector<uint8>& data)
 {
     if (!result)
     {
@@ -660,7 +744,7 @@ void MessageNotifyManager::NewData8080Callback(bool result, const std::vector<ui
     Notify(temp);
 }
 
-void MessageNotifyManager::NewSendHeartBeat(TcpHandle handle)
+void MessageNotifyManager::DoNewSendHeartBeat(TcpHandle handle)
 {
     std::string heartbeat = "HEARTBEAT_REQUEST";
     heartbeat.append("\n");

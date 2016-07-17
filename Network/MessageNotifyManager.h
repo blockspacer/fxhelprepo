@@ -78,6 +78,8 @@ public:
     void SetTcpManager(TcpManager* tcpManager);
     void SetServerIp(const std::string& serverip);
     void SetIpProxy(const IpProxy& ipproxy);
+
+    // 可动态改变的功能，都要转到工作线程去完成
     void SetNotify201(Notify201 notify201);
     void SetNotify501(Notify501 notify201);
     void SetNotify601(Notify601 notify601);
@@ -93,19 +95,37 @@ public:
     bool NewSendChatMessageRobot(const RoomChatMessage& roomChatMessage);
 
 private:
+
+    void DoSetNotify201(Notify201 notify201);
+    void DoSetNotify501(Notify501 notify201);
+    void DoSetNotify601(Notify601 notify601);
+    void DoSetNormalNotify(NormalNotify normalNotify);
+
     void Notify(const std::vector<char>& data);
     std::vector<std::string> HandleMixPackage(const std::string& package);
 
     // 使用新的高效的多路tcp请求分发模式
-    void NewConnect843Callback(bool result, TcpHandle handle);
-    void NewConnect8080Callback(uint32 roomid, uint32 userid,
+    static void NewConnect843Callback(std::weak_ptr<MessageNotifyManager> weakptr,
+        bool result, TcpHandle handle);
+    static void NewConnect8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+        uint32 roomid, uint32 userid,
+        const std::string& usertoken,
+        bool result, TcpHandle handle);
+    static void NewData843Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+        uint32 roomid, uint32 userid, const std::string& usertoken, bool result, 
+        const std::vector<uint8>& data);
+    static void NewData8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+        bool result, const std::vector<uint8>& data);
+
+    void DoNewConnect843Callback(bool result, TcpHandle handle);
+    void DoNewConnect8080Callback(uint32 roomid, uint32 userid,
                              const std::string& usertoken,
                              bool result, TcpHandle handle);
-    void NewData843Callback(uint32 roomid, uint32 userid,
+    void DoNewData843Callback(uint32 roomid, uint32 userid,
         const std::string& usertoken, bool result, const std::vector<uint8>& data);
-    void NewData8080Callback(bool result, const std::vector<uint8>& data);
+    void DoNewData8080Callback(bool result, const std::vector<uint8>& data);
 
-    void NewSendHeartBeat(TcpHandle handle);
+    void DoNewSendHeartBeat(TcpHandle handle);
 
     base::Thread baseThread_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;

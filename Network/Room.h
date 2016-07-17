@@ -58,7 +58,7 @@ private:
     uint32 clanid_ = 0;
     std::vector<uint32> guarduserids_;
     std::unique_ptr<CurlWrapper> curlWrapper_;
-    std::unique_ptr<MessageNotifyManager> messageNotifyManager_;
+    std::shared_ptr<MessageNotifyManager> messageNotifyManager_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;
 };
 
