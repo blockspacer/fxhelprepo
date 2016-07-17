@@ -38,10 +38,19 @@ bool TcpManager::AddClient(AddClientCallback addcallback,
     const IpProxy& ipproxy, const std::string& ip, uint16 port,
     ClientCallback callback)
 {
+    std::shared_ptr<TcpProxyClient> client(new TcpProxyClient);
+    client->SetProxy(ipproxy);
+
+    if (!client->Connect(ip, port))
+    {
+        addcallback(false, 0);
+        return false;
+    }
+
     return baseThread_.message_loop_proxy()->PostTask(
         FROM_HERE,
-        base::Bind(&TcpManager::DoAddClient, this, addcallback, ipproxy,
-                   ip, port, callback));
+        base::Bind(&TcpManager::DoAddClient, this, client, addcallback, callback));
+    return true;
 }
 
 void TcpManager::RemoveClient(TcpHandle handle)
@@ -56,62 +65,21 @@ bool TcpManager::Send(TcpHandle handle, const std::vector<char>& data)
         base::Bind(&TcpManager::DoSend, this, handle, data));
 }
 
-void TcpManager::DoAddClient(AddClientCallback addcallback, const IpProxy& ipproxy,
-    const std::string& ip, uint16 port, ClientCallback callback)
-{
-
-    std::shared_ptr<TcpProxyClient> client(new TcpProxyClient);
-    client->SetProxy(ipproxy);
-    
-    if (!client->Connect(ip, port))
-    {
-        addcallback(false, 0);
-        return;
-    }
-    
+void TcpManager::DoAddClient(std::shared_ptr<TcpProxyClient> client,
+    AddClientCallback addcallback, ClientCallback callback)
+{  
     auto sock = client->GetSocketHandle();
-    newcallbacks_[sock] = std::make_pair(client,callback);
+    
+    newcallbacks_[sock] = std::make_pair(client, callback);
     addcallback(true, sock);
 
+    static bool recvbegin = false;
+    if (recvbegin)
+        return;
+
+    recvbegin = true;
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
                                                base::Bind(&TcpManager::DoRecv, this));
-
-    //int rc = 0;
-    //SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    //if (sock == INVALID_SOCKET)
-    //{
-    //    assert(false);
-    //    addcallback(false, sock);
-    //    return;
-    //}
-
-    //SOCKADDR_IN serverAddr;
-    //serverAddr.sin_family = AF_INET;
-    //serverAddr.sin_port = htons(port);
-    //serverAddr.sin_addr.s_addr = inet_addr(ip.c_str());
-
-    //struct linger lig;
-    //lig.l_onoff = 0;
-    //lig.l_linger = 0;
-    //int iLen = sizeof(struct linger);
-    //setsockopt(sock, SOL_SOCKET, SO_LINGER, (char *)&lig, iLen);
-    //int flag = 1;
-    //int len = sizeof(int);
-    //setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&flag, len);
-    //int keepalivetime = 10;
-    //setsockopt(sock, IPPROTO_TCP, SO_KEEPALIVE,
-    //    (const char FAR *)&keepalivetime, sizeof(keepalivetime));
-    //rc = connect(sock, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
-    //if (SOCKET_ERROR == rc)
-    //{
-    //    int error = WSAGetLastError();
-    //    addcallback(false, sock);
-    //    return;
-    //}
-    //callbacks_[sock] = callback;
-    //addcallback(true, sock);
-    //baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
-    //                                           base::Bind(&TcpManager::DoRecv, this));
 }
 
 void TcpManager::DoRemoveClient(TcpHandle handle)
@@ -149,7 +117,7 @@ void TcpManager::DoRecv()
             FD_SET(sock, &rfdset);
         }
 
-        timeval timeout = { 0, 1 };
+        timeval timeout = { 10, 0 };
         int ret = select(0, &rfdset, 0, 0, &timeout);
         if (ret == 0)//timeout
         {
@@ -186,9 +154,6 @@ void TcpManager::DoRecv()
 
     if (stopflag)
         return;
-
-    //if (callbacks_.empty()) // 没有任务的情况下不要轮询了
-    //    return;
 
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
                                                base::Bind(&TcpManager::DoRecv, this));
