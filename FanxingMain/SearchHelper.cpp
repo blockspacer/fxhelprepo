@@ -299,7 +299,7 @@ bool SearchHelper::GetAllSingers(uint32 clanid, std::vector<std::string>* singer
         const Json::Value& temp = star;
         uint32 userid = temp.get("userId", 0).asUInt();       
         singerIdList->push_back(base::UintToString(userid));
-        std::string roomid = temp.get("roomId", "0").asString();
+        //std::string roomid = temp.get("roomId", "0").asUInt();
     }
 
     return true;
