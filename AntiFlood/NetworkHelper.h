@@ -79,6 +79,7 @@ private:
 };
 
 class NetworkHelper
+    : public std::enable_shared_from_this <NetworkHelper>
 {
 public:
     NetworkHelper();
@@ -87,11 +88,15 @@ public:
     bool Initialize();// 启动线程
     void Finalize();// 结束线程
 
+    static void AddRef() {}
+    static void Release() {}
+
     void SetAntiStrategy(std::shared_ptr<AntiStrategy> antiStrategy);
     void SetGiftStrategy(std::shared_ptr<GiftStrategy> giftStrategy);
     void SetGiftThanks(bool enable);
     void SetEnterRoomStrategy(std::shared_ptr<EnterRoomStrategy> enterRoomStrategy);
     void SetRoomWelcome(bool enable);
+    void SetRoomRepeatChat(bool enable, const std::wstring& seconds, const std::wstring& chatmsg);
 
     void SetNotify(notifyfn fn);
     void RemoveNotify();
@@ -145,6 +150,9 @@ private:
     void RobotHandleChatMessage(const EnterRoomUserInfo& enterRoomUserInfo,
         const RoomChatMessage& roomChatMessage);
 
+    void DoSetRoomRepeatChat(bool enable, uint32 seconds, const std::wstring& chatmsg);
+    void DoChatRepeat(const std::wstring& chatmsg);
+
     std::map<uint32, EnterRoomUserInfo> enterRoomUserInfoMap_;
     notifyfn notify_;
     notify201 notify201_;
@@ -160,5 +168,8 @@ private:
     std::shared_ptr<GiftStrategy> giftStrategy_;
     std::shared_ptr<EnterRoomStrategy> enterRoomStrategy_;
     std::unique_ptr<TcpManager> tcpmanager_;
+
+    scoped_ptr<base::Thread> workThread_;
+    base::RepeatingTimer<NetworkHelper> chatRepeatingTimer_;
 };
 

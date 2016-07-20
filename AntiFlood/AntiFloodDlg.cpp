@@ -36,6 +36,13 @@ namespace
     const wchar_t* vestcolumnlist[] = {
         L"马甲"
     };
+
+    const wchar_t* userstrategylist[] = {
+        L"昵称",
+        L"用户id",
+        L"欢迎内容",
+        L"感谢内容"
+    };
 }
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
@@ -122,6 +129,10 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_API_KEY, m_edit_api_key);
     DDX_Control(pDX, IDC_CHK_WELCOME, m_chk_welcome);
     DDX_Control(pDX, IDC_CHK_THANKS, m_chk_thanks);
+    DDX_Control(pDX, IDC_LIST_USER_STRATEGE, m_list_user_strategy);
+    DDX_Control(pDX, IDC_CHK_REPEAT_CHAT, m_chk_repeat_chat);
+    DDX_Control(pDX, IDC_COMBO_SECONDS, m_combo_seconds);
+    DDX_Control(pDX, IDC_EDIT_AUTO_CHAT, m_edit_auto_chat);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -171,6 +182,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_CHK_ROBOT, &CAntiFloodDlg::OnBnClickedChkRobot)
     ON_BN_CLICKED(IDC_CHK_THANKS, &CAntiFloodDlg::OnBnClickedChkThanks)
     ON_BN_CLICKED(IDC_CHK_WELCOME, &CAntiFloodDlg::OnBnClickedChkWelcome)
+    ON_BN_CLICKED(IDC_CHK_REPEAT_CHAT, &CAntiFloodDlg::OnBnClickedChkRepeatChat)
 END_MESSAGE_MAP()
 
 
@@ -262,6 +274,16 @@ BOOL CAntiFloodDlg::OnInitDialog()
     for (const auto& it : vestcolumnlist)
         m_list_vest.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列   
     m_radiogroup = 1;
+
+    m_list_user_strategy.SetExtendedStyle(dwStyle);
+    index = 0;
+    for (const auto& it : userstrategylist)
+        m_list_user_strategy.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
+
+    m_combo_seconds.AddString(L"60");
+    m_combo_seconds.AddString(L"120");
+    m_combo_seconds.AddString(L"180");
+    m_combo_seconds.SelectString(0,L"60");
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -1313,17 +1335,66 @@ void CAntiFloodDlg::OnBnClickedChkRobot()
 
 void CAntiFloodDlg::OnBnClickedChkThanks()
 {
-    bool enable = !!m_chk_thanks.GetCheck();
     if (!network_)
         return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
+        return;
+    }
+
+    bool enable = !!m_chk_thanks.GetCheck();
     network_->SetGiftThanks(enable);
 }
 
 
 void CAntiFloodDlg::OnBnClickedChkWelcome()
 {
-    bool enable = !!m_chk_welcome.GetCheck();
     if (!network_)
         return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
+        return;
+    }
+
+    bool enable = !!m_chk_welcome.GetCheck();
     network_->SetRoomWelcome(enable);
+}
+
+
+void CAntiFloodDlg::OnBnClickedChkRepeatChat()
+{
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
+        return;
+    }
+
+    bool enable = !!m_chk_repeat_chat.GetCheck();
+    CString chatmsg;
+    m_edit_auto_chat.GetWindowTextW(chatmsg);
+    if (chatmsg.IsEmpty())
+        return;
+
+    if (chatmsg.GetLength()>=50)
+    {
+        Notify(L"发言内容过长,请不要超过50个字符");
+        return;
+    }
+
+    CString seconds;
+    m_combo_seconds.GetWindowTextW(seconds);
+    network_->SetRoomRepeatChat(enable, seconds.GetBuffer(), chatmsg.GetBuffer());
 }

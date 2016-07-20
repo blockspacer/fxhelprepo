@@ -161,4 +161,11 @@ private:
     CButton m_chk_welcome;
     CButton m_chk_thanks;
     afx_msg void OnBnClickedChkWelcome();
+
+    CListCtrl m_list_user_strategy;
+    CButton m_chk_repeat_chat;
+    CComboBox m_combo_seconds;
+    CEdit m_edit_auto_chat;
+
+    afx_msg void OnBnClickedChkRepeatChat();
 };

@@ -7,6 +7,7 @@
 
 #undef max // 因为微软这个二比在某些头文件定义了max宏
 #undef min // 因为微软这个二比在某些头文件定义了min宏
+#include "third_party/chromium/base/time/time.h"
 #include "Network/TcpClient.h"
 #include "Network/MessageNotifyManager.h"
 #include "Network/CurlWrapper.h"
@@ -135,13 +136,12 @@ bool EnterRoomStrategy::GetEnterWelcome(const EnterRoomUserInfo& enterinfo,
     return true;
 }
 
-
 NetworkHelper::NetworkHelper()
     : authority_(new Authority)
     , tcpmanager_(new TcpManager)
+    , workThread_(new base::Thread("NetworkHelper"))
 {
 }
-
 
 NetworkHelper::~NetworkHelper()
 {
@@ -150,6 +150,7 @@ NetworkHelper::~NetworkHelper()
 bool NetworkHelper::Initialize()
 {
     CurlWrapper::CurlInit();
+    workThread_->Start();
     user_.reset(new User);
     tcpmanager_->Initialize();
     AuthorityHelper authorityHelper;
@@ -162,6 +163,8 @@ bool NetworkHelper::Initialize()
 
 void NetworkHelper::Finalize()
 {
+    chatRepeatingTimer_.Stop();
+    workThread_->Stop();
     tcpmanager_->Finalize();
     CurlWrapper::CurlCleanup();
     return;
@@ -190,6 +193,23 @@ void NetworkHelper::SetEnterRoomStrategy(std::shared_ptr<EnterRoomStrategy> ente
 void NetworkHelper::SetRoomWelcome(bool enable)
 {
     enterRoomStrategy_->SetWelcomeFlag(enable);
+}
+
+void NetworkHelper::SetRoomRepeatChat(bool enable, const std::wstring& seconds,
+                                      const std::wstring& chatmsg)
+{
+    uint32 sec = 0;
+    base::StringToUint(base::WideToUTF8(seconds),&sec);
+
+    if (sec < 30)
+    {
+        NotifyCallback(L"设置重复说话时间要超过30秒");
+        return;
+    }
+    
+    workThread_->message_loop_proxy()->PostTask(
+        FROM_HERE,
+        base::Bind(&NetworkHelper::DoSetRoomRepeatChat, this, enable, sec, chatmsg));
 }
 
 void NetworkHelper::SetNotify(notifyfn fn)
@@ -524,5 +544,23 @@ void NetworkHelper::RobotHandleChatMessage(
     responseChat.chatmessage = response;
 
     SendChatMessageRobot(responseChat);
+}
+
+void NetworkHelper::DoSetRoomRepeatChat(bool enable, uint32 seconds,
+                                        const std::wstring& chatmsg)
+{
+    chatRepeatingTimer_.Stop();
+    if (!enable)
+        return;
+    
+    DoChatRepeat(chatmsg);
+    chatRepeatingTimer_.Start(
+        FROM_HERE, base::TimeDelta::FromSeconds(static_cast<uint64>(seconds)),
+        base::Bind(&NetworkHelper::DoChatRepeat, this, chatmsg));
+}
+
+void NetworkHelper::DoChatRepeat(const std::wstring& chatmsg)
+{
+    user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
 }
 
