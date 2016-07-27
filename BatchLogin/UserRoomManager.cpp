@@ -52,7 +52,7 @@ void UserRoomManager::SetNotify(std::function<void(std::wstring)> notify)
     notify_ = notify;
 }
 
-bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total)
+bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total) const
 {
     // 读文件
     base::FilePath path;
@@ -112,7 +112,7 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total)
     return true;
 }
 
-bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
+bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total) const
 {
     base::FilePath path;
     PathService::Get(base::DIR_EXE, &path);
@@ -153,7 +153,6 @@ bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total)
             LOG(ERROR) << L"roomid change error! " << it;
             continue;
         }
-        //roomController_->AddRoom(roomid);
         RowData row;
         row.push_back(base::UintToString16(roomid));
         roomgrid->push_back(row);
@@ -229,6 +228,12 @@ bool UserRoomManager::LoadIpProxy(GridData* proxyinfo)
     return true;
 }
 
+void UserRoomManager::Notify(const std::wstring& msg)
+{
+    if (notify_)
+        notify_(msg);
+}
+
 void UserRoomManager::DoSaveUserLoginConfig()
 {
     base::File accountCookieFile;
@@ -264,18 +269,27 @@ bool UserRoomManager::BatchLogUsers(
 
 void UserRoomManager::DoBatchLogUsers(
     const std::map<std::wstring, std::wstring>& userAccountPassword)
-{
-    IpProxy ipproxy;
-    if (!ipProxys_.empty())
-        ipproxy = ipProxys_.begin()->second;
-    
+{    
+    auto current = ipProxys_.begin();
+
     for (auto it : userAccountPassword)
     {
         std::string account = base::WideToUTF8(it.first);
         std::string password = base::WideToUTF8(it.second);
         std::string errormsg;
         std::wstring message = base::UTF8ToWide(account) + L" 登录";
-        if (!userController_->AddUser(account, password, ipproxy, &errormsg))
+
+        IpProxy ipProxy;
+        if (!ipProxys_.empty())
+        {
+            if (current == ipProxys_.end())
+                current = ipProxys_.begin();
+
+            ipProxy = current->second;
+            current++;
+        }
+
+        if (!userController_->AddUser(account, password, ipProxy, &errormsg))
         {
             message += L"失败," + base::UTF8ToWide(errormsg);
         }
@@ -284,10 +298,7 @@ void UserRoomManager::DoBatchLogUsers(
             message += L"成功!";
         }
 
-        if (notify_)
-        {
-            notify_(message);
-        }
+        Notify(message);
     }
 }
 
@@ -321,10 +332,7 @@ void UserRoomManager::DoBatchLogUsersWithCookie(
             message += L"成功!";
         }
 
-        if (notify_)
-        {
-            notify_(message);
-        }
+        Notify(message);
     }
 }
 
@@ -346,17 +354,9 @@ bool UserRoomManager::FillRooms(const std::vector<std::wstring>& roomids)
 
 void UserRoomManager::DoFillRooms(const std::vector<uint32>& roomids)
 {
-    //std::vector<uint32> roomids = roomController_->GetRooms();
     for (const auto& roomid : roomids)
     {
-        bool result = userController_->FillRoom(roomid, roomusercount);
-        assert(result && L"进入房间失败");
-        if (notify_)
-        {
-            std::wstring message = L"Fill Room ";
-            message += result ? L"Success!" : L"Failed!";
-            notify_(message);
-        }
+        FillSingleRoom(roomid);
     }
 }
 
@@ -364,12 +364,9 @@ void UserRoomManager::FillSingleRoom(uint32 roomid)
 {
     bool result = userController_->FillRoom(roomid, roomusercount);
     assert(result && L"进入房间失败");
-    if (notify_)
-    {
-        std::wstring message = L"Fill Room ";
-        message += result ? L"Success!" : L"Failed!";
-        notify_(message);
-    }
+    std::wstring message = L"Fill Room ";
+    message += result ? L"Success!" : L"Failed!";
+    Notify(message);
 }
 
 bool UserRoomManager::UpMVBillboard(const std::wstring& collectionid, 
@@ -386,12 +383,9 @@ void UserRoomManager::DoUpMVBillboard(const std::wstring& collectionid,
 {
     bool result = userController_->UpMVBillboard(
         base::WideToUTF8(collectionid), base::WideToUTF8(mvid),
-        notify_);
+        std::bind(&UserRoomManager::Notify,this,std::placeholders::_1));
     assert(result && L"打榜失败");
-    if (notify_)
-    {
-        std::wstring message = L"upgrade mv billboard ";
-        message += result ? L"Success!" : L"Failed!";
-        notify_(message);
-    }
+    std::wstring message = L"upgrade mv billboard ";
+    message += result ? L"Success!" : L"Failed!";
+    Notify(message);
 }

@@ -1,5 +1,5 @@
 #include "TcpManager.h"
-
+#include <set>
 #include <assert.h>
 
 #include "EncodeHelper.h"
@@ -58,10 +58,11 @@ void TcpManager::RemoveClient(TcpHandle handle)
         base::Bind(&TcpManager::DoRemoveClient, this, handle));
 }
 
-bool TcpManager::Send(TcpHandle handle, const std::vector<char>& data)
+bool TcpManager::Send(TcpHandle handle, const std::vector<char>& data,
+    SendDataCallback callback)
 {
     return baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
-        base::Bind(&TcpManager::DoSend, this, handle, data));
+        base::Bind(&TcpManager::DoSend, this, handle, data, callback));
 }
 
 void TcpManager::DoAddClient(std::shared_ptr<TcpProxyClient> client,
@@ -91,7 +92,7 @@ void TcpManager::DoRemoveClient(TcpHandle handle)
     newcallbacks_.erase(result);
 }
 
-void TcpManager::DoSend(TcpHandle handle, const std::vector<char>& data)
+void TcpManager::DoSend(TcpHandle handle, const std::vector<char>& data, SendDataCallback callback)
 {
     int len = send(handle, data.data(), data.size(), 0);
     if (len<0)
@@ -99,8 +100,8 @@ void TcpManager::DoSend(TcpHandle handle, const std::vector<char>& data)
         int errorcode = WSAGetLastError();
         LOG(ERROR) << base::IntToString(errorcode);
     }
-    
-    assert(len == data.size());
+    if (callback)
+        callback(len == data.size());
 }
 
 void TcpManager::DoRecv()
@@ -116,7 +117,7 @@ void TcpManager::DoRecv()
             FD_SET(sock, &rfdset);
         }
 
-        timeval timeout = { 1, 0 };
+        timeval timeout = { 5, 0 };
         int ret = select(0, &rfdset, 0, 0, &timeout);
         if (ret == 0)//timeout
         {
@@ -129,6 +130,7 @@ void TcpManager::DoRecv()
             break;
         }
 
+        std::set<SocketHandle> eraseset;
         for (const auto& callback : newcallbacks_)
         {
             std::vector<uint8> buffer;
@@ -140,6 +142,7 @@ void TcpManager::DoRecv()
                     int errorcode = WSAGetLastError();
                     LOG(ERROR) << base::IntToString(errorcode);
                     callback.second.second(false, buffer);
+                    eraseset.insert(callback.first);
                     continue;
                 }
                 else if (buffer.size() > 0)
@@ -148,6 +151,10 @@ void TcpManager::DoRecv()
                 }
             }
         }
+        for (auto eraseit : eraseset)
+        {
+            newcallbacks_.erase(eraseit);
+    }
     }
     while (0);
 

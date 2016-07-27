@@ -111,6 +111,8 @@ private:
         uint32 roomid, uint32 userid,
         const std::string& usertoken,
         bool result, TcpHandle handle);
+    
+    void NewData843Callback(uint32 roomid, uint32 userid,
     static void NewData843Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
         uint32 roomid, uint32 userid, const std::string& usertoken, bool result, 
         const std::vector<uint8>& data);
@@ -126,6 +128,7 @@ private:
     void DoNewData8080Callback(bool result, const std::vector<uint8>& data);
 
     void DoNewSendHeartBeat(TcpHandle handle);
+    void NewSendDataCallback(TcpHandle handle, bool result);
 
     base::Thread baseThread_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;

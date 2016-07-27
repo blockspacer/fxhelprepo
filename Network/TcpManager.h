@@ -21,6 +21,7 @@ public:
 
     typedef std::function<void(bool, SocketHandle)> AddClientCallback;
     typedef std::function<void(bool, const std::vector<uint8>&)> ClientCallback;
+    typedef std::function<void(bool)> SendDataCallback;
 
     TcpManager();
     ~TcpManager();
@@ -34,13 +35,13 @@ public:
     bool AddClient(AddClientCallback addcallback, const IpProxy& ipproxy,
         const std::string& ip, uint16 port, ClientCallback callback);
     void RemoveClient(TcpHandle handle);
-    bool Send(TcpHandle handle, const std::vector<char>& data);
+    bool Send(TcpHandle handle, const std::vector<char>& data, SendDataCallback callback);
 private:
 
     void DoAddClient(std::shared_ptr<TcpProxyClient> client, 
         AddClientCallback addcallback, ClientCallback callback);
     void DoRemoveClient(TcpHandle handle);
-    void DoSend(TcpHandle handle, const std::vector<char>& data);
+    void DoSend(TcpHandle handle, const std::vector<char>& data, SendDataCallback callback);
     void DoRecv();
     void DoRemoveAllClient();
     std::map<TcpHandle, ClientCallback> callbacks_;

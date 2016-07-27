@@ -607,7 +607,6 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     const std::string& usertoken)
 {
     bool ret = false;
-    //ret = messageNotifyManager_->Connect843();
     if (ipproxy_.GetProxyType()!= IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
     {
         messageNotifyManager_->SetIpProxy(ipproxy_);

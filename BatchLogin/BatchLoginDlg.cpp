@@ -317,8 +317,11 @@ void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
     std::vector<std::wstring> roomids;
     for (int32 index = 0; index < itemcount; ++index)
     {
-        CString roomid = m_ListCtrl_Rooms.GetItemText(index, 0);
-        roomids.push_back(roomid.GetBuffer());
+        if (!!m_ListCtrl_Rooms.GetCheck(index))
+        {
+            CString roomid = m_ListCtrl_Rooms.GetItemText(index, 0);
+            roomids.push_back(roomid.GetBuffer());
+        }
     }
     userRoomManager_->FillRooms(roomids);
 }
