@@ -88,6 +88,7 @@
   <ItemGroup>
     <ClInclude Include="CookiesHelper.h" />
     <ClInclude Include="CurlWrapper.h" />
+    <ClInclude Include="easy_http_impl.h" />
     <ClInclude Include="EncodeHelper.h" />
     <ClInclude Include="IpProxy.h" />
     <ClInclude Include="MessageNotifyManager.h" />
@@ -112,6 +113,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="easy_http_impl.cpp" />
     <ClCompile Include="EncodeHelper.cpp" />
     <ClCompile Include="IpProxy.cpp" />
     <ClCompile Include="MessageNotifyManager.cpp" />

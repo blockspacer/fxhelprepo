@@ -2,6 +2,7 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <functional>
 #include <vector>
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/files/file.h"
@@ -12,6 +13,10 @@ enum class KICK_TYPE
     KICK_TYPE_HOUR = 0,
     KICK_TYPE_MONTH = 1,
 };
+
+class HttpResponse;
+
+typedef std::function<void(const HttpResponse&)> AsyncHttpResponseCallback;
 
 class HttpRequest
 {
@@ -32,6 +37,9 @@ public:
     std::map<std::string, std::string> headers;
     std::string postfile;
     IpProxy ipproxy;
+
+    // Òì²½»Øµ÷
+    AsyncHttpResponseCallback asyncHttpResponseCallback = nullptr;
 };
 
 class HttpResponse
