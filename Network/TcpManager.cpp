@@ -1,11 +1,12 @@
 #include "TcpManager.h"
+#include "ClientController.h"
 #include <set>
 #include <assert.h>
 #include "EncodeHelper.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
 
-#include "ClientController.h"
+
 
 
 TcpManager::TcpManager()
@@ -54,7 +55,7 @@ bool TcpManager::AddClient(AddClientCallback addcallback,
     //return baseThread_.message_loop_proxy()->PostTask(
     //    FROM_HERE, base::Bind(&TcpManager::DoAddClient, this, client, 
     //    addcallback, callback));
-    client_controller_.AddClient(ip, port, addcallback, callback);
+    client_controller_->AddClient(ip, port, addcallback, callback);
     return true;
 }
 

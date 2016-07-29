@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <Winsock2.h>
+
 #include "Room.h"
 #include "Network/IpProxy.h"
 

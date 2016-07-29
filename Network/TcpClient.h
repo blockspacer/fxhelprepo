@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <WinSock.h>
+#include <Winsock2.h>
 
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/timer/timer.h"
