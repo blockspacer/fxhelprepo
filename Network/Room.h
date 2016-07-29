@@ -1,8 +1,10 @@
 #pragma once
 #include <string>
 #include <memory>
-#include "IpProxy.h"
+#include <Winsock2.h>
+
 #include "third_party/chromium/base/basictypes.h"
+#include "IpProxy.h"
 #include "CurlWrapper.h"
 #include "MessageNotifyManager.h"
 

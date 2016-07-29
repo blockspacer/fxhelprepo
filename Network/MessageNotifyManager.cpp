@@ -1,7 +1,7 @@
 #include "MessageNotifyManager.h"
+
 #include <assert.h>
 #include <memory>
-
 #include "IpProxy.h"
 #include "TcpManager.h"
 #include "EncodeHelper.h"

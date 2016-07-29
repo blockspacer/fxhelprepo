@@ -1,4 +1,5 @@
 #pragma once
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -6,9 +7,12 @@
 #include <future>
 #include <condition_variable>
 #include <functional>
+#include <Winsock2.h> // 解决网络相关内容重定义问题
+
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/timer/timer.h"
 #include "third_party/chromium/base/threading/thread.h"
+
 #include "Network/IpProxy.h"
 #include "Network/TcpClient.h"
 

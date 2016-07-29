@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <WinSock.h>
+#include <Winsock2.h>
 
 #include "IpProxy.h"
 #include "TcpClient.h"
