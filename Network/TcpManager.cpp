@@ -1,9 +1,12 @@
 #include "TcpManager.h"
 #include <set>
 #include <assert.h>
-
 #include "EncodeHelper.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
+
+
+#include "ClientController.h"
+
 
 TcpManager::TcpManager()
     :baseThread_("TcpManagerThread")
@@ -19,6 +22,7 @@ bool TcpManager::Initialize()
 {
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
+    client_controller_.reset(new ClientController);
     return baseThread_.Start();
 }
 
@@ -38,18 +42,20 @@ bool TcpManager::AddClient(AddClientCallback addcallback,
     const IpProxy& ipproxy, const std::string& ip, uint16 port,
     ClientCallback callback)
 {
-    std::shared_ptr<TcpProxyClient> client(new TcpProxyClient);
-    client->SetProxy(ipproxy);
+    //std::shared_ptr<TcpProxyClient> client(new TcpProxyClient);
+    //client->SetProxy(ipproxy);
 
-    if (!client->Connect(ip, port))
-    {
-        addcallback(false, 0);
-        return false;
-    }
+    //if (!client->Connect(ip, port))
+    //{
+    //    addcallback(false, 0);
+    //    return false;
+    //}
 
-    return baseThread_.message_loop_proxy()->PostTask(
-        FROM_HERE, base::Bind(&TcpManager::DoAddClient, this, client, 
-        addcallback, callback));
+    //return baseThread_.message_loop_proxy()->PostTask(
+    //    FROM_HERE, base::Bind(&TcpManager::DoAddClient, this, client, 
+    //    addcallback, callback));
+    client_controller_.AddClient(ip, port, addcallback, callback);
+    return true;
 }
 
 void TcpManager::RemoveClient(TcpHandle handle)

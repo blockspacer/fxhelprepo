@@ -15,6 +15,7 @@
 #include "third_party/chromium/base/timer/timer.h"
 #include "third_party/chromium/base/threading/thread.h"
 
+class ClientController;
 class TcpManager
 {
 public:
@@ -50,6 +51,8 @@ private:
 
     bool stopflag = false;
     base::Thread baseThread_;
+
+    std::unique_ptr<ClientController> client_controller_;
 };
 
 //
