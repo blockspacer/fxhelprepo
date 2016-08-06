@@ -63,6 +63,7 @@ public:
 
     bool AddTask(std::shared_ptr<EasyHandle> easyHandle);
     bool GetTasks(std::deque<std::shared_ptr<EasyHandle>>* easyHandleQueue);
+    bool GetOneTask(std::shared_ptr<EasyHandle>* easyHandle);
 
 private:
     std::deque<std::shared_ptr<EasyHandle>> queue_;

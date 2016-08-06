@@ -225,7 +225,7 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
         CString password = m_ListCtrl_Users.GetItemText(index, 1);
         CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
 
-        //// 暂时全部走用户名密码登录流程
+        // 暂时全部走用户名密码登录流程
         //accountPassword[account.GetBuffer()] = password.GetBuffer();
         if (cookies.IsEmpty())
             accountPassword[account.GetBuffer()] = password.GetBuffer();

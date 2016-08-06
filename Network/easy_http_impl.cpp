@@ -11,6 +11,13 @@
 #include "third_party/libcurl/curl/curl.h"
 //#include "base/thread_pool.h"
 
+namespace
+{
+const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
+const char* acceptencode = "gzip";//目前都不应该接收压缩数据，免得解压麻烦
+const uint32 max_parallel = 8;
+
+}
 EasyHandle::EasyHandle(const HttpRequest& httpParams)
     : curlhandle_(nullptr)
     , headers_(nullptr)
@@ -28,7 +35,7 @@ EasyHandle::~EasyHandle()
 
 }
 
-#define EASYHANDLE_SETOPT(opttype,optvalue) \
+#define EASYHANDLE_SETOPT(opttype, optvalue) \
     result = curl_easy_setopt(curlhandle_, opttype, optvalue);\
     if (result != CURLE_OK)\
     {\
@@ -46,54 +53,135 @@ bool EasyHandle::Initialize()
     }
 
     CURLcode result = CURLE_OK;
+    const HttpRequest& request = httpRequest_;
 
-    EASYHANDLE_SETOPT(CURLOPT_URL, httpRequest_.url.c_str());
-    EASYHANDLE_SETOPT(CURLOPT_SSL_VERIFYHOST, 1L);
-    EASYHANDLE_SETOPT(CURLOPT_SSL_VERIFYPEER, 1L);
+    if (!curlhandle_)
+        return false;
+    std::string url = request.url;
+    if (!request.queries.empty())
+    {
+        bool first = true;
+        for (const auto& it : request.queries)
+        {
+            url += first ? "?" : "&";
+            first = false;
+            url += it.first + "=" + it.second;
+        }
+    }
+
+
+    EASYHANDLE_SETOPT(CURLOPT_URL, (url.c_str()));
+
+    if (url.find("https") != std::string::npos)
+    {
+        EASYHANDLE_SETOPT(CURLOPT_SSL_VERIFYHOST, 0L);
+        EASYHANDLE_SETOPT(CURLOPT_SSL_VERIFYPEER, 0L);
+    }
+
+    EASYHANDLE_SETOPT(CURLOPT_FOLLOWLOCATION, 1L);
+    EASYHANDLE_SETOPT(CURLOPT_HEADER, 0L);
+    EASYHANDLE_SETOPT(CURLOPT_TCP_KEEPALIVE, 1L);
+    struct curl_slist *headers = 0;
+    headers = curl_slist_append(headers, "Connection:Keep-Alive");
+    headers = curl_slist_append(headers, "Accept-Language:zh-CN");
+    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
+    headers = curl_slist_append(headers, "Accept:*/*");
+    for (const auto& it : request.headers)
+    {
+        std::string header = it.first + ":" + it.second;
+        headers = curl_slist_append(headers, header.c_str());
+    }
+    EASYHANDLE_SETOPT(CURLOPT_HTTPHEADER, headers);
+    EASYHANDLE_SETOPT(CURLOPT_AUTOREFERER, 1L);
+    EASYHANDLE_SETOPT(CURLOPT_ACCEPT_ENCODING, acceptencode);
+
+    if (!request.useragent.empty())
+    {
+        EASYHANDLE_SETOPT(CURLOPT_USERAGENT, request.useragent.c_str());
+    }
+    else
+    {
+        EASYHANDLE_SETOPT(CURLOPT_USERAGENT, useragent);
+    }
+        
+
+    if (!request.referer.empty())
+    {
+        EASYHANDLE_SETOPT(CURLOPT_REFERER, request.referer.c_str());
+    }
+
+    if (!request.cookies.empty())
+    {
+        EASYHANDLE_SETOPT(CURLOPT_COOKIE, request.cookies.c_str());
+    }
+
     EASYHANDLE_SETOPT(CURLOPT_CAINFO, crtPath_.c_str());
     EASYHANDLE_SETOPT(CURLOPT_FOLLOWLOCATION, 1L);
     EASYHANDLE_SETOPT(CURLOPT_WRITEFUNCTION, EasyHandle::curl_write_callback);
     EASYHANDLE_SETOPT(CURLOPT_WRITEDATA, this);
-    EASYHANDLE_SETOPT(CURLOPT_VERBOSE, 1L);   
-    EASYHANDLE_SETOPT(CURLOPT_PRIVATE, this);
+    EASYHANDLE_SETOPT(CURLOPT_VERBOSE, 1L);
 
-    // 持续6秒没有数据到达，就算超时
-    EASYHANDLE_SETOPT(CURLOPT_LOW_SPEED_LIMIT, 1L);
-    EASYHANDLE_SETOPT(CURLOPT_LOW_SPEED_TIME, 6);
+    struct curl_httppost* post = nullptr;
+    struct curl_httppost* last = nullptr;
 
-    //if (httpRequest_.progressFunction)
-    //{
-    //    EASYHANDLE_SETOPT(CURLOPT_PROGRESSFUNCTION, EasyHandle::curl_progress_callback);
-    //    EASYHANDLE_SETOPT(CURLOPT_PROGRESSDATA, this);
-    //    EASYHANDLE_SETOPT(CURLOPT_NOPROGRESS, 0L);
-    //}
-
-    std::map<std::string, std::string> headermap = httpRequest_.headers;
-    for (const auto& it:headermap)
-    {
-        std::string keyvalue = it.first + ":" + it.second;
-        headers_ = curl_slist_append(headers_, keyvalue.c_str());
-    }
-    if (headers_)
-    {
-        EASYHANDLE_SETOPT(CURLOPT_HTTPHEADER, headers_);
-    }
-
-    switch (httpRequest_.method)
+    switch (request.method)
     {
     case HttpRequest::HTTP_METHOD::HTTP_METHOD_GET:
         EASYHANDLE_SETOPT(CURLOPT_HTTPGET, 1L);
         break;
     case HttpRequest::HTTP_METHOD::HTTP_METHOD_POST:
-        EASYHANDLE_SETOPT(CURLOPT_POST, 1L);
-        EASYHANDLE_SETOPT(CURLOPT_POSTFIELDSIZE, httpRequest_.postdata.size());
-        EASYHANDLE_SETOPT(CURLOPT_POSTFIELDS, &httpRequest_.postdata[0]);
+        assert(!request.postdata.empty());
+        EASYHANDLE_SETOPT(CURLOPT_HTTPPOST, 1L);
+        EASYHANDLE_SETOPT(CURLOPT_POSTFIELDSIZE, request.postdata.size());
+        EASYHANDLE_SETOPT(CURLOPT_POSTFIELDS, &request.postdata[0]);
+        break;
+    case HttpRequest::HTTP_METHOD::HTTP_METHOD_HTTPPOST:
+        assert(!request.postfile.empty());
+        if (!request.postfile.empty())
+        {
+            curl_formadd(&post, &last, CURLFORM_COPYNAME, "file",
+                CURLFORM_FILE, request.postfile.c_str(), CURLFORM_END);
+            EASYHANDLE_SETOPT(CURLOPT_HTTPPOST, post);
+        }
         break;
     default:
-        assert(false && L"HTTP 请求方式不正确");
-        return false;
+        assert(false);
+        break;
     }
 
+    // 设置代理
+    if (request.ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    {
+        uint32 proxytype = CURLPROXY_HTTP;
+        switch (request.ipproxy.GetProxyType())
+        {
+        case IpProxy::PROXY_TYPE::PROXY_TYPE_HTTP:
+            proxytype = CURLPROXY_HTTP;
+            break;
+        case IpProxy::PROXY_TYPE::PROXY_TYPE_SOCKS4:
+            proxytype = CURLPROXY_SOCKS4;
+            break;
+        case IpProxy::PROXY_TYPE::PROXY_TYPE_SOCKS4A:
+            proxytype = CURLPROXY_SOCKS4A;
+            break;
+        case IpProxy::PROXY_TYPE::PROXY_TYPE_SOCKS5:
+            proxytype = CURLPROXY_SOCKS5;
+            break;
+        default:
+            assert(false && L"参数错误");
+            break;
+        }
+        std::string proxyip = request.ipproxy.GetProxyIp();
+        uint16 proxyport = request.ipproxy.GetProxyPort();
+
+        EASYHANDLE_SETOPT(CURLOPT_PROXYTYPE, proxytype);
+        EASYHANDLE_SETOPT(CURLOPT_PROXY, proxyip.c_str());
+        EASYHANDLE_SETOPT(CURLOPT_PROXYPORT, proxyport);
+    }
+
+    // 持续6秒没有数据到达，就算超时
+    EASYHANDLE_SETOPT(CURLOPT_LOW_SPEED_LIMIT, 1L);
+    EASYHANDLE_SETOPT(CURLOPT_LOW_SPEED_TIME, 60L);
     return true;
 }
     
@@ -119,9 +207,6 @@ size_t EasyHandle::curl_write_callback(char* buffer, size_t size, size_t nitems,
 
 int EasyHandle::WriteCallback(const std::vector<uint8>& data)
 {
-    //if (httpRequest_.writeFunction)
-    //    return httpRequest_.writeFunction(data);
-
     responseData_.insert(responseData_.end(), data.begin(), data.end());
     return data.size();
 }
@@ -189,6 +274,16 @@ bool TaskQueue::GetTasks(std::deque<std::shared_ptr<EasyHandle>>* easyHandleQueu
     return true;
 }
 
+bool TaskQueue::GetOneTask(std::shared_ptr<EasyHandle>* easyHandle)
+{
+    base::AutoLock lock(lock_);
+    if (queue_.empty())
+        return false;
+
+    *easyHandle = *queue_.begin();
+    queue_.erase(queue_.begin());
+    return true;
+}
 
 EasyHttpImpl::EasyHttpImpl()
     :shutdownFlag_(false)
@@ -224,7 +319,8 @@ void EasyHttpImpl::ShutdownService()
 void EasyHttpImpl::DoHttpRequest()
 {
     auto multi_handle = curl_multi_init();
-    std::deque<std::shared_ptr<EasyHandle>> easyHandleQueue;
+
+    std::map<CURL*, std::shared_ptr<EasyHandle>> easyHandleQueue;
 
     int still_running = 0;
     do
@@ -232,25 +328,23 @@ void EasyHttpImpl::DoHttpRequest()
         if (shutdownFlag_)// 只有在ShutdownService的时候强制退出
             break;
 
-        std::deque<std::shared_ptr<EasyHandle>> temp;
-        taskQueue_.GetTasks(&temp);
-
-        if (!temp.empty())
+        if (still_running < max_parallel)
         {
-            easyHandleQueue.insert(easyHandleQueue.end(), temp.begin(), temp.end());
-
-            for (auto& it : temp)
+            std::shared_ptr<EasyHandle> task;
+            if (taskQueue_.GetOneTask(&task))
             {
-                if (!it->Initialize())
+                if (!task->Initialize())
                 {
-                    it->FinishCallback(0);
-                    continue;
+                    task->FinishCallback(0);
                 }
-                
-                int result = curl_multi_add_handle(multi_handle, it->GetHandle());
-                if (result != CURLM_OK)
+                else
                 {
-                    it->FinishCallback(0);
+                    easyHandleQueue[task->GetHandle()] = task;
+                    int result = curl_multi_add_handle(multi_handle, task->GetHandle());
+                    if (result != CURLM_OK)
+                    {
+                        task->FinishCallback(0);
+                    }
                 }
             }
         }
@@ -356,6 +450,7 @@ void EasyHttpImpl::DoHttpRequest()
                 tempEasyHandle->FinishCallback(statusCode);
                 curl_multi_remove_handle(multi_handle, curlHandle);
                 tempEasyHandle->Finalize();
+                easyHandleQueue.erase(tempEasyHandle->GetHandle());
             }
         }
     }

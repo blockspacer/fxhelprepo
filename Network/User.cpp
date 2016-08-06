@@ -199,18 +199,18 @@ bool User::LoginWithCookies(const std::string& cookies, std::string* errormsg)
 
     cookiesHelper_->SetCookies(cookies);
 
-    std::string msg;
-    if (!LoginUServiceGetMyUserDataInfo(&msg))
-    {
-        *errormsg = msg;
-        return false;
-    }
+    //std::string msg;
+    //if (!LoginUServiceGetMyUserDataInfo(&msg))
+    //{
+    //    *errormsg = msg;
+    //    return false;
+    //}
 
-    if (!LoginIndexServiceGetUserCenter(&msg))
-    {
-        *errormsg = msg;
-        return false;
-    }
+    //if (!LoginIndexServiceGetUserCenter(&msg))
+    //{
+    //    *errormsg = msg;
+    //    return false;
+    //}
 
     return true;
 }

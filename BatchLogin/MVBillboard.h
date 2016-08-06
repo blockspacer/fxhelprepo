@@ -2,6 +2,7 @@
 #include <memory>
 
 class CurlWrapper;
+class EasyHttpImpl;
 
 class MVBillboard
 {
@@ -30,9 +31,13 @@ public:
         const std::string& mvid);
 
 private:
-    bool MVAction_(const std::string& url, const std::string& cookie,
+    //bool MVAction_(const std::string& url, const std::string& cookie,
+    //    const std::string& collectionid, const std::string& mvid);
+
+    bool MVAction2_(const std::string& url, const std::string& cookie,
         const std::string& collectionid, const std::string& mvid);
 
     std::unique_ptr<CurlWrapper> curlWrapper_;
+    std::unique_ptr<EasyHttpImpl> easyHttpImpl_;
 };
 
