@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include <string>
+#include <map>
 #include "Config.h"
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/path_service.h"
@@ -135,5 +137,25 @@ bool Config::GetApiKey(std::wstring* apikey) const
     std::wstring tempstr;
     tempstr.assign(temp, temp + count);
     *apikey = Decrypt(tempstr);
+    return true;
+}
+
+bool Config::SaveNormalWelcome(const std::wstring& content) const
+{
+    WritePrivateProfileString(L"Normal", L"Welcome", content.c_str(),
+        filepath_.c_str());
+    return true;
+}
+
+bool Config::GetNormalWelcome(std::wstring* content)
+{
+    wchar_t temp[128] = { 0 };
+    int32 count = GetPrivateProfileString(L"Normal", L"Welcome", L"",
+        temp, 128, filepath_.c_str());
+    if (count >= 128 || count <= 0)
+    {
+        return false;
+    }
+    *content = temp;
     return true;
 }

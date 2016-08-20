@@ -78,8 +78,7 @@ protected:
     afx_msg void OnBnClickedBtnAddToBlack();
     afx_msg void OnBnClickedBtnSaveBlack();
 
-    //自动处理消息区功能
-    
+    //自动处理消息区功能    
     afx_msg void OnBnClickedBtnAddVest();
     afx_msg void OnBnClickedBtnRemoveVest();
     afx_msg void OnBnClickedRadioNoaction();
@@ -87,6 +86,10 @@ protected:
 
     // 聊天机器人操作
     afx_msg void OnBnClickedChkRobot();
+
+    // 特殊欢迎操作
+    afx_msg void OnBnClickedBtnAddWelcome();
+    afx_msg void OnBnClickedBtnRemoveWelcome();
 
     // 点击列头排序
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
@@ -168,4 +171,5 @@ private:
     CEdit m_edit_auto_chat;
 
     afx_msg void OnBnClickedChkRepeatChat();
+    
 };

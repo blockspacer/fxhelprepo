@@ -6,6 +6,7 @@
 #include <xutility>
 #include "AntiFlood.h"
 #include "AntiFloodDlg.h"
+#include "WelcomeSettingDlg.h"
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
@@ -38,10 +39,9 @@ namespace
     };
 
     const wchar_t* userstrategylist[] = {
+        L"用户id", 
         L"昵称",
-        L"用户id",
-        L"欢迎内容",
-        L"感谢内容"
+        L"欢迎内容"
     };
 }
 
@@ -183,6 +183,8 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_CHK_THANKS, &CAntiFloodDlg::OnBnClickedChkThanks)
     ON_BN_CLICKED(IDC_CHK_WELCOME, &CAntiFloodDlg::OnBnClickedChkWelcome)
     ON_BN_CLICKED(IDC_CHK_REPEAT_CHAT, &CAntiFloodDlg::OnBnClickedChkRepeatChat)
+    ON_BN_CLICKED(IDC_BTN_ADD_WELCOME, &CAntiFloodDlg::OnBnClickedBtnAddWelcome)
+    ON_BN_CLICKED(IDC_BTN_REMOVE_WELCOME, &CAntiFloodDlg::OnBnClickedBtnRemoveWelcome)
 END_MESSAGE_MAP()
 
 
@@ -280,10 +282,29 @@ BOOL CAntiFloodDlg::OnInitDialog()
     for (const auto& it : userstrategylist)
         m_list_user_strategy.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
 
+    std::map<uint32, WelcomeInfo> welcome_info_map;
+    enterRoomStrategy_->GetWelcomeContent(&welcome_info_map);
+    int welcomecount = 0;
+    for (auto& it : welcome_info_map)
+    {
+        std::wstring ws_fanxingid = base::UTF8ToWide(base::UintToString(it.first));
+        int nitem = m_list_user_strategy.InsertItem(welcomecount, ws_fanxingid.c_str());
+        m_list_user_strategy.SetItemText(nitem, 0, ws_fanxingid.c_str());
+        m_list_user_strategy.SetItemText(nitem, 1, it.second.name.c_str()); // name只作用户提示使用，逻辑不使用
+        m_list_user_strategy.SetItemText(nitem, 2, it.second.content.c_str());
+        welcomecount++;
+    }
+
+    // 读取通用欢迎语
+    std::wstring content;
+    config.GetNormalWelcome(&content);
+    m_edit_auto_chat.SetWindowTextW(content.c_str());
+
     m_combo_seconds.AddString(L"60");
     m_combo_seconds.AddString(L"120");
     m_combo_seconds.AddString(L"180");
     m_combo_seconds.SelectString(0,L"60");
+
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -1385,16 +1406,101 @@ void CAntiFloodDlg::OnBnClickedChkRepeatChat()
     bool enable = !!m_chk_repeat_chat.GetCheck();
     CString chatmsg;
     m_edit_auto_chat.GetWindowTextW(chatmsg);
-    if (chatmsg.IsEmpty())
-        return;
-
-    if (chatmsg.GetLength()>=50)
+    if (enable && (chatmsg.IsEmpty() || chatmsg.GetLength() >= 50))
     {
-        Notify(L"发言内容过长,请不要超过50个字符");
+        m_chk_repeat_chat.SetCheck(FALSE);
+        Notify(L"发言内容长度错误,请不要超过50个字符");
         return;
     }
+
+    m_combo_seconds.EnableWindow(!enable);
+    m_edit_auto_chat.EnableWindow(!enable);
 
     CString seconds;
     m_combo_seconds.GetWindowTextW(seconds);
     network_->SetRoomRepeatChat(enable, seconds.GetBuffer(), chatmsg.GetBuffer());
+    Config config;
+    config.SaveNormalWelcome(chatmsg.GetBuffer());
+}
+
+void CAntiFloodDlg::OnBnClickedBtnAddWelcome()
+{
+    WelcomeSettingDlg dlg;
+    INT_PTR nResponse = dlg.DoModal();
+
+    if (nResponse == IDCANCEL)
+        return;
+
+    if (nResponse != IDOK)
+        return;
+
+    std::wstring fanxingid;
+    std::wstring name;
+    std::wstring content;
+    if (!dlg.GetSettingInfo(&fanxingid, &name, &content))
+        return;
+
+    int itemcount = m_list_user_strategy.GetItemCount();
+
+    bool exist = false;
+    // 检测是否存在相同用户id
+    for (int index = 0; index < itemcount; index++)
+    {
+        CString text = m_list_user_strategy.GetItemText(index, 0);
+        if (fanxingid.compare(text.GetBuffer()) == 0) // 相同用户id
+        {
+            exist = true;
+            m_list_user_strategy.SetItemText(index, 0, fanxingid.c_str());
+            m_list_user_strategy.SetItemText(index, 1, name.c_str());
+            m_list_user_strategy.SetItemText(index, 2, content.c_str());
+            break;
+        }
+    }
+
+    if (!exist) // 如果不存在，需要插入新数据
+    {
+        int nitem = m_list_user_strategy.InsertItem(itemcount, fanxingid.c_str());
+        m_list_user_strategy.SetItemText(nitem, 0, fanxingid.c_str());
+        m_list_user_strategy.SetItemText(nitem, 1, name.c_str()); // name只作用户提示使用，逻辑不使用
+        m_list_user_strategy.SetItemText(nitem, 2, content.c_str());
+    }
+
+    // 更新欢迎策略
+    itemcount = m_list_user_strategy.GetItemCount();
+    std::map<uint32, WelcomeInfo> welcome_content;
+    for (int index = 0; index < itemcount; index++)
+    {
+        CString cs_fanxingid = m_list_user_strategy.GetItemText(index, 0);
+        CString cs_name = m_list_user_strategy.GetItemText(index, 1);
+        CString cs_welcome = m_list_user_strategy.GetItemText(index, 2);
+        uint32 fanxingid = 0;
+        base::StringToUint(base::WideToUTF8(cs_fanxingid.GetBuffer()), &fanxingid);
+        WelcomeInfo info = { fanxingid, cs_name.GetBuffer(), cs_welcome.GetBuffer() };
+        welcome_content[fanxingid] = info;
+    }
+
+    enterRoomStrategy_->SetWelcomeContent(welcome_content);
+}
+
+
+void CAntiFloodDlg::OnBnClickedBtnRemoveWelcome()
+{
+    int itemcount = m_list_user_strategy.GetItemCount();
+    std::map<uint32, WelcomeInfo> welcome_info_map;
+    for (int index = itemcount-1; index >=0; index--)
+    {
+        if (m_list_user_strategy.GetCheck(index))
+        {
+            m_list_user_strategy.DeleteItem(index);
+            continue;
+        }
+        CString cs_fanxingid = m_list_user_strategy.GetItemText(index, 0);
+        CString cs_name = m_list_user_strategy.GetItemText(index, 1);
+        CString cs_welcome = m_list_user_strategy.GetItemText(index, 2);
+        uint32 fanxingid = 0;
+        base::StringToUint(base::WideToUTF8(cs_fanxingid.GetBuffer()), &fanxingid);
+        WelcomeInfo welcome_info = { fanxingid, cs_name.GetBuffer(), cs_welcome.GetBuffer() };
+        welcome_info_map[fanxingid] = welcome_info;
+    }
+    enterRoomStrategy_->SetWelcomeContent(welcome_info_map);
 }

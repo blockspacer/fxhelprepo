@@ -78,6 +78,7 @@ bool BlacklistHelper::SaveBlackList(const std::vector<RowData>& rowdatas)
     bool result = SaveToFile(blackInfoMap);
     return result;
 }
+
 bool BlacklistHelper::LoadFromFile(std::map<uint32, BlackInfo>* blackInfoMap)
 {
     if (!blackInfoMap)

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <fstream>
 #include "NetworkHelper.h"
 
 #include "Network/TcpManager.h"
@@ -14,6 +15,9 @@
 #include "Network/EncodeHelper.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/files/file_path.h"
+#include "third_party/chromium/base/files/file.h"
+#include "third_party/chromium/base/path_service.h"
 
 namespace
 {
@@ -125,13 +129,131 @@ void EnterRoomStrategy::SetWelcomeFlag(bool enable)
     welcomeflag_ = enable;
 }
 
+void EnterRoomStrategy::SetWelcomeContent(
+    const std::map<uint32, WelcomeInfo>& special_welcome)
+{
+    base::AutoLock lock(welcome_lock_);
+    welcome_info_map_ = special_welcome;
+    SaveWelcomeContent(welcome_info_map_);
+}
+
+void EnterRoomStrategy::GetWelcomeContent(
+    std::map<uint32, WelcomeInfo>* special_welcome)
+{
+    if (!welcome_info_map_.empty())
+    {
+        *special_welcome = welcome_info_map_;
+    }
+    LoadWelcomeContent(special_welcome);
+    welcome_info_map_ = *special_welcome;
+}
+
+bool EnterRoomStrategy::SaveWelcomeContent(
+    const std::map<uint32, WelcomeInfo>& welcome_info_map) const
+{
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = L"welcome_content.txt";
+    base::FilePath pathname = dirPath.Append(filename);
+
+    Json::FastWriter writer;
+    Json::Value root(Json::arrayValue);
+
+    for (const auto& welcome_info : welcome_info_map)
+    {
+        Json::Value jvWelcomeInfo(Json::objectValue);
+        jvWelcomeInfo["fanxingid"] = welcome_info.second.fanxing_id;
+        jvWelcomeInfo["name"] = base::WideToUTF8(welcome_info.second.name);
+        jvWelcomeInfo["content"] = base::WideToUTF8(welcome_info.second.content);
+        root.append(jvWelcomeInfo);
+    }
+
+    std::string writestring = writer.write(root);
+
+    std::ofstream ofs(pathname.value(), std::ios_base::out);
+    if (!ofs)
+        return false;
+
+    ofs << writestring;
+    ofs.flush();
+    ofs.close();
+
+    return true;
+}
+
+bool EnterRoomStrategy::LoadWelcomeContent(
+    std::map<uint32, WelcomeInfo>* special_welcome)
+{
+    if (!special_welcome)
+        return false;
+
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring filename = L"welcome_content.txt";
+    base::FilePath pathname = dirPath.Append(filename);
+
+    std::ifstream ovrifs;
+    ovrifs.open(pathname.value());
+    if (!ovrifs)
+        return false;
+
+    std::stringstream ss;
+    ss << ovrifs.rdbuf();
+    if (ss.str().empty())
+        return false;
+
+    std::string data = ss.str();
+    try
+    {
+        Json::Reader reader;
+        Json::Value root(Json::objectValue);
+        if (!Json::Reader().parse(data.c_str(), root))
+        {
+            assert(false && L"Json::Reader().parse error");
+            return false;
+        }
+
+        if (!root.isArray())
+        {
+            assert(false && L"root is not array");
+            return false;
+        }
+
+        for (const auto& value : root)//for data
+        {
+            Json::Value temp;
+            uint32 fanxingid = GetInt32FromJsonValue(value, "fanxingid");
+            std::string name = value.get("name", "").asString();
+            std::string content = value.get("content", "").asString();
+            WelcomeInfo welcome_info = { fanxingid, base::UTF8ToWide(name),base::UTF8ToWide(content) };
+            (*special_welcome)[fanxingid] = welcome_info;
+        }
+    }
+    catch (...)
+    {
+        return false;
+    }
+    return true;
+}
+
 bool EnterRoomStrategy::GetEnterWelcome(const EnterRoomUserInfo& enterinfo, 
     std::wstring* chatmessage)
 {
     if (!welcomeflag_)
         return false;
 
-    std::wstring msg = L"欢迎" + base::UTF8ToWide(enterinfo.nickname) + L"进入直播间";
+    std::wstring msg;
+    base::AutoLock lock(welcome_lock_);
+    auto find = welcome_info_map_.find(enterinfo.userid);
+    if (find != welcome_info_map_.end())
+    {
+        msg = find->second.content;
+    }
+    else
+    {
+        msg = L"欢迎 " + base::UTF8ToWide(enterinfo.nickname) + L" 进入直播间";
+    }
+     
     chatmessage->assign(msg.begin(), msg.end());
     return true;
 }

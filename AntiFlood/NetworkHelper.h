@@ -64,6 +64,13 @@ private:
     bool thanksflag_ = false;
 };
 
+struct WelcomeInfo
+{
+    uint32 fanxing_id;
+    std::wstring name;
+    std::wstring content;
+};
+
 class EnterRoomStrategy
     :public std::enable_shared_from_this<EnterRoomStrategy>
 {
@@ -71,11 +78,19 @@ public:
     EnterRoomStrategy();
     ~EnterRoomStrategy();
 
+
+
     void SetWelcomeFlag(bool enable);
+    void SetWelcomeContent(const std::map<uint32, WelcomeInfo>& special_welcome);
+    void GetWelcomeContent(std::map<uint32, WelcomeInfo>* special_welcome);
     bool GetEnterWelcome(const EnterRoomUserInfo& enterinfo, std::wstring* chatmessage);
 
 private:
+    bool SaveWelcomeContent(const std::map<uint32, WelcomeInfo>& special_welcome) const;
+    bool LoadWelcomeContent(std::map<uint32, WelcomeInfo>* special_welcome);
     bool welcomeflag_ = false;
+    base::Lock welcome_lock_;
+    std::map<uint32, WelcomeInfo> welcome_info_map_;
 };
 
 class NetworkHelper
