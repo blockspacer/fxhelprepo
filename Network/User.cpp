@@ -114,6 +114,11 @@ void User::SetNotify501(Notify501 notify501)
     notify501_ = notify501;
 }
 
+void User::SetNotify601(Notify601 notify601)
+{
+    notify601_ = notify601;
+}
+
 bool User::Login()
 {
     std::string msg;
@@ -297,6 +302,11 @@ bool User::EnterRoomFopOperation(uint32 roomid)
     {
         room->SetNotify501(notify501_);
     }
+
+    if (notify601_)
+    {
+        room->SetNotify601(notify601_);
+    }
     // 如果存在重复的房间，先断掉旧的
     this->ExitRoom(roomid);
 
@@ -372,7 +382,12 @@ bool User::ExitRoom(uint32 roomid)
 
 bool User::ExitRooms()
 {
-    return false;
+    for (auto it : rooms_)
+    {
+        it.second->Exit();
+    }
+    rooms_.clear();
+    return true;
 }
 
 bool User::SendChatMessage(uint32 roomid, const std::string& message)
@@ -395,16 +410,25 @@ bool User::SendChatMessageRobot(const RoomChatMessage& roomChatMessage)
     return room->second->SendChatMessage(roomChatMessage);
 }
 
+void User::SetRobotApiKey(const std::string& apikey)
+{
+    apikey_ = apikey;
+}
+
 bool User::RequestRobot(uint32 senderid, const std::string& request, std::string* response)
 {
     if (!response || !senderid || request.empty())
         return false;
 
+    assert(!apikey_.empty());
+    if (apikey_.empty())
+        return false;
+
     HttpRequest httpRequest;
     httpRequest.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_POST;
-    httpRequest.url = "http://www.tuling123.com//openapi/api";
+    httpRequest.url = "http://www.tuling123.com/openapi/api";
     std::map<std::string, std::string> postmap;
-    postmap["key"] = "21ef7a39254642f721736081e8e2226d";
+    postmap["key"] = apikey_;
     postmap["info"] = request;
     postmap["userid"] = base::UintToString(senderid);
     MakePostdata(postmap, &httpRequest.postdata);

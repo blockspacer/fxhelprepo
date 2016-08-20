@@ -13,6 +13,13 @@ public:
         bool remember) const;
     bool SaveRoomId(const std::wstring& roomid) const;
     bool GetRemember() const;
+
+    bool SaveApiKey(const std::wstring& apikey) const;
+    bool GetApiKey(std::wstring* apikey) const;
+
+    bool SaveNormalWelcome(const std::wstring& content) const;
+    bool GetNormalWelcome(std::wstring* content);
+
 private:
     std::wstring filepath_;
 };

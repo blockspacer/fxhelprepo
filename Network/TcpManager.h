@@ -38,8 +38,8 @@ public:
     bool Send(TcpHandle handle, const std::vector<char>& data, SendDataCallback callback);
 private:
 
-    void DoAddClient(AddClientCallback addcallback, const IpProxy& ipproxy, 
-        const std::string& ip, uint16 port, ClientCallback callback);
+    void DoAddClient(std::shared_ptr<TcpProxyClient> client, 
+        AddClientCallback addcallback, ClientCallback callback);
     void DoRemoveClient(TcpHandle handle);
     void DoSend(TcpHandle handle, const std::vector<char>& data, SendDataCallback callback);
     void DoRecv();

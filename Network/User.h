@@ -57,6 +57,7 @@ public:
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
     void SetNotify501(Notify501 notify501);
+    void SetNotify601(Notify601 notify601);
 
     // 操作行为
     bool Login();
@@ -79,7 +80,7 @@ public:
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
 
-    bool RobotRequest(const RoomChatMessage& roomChatMessage);
+    void SetRobotApiKey(const std::string& apikey);
     bool SendChatMessage(uint32 roomid, const std::string& message);
     bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
     bool RequestRobot(uint32 senderid, const std::string& request, std::string* response);
@@ -110,6 +111,9 @@ private:
     std::string serverip_;
     IpProxy ipproxy_;
 
+    // 图灵机器人使用的接口key
+    std::string apikey_;
+
     // 登录后才能获得的用户信息
     std::string nickname_ = "";
     uint32 richlevel_ = 0;
@@ -128,5 +132,6 @@ private:
     NormalNotify normalNotify_;
     Notify201 notify201_;
     Notify501 notify501_;
+    Notify601 notify601_;
 };
 

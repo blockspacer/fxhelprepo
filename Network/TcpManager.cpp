@@ -38,10 +38,18 @@ bool TcpManager::AddClient(AddClientCallback addcallback,
     const IpProxy& ipproxy, const std::string& ip, uint16 port,
     ClientCallback callback)
 {
+    std::shared_ptr<TcpProxyClient> client(new TcpProxyClient);
+    client->SetProxy(ipproxy);
+
+    if (!client->Connect(ip, port))
+    {
+        addcallback(false, 0);
+        return false;
+    }
+
     return baseThread_.message_loop_proxy()->PostTask(
-        FROM_HERE,
-        base::Bind(&TcpManager::DoAddClient, this, addcallback, ipproxy,
-                   ip, port, callback));
+        FROM_HERE, base::Bind(&TcpManager::DoAddClient, this, client, 
+        addcallback, callback));
 }
 
 void TcpManager::RemoveClient(TcpHandle handle)
@@ -57,23 +65,19 @@ bool TcpManager::Send(TcpHandle handle, const std::vector<char>& data,
         base::Bind(&TcpManager::DoSend, this, handle, data, callback));
 }
 
-void TcpManager::DoAddClient(AddClientCallback addcallback, const IpProxy& ipproxy,
-    const std::string& ip, uint16 port, ClientCallback callback)
-{
-
-    std::shared_ptr<TcpProxyClient> client(new TcpProxyClient);
-    client->SetProxy(ipproxy);
-    
-    if (!client->Connect(ip, port))
-    {
-        addcallback(false, 0);
-        return;
-    }
-    
+void TcpManager::DoAddClient(std::shared_ptr<TcpProxyClient> client,
+    AddClientCallback addcallback, ClientCallback callback)
+{  
     auto sock = client->GetSocketHandle();
-    newcallbacks_[sock] = std::make_pair(client,callback);
+    
+    newcallbacks_[sock] = std::make_pair(client, callback);
     addcallback(true, sock);
 
+    static bool recvbegin = false;
+    if (recvbegin)
+        return;
+
+    recvbegin = true;
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
                                                base::Bind(&TcpManager::DoRecv, this));
 }
@@ -156,9 +160,6 @@ void TcpManager::DoRecv()
 
     if (stopflag)
         return;
-
-    //if (callbacks_.empty()) // 没有任务的情况下不要轮询了
-    //    return;
 
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
                                                base::Bind(&TcpManager::DoRecv, this));

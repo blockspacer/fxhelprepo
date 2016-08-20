@@ -46,29 +46,19 @@ bool Room::EnterForOperation(const std::string& cookies, const std::string& user
     std::string ext = "";
 
     if (!OpenRoom(cookies))
-    {
         return false;
-    }
 
     if (!GetStarInfo(cookies))
-    {
         return false;
-    }
 
-    //if (!GetCurrentUserInfo(cookies, &userid, &nickname, &richlevel))
-    //{
-    //    return false;
-    //}
+    GetStarGuard();
 
     if (!EnterRoom(cookies, userid, usertoken))
-    {
         return false;
-    }
     
     if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
-    {
         return false;
-    }
+
     return true;
 }
 
@@ -357,6 +347,14 @@ void Room::SetNotify501(Notify501 notify501)
 {
     messageNotifyManager_->SetNotify501(notify501);
 }
+
+void Room::SetNotify601(Notify601 notify601)
+{
+    notify601transfer_ = notify601;
+    messageNotifyManager_->SetNotify601(
+        std::bind(&Room::TranferNotify601,this,std::placeholders::_1));
+}
+
 bool Room::OpenRoom(const std::string& cookies)
 {
     HttpRequest request;
@@ -522,6 +520,87 @@ bool Room::EnterRoom(const std::string& cookies, uint32 userid, const std::strin
         return false;
     }
     return true;
+}
+
+bool Room::GetStarGuard()
+{
+    assert(singerid_ && roomid_);
+    std::string url = "http://visitor.fanxing.kugou.com/VServices/GuardService.GuardService.getRoomGuardLst/";
+    url += base::UintToString(singerid_) + "-" + base::UintToString(roomid_);
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_);
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+
+    for (const auto& it : response.cookies)
+        cookiesHelper_->SetCookies(it);
+
+    if (content.empty())
+        return false;
+
+    const std::string& rootdata = PickJson(content);
+    //解析json数据
+    Json::Reader reader;
+    Json::Value root(Json::objectValue);
+    if (!reader.parse(rootdata, root, false))
+        return false;
+
+    uint32 status = GetInt32FromJsonValue(root, "status");
+    if (status != 1)
+        return false;
+
+    Json::Value defaultval(Json::objectValue);
+    auto data = root.get("data", defaultval);
+    if (!data.isObject())
+    {
+        return false;
+    }
+
+    auto guardlist = data.get("list", defaultval);
+    if (!guardlist.isArray())
+    {
+        return false;
+    }
+
+    for (auto guardinfo : guardlist)
+    {
+        std::string nickName = guardinfo.get("nickName", "").asString();
+        std::string userLogo = guardinfo.get("userLogo", "").asString();
+        uint32 roomId = GetInt32FromJsonValue(guardinfo, "roomId");
+        uint32 guardLevel = GetInt32FromJsonValue(guardinfo, "guardLevel");
+        uint32 annualFee = GetInt32FromJsonValue(guardinfo, "annualFee");
+        std::string guardLvIcon = guardinfo.get("guardLvIcon", "").asString();
+        uint32 userid = GetInt32FromJsonValue(guardinfo, "userId");
+        uint32 online = GetInt32FromJsonValue(guardinfo, "online");
+        guarduserids_.push_back(userid);
+    }
+
+    return true;
+}
+
+void Room::TranferNotify601(const RoomGiftInfo601& roomgiftinfo)
+{
+    // 如果不是在本房间送给主播的消息，过滤掉不回调
+    if ((roomid_ != roomgiftinfo.roomid)
+        || (singerid_ != roomgiftinfo.receiverid))
+    {
+        return;
+    }
+    if (!notify601transfer_)
+        return;
+
+    notify601transfer_(roomgiftinfo);
 }
 
 bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,

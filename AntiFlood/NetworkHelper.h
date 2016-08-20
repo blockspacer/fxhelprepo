@@ -51,7 +51,50 @@ private:
     HANDLE_TYPE handletype_ = HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 };
 
+class GiftStrategy
+    :public std::enable_shared_from_this <GiftStrategy>
+{
+public:
+    GiftStrategy();
+    ~GiftStrategy();
+
+    void SetThanksFlag(bool enable);
+    bool GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage);
+private:
+    bool thanksflag_ = false;
+};
+
+struct WelcomeInfo
+{
+    uint32 fanxing_id;
+    std::wstring name;
+    std::wstring content;
+};
+
+class EnterRoomStrategy
+    :public std::enable_shared_from_this<EnterRoomStrategy>
+{
+public:
+    EnterRoomStrategy();
+    ~EnterRoomStrategy();
+
+
+
+    void SetWelcomeFlag(bool enable);
+    void SetWelcomeContent(const std::map<uint32, WelcomeInfo>& special_welcome);
+    void GetWelcomeContent(std::map<uint32, WelcomeInfo>* special_welcome);
+    bool GetEnterWelcome(const EnterRoomUserInfo& enterinfo, std::wstring* chatmessage);
+
+private:
+    bool SaveWelcomeContent(const std::map<uint32, WelcomeInfo>& special_welcome) const;
+    bool LoadWelcomeContent(std::map<uint32, WelcomeInfo>* special_welcome);
+    bool welcomeflag_ = false;
+    base::Lock welcome_lock_;
+    std::map<uint32, WelcomeInfo> welcome_info_map_;
+};
+
 class NetworkHelper
+    : public std::enable_shared_from_this <NetworkHelper>
 {
 public:
     NetworkHelper();
@@ -60,7 +103,15 @@ public:
     bool Initialize();// 启动线程
     void Finalize();// 结束线程
 
+    static void AddRef() {}
+    static void Release() {}
+
     void SetAntiStrategy(std::shared_ptr<AntiStrategy> antiStrategy);
+    void SetGiftStrategy(std::shared_ptr<GiftStrategy> giftStrategy);
+    void SetGiftThanks(bool enable);
+    void SetEnterRoomStrategy(std::shared_ptr<EnterRoomStrategy> enterRoomStrategy);
+    void SetRoomWelcome(bool enable);
+    void SetRoomRepeatChat(bool enable, const std::wstring& seconds, const std::wstring& chatmsg);
 
     void SetNotify(notifyfn fn);
     void RemoveNotify();
@@ -98,11 +149,12 @@ public:
     bool SendChatMessage(uint32 roomid, const std::string& message);
 
     void SetRobotHandle(bool enable);
+    void SetRobotApiKey(const std::wstring& apikey);
     bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
 
 private:
     void NotifyCallback(const std::wstring& message);
-    void NotifyCallback601(uint32 roomid, uint32 singerid, const RoomGiftInfo601& roomgiftinfo);
+    void NotifyCallback601(uint32 roomid, const RoomGiftInfo601& roomgiftinfo);
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
     void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
         const RoomChatMessage& roomChatMessage);
@@ -112,6 +164,9 @@ private:
     void RobotHandleEnterRoom(const EnterRoomUserInfo& enterRoomUserInfo);
     void RobotHandleChatMessage(const EnterRoomUserInfo& enterRoomUserInfo,
         const RoomChatMessage& roomChatMessage);
+
+    void DoSetRoomRepeatChat(bool enable, uint32 seconds, const std::wstring& chatmsg);
+    void DoChatRepeat(const std::wstring& chatmsg);
 
     std::map<uint32, EnterRoomUserInfo> enterRoomUserInfoMap_;
     notifyfn notify_;
@@ -125,6 +180,11 @@ private:
     std::unique_ptr<User> user_;
     std::unique_ptr<Authority> authority_;
     std::shared_ptr<AntiStrategy> antiStrategy_;
+    std::shared_ptr<GiftStrategy> giftStrategy_;
+    std::shared_ptr<EnterRoomStrategy> enterRoomStrategy_;
     std::unique_ptr<TcpManager> tcpmanager_;
+
+    scoped_ptr<base::Thread> workThread_;
+    base::RepeatingTimer<NetworkHelper> chatRepeatingTimer_;
 };
 
