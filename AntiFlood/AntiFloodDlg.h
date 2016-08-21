@@ -125,6 +125,8 @@ private:
         KICK_TYPE kicktype);
     bool BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos);
     bool UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos);
+    bool Worship_(uint32 roomid, uint32 fanxingid);
+
     bool SendChatMessage_(uint32 roomid, const std::wstring& message);
 
     HICON m_hIcon;
@@ -194,4 +196,8 @@ private:
 public:
     afx_msg void OnBnClickedChkCheckVipV();
     CButton m_chk_vip_v;
+public:
+    CEdit m_edit_worship_target_fanxingid;
+    CEdit m_edit_worship_roomid;
+    afx_msg void OnBnClickedBtnWorship();
 };

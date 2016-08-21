@@ -573,6 +573,74 @@ bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
     return room->second->UnbanChat(cookies, enterRoomUserInfo);
 }
 
+bool User::Worship(uint32 roomid, uint32 userid)
+{
+    //auto room = rooms_.find(roomid);
+    //if (room == rooms_.end())
+    //{
+    //    return false;
+    //}
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    return Worship_(cookies, roomid, userid);
+}
+
+bool User::Worship_(const std::string& cookies, uint32 roomid, uint32 userid)
+{
+    std::string url = "http://fanxing.kugou.com";
+    url += "/NServices/worship/WorshipService/getWorshipInfo";
+
+    HttpRequest request;
+    request.url = url;
+    request.queries["args"] = "[" + base::IntToString(userid) + "]";
+    request.queries["_"] = GetNowTimeString();
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid);
+    request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string jsondata(response.content.begin(), response.content.end());
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(jsondata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1461378689).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    if (status != 1)
+    {
+        assert(false);
+        return false;
+    }
+    Json::Value jvdata(Json::ValueType::objectValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull() || !data.isObject())
+    {
+        assert(false);
+        return false;
+    }
+    return true;
+}
+
 bool User::CheckVerifyCode(const std::string& verifycode, std::string* errormsg)
 {
     HttpRequest request;
