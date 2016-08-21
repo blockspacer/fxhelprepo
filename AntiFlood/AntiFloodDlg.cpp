@@ -133,6 +133,8 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_REPEAT_CHAT, m_chk_repeat_chat);
     DDX_Control(pDX, IDC_COMBO_SECONDS, m_combo_seconds);
     DDX_Control(pDX, IDC_EDIT_AUTO_CHAT, m_edit_auto_chat);
+    DDX_Control(pDX, IDC_EDIT_WORSHIP_TARGET_FANXINGID, m_edit_worship_target_fanxingid);
+    DDX_Control(pDX, IDC_EDIT_WORSHIP_ROOMID, m_edit_worship_roomid);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -185,6 +187,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_CHK_REPEAT_CHAT, &CAntiFloodDlg::OnBnClickedChkRepeatChat)
     ON_BN_CLICKED(IDC_BTN_ADD_WELCOME, &CAntiFloodDlg::OnBnClickedBtnAddWelcome)
     ON_BN_CLICKED(IDC_BTN_REMOVE_WELCOME, &CAntiFloodDlg::OnBnClickedBtnRemoveWelcome)
+    ON_BN_CLICKED(IDC_BTN_WORSHIP, &CAntiFloodDlg::OnBnClickedBtnWorship)
 END_MESSAGE_MAP()
 
 
@@ -1503,4 +1506,34 @@ void CAntiFloodDlg::OnBnClickedBtnRemoveWelcome()
         welcome_info_map[fanxingid] = welcome_info;
     }
     enterRoomStrategy_->SetWelcomeContent(welcome_info_map);
+}
+
+
+void CAntiFloodDlg::OnBnClickedBtnWorship()
+{
+    CString cs_worship_fanxingid;
+    m_edit_worship_target_fanxingid.GetWindowTextW(cs_worship_fanxingid);
+    CString cs_worship_roomid;
+    m_edit_worship_roomid.GetWindowTextW(cs_worship_roomid);
+
+    std::string str_roomid = base::WideToUTF8(cs_worship_roomid.GetBuffer());
+    uint32 roomid = 0;
+    base::StringToUint(str_roomid, &roomid);
+
+    std::string str_fanxingid = base::WideToUTF8(cs_worship_fanxingid.GetBuffer());
+    uint32 fanxingid = 0;
+    base::StringToUint(str_fanxingid, &fanxingid);
+
+    if (!roomid || !fanxingid)
+    {
+        Notify(L"房间号或者神号输入错误");
+        return;
+    }
+    
+    if (!network_->Worship(roomid, fanxingid))
+    {
+        Notify(L"膜拜请求失败");
+        return;
+    }
+    Notify(L"膜拜请求成功，请在仓库检查结果");
 }

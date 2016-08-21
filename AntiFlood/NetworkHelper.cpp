@@ -486,6 +486,11 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
     return user_->UnbanChat(roomid, enterRoomUserInfo);
 }
 
+bool NetworkHelper::Worship(uint32 roomid, uint32 fanxingid)
+{
+    return user_->Worship(roomid, fanxingid);
+}
+
 bool NetworkHelper::SendChatMessage(uint32 roomid, const std::string& message)
 {
     return user_->SendChatMessage(roomid, message);
