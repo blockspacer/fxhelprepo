@@ -178,7 +178,7 @@ public:
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
-    bool Worship(uint32 roomid, uint32 fanxingid);
+    bool Worship(uint32 roomid, uint32 fanxingid, std::string* errormsg);
 
     bool SendChatMessage(uint32 roomid, const std::string& message);
 

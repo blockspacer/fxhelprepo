@@ -96,8 +96,9 @@ public:
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
-    bool Worship(uint32 roomid, uint32 userid);
-    bool Worship_(const std::string& cookies, uint32 roomid, uint32 userid);
+    bool Worship(uint32 roomid, uint32 userid, std::string* errormsg);
+    bool Worship_(const std::string& cookies, uint32 roomid, uint32 userid,
+        std::string* errormsg);
     
 private:
     bool CheckVerifyCode(const std::string& verifycode, std::string* errormsg);

@@ -767,9 +767,9 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
     return user_->UnbanChat(roomid, enterRoomUserInfo);
 }
 
-bool NetworkHelper::Worship(uint32 roomid, uint32 fanxingid)
+bool NetworkHelper::Worship(uint32 roomid, uint32 fanxingid, std::string* errormsg)
 {
-    return user_->Worship(roomid, fanxingid);
+    return user_->Worship(roomid, fanxingid, errormsg);
 }
 
 bool NetworkHelper::SendChatMessage(uint32 roomid, const std::string& message)
