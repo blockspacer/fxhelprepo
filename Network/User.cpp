@@ -553,13 +553,8 @@ bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
     return room->second->UnbanChat(cookies, enterRoomUserInfo);
 }
 
-bool User::Worship(uint32 roomid, uint32 userid)
+bool User::Worship(uint32 roomid, uint32 userid, std::string* errormsg)
 {
-    //auto room = rooms_.find(roomid);
-    //if (room == rooms_.end())
-    //{
-    //    return false;
-    //}
     std::vector<std::string> keys;
     keys.push_back("KuGoo");
     keys.push_back("_fx_coin");
@@ -570,17 +565,19 @@ bool User::Worship(uint32 roomid, uint32 userid)
     keys.push_back("fxClientInfo");
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
-    return Worship_(cookies, roomid, userid);
+    return Worship_(cookies, roomid, userid, errormsg);
 }
 
-bool User::Worship_(const std::string& cookies, uint32 roomid, uint32 userid)
+bool User::Worship_(const std::string& cookies, uint32 roomid, uint32 userid,
+    std::string* errormsg)
 {
     std::string url = "http://fanxing.kugou.com";
-    url += "/NServices/worship/WorshipService/getWorshipInfo";
+    url += "/NServices/worship/WorshipService/worship";
 
     HttpRequest request;
     request.url = url;
-    request.queries["args"] = "[" + base::IntToString(userid) + "]";
+    request.queries["args"] = "[%22" + base::IntToString(userid) + "%22,%22"+
+        base::IntToString(roomid)+"%22]";
     request.queries["_"] = GetNowTimeString();
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.referer = std::string("http://fanxing.kugou.com/") +
@@ -609,7 +606,11 @@ bool User::Worship_(const std::string& cookies, uint32 roomid, uint32 userid)
     if (status != 1)
     {
         assert(false);
-        return false;
+        *errormsg = rootdata.get("errorcode", "").asString();
+        if (!errormsg->empty())
+        {
+            return false;
+        }
     }
     Json::Value jvdata(Json::ValueType::objectValue);
     Json::Value data = rootdata.get(std::string("data"), jvdata);

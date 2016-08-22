@@ -7,6 +7,7 @@
 #include "AntiFlood.h"
 #include "AntiFloodDlg.h"
 #include "WelcomeSettingDlg.h"
+#include "WorshipDlg.h"
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
@@ -188,6 +189,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_ADD_WELCOME, &CAntiFloodDlg::OnBnClickedBtnAddWelcome)
     ON_BN_CLICKED(IDC_BTN_REMOVE_WELCOME, &CAntiFloodDlg::OnBnClickedBtnRemoveWelcome)
     ON_BN_CLICKED(IDC_BTN_WORSHIP, &CAntiFloodDlg::OnBnClickedBtnWorship)
+    ON_BN_CLICKED(IDC_BTN_WORSHIP_ENTER, &CAntiFloodDlg::OnBnClickedBtnWorshipEnter)
 END_MESSAGE_MAP()
 
 
@@ -1530,10 +1532,34 @@ void CAntiFloodDlg::OnBnClickedBtnWorship()
         return;
     }
     
-    if (!network_->Worship(roomid, fanxingid))
+    std::string error_msg;
+    if (!network_->Worship(roomid, fanxingid, &error_msg))
     {
+        std::wstring w_error_msg = base::UTF8ToWide(error_msg);
         Notify(L"膜拜请求失败");
+        Notify(w_error_msg);
         return;
     }
     Notify(L"膜拜请求成功，请在仓库检查结果");
+}
+
+
+void CAntiFloodDlg::OnBnClickedBtnWorshipEnter()
+{
+    if (!network_)
+    {
+        Notify(L"未正常登录");
+        return;
+    }
+
+    WorshipDlg dlg(network_.get());
+    INT_PTR nResponse = dlg.DoModal();
+
+    if (nResponse == IDCANCEL)
+        return;
+
+    if (nResponse != IDOK)
+        return;
+
+
 }

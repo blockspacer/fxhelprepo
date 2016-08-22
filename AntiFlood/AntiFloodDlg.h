@@ -178,4 +178,5 @@ public:
     CEdit m_edit_worship_target_fanxingid;
     CEdit m_edit_worship_roomid;
     afx_msg void OnBnClickedBtnWorship();
+    afx_msg void OnBnClickedBtnWorshipEnter();
 };
