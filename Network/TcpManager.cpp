@@ -117,7 +117,7 @@ void TcpManager::DoRecv()
             FD_SET(sock, &rfdset);
         }
 
-        timeval timeout = { 5, 0 };
+        timeval timeout = { 0, 100 };
         int ret = select(0, &rfdset, 0, 0, &timeout);
         if (ret == 0)//timeout
         {
@@ -161,8 +161,8 @@ void TcpManager::DoRecv()
     if (stopflag)
         return;
 
-    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
-                                               base::Bind(&TcpManager::DoRecv, this));
+    baseThread_.message_loop_proxy()->PostDelayedTask(
+        FROM_HERE, base::Bind(&TcpManager::DoRecv, this), base::TimeDelta::FromMilliseconds(100));
 }
 
 void TcpManager::DoRemoveAllClient()

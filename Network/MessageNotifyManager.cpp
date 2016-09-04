@@ -655,7 +655,7 @@ void MessageNotifyManager::DoNewConnect843Callback(bool result, TcpHandle handle
 {
     if (!result)
     {
-        //assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
         return;
     }
 

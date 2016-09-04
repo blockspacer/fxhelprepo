@@ -93,6 +93,7 @@ bool UserController::FillRoom(uint32 roomid, uint32 count)
 {
     for (const auto& it : users_)
     {
+        Sleep(1000);
         it.second->EnterRoomFopAlive(roomid);
     }
     return true;
