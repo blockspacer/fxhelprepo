@@ -66,6 +66,7 @@ BEGIN_MESSAGE_MAP(WorshipDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_WORSHIP, &WorshipDlg::OnBnClickedBtnWorship)
     ON_BN_CLICKED(IDC_BTN_ADD_TO_LIST, &WorshipDlg::OnBnClickedBtnAddToList)
     ON_BN_CLICKED(IDC_BTN_WORSHIP_SELECT, &WorshipDlg::OnBnClickedBtnWorshipSelect)
+    ON_BN_CLICKED(IDC_BTN_DELETE_SELECT, &WorshipDlg::OnBnClickedBtnDeleteSelect)
 END_MESSAGE_MAP()
 
 
@@ -125,9 +126,9 @@ void WorshipDlg::OnBnClickedBtnAddToList()
     // 检测是否存在相同用户id
     for (int index = 0; index < itemcount; index++)
     {
-        CString temp_room_id = m_list_worship.GetItemText(index, 0);
-        CString temp_fanxing_id = m_list_worship.GetItemText(index, 1);
-        if ((cs_worship_fanxingid.Compare(temp_fanxing_id.GetBuffer()) == 0)
+        CString temp_fanxing_id = m_list_worship.GetItemText(index, 0);
+        CString temp_room_id = m_list_worship.GetItemText(index, 1);
+        if ((cs_worship_fanxingid.Compare(temp_fanxing_id) == 0)
             && (cs_worship_roomid.Compare(temp_room_id) == 0))
         {
             exist = true;
@@ -190,4 +191,18 @@ bool WorshipDlg::GetSelectItems(std::vector<worship_pair>* select_items)
         }
     }
     return true;
+}
+
+void WorshipDlg::OnBnClickedBtnDeleteSelect()
+{
+    int count = m_list_worship.GetItemCount();
+    for (int index = count-1; index >=0; --index)
+    {
+        if (m_list_worship.GetCheck(index))
+        {
+            std::wstring temp_fanxing_id = m_list_worship.GetItemText(index, 0).GetBuffer();
+            std::wstring temp_room_id = m_list_worship.GetItemText(index, 1).GetBuffer();
+            m_list_worship.DeleteItem(index);
+        }
+    }
 }
