@@ -73,11 +73,11 @@ void TcpManager::DoAddClient(std::shared_ptr<TcpProxyClient> client,
     newcallbacks_[sock] = std::make_pair(client, callback);
     addcallback(true, sock);
 
-    static bool recvbegin = false;
-    if (recvbegin)
-        return;
+    //static bool recvbegin = false;
+    //if (recvbegin)
+    //    return;
 
-    recvbegin = true;
+    //recvbegin = true;
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
                                                base::Bind(&TcpManager::DoRecv, this));
 }
