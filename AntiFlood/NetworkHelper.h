@@ -177,6 +177,7 @@ private:
     notify502 notify502_;
     notify601 notify601_;
     uint32 roomid_ = 0;
+    uint32 singer_clanid_ = 0;
     std::unique_ptr<User> user_;
     std::unique_ptr<Authority> authority_;
     std::shared_ptr<AntiStrategy> antiStrategy_;

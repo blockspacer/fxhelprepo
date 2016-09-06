@@ -36,7 +36,8 @@ void Room::SetTcpManager(TcpManager* tcpManager)
     messageNotifyManager_->SetTcpManager(tcpManager);
 }
 
-bool Room::EnterForOperation(const std::string& cookies, const std::string& usertoken, uint32 userid)
+bool Room::EnterForOperation(const std::string& cookies, 
+    const std::string& usertoken, uint32 userid, uint32* singer_clanid)
 {
     std::string nickname = "";
     uint32 richlevel = 0;
@@ -58,6 +59,9 @@ bool Room::EnterForOperation(const std::string& cookies, const std::string& user
     
     if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
         return false;
+
+    if (singer_clanid)
+        *singer_clanid = clanid_;
 
     return true;
 }

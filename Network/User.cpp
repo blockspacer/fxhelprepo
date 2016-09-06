@@ -274,7 +274,7 @@ uint32 User::GetClanId() const
     return clanid_;
 }
 
-bool User::EnterRoomFopOperation(uint32 roomid)
+bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid)
 {
     std::shared_ptr<Room> room(new Room(roomid));
     room->SetTcpManager(tcpManager_);
@@ -315,7 +315,7 @@ bool User::EnterRoomFopOperation(uint32 roomid)
         room->SetIpProxy(ipproxy_);
     }
 
-    if (!room->EnterForOperation(cookie,usertoken_,kugouid_))
+    if (!room->EnterForOperation(cookie, usertoken_, kugouid_, singer_clanid))
     {
         return false;
     }

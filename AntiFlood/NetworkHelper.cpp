@@ -444,7 +444,8 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
     user_->SetNormalNotify(std::bind(&NetworkHelper::NotifyCallback, this,
         std::placeholders::_1));
     roomid_ = roomid;
-    return user_->EnterRoomFopOperation(roomid);
+
+    return user_->EnterRoomFopOperation(roomid, &singer_clanid_);
 }
 
 bool NetworkHelper::GetViewerList(uint32 roomid,
@@ -514,7 +515,15 @@ void NetworkHelper::SetHandleChatUsers(bool handleall501)
 
 bool NetworkHelper::GetActionPrivilege(std::wstring* message)
 {
-    if (user_->GetFanxingId() != authority_->userid)
+    // 三个值都是0，不正确
+    if (!authority_->roomid && !authority_->userid && !authority_->clanid)
+    {
+        *message = L"授权信息错误!";
+        return false;
+    }
+
+    // 如果指定了繁星号，则要判断用户权限
+    if (authority_->userid && (user_->GetFanxingId() != authority_->userid))
     {
         *message = L"当前用户未授权!";
         return false;
@@ -535,6 +544,11 @@ bool NetworkHelper::GetActionPrivilege(std::wstring* message)
         return false;
     }
 
+    if (authority_->clanid && singer_clanid_ != authority_->clanid)
+    {
+        *message = L"当前授权仅限在指定公会的主播房间中使用!";
+        return false;
+    }
 
     if (authority_->roomid && (roomid_ != authority_->roomid))
     {
