@@ -437,12 +437,22 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
         std::bind(&CAntiFloodDlg::NotifyEnterRoom, this, std::placeholders::_1));
 
     bool result = network_->EnterRoom(strRoomid.GetBuffer());
-    std::wstring message = std::wstring(L"Enter room ") + (result ? L"success" : L"failed");
+    std::wstring message = std::wstring(L"进入房间 ") + (result ? L"成功" : L"失败");
     if (result)
     {
         Config config;
         config.SaveRoomId(strRoomid.GetBuffer());
     }
+
+    Notify(message);
+
+    // 清空选中状态
+    m_chk_robot.SetCheck(FALSE);
+    m_chk_welcome.SetCheck(FALSE);
+    m_chk_thanks.SetCheck(FALSE);
+    m_chk_repeat_chat.SetCheck(FALSE);
+    m_combo_seconds.EnableWindow(TRUE);
+    m_edit_auto_chat.EnableWindow(TRUE);
 }
 
 // 送星星功能
@@ -1333,9 +1343,18 @@ void CAntiFloodDlg::OnBnClickedChkRobot()
     if (!network_)
         return;
 
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        m_chk_robot.SetCheck(FALSE);
+        Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
+        return;
+    }
+
     if (!enablerobot)
     {
-    network_->SetRobotHandle(enablerobot);
+        network_->SetRobotHandle(enablerobot);
         return;
     }
 
@@ -1362,6 +1381,7 @@ void CAntiFloodDlg::OnBnClickedChkThanks()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
+        m_chk_thanks.SetCheck(FALSE);
         Notify(NOPRIVILEGE_NOTICE);
         Notify(privilegeMsg);
         return;
@@ -1380,6 +1400,8 @@ void CAntiFloodDlg::OnBnClickedChkWelcome()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
+        m_chk_welcome.SetCheck(FALSE);
+        network_->SetRoomWelcome(false);
         Notify(NOPRIVILEGE_NOTICE);
         Notify(privilegeMsg);
         return;
@@ -1398,6 +1420,10 @@ void CAntiFloodDlg::OnBnClickedChkRepeatChat()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
+        m_chk_repeat_chat.SetCheck(FALSE);
+        m_combo_seconds.EnableWindow(TRUE);
+        m_edit_auto_chat.EnableWindow(TRUE);
+
         Notify(NOPRIVILEGE_NOTICE);
         Notify(privilegeMsg);
         return;
