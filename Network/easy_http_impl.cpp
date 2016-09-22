@@ -1,4 +1,5 @@
 ﻿#include "easy_http_impl.h"
+#include "VMProtect/VMProtectSDK.h"
 #include <memory>
 #include <string>
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
@@ -13,7 +14,7 @@
 
 namespace
 {
-const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
+//const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
 const char* acceptencode = "gzip";//目前都不应该接收压缩数据，免得解压麻烦
 const uint32 max_parallel = 8;
 
@@ -101,7 +102,12 @@ bool EasyHandle::Initialize()
     }
     else
     {
-        EASYHANDLE_SETOPT(CURLOPT_USERAGENT, useragent);
+        VMProtectBeginUltra(__FUNCTION__);
+        //std::string useragent = VMProtectDecryptStringA("Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko");
+        std::string useragent;
+        VMProtectEnd();
+        EASYHANDLE_SETOPT(CURLOPT_USERAGENT, useragent.c_str());
+        
     }
         
 

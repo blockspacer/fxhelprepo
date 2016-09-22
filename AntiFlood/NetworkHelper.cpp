@@ -4,6 +4,7 @@
 
 #include "Network/TcpManager.h"
 #include "Network/User.h"
+#include "VMProtect/VMProtectSDK.h"
 #include "third_party/chromium/base/strings/sys_string_conversions.h"
 
 #undef max // 因为微软这个二比在某些头文件定义了max宏
@@ -411,9 +412,11 @@ bool NetworkHelper::GetCurrentUserDisplay(std::wstring* display)
         return false;
 
     servertime *= 1000000;
-    std::wstring loginInfo = L"登录信息: ";
-    loginInfo += L"繁星号: " + base::UintToString16(fanxingid);
-    loginInfo += L" 公会ID: " + base::UintToString16(clanid);
+    VMProtectBeginUltra(__FUNCTION__);
+    std::wstring loginInfo = VMProtectDecryptStringW(L"登录信息: ");
+    loginInfo += VMProtectDecryptStringW(L"繁星号: ") + base::UintToString16(fanxingid);
+    loginInfo += VMProtectDecryptStringW(L" 公会ID: ") + base::UintToString16(clanid);
+    VMProtectEnd();
     *display = loginInfo;
     return true;
 }
@@ -515,17 +518,18 @@ void NetworkHelper::SetHandleChatUsers(bool handleall501)
 
 bool NetworkHelper::GetActionPrivilege(std::wstring* message)
 {
+    VMProtectBeginUltra(__FUNCTION__);
     // 三个值都是0，不正确
     if (!authority_->roomid && !authority_->userid && !authority_->clanid)
     {
-        *message = L"授权信息错误!";
+        *message = VMProtectDecryptStringW(L"授权信息错误!");
         return false;
     }
 
     // 如果指定了繁星号，则要判断用户权限
     if (authority_->userid && (user_->GetFanxingId() != authority_->userid))
     {
-        *message = L"当前用户未授权!";
+        *message = VMProtectDecryptStringW(L"当前用户未授权!");
         return false;
     }
 
@@ -534,28 +538,28 @@ bool NetworkHelper::GetActionPrivilege(std::wstring* message)
     expiretime /= 1000000;
     if (servertime > expiretime)
     {
-        *message = L"当前用户授权已过期!";
+        *message = VMProtectDecryptStringW(L"当前用户授权已过期!");
         return false;
     }
 
     if (authority_->clanid && user_->GetClanId() != authority_->clanid)
     {
-        *message = L"当前授权仅限指定公会成员使用!";
+        *message = VMProtectDecryptStringW(L"当前授权仅限指定公会成员使用!");
         return false;
     }
 
     if (authority_->clanid && singer_clanid_ != authority_->clanid)
     {
-        *message = L"当前授权仅限在指定公会的主播房间中使用!";
+        *message = VMProtectDecryptStringW(L"当前授权仅限在指定公会的主播房间中使用!");
         return false;
     }
 
     if (authority_->roomid && (roomid_ != authority_->roomid))
     {
-        *message = L"当前授权仅限指定房间使用!";
+        *message = VMProtectDecryptStringW(L"当前授权仅限指定房间使用!");
         return false;
     }
-
+    VMProtectEnd();
     return true;
 }
 

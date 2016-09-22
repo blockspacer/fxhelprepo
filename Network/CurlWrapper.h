@@ -75,6 +75,9 @@ private:
     std::string response_of_EnterRoom_;
 
     std::unique_ptr<CookiesHelper> cookiesHelper_;
+
+    std::string useragent_;
+    std::string acceptencode_;
 };
 
 

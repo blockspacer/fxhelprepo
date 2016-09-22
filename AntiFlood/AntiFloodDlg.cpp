@@ -11,6 +11,7 @@
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
 #include "Config.h"
+#include "VMProtect/VMProtectSDK.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 
@@ -266,7 +267,9 @@ BOOL CAntiFloodDlg::OnInitDialog()
 
     // 读取授权信息显示在界面上
     AuthorityHelper authorityHelper;
-    std::wstring authorityDisplayInfo = L"软件未授权,操作受限";
+    VMProtectBeginUltra(__FUNCTION__);
+    std::wstring authorityDisplayInfo = VMProtectDecryptStringW(L"软件未授权,操作受限");
+    VMProtectEnd();
     authorityHelper.GetAuthorityDisplayInfo(&authorityDisplayInfo);
     m_static_auth_info.SetWindowTextW(authorityDisplayInfo.c_str());
 
@@ -664,17 +667,19 @@ bool CAntiFloodDlg::KickOut_(
 
     for (const auto& enterRoomUserInfo : enterRoomUserInfos)
     {
+        VMProtectBeginUltra(__FUNCTION__);
         std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
         if (!network_->KickoutUsers(kicktype,
             enterRoomUserInfo.roomid, enterRoomUserInfo))
         {
-            msg += L"踢出失败!权限不够或网络错误!";          
+            msg += VMProtectDecryptStringW(L"踢出失败!权限不够或网络错误!");
         }
         else
         {
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
-            msg += L"被踢出";
+            msg += VMProtectDecryptStringW(L"被踢出");
         }
+        VMProtectEnd();
         Notify(msg);
     }
 
@@ -688,17 +693,19 @@ bool CAntiFloodDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUser
 
     for (const auto& enterRoomUserInfo : enterRoomUserInfos)
     {
+        VMProtectBeginUltra(__FUNCTION__);
         std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
         if (!network_->BanChat(
             enterRoomUserInfo.roomid, enterRoomUserInfo))
         {
-            msg += L"禁言失败!权限不够或网络错误!";
+            msg += VMProtectDecryptStringW(L"禁言失败!权限不够或网络错误!");
         }
         else
         {
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
-            msg += L"被禁言五分钟";
+            msg += VMProtectDecryptStringW(L"被禁言五分钟");
         }
+        VMProtectEnd();
         Notify(msg);
     }
     return true;
@@ -711,17 +718,19 @@ bool CAntiFloodDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUs
 
     for (const auto& enterRoomUserInfo : enterRoomUserInfos)
     {
+        VMProtectBeginUltra(__FUNCTION__);
         std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
         if (!network_->UnbanChat(
             enterRoomUserInfo.roomid, enterRoomUserInfo))
         {
-            msg += L"恢复发言失败!权限不够或网络错误!";
+            msg += VMProtectDecryptStringW(L"恢复发言失败!权限不够或网络错误!");
         }
         else
         {
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
-            msg += L"被恢复发言";
+            msg += VMProtectDecryptStringW(L"被恢复发言");
         }
+        VMProtectEnd();
         Notify(msg);
     }
     return true;
@@ -1362,7 +1371,9 @@ void CAntiFloodDlg::OnBnClickedChkRobot()
     m_edit_api_key.GetWindowTextW(apiKey);
     if (apiKey.GetLength() != 32)
     {
-        Notify(L"机器人Key不正确,无法启用机器人");
+        VMProtectBeginUltra(__FUNCTION__);
+        Notify(VMProtectDecryptStringW(L"机器人Key不正确,无法启用机器人"));
+        VMProtectEnd();
         m_chk_robot.SetCheck(FALSE);
         return;
     }

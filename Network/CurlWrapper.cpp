@@ -14,15 +14,10 @@
 
 #include "Network/CookiesHelper.h"
 #include "Network/EncodeHelper.h"
+#include "VMProtect/VMProtectSDK.h"
 
 namespace
 {
-    const char* fanxingurl = "http://fanxing.kugou.com";
-    
-    const char* kugouurl = "http://kugou.com";
-    const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
-    const char* acceptencode = "gzip";//目前都不应该接收压缩数据，免得解压麻烦
-
     static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
     {
         std::string data;
@@ -92,6 +87,10 @@ CurlWrapper::CurlWrapper()
     :currentWriteData_("")
     , cookiesHelper_(new CookiesHelper)
 {
+    VMProtectBeginUltra(__FUNCTION__);
+    //useragent_ = VMProtectDecryptStringA("Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko");
+    acceptencode_ = VMProtectDecryptStringA("gzip");//目前都不应该接收压缩数据，免得解压麻烦
+    VMProtectEnd();
 }
 
 CurlWrapper::~CurlWrapper()
@@ -141,10 +140,14 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
     struct curl_slist *headers = 0;
-    headers = curl_slist_append(headers, "Connection:Keep-Alive");
-    headers = curl_slist_append(headers, "Accept-Language:zh-CN");
-    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
-    headers = curl_slist_append(headers, "Accept:*/*");
+
+    VMProtectBeginUltra(__FUNCTION__);
+
+    headers = curl_slist_append(headers, VMProtectDecryptStringA("Connection:Keep-Alive"));
+    headers = curl_slist_append(headers, VMProtectDecryptStringA("Accept-Language:zh-CN"));
+    headers = curl_slist_append(headers, VMProtectDecryptStringA("Accept-Encoding:gzip,deflate,sdch"));
+    headers = curl_slist_append(headers, VMProtectDecryptStringA("Accept:*/*"));
+
     for (const auto& it : request.headers)
     {
         std::string header = it.first + ":" + it.second;
@@ -152,13 +155,16 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     }
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, 1L);
-    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode);
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, acceptencode_.c_str());
 
+    
     if (!request.useragent.empty())
         curl_easy_setopt(curl, CURLOPT_USERAGENT, request.useragent.c_str());
     else
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, useragent);
+        curl_easy_setopt(curl, CURLOPT_USERAGENT, VMProtectDecryptStringA("Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko"));
     
+    VMProtectEnd();
+
     if (!request.referer.empty())
     {
         curl_easy_setopt(curl, CURLOPT_REFERER, request.referer.c_str());

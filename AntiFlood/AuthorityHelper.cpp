@@ -4,6 +4,7 @@
 
 #include "AuthorityHelper.h"
 #include "Network/EncodeHelper.h"
+#include "VMProtect/VMProtectSDK.h"
 #include "third_party/chromium/base/files/file.h"
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/path_service.h"
@@ -82,16 +83,17 @@ bool AuthorityHelper::Load(Authority* authority)
             assert(false && L"root is not object");
             return false;
         }
-      
-        authority->userid = GetInt32FromJsonValue(root, "userid");
-        authority->roomid = GetInt32FromJsonValue(root, "roomid");
-        authority->clanid = GetInt32FromJsonValue(root, "clanid");
-        authority->kickout = GetInt32FromJsonValue(root, "kickout");
-        authority->banchat = GetInt32FromJsonValue(root, "banchat");
-        authority->antiadvance = GetInt32FromJsonValue(root, "antiadvance");
-        std::string expire = root.get("expiretime", "0").asString();
+        VMProtectBeginUltra(__FUNCTION__);
+        authority->userid = GetInt32FromJsonValue(root, VMProtectDecryptStringA("userid"));
+        authority->roomid = GetInt32FromJsonValue(root, VMProtectDecryptStringA("roomid"));
+        authority->clanid = GetInt32FromJsonValue(root, VMProtectDecryptStringA("clanid"));
+        authority->kickout = GetInt32FromJsonValue(root, VMProtectDecryptStringA("kickout"));
+        authority->banchat = GetInt32FromJsonValue(root, VMProtectDecryptStringA("banchat"));
+        authority->antiadvance = GetInt32FromJsonValue(root, VMProtectDecryptStringA("antiadvance"));
+        std::string expire = root.get(VMProtectDecryptStringA("expiretime"), "0").asString();
         base::StringToUint64(expire, &authority->expiretime);
-        authority->serverip = root.get("serverip", "").asString();
+        authority->serverip = root.get(VMProtectDecryptStringA("serverip"), "").asString();
+        VMProtectEnd();
     }
     catch (...)
     {
@@ -106,6 +108,7 @@ bool AuthorityHelper::GetAuthorityDisplayInfo(std::wstring* display)
     if (!Load(&authority))
         return false;
 
+    VMProtectBeginUltra(__FUNCTION__);
     std::wstring userid = base::UintToString16(authority.userid);
     std::wstring roomid = base::UintToString16(authority.roomid);
     base::Time expired = base::Time::FromInternalValue(authority.expiretime);
@@ -113,20 +116,21 @@ bool AuthorityHelper::GetAuthorityDisplayInfo(std::wstring* display)
         MakeFormatTimeString(expired);
     std::wstring expiredwstr = base::UTF8ToWide(expiredstr);
     std::wstring clanid = base::UTF8ToWide(base::UintToString(authority.clanid));
-    *display = L"授权信息:";
+    *display = VMProtectDecryptStringW(L"授权信息:");
     if (authority.clanid)
     {
-        *display += std::wstring(L" 公会ID: ") + clanid;
+        *display += std::wstring(VMProtectDecryptStringW(L" 公会ID: ")) + clanid;
     }
     if (authority.userid)
     {
-        *display += std::wstring(L" 繁星号: ") + userid;
+        *display += std::wstring(VMProtectDecryptStringW(L" 繁星号: ")) + userid;
     }
     if (authority.roomid)
     {
-        *display += std::wstring(L" 房间号: ") + roomid;
+        *display += std::wstring(VMProtectDecryptStringW(L" 房间号: ")) + roomid;
     }
 
-    *display += L" 到期时间: " + expiredwstr;
+    *display += VMProtectDecryptStringW(L" 到期时间: ") + expiredwstr;
+    VMProtectEnd();
     return true;
 }
