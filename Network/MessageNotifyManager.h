@@ -126,6 +126,7 @@ private:
     void DoNewData8080Callback(bool result, const std::vector<uint8>& data);
 
     void DoNewSendHeartBeat(TcpHandle handle);
+    void DoNewSendChatMessage(const std::vector<char>& msg); // 发言需要符合间隔时间
     void NewSendDataCallback(TcpHandle handle, bool result);
 
     base::Thread baseThread_;
@@ -148,5 +149,7 @@ private:
 
     TcpManager* tcpManager_;
     base::RepeatingTimer<MessageNotifyManager> newRepeatingTimer_;
+    base::TimeDelta chat_message_space_;
+    base::Time last_chat_time_;
 };
 

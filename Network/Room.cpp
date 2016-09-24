@@ -81,6 +81,37 @@ bool Room::Exit()
     return true;
 }
 
+bool Room::GetGiftList(const std::string& cookies, std::string* content)
+{
+    std::string url = "http://visitor.fanxing.kugou.com/";
+    url += "/VServices/GiftService.GiftService.getGiftList/";
+    url += base::UintToString(roomid_);
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid_);
+    request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    content->assign(response.content.begin(), response.content.end());
+
+    return true;
+}
+
 bool Room::GetViewerList(const std::string& cookies,
     std::vector<EnterRoomUserInfo>* enterRoomUserInfoList)
 {

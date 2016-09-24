@@ -88,6 +88,7 @@ public:
     bool RetrieveStart();
     bool SendGift(uint32 giftid);
 
+    bool GetGiftList(uint32 roomid, std::string* content);
     bool GetViewerList(uint32 roomid, 
         std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
 

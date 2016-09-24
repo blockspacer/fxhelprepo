@@ -87,9 +87,18 @@ protected:
     // 聊天机器人操作
     afx_msg void OnBnClickedChkRobot();
 
+    // 自动感谢操作
+    afx_msg void OnBnClickedChkThanks();
+
+    // 自动欢迎操作
+    afx_msg void OnBnClickedChkWelcome();
+
     // 特殊欢迎操作
     afx_msg void OnBnClickedBtnAddWelcome();
     afx_msg void OnBnClickedBtnRemoveWelcome();
+
+    // 自动重复发言操作
+    afx_msg void OnBnClickedChkRepeatChat();
 
     // 点击列头排序
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
@@ -160,16 +169,15 @@ private:
     //聊天机器人设置
     CButton m_chk_robot;
     CEdit m_edit_api_key;
-    afx_msg void OnBnClickedChkThanks();
-    CButton m_chk_welcome;
+ 
     CButton m_chk_thanks;
-    afx_msg void OnBnClickedChkWelcome();
+    CComboBox m_combo_thanks;   // 感谢礼物星币数
 
+    CButton m_chk_welcome;
+    CComboBox m_combo_welcome;  // 欢迎玩家等级
     CListCtrl m_list_user_strategy;
+
     CButton m_chk_repeat_chat;
     CComboBox m_combo_seconds;
-    CEdit m_edit_auto_chat;
-
-    afx_msg void OnBnClickedChkRepeatChat();
-    
+    CEdit m_edit_auto_chat;   
 };

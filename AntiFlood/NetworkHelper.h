@@ -58,9 +58,26 @@ public:
     GiftStrategy();
     ~GiftStrategy();
 
+    bool Initialize(const std::string& content);
     void SetThanksFlag(bool enable);
+    void SetGiftValue(uint32 gift_value);
     bool GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage);
 private:
+
+    struct GiftInfo
+    {
+        uint32 giftid = 0;
+        std::string giftname = "";
+        uint32 price = 0;
+        double exchange = false;
+        uint32 category = 0;
+        std::string categoryname = "";
+    };
+
+    std::map<uint32, GiftInfo> giftmap_;
+    std::map<uint32, std::string> category_;
+
+    uint32 gift_value_ = 0;
     bool thanksflag_ = false;
 };
 
@@ -78,9 +95,8 @@ public:
     EnterRoomStrategy();
     ~EnterRoomStrategy();
 
-
-
     void SetWelcomeFlag(bool enable);
+    void SetWelcomeLevel(uint32 level);
     void SetWelcomeContent(const std::map<uint32, WelcomeInfo>& special_welcome);
     void GetWelcomeContent(std::map<uint32, WelcomeInfo>* special_welcome);
     bool GetEnterWelcome(const EnterRoomUserInfo& enterinfo, std::wstring* chatmessage);
@@ -88,7 +104,8 @@ public:
 private:
     bool SaveWelcomeContent(const std::map<uint32, WelcomeInfo>& special_welcome) const;
     bool LoadWelcomeContent(std::map<uint32, WelcomeInfo>* special_welcome);
-    bool welcomeflag_ = false;
+    bool welcome_flag_ = false;
+    uint32 welcome_level_ = 0;
     base::Lock welcome_lock_;
     std::map<uint32, WelcomeInfo> welcome_info_map_;
 };
@@ -137,6 +154,8 @@ public:
     bool EnterRoom(uint32 roomid);
     bool GetViewerList(uint32 roomid,
         std::vector<RowData>* enterRoomUserInfoRowdata);
+
+    bool GetGiftList(uint32 roomid, std::string* content);
 
     void SetHandleChatUsers(bool kick);
     // 判断用户是否有操作权限，暂时实现为只有公会成员才能操作。

@@ -95,15 +95,110 @@ GiftStrategy::~GiftStrategy()
 
 }
 
+bool GiftStrategy::Initialize(const std::string& content)
+{
+    auto pos = content.find("jsonpcallback_httpvisitorfanxingkugoucomVServicesGiftServiceGiftServicegetGiftList");
+    if (pos == std::string::npos)
+        return false;
+
+    pos = content.find("(", pos);
+    if (pos == std::string::npos)
+        return false;
+
+    auto begin = pos + 1;
+    pos = content.find(")", begin);
+    if (pos == std::string::npos)
+        return false;
+    auto end = pos;
+
+    std::string root = content.substr(begin, end - begin);
+    //解析json数据
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(root, rootdata, false))
+    {
+        return false;
+    }
+
+    // 有必要检测status的值
+    uint32 status = rootdata.get(std::string("status"), 0).asInt();
+    if (status != 1)
+    {
+        return false;
+    }
+
+    Json::Value dataObject(Json::objectValue);
+    dataObject = rootdata.get(std::string("data"), dataObject);
+    if (dataObject.empty())
+    {
+        return false;
+    }
+
+    // category_
+    Json::Value categoryObject(Json::arrayValue);
+    categoryObject = dataObject.get("category", categoryObject);
+    if (categoryObject.empty())
+    {
+        return false;
+    }
+    for (const auto& it : categoryObject)
+    {
+        uint32 classid = GetInt32FromJsonValue(it, "classId");
+        // 已经自动做了字符转换为utf8, nice
+        std::string className = it.get("className", "").asString();
+        category_.insert(std::make_pair(classid, className));
+    }
+
+    // data
+    Json::Value listObject(Json::arrayValue);
+    listObject = dataObject.get("list", listObject);
+    if (listObject.empty())
+    {
+        return false;
+    }
+
+    for (const auto& it : listObject)
+    {
+        GiftInfo giftinfo;
+        giftinfo.giftid = GetInt32FromJsonValue(it, "id");
+        giftinfo.giftname = it.get("name", "").asString();
+        giftinfo.price = GetInt32FromJsonValue(it, "price");
+        giftinfo.exchange = GetDoubleFromJsonValue(it, "exchange");
+        giftinfo.category = GetInt32FromJsonValue(it, "category");
+        auto find = category_.find(giftinfo.category);
+        if (find != category_.end())
+        {
+            giftinfo.categoryname = find->second;
+        }
+        giftmap_.insert(std::make_pair(giftinfo.giftid, giftinfo));
+    }
+
+    return true;
+}
+
 void GiftStrategy::SetThanksFlag(bool enable)
 {
     thanksflag_ = enable;
+}
+
+void GiftStrategy::SetGiftValue(uint32 gift_value)
+{
+    gift_value_ = gift_value;
 }
 
 bool GiftStrategy::GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage)
 {
     if (!thanksflag_)
         return false;
+
+    const auto& it = giftmap_.find(giftinfo.giftid);
+    uint32 gift_value = 0;
+    if (it != giftmap_.end()) // 如果在礼物列表能找到，就判断价值，如果找不到直接感谢
+    {
+        gift_value = giftinfo.giftid * it->second.price;
+        if (gift_value < gift_value_) // 价值少于设置点的，不发送感谢
+            return false;
+    }
 
     std::wstring thanks = L"感谢" + base::UTF8ToWide(giftinfo.sendername) + 
         L"送来的" + base::UintToString16(giftinfo.gitfnumber) + 
@@ -126,7 +221,12 @@ EnterRoomStrategy::~EnterRoomStrategy()
 
 void EnterRoomStrategy::SetWelcomeFlag(bool enable)
 {
-    welcomeflag_ = enable;
+    welcome_flag_ = enable;
+}
+
+void EnterRoomStrategy::SetWelcomeLevel(uint32 level)
+{
+    welcome_level_ = level;
 }
 
 void EnterRoomStrategy::SetWelcomeContent(
@@ -239,7 +339,10 @@ bool EnterRoomStrategy::LoadWelcomeContent(
 bool EnterRoomStrategy::GetEnterWelcome(const EnterRoomUserInfo& enterinfo, 
     std::wstring* chatmessage)
 {
-    if (!welcomeflag_)
+    if (!welcome_flag_)
+        return false;
+
+    if (enterinfo.richlevel < welcome_level_)//等级低于指定等级的不设置欢迎
         return false;
 
     std::wstring msg;
@@ -459,6 +562,11 @@ bool NetworkHelper::GetViewerList(uint32 roomid,
         enterRoomUserInfoRowdata->push_back(rowdata);
     }
     return result;
+}
+
+bool NetworkHelper::GetGiftList(uint32 roomid, std::string* content)
+{
+    return user_->GetGiftList(roomid, content);
 }
 
 // messageNotifyManager_ 线程回调

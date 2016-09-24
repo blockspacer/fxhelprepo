@@ -19,6 +19,7 @@
 namespace
 {
 static int threadindex = 0;
+const uint32 char_millisecond_space = 2500;// 发言间隔使用2.5秒
 const char* targetip = "114.54.2.204";
 //const char* targetip = "114.54.2.205";
 const uint16 port843 = 843;
@@ -278,7 +279,9 @@ MessageNotifyManager::MessageNotifyManager()
     notify201_(nullptr),
     notify501_(nullptr),
     notify601_(nullptr),
-    baseThread_("NetworkHelperThread" + base::IntToString(threadindex))
+    baseThread_("NetworkHelperThread" + base::IntToString(threadindex)),
+    chat_message_space_(base::TimeDelta::FromMilliseconds(char_millisecond_space)),
+    last_chat_time_(base::Time::Now())
 {
 }
 
@@ -521,6 +524,9 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
             break;
         case 602:
             CommandHandle_602(rootdata, &outmsg);
+            if (normalNotify_)
+                normalNotify_(L"房间状态正常");
+
             break;
         case 606:
             CommandHandle_606(rootdata, &outmsg);
@@ -759,12 +765,31 @@ void MessageNotifyManager::DoNewSendHeartBeat(TcpHandle handle)
         this, handle, std::placeholders::_1));
 }
 
+void MessageNotifyManager::DoNewSendChatMessage(const std::vector<char>& msg)
+{
+    // 间隔小于设置的值，重新投递消息
+    if (base::Time::Now() - last_chat_time_ <= chat_message_space_)
+    {
+        baseThread_.message_loop_proxy()->PostDelayedTask(FROM_HERE,
+            base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg), 
+            base::Time::Now() - last_chat_time_);
+        return;
+    }
+
+    last_chat_time_ = base::Time::Now();
+
+    tcpManager_->Send(tcphandle_8080_, msg, 
+        std::bind(&MessageNotifyManager::NewSendDataCallback,
+        this, tcphandle_8080_, std::placeholders::_1));
+    
+}
+
 void MessageNotifyManager::NewSendDataCallback(TcpHandle handle, bool result)
 {
-    std::wstring state = L"房间状态正常";
+    std::wstring state = L"发送数据正常";
     if (!result)
     {
-        state = L"房间状态异常";
+        state = L"发送数据异常，请重新进入房间";
         newRepeatingTimer_.Stop();
         tcpManager_->RemoveClient(handle);
     }
@@ -789,9 +814,9 @@ bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint3
     std::string data = writer.write(root);
     std::vector<char> msg;
     msg.assign(data.begin(), data.end());
-    return tcpManager_->Send(tcphandle_8080_, msg, 
-        std::bind(&MessageNotifyManager::NewSendDataCallback,
-        this, tcphandle_8080_, std::placeholders::_1));
+
+    return baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg));
 }
 
 bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomChatMessage)
@@ -809,7 +834,7 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
     std::string data = writer.write(root);
     std::vector<char> msg;
     msg.assign(data.begin(), data.end());
-    return tcpManager_->Send(tcphandle_8080_, msg,
-        std::bind(&MessageNotifyManager::NewSendDataCallback,
-        this, tcphandle_8080_, std::placeholders::_1));
+
+    return baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg));
 }

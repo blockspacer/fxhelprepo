@@ -133,6 +133,8 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_REPEAT_CHAT, m_chk_repeat_chat);
     DDX_Control(pDX, IDC_COMBO_SECONDS, m_combo_seconds);
     DDX_Control(pDX, IDC_EDIT_AUTO_CHAT, m_edit_auto_chat);
+    DDX_Control(pDX, IDC_COMBO_THANKS, m_combo_thanks);
+    DDX_Control(pDX, IDC_COMBO_WELCOME, m_combo_welcome);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -305,6 +307,17 @@ BOOL CAntiFloodDlg::OnInitDialog()
     m_combo_seconds.AddString(L"180");
     m_combo_seconds.SelectString(0,L"60");
 
+    m_combo_thanks.AddString(L"5");
+    m_combo_thanks.AddString(L"100");
+    m_combo_thanks.AddString(L"500");
+    m_combo_thanks.AddString(L"1000");
+    m_combo_thanks.SelectString(0, L"5");
+
+    m_combo_welcome.AddString(L"3");
+    m_combo_welcome.AddString(L"5");
+    m_combo_welcome.AddString(L"8");
+    m_combo_welcome.AddString(L"11");
+    m_combo_welcome.SelectString(0, L"3");
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -442,6 +455,10 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
     {
         Config config;
         config.SaveRoomId(strRoomid.GetBuffer());
+
+        std::string content;
+        network_->GetGiftList(roomid_, &content);
+        giftStrategy_->Initialize(content);  
     }
 
     Notify(message);
@@ -1382,15 +1399,26 @@ void CAntiFloodDlg::OnBnClickedChkThanks()
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         m_chk_thanks.SetCheck(FALSE);
+        m_combo_thanks.EnableWindow(TRUE);
+        giftStrategy_->SetThanksFlag(false);
         Notify(NOPRIVILEGE_NOTICE);
         Notify(privilegeMsg);
         return;
     }
 
     bool enable = !!m_chk_thanks.GetCheck();
-    network_->SetGiftThanks(enable);
-}
+    m_combo_thanks.EnableWindow(!enable);
+    giftStrategy_->SetThanksFlag(enable);
 
+    if (enable)
+    {
+        CString cs_gift_value;
+        m_combo_thanks.GetWindowTextW(cs_gift_value);
+        uint32 gift_value = 0;
+        base::StringToUint(base::WideToUTF8(cs_gift_value.GetBuffer()), &gift_value);
+        giftStrategy_->SetGiftValue(gift_value);
+    }
+}
 
 void CAntiFloodDlg::OnBnClickedChkWelcome()
 {
@@ -1401,16 +1429,26 @@ void CAntiFloodDlg::OnBnClickedChkWelcome()
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         m_chk_welcome.SetCheck(FALSE);
-        network_->SetRoomWelcome(false);
+        m_combo_welcome.EnableWindow(TRUE);
+        enterRoomStrategy_->SetWelcomeFlag(false);
         Notify(NOPRIVILEGE_NOTICE);
         Notify(privilegeMsg);
         return;
     }
 
     bool enable = !!m_chk_welcome.GetCheck();
-    network_->SetRoomWelcome(enable);
-}
+    m_combo_welcome.EnableWindow(!enable);
+    enterRoomStrategy_->SetWelcomeFlag(enable);
 
+    if (enable)
+    {
+        CString welcome_level;
+        m_combo_welcome.GetWindowTextW(welcome_level);
+        uint32 level = 0;
+        base::StringToUint(base::WideToUTF8(welcome_level.GetBuffer()), &level);
+        enterRoomStrategy_->SetWelcomeLevel(level);
+    }
+}
 
 void CAntiFloodDlg::OnBnClickedChkRepeatChat()
 {
