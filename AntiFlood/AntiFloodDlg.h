@@ -56,7 +56,6 @@ protected:
     // 观众列表操作
     afx_msg void OnBnClickedBtnAdd();
     afx_msg void OnBnClickedButtonRemove();
-    afx_msg void OnBnClickedBtnQuery();
     afx_msg void OnBnClickedBtnSelectAll();
     afx_msg void OnBnClickedBtnSelectReverse();
     afx_msg void OnBnClickedBtnKickoutMonth();
@@ -146,7 +145,6 @@ private:
     uint32 singerid_ = 0;
     std::wstring username_;
 
-    CString m_query_key;
     CListBox InfoList_;
     int infoListCount_;
     CListCtrl m_ListCtrl_Viewers;

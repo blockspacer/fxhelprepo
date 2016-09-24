@@ -4,6 +4,8 @@
 #include "Config.h"
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 namespace{
 
@@ -118,18 +120,29 @@ bool Config::SaveRoomId(const std::wstring& roomid) const
     return true;
 }
 
-bool Config::SaveApiKey(const std::wstring& apikey) const
+bool Config::SaveRobot(bool enable, const std::wstring& apikey) const
 {
+    std::wstring str = enable ? L"1" : L"0";
+    WritePrivateProfileString(L"Robot", L"Enable", str.c_str(), filepath_.c_str());
     WritePrivateProfileString(L"Robot", L"ApiKey", Encrypt(apikey).c_str(),
                               filepath_.c_str());
     return true;
 }
 
-bool Config::GetApiKey(std::wstring* apikey) const
+bool Config::GetRobot(bool* enable, std::wstring* apikey) const
 {
     wchar_t temp[128] = { 0 };
-    int32 count = GetPrivateProfileString(L"Robot", L"ApiKey", L"",
-                                          temp, 128, filepath_.c_str());
+    int32 count = GetPrivateProfileString(L"Robot", L"Enable", L"0",
+        temp, 128, filepath_.c_str());
+    if (count >= 128 || count <= 0)
+    {
+        return false;
+    }
+    std::wstring str = temp;
+    *enable = (str.compare(L"1") == 0);
+
+    count = GetPrivateProfileString(L"Robot", L"ApiKey", L"",
+                                    temp, 128, filepath_.c_str());
     if (count >= 128 || count <= 0)
     {
         return false;
@@ -140,22 +153,106 @@ bool Config::GetApiKey(std::wstring* apikey) const
     return true;
 }
 
-bool Config::SaveNormalWelcome(const std::wstring& content) const
+bool Config::SaveGiftThanks(bool enable, uint32 gift_value) const
 {
-    WritePrivateProfileString(L"Normal", L"Welcome", content.c_str(),
+    std::wstring str = enable ? L"1" : L"0";
+    WritePrivateProfileString(L"Thanks", L"Enable", str.c_str(), filepath_.c_str());
+    str = base::UintToString16(gift_value);
+    WritePrivateProfileString(L"Thanks", L"GiftValue", str.c_str(), filepath_.c_str());
+    return true;
+}
+bool Config::GetGiftThanks(bool* enable, uint32* gift_value) const
+{
+    wchar_t temp[128] = { 0 };
+    int32 count = GetPrivateProfileString(L"Thanks", L"Enable", L"0",
+        temp, 128, filepath_.c_str());
+    if (count >= 128 || count <= 0)
+    {
+        return false;
+    }
+    std::wstring str = temp;
+    *enable = (str.compare(L"1") == 0);
+
+    count = GetPrivateProfileString(L"Thanks", L"GiftValue", L"0",
+        temp, 128, filepath_.c_str());
+    if (count >= 128 || count <= 0)
+    {
+        return false;
+    }
+    str = temp;
+    return base::StringToUint(base::WideToUTF8(str), gift_value);
+}
+
+bool Config::SaveEnterRoomWelcome(bool enable, uint32 rich_level) const
+{
+    std::wstring str = enable ? L"1" : L"0";
+    WritePrivateProfileString(L"Welcome", L"Enable", str.c_str(), filepath_.c_str());
+    str = base::UintToString16(rich_level);
+    WritePrivateProfileString(L"Welcome", L"RichLevel", str.c_str(), filepath_.c_str());
+    return true;
+}
+
+bool Config::GetEnterRoomWelcome(bool* enable, uint32* rich_level) const
+{
+    wchar_t temp[128] = { 0 };
+    int32 count = GetPrivateProfileString(L"Welcome", L"Enable", L"0",
+        temp, 128, filepath_.c_str());
+    if (count >= 128 || count <= 0)
+    {
+        return false;
+    }
+    std::wstring str = temp;
+    *enable = (str.compare(L"1") == 0);
+
+    count = GetPrivateProfileString(L"Welcome", L"RichLevel", L"0",
+        temp, 128, filepath_.c_str());
+    if (count >= 128 || count <= 0)
+    {
+        return false;
+    }
+    str = temp;
+    return base::StringToUint(base::WideToUTF8(str), rich_level);
+}
+
+bool Config::SaveRepeatChat(bool enable, 
+                            const std::wstring& content, 
+                            const std::wstring& seconds) const
+{
+    std::wstring str = enable ? L"1" : L"0";
+    WritePrivateProfileString(L"Repeat", L"Enable", str.c_str(), filepath_.c_str());
+    WritePrivateProfileString(L"Repeat", L"ChatContent", content.c_str(),
+        filepath_.c_str());
+    WritePrivateProfileString(L"Repeat", L"Seconds", seconds.c_str(),
         filepath_.c_str());
     return true;
 }
 
-bool Config::GetNormalWelcome(std::wstring* content)
+bool Config::GetRepeatChat(bool* enable, std::wstring* content, std::wstring* seconds) const
 {
     wchar_t temp[128] = { 0 };
-    int32 count = GetPrivateProfileString(L"Normal", L"Welcome", L"",
+    int32 count = GetPrivateProfileString(L"Repeat", L"Enable", L"0",
+        temp, 128, filepath_.c_str());
+    if (count >= 128 || count <= 0)
+    {
+        return false;
+    }
+    std::wstring str = temp;
+    *enable = (str.compare(L"1") == 0);
+
+    count = GetPrivateProfileString(L"Repeat", L"ChatContent", L"",
         temp, 128, filepath_.c_str());
     if (count >= 128 || count <= 0)
     {
         return false;
     }
     *content = temp;
+
+    count = GetPrivateProfileString(L"Repeat", L"Seconds", L"",
+        temp, 128, filepath_.c_str());
+    if (count >= 128 || count <= 0)
+    {
+        return false;
+    }
+    *seconds = temp;
     return true;
 }

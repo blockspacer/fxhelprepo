@@ -86,7 +86,6 @@ CAntiFloodDlg::CAntiFloodDlg(CWnd* pParent /*=NULL*/)
     , blacklistHelper_(nullptr)
     , infoListCount_(0)
     , listCtrlRowIndex_(0)
-    , m_query_key(_T(""))
     , m_radiogroup(0)
 {
     blacklistHelper_.reset(new BlacklistHelper);
@@ -113,7 +112,6 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_LIST1, InfoList_);
     DDX_Control(pDX, IDC_LIST_USER_STATUS, m_ListCtrl_Viewers);
-    DDX_Text(pDX, IDC_EDIT_QUERY_KEYWORD, m_query_key);
     DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
     DDX_Control(pDX, IDC_LIST_USER_STATUS_BLACK, m_ListCtrl_Blacks);
     DDX_Control(pDX, IDC_STATIC_AUTH_INFO, m_static_auth_info);
@@ -153,7 +151,6 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_MESSAGE(WM_USER_ADD_TO_BLACK_LIST, &CAntiFloodDlg::OnDisplayDtatToBlackList)
     ON_NOTIFY(HDN_ITEMCLICK, 0, &CAntiFloodDlg::OnHdnItemclickListUserStatus)
     ON_BN_CLICKED(IDC_BUTTON_REMOVE, &CAntiFloodDlg::OnBnClickedButtonRemove)
-    ON_BN_CLICKED(IDC_BTN_QUERY, &CAntiFloodDlg::OnBnClickedBtnQuery)
     ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CAntiFloodDlg::OnBnClickedBtnSelectAll)
     ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE, &CAntiFloodDlg::OnBnClickedBtnSelectReverse)
     ON_BN_CLICKED(IDC_BTN_KICKOUT_MONTH, &CAntiFloodDlg::OnBnClickedBtnKickoutMonth)
@@ -258,14 +255,6 @@ BOOL CAntiFloodDlg::OnInitDialog()
         SetDlgItemText(IDC_EDIT_Password, password.c_str());
     }
 
-    std::wstring roomid;
-    config.GetRoomid(&roomid);
-    SetDlgItemText(IDC_EDIT_NAV, roomid.c_str());
-
-    std::wstring apikey;
-    config.GetApiKey(&apikey);
-    m_edit_api_key.SetWindowTextW(apikey.c_str());
-
     // 读取授权信息显示在界面上
     AuthorityHelper authorityHelper;
     std::wstring authorityDisplayInfo = L"软件未授权,操作受限";
@@ -297,27 +286,55 @@ BOOL CAntiFloodDlg::OnInitDialog()
         welcomecount++;
     }
 
-    // 读取通用欢迎语
-    std::wstring content;
-    config.GetNormalWelcome(&content);
-    m_edit_auto_chat.SetWindowTextW(content.c_str());
+    std::wstring roomid;
+    config.GetRoomid(&roomid);
+    SetDlgItemText(IDC_EDIT_NAV, roomid.c_str());
 
+    std::wstring apikey;
+    bool enable_robot = false;
+    config.GetRobot(&enable_robot, &apikey);
+    m_chk_robot.SetCheck(enable_robot);
+    m_edit_api_key.SetWindowTextW(apikey.c_str());
+    m_edit_api_key.EnableWindow(!enable_robot);
+
+    // 读取通用欢迎语
     m_combo_seconds.AddString(L"60");
     m_combo_seconds.AddString(L"120");
     m_combo_seconds.AddString(L"180");
-    m_combo_seconds.SelectString(0,L"60");
-
+    m_combo_seconds.SelectString(0, L"60");
+    bool enable_repeat = false;
+    std::wstring content;
+    std::wstring seconds;
+    config.GetRepeatChat(&enable_repeat, &content, &seconds);
+    m_chk_repeat_chat.SetCheck(enable_repeat);
+    m_edit_auto_chat.SetWindowTextW(content.c_str());
+    m_combo_seconds.SetWindowTextW(seconds.c_str());
+    m_edit_auto_chat.EnableWindow(!enable_repeat);
+    m_combo_seconds.EnableWindow(!enable_repeat);
+   
     m_combo_thanks.AddString(L"5");
     m_combo_thanks.AddString(L"100");
     m_combo_thanks.AddString(L"500");
     m_combo_thanks.AddString(L"1000");
     m_combo_thanks.SelectString(0, L"5");
+    bool enable_gift_thanks = false;
+    uint32 gift_value = 0;
+    config.GetGiftThanks(&enable_gift_thanks, &gift_value);
+    m_chk_thanks.SetCheck(enable_gift_thanks);
+    m_combo_thanks.SetWindowTextW(base::UintToString16(gift_value).c_str());
+    m_combo_thanks.EnableWindow(!enable_gift_thanks);
 
     m_combo_welcome.AddString(L"3");
     m_combo_welcome.AddString(L"5");
     m_combo_welcome.AddString(L"8");
     m_combo_welcome.AddString(L"11");
     m_combo_welcome.SelectString(0, L"3");
+    bool enable_welcome = false;
+    uint32 level = 0;
+    config.GetEnterRoomWelcome(&enable_welcome, &level);
+    m_chk_welcome.SetCheck(enable_welcome);
+    m_combo_welcome.SetWindowTextW(base::UintToString16(level).c_str());
+    m_combo_welcome.EnableWindow(!enable_welcome);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -371,10 +388,8 @@ void CAntiFloodDlg::OnPaint()
 		// 绘制图标
 		dc.DrawIcon(x, y, m_hIcon);
 	}
-	//else
-	//{
-		CDialogEx::OnPaint();
-	//}
+
+	CDialogEx::OnPaint();
 }
 
 void CAntiFloodDlg::OnClose()
@@ -451,25 +466,32 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
 
     bool result = network_->EnterRoom(strRoomid.GetBuffer());
     std::wstring message = std::wstring(L"进入房间 ") + (result ? L"成功" : L"失败");
-    if (result)
-    {
-        Config config;
-        config.SaveRoomId(strRoomid.GetBuffer());
+    Notify(message);
+    if (!result)
+        return;
 
-        std::string content;
-        network_->GetGiftList(roomid_, &content);
-        giftStrategy_->Initialize(content);  
+    Config config;
+    config.SaveRoomId(strRoomid.GetBuffer());
+
+    std::string content;
+    network_->GetGiftList(roomid_, &content);
+    giftStrategy_->Initialize(content);
+
+    bool enable = !!m_chk_repeat_chat.GetCheck();
+    CString chatmsg;
+    m_edit_auto_chat.GetWindowTextW(chatmsg);
+    if (enable && (chatmsg.IsEmpty() || chatmsg.GetLength() >= 50))
+    {
+        m_chk_repeat_chat.SetCheck(FALSE);
+        return;
     }
 
-    Notify(message);
+    m_combo_seconds.EnableWindow(!enable);
+    m_edit_auto_chat.EnableWindow(!enable);
 
-    // 清空选中状态
-    m_chk_robot.SetCheck(FALSE);
-    m_chk_welcome.SetCheck(FALSE);
-    m_chk_thanks.SetCheck(FALSE);
-    m_chk_repeat_chat.SetCheck(FALSE);
-    m_combo_seconds.EnableWindow(TRUE);
-    m_edit_auto_chat.EnableWindow(TRUE);
+    CString seconds;
+    m_combo_seconds.GetWindowTextW(seconds);
+    network_->SetRoomRepeatChat(enable, seconds.GetBuffer(), chatmsg.GetBuffer());
 }
 
 // 送星星功能
@@ -921,23 +943,6 @@ void CAntiFloodDlg::OnBnClickedButtonRemove()
     }
 }
 
-void CAntiFloodDlg::OnBnClickedBtnQuery()
-{
-    UpdateData(TRUE);
-    CString key = m_query_key;
-    int count = m_ListCtrl_Viewers.GetItemCount();
-
-    for (int i = count - 1; i >= 0; --i)
-    {
-        CString temp = m_ListCtrl_Viewers.GetItemText(i, 1);
-        if (temp.Find(key)>=0)
-        {
-            m_ListCtrl_Viewers.SetCheck(i, TRUE);
-        }
-    }
-}
-
-
 void CAntiFloodDlg::OnBnClickedBtnSelectAll()
 {
     int count = m_ListCtrl_Viewers.GetItemCount();
@@ -1369,12 +1374,6 @@ void CAntiFloodDlg::OnBnClickedChkRobot()
         return;
     }
 
-    if (!enablerobot)
-    {
-        network_->SetRobotHandle(enablerobot);
-        return;
-    }
-
     CString apiKey;
     m_edit_api_key.GetWindowTextW(apiKey);
     if (apiKey.GetLength() != 32)
@@ -1384,10 +1383,12 @@ void CAntiFloodDlg::OnBnClickedChkRobot()
         return;
     }
 
+    m_edit_api_key.EnableWindow(!enablerobot);
+
     network_->SetRobotApiKey(apiKey.GetBuffer());
     network_->SetRobotHandle(enablerobot);
     Config config;
-    config.SaveApiKey(apiKey.GetBuffer());
+    config.SaveRobot(enablerobot, apiKey.GetBuffer());
 }
 
 void CAntiFloodDlg::OnBnClickedChkThanks()
@@ -1410,14 +1411,14 @@ void CAntiFloodDlg::OnBnClickedChkThanks()
     m_combo_thanks.EnableWindow(!enable);
     giftStrategy_->SetThanksFlag(enable);
 
-    if (enable)
-    {
-        CString cs_gift_value;
-        m_combo_thanks.GetWindowTextW(cs_gift_value);
-        uint32 gift_value = 0;
-        base::StringToUint(base::WideToUTF8(cs_gift_value.GetBuffer()), &gift_value);
-        giftStrategy_->SetGiftValue(gift_value);
-    }
+    CString cs_gift_value;
+    m_combo_thanks.GetWindowTextW(cs_gift_value);
+    uint32 gift_value = 0;
+    base::StringToUint(base::WideToUTF8(cs_gift_value.GetBuffer()), &gift_value);
+    giftStrategy_->SetGiftValue(gift_value);
+
+    Config config;
+    config.SaveGiftThanks(enable, gift_value);
 }
 
 void CAntiFloodDlg::OnBnClickedChkWelcome()
@@ -1440,14 +1441,14 @@ void CAntiFloodDlg::OnBnClickedChkWelcome()
     m_combo_welcome.EnableWindow(!enable);
     enterRoomStrategy_->SetWelcomeFlag(enable);
 
-    if (enable)
-    {
-        CString welcome_level;
-        m_combo_welcome.GetWindowTextW(welcome_level);
-        uint32 level = 0;
-        base::StringToUint(base::WideToUTF8(welcome_level.GetBuffer()), &level);
-        enterRoomStrategy_->SetWelcomeLevel(level);
-    }
+    CString welcome_level;
+    m_combo_welcome.GetWindowTextW(welcome_level);
+    uint32 level = 0;
+    base::StringToUint(base::WideToUTF8(welcome_level.GetBuffer()), &level);
+    enterRoomStrategy_->SetWelcomeLevel(level);
+
+    Config config;
+    config.SaveEnterRoomWelcome(enable, level);   
 }
 
 void CAntiFloodDlg::OnBnClickedChkRepeatChat()
@@ -1484,7 +1485,7 @@ void CAntiFloodDlg::OnBnClickedChkRepeatChat()
     m_combo_seconds.GetWindowTextW(seconds);
     network_->SetRoomRepeatChat(enable, seconds.GetBuffer(), chatmsg.GetBuffer());
     Config config;
-    config.SaveNormalWelcome(chatmsg.GetBuffer());
+    config.SaveRepeatChat(enable, chatmsg.GetBuffer(), seconds.GetBuffer());
 }
 
 void CAntiFloodDlg::OnBnClickedBtnAddWelcome()
