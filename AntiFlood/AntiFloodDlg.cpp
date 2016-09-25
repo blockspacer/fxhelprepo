@@ -273,6 +273,12 @@ BOOL CAntiFloodDlg::OnInitDialog()
         m_list_vest.InsertColumn(index++, it, LVCFMT_LEFT, 100);//²åÈëÁÐ   
     m_radiogroup = 1;
 
+    m_combo_handle_level.AddString(L"1");
+    m_combo_handle_level.AddString(L"3");
+    m_combo_handle_level.AddString(L"5");
+    m_combo_handle_level.AddString(L"8");
+    m_combo_handle_level.SelectString(0, L"3");
+
     m_list_user_strategy.SetExtendedStyle(dwStyle);
     index = 0;
     for (const auto& it : userstrategylist)
@@ -1369,6 +1375,11 @@ void CAntiFloodDlg::OnBnClickedBtnSendChat()
 void CAntiFloodDlg::OnBnClickedRadioNoaction()
 {
     UpdateData(TRUE);
+    CString cs_handle_level;
+    m_combo_handle_level.GetWindowTextW(cs_handle_level);
+    uint32 rich_level = 3;
+    base::StringToUint(base::WideToUTF8(cs_handle_level.GetBuffer()), &rich_level);
+    antiStrategy_->SetHandleRichLevel(rich_level);
     switch (m_radiogroup)
     {
     case 0:
@@ -1393,6 +1404,11 @@ void CAntiFloodDlg::OnBnClickedChkHandleAll()
     if (!network_)
         return;
 
+    CString cs_handle_level;
+    m_combo_handle_level.GetWindowTextW(cs_handle_level);
+    uint32 rich_level = 3;
+    base::StringToUint(base::WideToUTF8(cs_handle_level.GetBuffer()), &rich_level);
+    antiStrategy_->SetHandleRichLevel(rich_level);
     network_->SetHandleChatUsers(handleall);
 }
 

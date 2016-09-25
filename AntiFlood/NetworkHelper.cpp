@@ -45,8 +45,12 @@ AntiStrategy::~AntiStrategy()
 
 }
 
-HANDLE_TYPE AntiStrategy::GetUserHandleType(const std::string& nickname) const
+HANDLE_TYPE AntiStrategy::GetUserHandleType(uint32 rich_level,
+    const std::string& nickname) const
 {
+    if (rich_level >= rich_level_)// 指定等级以上的不处理
+        return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
+
     for (const auto& it : vestnames_)
     {
         if (nickname.find(it) != std::string::npos)
@@ -55,8 +59,12 @@ HANDLE_TYPE AntiStrategy::GetUserHandleType(const std::string& nickname) const
     return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 }
 
-HANDLE_TYPE AntiStrategy::GetMessageHandleType(const std::string& message) const
+HANDLE_TYPE AntiStrategy::GetMessageHandleType(uint32 rich_level,
+    const std::string& message) const
 {
+    if (rich_level >= rich_level_)// 指定等级以上的不处理
+        return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
+
     for (const auto& it : sensitive_)
     {
         if (message.find(it) != std::string::npos)
@@ -73,6 +81,11 @@ HANDLE_TYPE AntiStrategy::GetHandleType() const
 void AntiStrategy::SetHandleType(HANDLE_TYPE handletype)
 {
     handletype_ = handletype;
+}
+
+void AntiStrategy::SetHandleRichLevel(uint32 rich_level)
+{
+    rich_level_ = rich_level;
 }
 
 bool AntiStrategy::AddSensitive(const std::string& sensitive)
@@ -744,9 +757,15 @@ void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo
     notify501_(rowdata);
 }
 
+void NetworkHelper::SetHandleRichLevel(uint32 rich_level)
+{
+    antiStrategy_->SetHandleRichLevel(rich_level);
+}
+
 void NetworkHelper::TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo)
 {
-    HANDLE_TYPE handletype = antiStrategy_->GetUserHandleType(enterRoomUserInfo.nickname);
+    HANDLE_TYPE handletype = antiStrategy_->GetUserHandleType(
+        enterRoomUserInfo.richlevel, enterRoomUserInfo.nickname);
     bool result = true;
     switch (handletype)
     {
@@ -768,7 +787,9 @@ void NetworkHelper::TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo,
     if (!handleall501_)
         return;
 
-    HANDLE_TYPE handletype = antiStrategy_->GetMessageHandleType(roomChatMessage.chatmessage);
+    HANDLE_TYPE handletype = antiStrategy_->GetMessageHandleType(
+        enterRoomUserInfo.richlevel, roomChatMessage.chatmessage);
+
     bool result = true;
     switch (handletype)
     {

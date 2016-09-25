@@ -40,10 +40,11 @@ class AntiStrategy
 public:
     AntiStrategy();
     ~AntiStrategy();
-    HANDLE_TYPE GetUserHandleType(const std::string& nickname) const;
-    HANDLE_TYPE GetMessageHandleType(const std::string& message) const;
+    HANDLE_TYPE GetUserHandleType(uint32 rich_level, const std::string& nickname) const;
+    HANDLE_TYPE GetMessageHandleType(uint32 rich_level, const std::string& message) const;
     HANDLE_TYPE GetHandleType() const;
     void SetHandleType(HANDLE_TYPE handletype);
+    void SetHandleRichLevel(uint32 rich_level);
 
     bool AddSensitive(const std::string& sensitive);
     bool RemoveSensitive(const std::string& sensitive);
@@ -53,6 +54,7 @@ private:
     std::set<std::string> vestnames_;
     std::set<std::string> sensitive_;
     HANDLE_TYPE handletype_ = HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
+    uint32 rich_level_ = 3;
 };
 
 class GiftStrategy
@@ -181,6 +183,7 @@ private:
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
     void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
         const RoomChatMessage& roomChatMessage);
+    void SetHandleRichLevel(uint32 rich_level);
     void TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo);
     void TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo,
         const RoomChatMessage& roomChatMessage);
