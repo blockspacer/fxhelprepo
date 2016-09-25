@@ -85,12 +85,15 @@ protected:
 
     // 聊天机器人操作
     afx_msg void OnBnClickedChkRobot();
+    void UpdateRobotSetting();
 
     // 自动感谢操作
     afx_msg void OnBnClickedChkThanks();
+    void UpdateThanksSetting();
 
     // 自动欢迎操作
     afx_msg void OnBnClickedChkWelcome();
+    void UpdateWelcomeSetting();
 
     // 特殊欢迎操作
     afx_msg void OnBnClickedBtnAddWelcome();
@@ -98,6 +101,7 @@ protected:
 
     // 自动重复发言操作
     afx_msg void OnBnClickedChkRepeatChat();
+    void UpdateRepeatChatSetting();
 
     // 点击列头排序
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);

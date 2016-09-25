@@ -473,25 +473,23 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
     Config config;
     config.SaveRoomId(strRoomid.GetBuffer());
 
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
+
+    // 为根据礼物大小感谢做准备
     std::string content;
     network_->GetGiftList(roomid_, &content);
     giftStrategy_->Initialize(content);
 
-    bool enable = !!m_chk_repeat_chat.GetCheck();
-    CString chatmsg;
-    m_edit_auto_chat.GetWindowTextW(chatmsg);
-    if (enable && (chatmsg.IsEmpty() || chatmsg.GetLength() >= 50))
-    {
-        m_chk_repeat_chat.SetCheck(FALSE);
-        return;
-    }
-
-    m_combo_seconds.EnableWindow(!enable);
-    m_edit_auto_chat.EnableWindow(!enable);
-
-    CString seconds;
-    m_combo_seconds.GetWindowTextW(seconds);
-    network_->SetRoomRepeatChat(enable, seconds.GetBuffer(), chatmsg.GetBuffer());
+    // 激活机器设置
+    UpdateRobotSetting();
+    UpdateThanksSetting();
+    UpdateWelcomeSetting();
+    UpdateRepeatChatSetting();
 }
 
 // 送星星功能
@@ -1361,6 +1359,11 @@ void CAntiFloodDlg::OnBnClickedChkHandleAll()
 
 void CAntiFloodDlg::OnBnClickedChkRobot()
 {
+    UpdateRobotSetting();
+}
+
+void CAntiFloodDlg::UpdateRobotSetting()
+{
     bool enablerobot = !!m_chk_robot.GetCheck();
     if (!network_)
         return;
@@ -1393,6 +1396,11 @@ void CAntiFloodDlg::OnBnClickedChkRobot()
 
 void CAntiFloodDlg::OnBnClickedChkThanks()
 {
+    UpdateThanksSetting();
+}
+
+void CAntiFloodDlg::UpdateThanksSetting()
+{
     if (!network_)
         return;
 
@@ -1423,6 +1431,11 @@ void CAntiFloodDlg::OnBnClickedChkThanks()
 
 void CAntiFloodDlg::OnBnClickedChkWelcome()
 {
+    UpdateWelcomeSetting();
+}
+
+void CAntiFloodDlg::UpdateWelcomeSetting()
+{
     if (!network_)
         return;
 
@@ -1452,6 +1465,11 @@ void CAntiFloodDlg::OnBnClickedChkWelcome()
 }
 
 void CAntiFloodDlg::OnBnClickedChkRepeatChat()
+{
+    UpdateRepeatChatSetting();
+}
+
+void CAntiFloodDlg::UpdateRepeatChatSetting()
 {
     if (!network_)
         return;

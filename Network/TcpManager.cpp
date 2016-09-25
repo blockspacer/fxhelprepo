@@ -73,11 +73,6 @@ void TcpManager::DoAddClient(std::shared_ptr<TcpProxyClient> client,
     newcallbacks_[sock] = std::make_pair(client, callback);
     addcallback(true, sock);
 
-    //static bool recvbegin = false;
-    //if (recvbegin)
-    //    return;
-
-    //recvbegin = true;
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
                                                base::Bind(&TcpManager::DoRecv, this));
 }
@@ -117,7 +112,7 @@ void TcpManager::DoRecv()
             FD_SET(sock, &rfdset);
         }
 
-        timeval timeout = { 0, 100 };
+        timeval timeout = { 0, 1 };
         int ret = select(0, &rfdset, 0, 0, &timeout);
         if (ret == 0)//timeout
         {
@@ -162,7 +157,7 @@ void TcpManager::DoRecv()
         return;
 
     baseThread_.message_loop_proxy()->PostDelayedTask(
-        FROM_HERE, base::Bind(&TcpManager::DoRecv, this), base::TimeDelta::FromMilliseconds(100));
+        FROM_HERE, base::Bind(&TcpManager::DoRecv, this), base::TimeDelta::FromMilliseconds(1000));
 }
 
 void TcpManager::DoRemoveAllClient()
