@@ -41,13 +41,17 @@ public:
     AntiStrategy();
     ~AntiStrategy();
     HANDLE_TYPE GetUserHandleType(const std::string& nickname) const;
+    HANDLE_TYPE GetMessageHandleType(const std::string& message) const;
     HANDLE_TYPE GetHandleType() const;
     void SetHandleType(HANDLE_TYPE handletype);
 
+    bool AddSensitive(const std::string& sensitive);
+    bool RemoveSensitive(const std::string& sensitive);
     bool AddNickname(const std::string& vestname);
     bool RemoveNickname(const std::string& vestname);
 private:
     std::set<std::string> vestnames_;
+    std::set<std::string> sensitive_;
     HANDLE_TYPE handletype_ = HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 };
 
@@ -178,7 +182,8 @@ private:
     void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
         const RoomChatMessage& roomChatMessage);
     void TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo);
-    void TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo);
+    void TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo,
+        const RoomChatMessage& roomChatMessage);
 
     void RobotHandleEnterRoom(const EnterRoomUserInfo& enterRoomUserInfo);
     void RobotHandleChatMessage(const EnterRoomUserInfo& enterRoomUserInfo,

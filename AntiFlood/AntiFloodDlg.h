@@ -77,8 +77,9 @@ protected:
     afx_msg void OnBnClickedBtnAddToBlack();
     afx_msg void OnBnClickedBtnSaveBlack();
 
-    //自动处理消息区功能    
-    afx_msg void OnBnClickedBtnAddVest();
+    //自动处理消息区功能
+    afx_msg void OnBnClickedBtnSensitive(); // 增加敏感词
+    afx_msg void OnBnClickedBtnAddVest();   // 增加马甲
     afx_msg void OnBnClickedBtnRemoveVest();
     afx_msg void OnBnClickedRadioNoaction();
     afx_msg void OnBnClickedChkHandleAll();
@@ -182,4 +183,8 @@ private:
     CButton m_chk_repeat_chat;
     CComboBox m_combo_seconds;
     CEdit m_edit_auto_chat;   
+
+    // 敏感词处理
+    CEdit m_edit_sensitive;
+    CComboBox m_combo_handle_level;
 };

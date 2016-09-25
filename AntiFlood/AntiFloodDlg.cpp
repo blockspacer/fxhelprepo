@@ -35,7 +35,9 @@ namespace
     };
 
     const wchar_t* vestcolumnlist[] = {
-        L"马甲"
+        L"类别",
+        L"马甲",
+        L"发言特征"
     };
 
     const wchar_t* userstrategylist[] = {
@@ -133,6 +135,8 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_AUTO_CHAT, m_edit_auto_chat);
     DDX_Control(pDX, IDC_COMBO_THANKS, m_combo_thanks);
     DDX_Control(pDX, IDC_COMBO_WELCOME, m_combo_welcome);
+    DDX_Control(pDX, IDC_EDIT_SENSITIVE, m_edit_sensitive);
+    DDX_Control(pDX, IDC_COMBO_HANDLE_LEVEL, m_combo_handle_level);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -184,6 +188,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_CHK_REPEAT_CHAT, &CAntiFloodDlg::OnBnClickedChkRepeatChat)
     ON_BN_CLICKED(IDC_BTN_ADD_WELCOME, &CAntiFloodDlg::OnBnClickedBtnAddWelcome)
     ON_BN_CLICKED(IDC_BTN_REMOVE_WELCOME, &CAntiFloodDlg::OnBnClickedBtnRemoveWelcome)
+    ON_BN_CLICKED(IDC_BTN_SENSITIVE, &CAntiFloodDlg::OnBnClickedBtnSensitive)
 END_MESSAGE_MAP()
 
 
@@ -1264,6 +1269,36 @@ void CAntiFloodDlg::OnBnClickedCancel()
     CDialogEx::OnCancel();
 }
 
+void CAntiFloodDlg::OnBnClickedBtnSensitive()
+{
+    CString sensitive;
+    m_edit_sensitive.GetWindowTextW(sensitive);
+    std::string utfsensitive = base::WideToUTF8(sensitive.GetBuffer());
+    if (!antiStrategy_->AddSensitive(utfsensitive))
+        return; // 已经存在，不需要重新添加
+
+    int itemcount = m_list_vest.GetItemCount();
+    bool exist = false;
+    // 检测是否存在相同用户id
+    for (int index = 0; index < itemcount; index++)
+    {
+        CString text = m_list_vest.GetItemText(index, 2);
+        if (sensitive.CompareNoCase(text.GetBuffer()) == 0)
+        {
+            exist = true;
+            break;
+        }
+    }
+
+    if (!exist) // 如果不存在，需要插入新数据
+    {
+        int nitem = m_list_vest.InsertItem(itemcount + 1, L"敏感词");
+        //m_list_vest.SetItemText(nitem, 1, L"");
+        m_list_vest.SetItemText(nitem, 2, sensitive);
+        CString msg = sensitive + L"敏感词被加入到自动处理列表中";
+        Notify(msg.GetBuffer());
+    }
+}
 
 void CAntiFloodDlg::OnBnClickedBtnAddVest()
 {
@@ -1288,9 +1323,9 @@ void CAntiFloodDlg::OnBnClickedBtnAddVest()
 
     if (!exist) // 如果不存在，需要插入新数据
     {
-        int nitem = m_list_vest.InsertItem(itemcount + 1, vestname);
+        int nitem = m_list_vest.InsertItem(itemcount + 1, L"马甲");
         m_list_vest.SetItemText(nitem, 1, vestname);
-        CString msg = vestname + L"被加入到自动处理列表中";
+        CString msg = vestname + L"马甲被加入到自动处理列表中";
         Notify(msg.GetBuffer());
     }
 }
@@ -1309,6 +1344,11 @@ void CAntiFloodDlg::OnBnClickedBtnRemoveVest()
             CString itemtext = m_list_vest.GetItemText(i, 0);
             std::string utfvestname = base::WideToUTF8(itemtext.GetBuffer());
             antiStrategy_->RemoveNickname(utfvestname);
+
+            itemtext = m_list_vest.GetItemText(i, 1);
+            std::string utfsensitive = base::WideToUTF8(itemtext.GetBuffer());
+            antiStrategy_->RemoveSensitive(utfsensitive);
+
             // 删除已经勾选的记录
             m_list_vest.DeleteItem(i);
             CString msg = itemtext + L"被从自动处理列表中删除";
@@ -1587,3 +1627,4 @@ void CAntiFloodDlg::OnBnClickedBtnRemoveWelcome()
     }
     enterRoomStrategy_->SetWelcomeContent(welcome_info_map);
 }
+

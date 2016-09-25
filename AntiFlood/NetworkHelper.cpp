@@ -55,6 +55,16 @@ HANDLE_TYPE AntiStrategy::GetUserHandleType(const std::string& nickname) const
     return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 }
 
+HANDLE_TYPE AntiStrategy::GetMessageHandleType(const std::string& message) const
+{
+    for (const auto& it : sensitive_)
+    {
+        if (message.find(it) != std::string::npos)
+            return handletype_;
+    }
+    return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
+}
+
 HANDLE_TYPE AntiStrategy::GetHandleType() const
 {
     return handletype_;
@@ -63,6 +73,26 @@ HANDLE_TYPE AntiStrategy::GetHandleType() const
 void AntiStrategy::SetHandleType(HANDLE_TYPE handletype)
 {
     handletype_ = handletype;
+}
+
+bool AntiStrategy::AddSensitive(const std::string& sensitive)
+{
+    if (sensitive_.end() != sensitive_.find(sensitive))
+    {
+        return false;
+    }
+    sensitive_.insert(sensitive);
+    return true;
+}
+
+bool AntiStrategy::RemoveSensitive(const std::string& sensitive)
+{
+    auto it = sensitive_.find(sensitive);
+    if (it == sensitive_.end())
+        return false;
+
+    sensitive_.erase(it);
+    return true;
 }
 
 bool AntiStrategy::AddNickname(const std::string& vestname)
@@ -705,7 +735,7 @@ void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo
 {
     TryHandleUser(enterRoomUserInfo);
     RobotHandleChatMessage(enterRoomUserInfo, roomChatMessage);
-    TryHandle501Msg(enterRoomUserInfo);
+    TryHandle501Msg(enterRoomUserInfo, roomChatMessage);
     if (!notify501_)
         return;
 
@@ -732,12 +762,13 @@ void NetworkHelper::TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo)
     assert(result);
 }
 
-void NetworkHelper::TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo)
+void NetworkHelper::TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo,
+    const RoomChatMessage& roomChatMessage)
 {
     if (!handleall501_)
         return;
 
-    HANDLE_TYPE handletype = antiStrategy_->GetHandleType();
+    HANDLE_TYPE handletype = antiStrategy_->GetMessageHandleType(roomChatMessage.chatmessage);
     bool result = true;
     switch (handletype)
     {
