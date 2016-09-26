@@ -238,7 +238,8 @@ bool GiftStrategy::GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* 
     uint32 gift_value = 0;
     if (it != giftmap_.end()) // 如果在礼物列表能找到，就判断价值，如果找不到直接感谢
     {
-        gift_value = giftinfo.giftid * it->second.price;
+        gift_value = giftinfo.gitfnumber * it->second.price;
+        LOG(INFO) << __FUNCTION__ << L"gift value = [" << base::UintToString16(gift_value) << L" / " << base::UintToString16(gift_value_)<< L"]";
         if (gift_value < gift_value_) // 价值少于设置点的，不发送感谢
             return false;
     }
@@ -384,6 +385,8 @@ bool EnterRoomStrategy::GetEnterWelcome(const EnterRoomUserInfo& enterinfo,
 {
     if (!welcome_flag_)
         return false;
+
+    LOG(INFO) << __FUNCTION__ << L"rich level = " << base::UintToString16(enterinfo.richlevel) << L" / " << base::UintToString16(welcome_level_) << L"]";
 
     if (enterinfo.richlevel < welcome_level_)//等级低于指定等级的不设置欢迎
         return false;
