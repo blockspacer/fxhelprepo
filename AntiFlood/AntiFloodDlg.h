@@ -187,4 +187,8 @@ private:
     // √Ù∏–¥ ¥¶¿Ì
     CEdit m_edit_sensitive;
     CComboBox m_combo_handle_level;
+
+    CButton m_btn_add_sensitive;
+    CButton m_btn_add_vest;
+    CButton m_btn_remove_vest_sensitive;
 };

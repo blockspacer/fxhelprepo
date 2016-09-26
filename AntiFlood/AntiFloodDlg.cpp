@@ -137,6 +137,9 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_COMBO_WELCOME, m_combo_welcome);
     DDX_Control(pDX, IDC_EDIT_SENSITIVE, m_edit_sensitive);
     DDX_Control(pDX, IDC_COMBO_HANDLE_LEVEL, m_combo_handle_level);
+    DDX_Control(pDX, IDC_BTN_SENSITIVE, m_btn_add_sensitive);
+    DDX_Control(pDX, IDC_BTN_ADD_VEST, m_btn_add_vest);
+    DDX_Control(pDX, IDC_BTN_REMOVE_VEST, m_btn_remove_vest_sensitive);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -1406,6 +1409,11 @@ void CAntiFloodDlg::OnBnClickedRadioNoaction()
         antiStrategy_->SetHandleType(HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE);
         break;
     }
+
+    m_combo_handle_level.EnableWindow(!m_radiogroup);
+    m_btn_add_sensitive.EnableWindow(!m_radiogroup);
+    m_btn_add_vest.EnableWindow(!m_radiogroup);
+    m_btn_remove_vest_sensitive.EnableWindow(!m_radiogroup);
 }
 
 
@@ -1414,6 +1422,15 @@ void CAntiFloodDlg::OnBnClickedChkHandleAll()
     bool handleall = !!m_chk_handle_all.GetCheck();
     if (!network_)
         return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        m_chk_handle_all.SetCheck(FALSE);
+        Notify(NOPRIVILEGE_NOTICE);
+        Notify(privilegeMsg);
+        return;
+    }
 
     CString cs_handle_level;
     m_combo_handle_level.GetWindowTextW(cs_handle_level);
