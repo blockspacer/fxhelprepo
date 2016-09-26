@@ -73,8 +73,11 @@ HANDLE_TYPE AntiStrategy::GetMessageHandleType(uint32 rich_level,
     return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 }
 
-HANDLE_TYPE AntiStrategy::GetHandleType() const
+HANDLE_TYPE AntiStrategy::GetHandleType(uint32 rich_level) const
 {
+    if (rich_level >= rich_level_)// 指定等级以上的不处理
+        return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
+
     return handletype_;
 }
 
@@ -787,11 +790,17 @@ void NetworkHelper::TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo)
 void NetworkHelper::TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo,
     const RoomChatMessage& roomChatMessage)
 {
-    if (!handleall501_)
-        return;
+    HANDLE_TYPE handletype = HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 
-    HANDLE_TYPE handletype = antiStrategy_->GetMessageHandleType(
-        enterRoomUserInfo.richlevel, roomChatMessage.chatmessage);
+    if (!handleall501_) // 仅处理关键词
+    {
+        handletype = antiStrategy_->GetMessageHandleType(
+            enterRoomUserInfo.richlevel, roomChatMessage.chatmessage);
+    }
+    else
+    {
+        handletype = antiStrategy_->GetHandleType(enterRoomUserInfo.richlevel);
+    }
 
     bool result = true;
     switch (handletype)

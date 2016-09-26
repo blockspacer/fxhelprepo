@@ -42,7 +42,7 @@ public:
     ~AntiStrategy();
     HANDLE_TYPE GetUserHandleType(uint32 rich_level, const std::string& nickname) const;
     HANDLE_TYPE GetMessageHandleType(uint32 rich_level, const std::string& message) const;
-    HANDLE_TYPE GetHandleType() const;
+    HANDLE_TYPE GetHandleType(uint32 rich_level) const;
     void SetHandleType(HANDLE_TYPE handletype);
     void SetHandleRichLevel(uint32 rich_level);
 

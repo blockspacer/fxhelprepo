@@ -10,6 +10,7 @@
 #include "third_party/json/json.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/strings/sys_string_conversions.h"
 #include "third_party/chromium/base/message_loop/message_loop.h"
 #include "third_party/chromium/base/bind.h"
 #include "third_party/chromium/base/base64.h"
@@ -815,6 +816,9 @@ bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint3
     std::vector<char> msg;
     msg.assign(data.begin(), data.end());
 
+    std::wstring ws_message = base::UTF8ToWide(message);
+    LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(ws_message, 936);
+
     return baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg));
 }
@@ -834,6 +838,9 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
     std::string data = writer.write(root);
     std::vector<char> msg;
     msg.assign(data.begin(), data.end());
+
+    std::wstring message = base::UTF8ToWide(roomChatMessage.chatmessage);
+    LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(message, 936);
 
     return baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg));
