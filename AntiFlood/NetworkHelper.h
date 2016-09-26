@@ -40,6 +40,10 @@ class AntiStrategy
 public:
     AntiStrategy();
     ~AntiStrategy();
+
+    bool AntiStrategy::LoadAntiSetting(std::vector<RowData>* rowdatas);
+    bool AntiStrategy::SaveAntiSetting() const;
+
     HANDLE_TYPE GetUserHandleType(uint32 rich_level, const std::string& nickname) const;
     HANDLE_TYPE GetMessageHandleType(uint32 rich_level, const std::string& message) const;
     HANDLE_TYPE GetHandleType(uint32 rich_level) const;
@@ -50,9 +54,10 @@ public:
     bool RemoveSensitive(const std::string& sensitive);
     bool AddNickname(const std::string& vestname);
     bool RemoveNickname(const std::string& vestname);
+
 private:
     std::set<std::string> vestnames_;
-    std::set<std::string> sensitive_;
+    std::set<std::string> sensitives_;
     HANDLE_TYPE handletype_ = HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
     uint32 rich_level_ = 3;
 };

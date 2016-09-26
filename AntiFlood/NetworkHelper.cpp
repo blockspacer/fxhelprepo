@@ -21,6 +21,8 @@
 
 namespace
 {
+    const wchar_t* filename = L"AntiVestSensitive.txt";
+
     RowData EnterRoomUserInfoToRowdata(const EnterRoomUserInfo& enterRoomUserInfo)
     {
         RowData rowdata;
@@ -42,7 +44,116 @@ AntiStrategy::AntiStrategy()
 
 AntiStrategy::~AntiStrategy()
 {
+    SaveAntiSetting();
+}
 
+bool AntiStrategy::LoadAntiSetting(std::vector<RowData>* rowdatas)
+{
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    base::FilePath pathname = dirPath.Append(filename);
+
+    std::ifstream ovrifs;
+    ovrifs.open(pathname.value());
+    if (!ovrifs)
+        return false;
+
+    std::stringstream ss;
+    ss << ovrifs.rdbuf();
+    if (ss.str().empty())
+        return false;
+
+    std::string data = ss.str();
+    try
+    {
+        Json::Reader reader;
+        Json::Value root(Json::objectValue);
+        if (!Json::Reader().parse(data.c_str(), root))
+        {
+            assert(false && L"Json::Reader().parse error");
+            return false;
+        }
+
+        if (!root.isArray())
+        {
+            assert(false && L"root is not array");
+            return false;
+        }
+
+        for (const auto& value : root)//for data
+        {
+            Json::Value temp;
+            std::string vestname = value.get("vestname", "vestname").asString();
+            std::string sensitive = value.get("sensitive", "sensitive").asString();
+            if (!vestname.empty())
+                vestnames_.insert(vestname);
+
+            if (!sensitive.empty())
+                sensitives_.insert(sensitive);
+        }
+    }
+    catch (...)
+    {
+        return false;
+    }
+
+    for (const auto& vestname : vestnames_)
+    {
+        RowData rawdata;
+        rawdata.push_back(L"马甲");
+        rawdata.push_back(base::UTF8ToWide(vestname));
+        rawdata.push_back(L"");
+        rowdatas->push_back(rawdata);
+    }
+
+    for (const auto& sensitive : sensitives_)
+    {
+        RowData rawdata;
+        rawdata.push_back(L"敏感词");
+        rawdata.push_back(L"");
+        rawdata.push_back(base::UTF8ToWide(sensitive));
+        rowdatas->push_back(rawdata);
+    }
+
+    return true;
+}
+
+bool AntiStrategy::SaveAntiSetting() const
+{
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    base::FilePath pathname = dirPath.Append(filename);
+
+    Json::FastWriter writer;
+    Json::Value root(Json::arrayValue);
+
+    for (const auto& vestname : vestnames_)
+    {
+        Json::Value vestinfo(Json::objectValue);
+        vestinfo["vestname"] = vestname;
+        vestinfo["sensitive"] = "";
+        root.append(vestinfo);
+    }
+
+    for (const auto& sensitive : sensitives_)
+    {
+        Json::Value vestinfo(Json::objectValue);
+        vestinfo["vestname"] = "";
+        vestinfo["sensitive"] = sensitive;
+        root.append(vestinfo);
+    }
+
+    std::string writestring = writer.write(root);
+
+    std::ofstream ofs(pathname.value(), std::ios_base::out);
+    if (!ofs)
+        return false;
+
+    ofs << writestring;
+    ofs.flush();
+    ofs.close();
+
+    return true;
 }
 
 HANDLE_TYPE AntiStrategy::GetUserHandleType(uint32 rich_level,
@@ -65,7 +176,7 @@ HANDLE_TYPE AntiStrategy::GetMessageHandleType(uint32 rich_level,
     if (rich_level >= rich_level_)// 指定等级以上的不处理
         return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 
-    for (const auto& it : sensitive_)
+    for (const auto& it : sensitives_)
     {
         if (message.find(it) != std::string::npos)
             return handletype_;
@@ -93,21 +204,21 @@ void AntiStrategy::SetHandleRichLevel(uint32 rich_level)
 
 bool AntiStrategy::AddSensitive(const std::string& sensitive)
 {
-    if (sensitive_.end() != sensitive_.find(sensitive))
+    if (sensitives_.end() != sensitives_.find(sensitive))
     {
         return false;
     }
-    sensitive_.insert(sensitive);
+    sensitives_.insert(sensitive);
     return true;
 }
 
 bool AntiStrategy::RemoveSensitive(const std::string& sensitive)
 {
-    auto it = sensitive_.find(sensitive);
-    if (it == sensitive_.end())
+    auto it = sensitives_.find(sensitive);
+    if (it == sensitives_.end())
         return false;
 
-    sensitive_.erase(it);
+    sensitives_.erase(it);
     return true;
 }
 
@@ -719,6 +830,13 @@ bool NetworkHelper::GetActionPrivilege(std::wstring* message)
 // messageNotifyManager_ 线程回调
 void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& roomgiftinfo601)
 {
+    std::wstring message;
+    if (!GetActionPrivilege(&message))
+    {
+        LOG(INFO) << __FUNCTION__ << message.c_str();
+        return;
+    }
+
     if (!roomgiftinfo601.token.empty())
     {
         // 原本是抢币的动作，目前不做这类功能
@@ -733,6 +851,20 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
 
 void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    if (notify201_)
+    {
+        enterRoomUserInfoMap_[enterRoomUserInfo.userid] = enterRoomUserInfo;
+        RowData rowdata = EnterRoomUserInfoToRowdata(enterRoomUserInfo);
+        notify201_(rowdata);
+    }
+
+    std::wstring message;
+    if (!GetActionPrivilege(&message))
+    {
+        LOG(INFO)<<__FUNCTION__<< message.c_str();
+        return;
+    }
+
     TryHandleUser(enterRoomUserInfo);
 
     std::wstring chatmsg;
@@ -740,27 +872,28 @@ void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo
     {
         user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
     }
-
-    if (!notify201_)
-        return;
-
-    enterRoomUserInfoMap_[enterRoomUserInfo.userid] = enterRoomUserInfo;
-    RowData rowdata = EnterRoomUserInfoToRowdata(enterRoomUserInfo);
-    notify201_(rowdata);
 }
 
 void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
     const RoomChatMessage& roomChatMessage)
 {
+    if (notify501_)
+    {
+        enterRoomUserInfoMap_[enterRoomUserInfo.userid] = enterRoomUserInfo;
+        RowData rowdata = EnterRoomUserInfoToRowdata(enterRoomUserInfo);
+        notify501_(rowdata);
+    }
+
+    std::wstring message;
+    if (!GetActionPrivilege(&message))
+    {
+        LOG(INFO) << __FUNCTION__ << message.c_str();
+        return;
+    }
+    
     TryHandleUser(enterRoomUserInfo);
     RobotHandleChatMessage(enterRoomUserInfo, roomChatMessage);
     TryHandle501Msg(enterRoomUserInfo, roomChatMessage);
-    if (!notify501_)
-        return;
-
-    enterRoomUserInfoMap_[enterRoomUserInfo.userid] = enterRoomUserInfo;
-    RowData rowdata = EnterRoomUserInfoToRowdata(enterRoomUserInfo);
-    notify501_(rowdata);
 }
 
 void NetworkHelper::SetHandleRichLevel(uint32 rich_level)
@@ -770,6 +903,9 @@ void NetworkHelper::SetHandleRichLevel(uint32 rich_level)
 
 void NetworkHelper::TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo)
 {
+    if (enterRoomUserInfo.isAdmin)// 不处理管理员
+        return;
+
     HANDLE_TYPE handletype = antiStrategy_->GetUserHandleType(
         enterRoomUserInfo.richlevel, enterRoomUserInfo.nickname);
     bool result = true;
@@ -790,6 +926,9 @@ void NetworkHelper::TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo)
 void NetworkHelper::TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo,
     const RoomChatMessage& roomChatMessage)
 {
+    if (enterRoomUserInfo.isAdmin)// 不处理管理员
+        return;
+
     HANDLE_TYPE handletype = HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 
     if (!handleall501_) // 仅处理关键词

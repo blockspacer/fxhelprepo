@@ -272,6 +272,18 @@ BOOL CAntiFloodDlg::OnInitDialog()
     for (const auto& it : vestcolumnlist)
         m_list_vest.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列   
     m_radiogroup = 1;
+    std::vector<RowData> rowdatas;
+    antiStrategy_->LoadAntiSetting(&rowdatas);
+    int itemcount = m_list_vest.GetItemCount();
+    for (const auto& rowdata : rowdatas)
+    {
+        int nitem = m_list_vest.InsertItem(itemcount + 1, L"敏感词");
+        int index = 0;
+        for (const auto& column : rowdata)
+        {
+            m_list_vest.SetItemText(nitem, index++, column.c_str());
+        }
+    }
 
     m_combo_handle_level.AddString(L"1");
     m_combo_handle_level.AddString(L"3");
@@ -1299,7 +1311,6 @@ void CAntiFloodDlg::OnBnClickedBtnSensitive()
     if (!exist) // 如果不存在，需要插入新数据
     {
         int nitem = m_list_vest.InsertItem(itemcount + 1, L"敏感词");
-        //m_list_vest.SetItemText(nitem, 1, L"");
         m_list_vest.SetItemText(nitem, 2, sensitive);
         CString msg = sensitive + L"敏感词被加入到自动处理列表中";
         Notify(msg.GetBuffer());
