@@ -122,7 +122,7 @@ void TcpManager::DoRecv()
         {
             int errorcode = WSAGetLastError();
             LOG(ERROR) << base::IntToString(errorcode);
-            break;
+            //break;
         }
 
         std::set<SocketHandle> eraseset;
