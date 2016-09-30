@@ -24,7 +24,8 @@ CAuthorityServerDlg::CAuthorityServerDlg(CWnd* pParent /*=NULL*/)
 
 void CAuthorityServerDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+    CDialogEx::DoDataExchange(pDX);
+    DDX_Control(pDX, IDC_LIST_MSG, m_list_msg);
 }
 
 BEGIN_MESSAGE_MAP(CAuthorityServerDlg, CDialogEx)
