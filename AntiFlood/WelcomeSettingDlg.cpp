@@ -12,7 +12,7 @@
 IMPLEMENT_DYNAMIC(WelcomeSettingDlg, CDialogEx)
 
 WelcomeSettingDlg::WelcomeSettingDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(WelcomeSettingDlg::IDD, pParent)
+    : CDialogEx(WelcomeSettingDlg::IDD, pParent)
 {
 
 }

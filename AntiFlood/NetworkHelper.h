@@ -108,6 +108,7 @@ public:
 
     void SetWelcomeFlag(bool enable);
     void SetWelcomeLevel(uint32 level);
+    void SetWelcomeVipV(bool enable);
     void SetWelcomeContent(const std::map<uint32, WelcomeInfo>& special_welcome);
     void GetWelcomeContent(std::map<uint32, WelcomeInfo>* special_welcome);
     bool GetEnterWelcome(const EnterRoomUserInfo& enterinfo, std::wstring* chatmessage);
@@ -117,6 +118,7 @@ private:
     bool LoadWelcomeContent(std::map<uint32, WelcomeInfo>* special_welcome);
     bool welcome_flag_ = false;
     uint32 welcome_level_ = 0;
+    bool vip_v_ = false;
     base::Lock welcome_lock_;
     std::map<uint32, WelcomeInfo> welcome_info_map_;
 };

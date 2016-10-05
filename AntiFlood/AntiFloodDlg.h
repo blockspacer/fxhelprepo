@@ -22,7 +22,7 @@ public:
     virtual ~CAntiFloodDlg();
 
 // 对话框数据
-	enum { IDD = IDD_FANXING_DIALOG };
+    enum { IDD = IDD_FANXING_DIALOG };
 
     enum
     {
@@ -31,7 +31,7 @@ public:
         WM_USER_ADD_TO_BLACK_LIST = WM_USER + 3,
     };
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
     // 生成的消息映射函数
     virtual BOOL OnInitDialog();
     virtual void OnOK();
@@ -119,7 +119,7 @@ private:
     bool LoginByRequest(const std::wstring& username, 
         const std::wstring& password, const std::wstring& verifycode);
     bool RefreshVerifyCode();
-	bool GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
+    bool GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
     bool GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
     bool KickOut_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos,
         KICK_TYPE kicktype);
@@ -191,4 +191,7 @@ private:
     CButton m_btn_add_sensitive;
     CButton m_btn_add_vest;
     CButton m_btn_remove_vest_sensitive;
+public:
+    afx_msg void OnBnClickedChkCheckVipV();
+    CButton m_chk_vip_v;
 };

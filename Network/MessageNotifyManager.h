@@ -23,6 +23,7 @@ struct EnterRoomUserInfo
     uint32 roomid = 0;
     uint32 unixtime = 0;
     uint32 userid = 0;
+	bool vip_v = false; // vipData中v字段中 1为普通vip, 2为白金vip，是隐身功能的。这里bool只做判断是否隐身使用
     bool isAdmin = false;
     bool isUserGuard = false;
     bool isGoldFans = false;

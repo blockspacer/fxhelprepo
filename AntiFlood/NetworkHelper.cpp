@@ -387,6 +387,11 @@ void EnterRoomStrategy::SetWelcomeLevel(uint32 level)
     welcome_level_ = level;
 }
 
+void EnterRoomStrategy::SetWelcomeVipV(bool enable)
+{
+    vip_v_ = enable;
+}
+
 void EnterRoomStrategy::SetWelcomeContent(
     const std::map<uint32, WelcomeInfo>& special_welcome)
 {
@@ -504,6 +509,13 @@ bool EnterRoomStrategy::GetEnterWelcome(const EnterRoomUserInfo& enterinfo,
 
     if (enterinfo.richlevel < welcome_level_)//等级低于指定等级的不设置欢迎
         return false;
+
+    if (!vip_v_ && enterinfo.vip_v) // 如果用户是白金vip,并且主播没有设置识别隐身用户,则不欢迎.
+    {
+        *chatmessage = L"欢迎神秘嘉宾";
+        return false;
+    }
+
 
     std::wstring msg;
     base::AutoLock lock(welcome_lock_);
@@ -742,7 +754,7 @@ void NetworkHelper::NotifyCallback(const std::wstring& message)
 
 bool NetworkHelper::KickoutUsers(KICK_TYPE kicktype, uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
 {
-	return user_->KickoutUser(kicktype, roomid, enterRoomUserInfo);;
+    return user_->KickoutUser(kicktype, roomid, enterRoomUserInfo);;
 }
 
 bool NetworkHelper::BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)

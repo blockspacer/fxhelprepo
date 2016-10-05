@@ -52,17 +52,17 @@ namespace
 class CAboutDlg : public CDialogEx
 {
 public:
-	CAboutDlg();
+    CAboutDlg();
 
 // 对话框数据
-	enum { IDD = IDD_ABOUTBOX };
+    enum { IDD = IDD_ABOUTBOX };
 
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
+    protected:
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
 // 实现
 protected:
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
@@ -71,7 +71,7 @@ CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+    CDialogEx::DoDataExchange(pDX);
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
@@ -83,7 +83,7 @@ END_MESSAGE_MAP()
 #define NOPRIVILEGE_NOTICE L"你没有操作权限"
 
 CAntiFloodDlg::CAntiFloodDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(CAntiFloodDlg::IDD, pParent)
+    : CDialogEx(CAntiFloodDlg::IDD, pParent)
     , network_(nullptr)
     , blacklistHelper_(nullptr)
     , infoListCount_(0)
@@ -95,7 +95,7 @@ CAntiFloodDlg::CAntiFloodDlg(CWnd* pParent /*=NULL*/)
     giftStrategy_.reset(new GiftStrategy);
     enterRoomStrategy_.reset(new EnterRoomStrategy);
 
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
+    m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME); 
 }
 
 CAntiFloodDlg::~CAntiFloodDlg()
@@ -140,6 +140,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_BTN_SENSITIVE, m_btn_add_sensitive);
     DDX_Control(pDX, IDC_BTN_ADD_VEST, m_btn_add_vest);
     DDX_Control(pDX, IDC_BTN_REMOVE_VEST, m_btn_remove_vest_sensitive);
+    DDX_Control(pDX, IDC_CHK_CHECK_VIP_V, m_chk_vip_v);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -192,6 +193,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_ADD_WELCOME, &CAntiFloodDlg::OnBnClickedBtnAddWelcome)
     ON_BN_CLICKED(IDC_BTN_REMOVE_WELCOME, &CAntiFloodDlg::OnBnClickedBtnRemoveWelcome)
     ON_BN_CLICKED(IDC_BTN_SENSITIVE, &CAntiFloodDlg::OnBnClickedBtnSensitive)
+    ON_BN_CLICKED(IDC_CHK_CHECK_VIP_V, &CAntiFloodDlg::OnBnClickedChkCheckVipV)
 END_MESSAGE_MAP()
 
 
@@ -199,32 +201,32 @@ END_MESSAGE_MAP()
 
 BOOL CAntiFloodDlg::OnInitDialog()
 {
-	CDialogEx::OnInitDialog();
+    CDialogEx::OnInitDialog();
 
-	// 将“关于...”菜单项添加到系统菜单中。
+    // 将“关于...”菜单项添加到系统菜单中。
 
-	// IDM_ABOUTBOX 必须在系统命令范围内。
-	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
-	ASSERT(IDM_ABOUTBOX < 0xF000);
+    // IDM_ABOUTBOX 必须在系统命令范围内。
+    ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
+    ASSERT(IDM_ABOUTBOX < 0xF000);
 
-	CMenu* pSysMenu = GetSystemMenu(FALSE);
-	if (pSysMenu != NULL)
-	{
-		BOOL bNameValid;
-		CString strAboutMenu;
-		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
-		ASSERT(bNameValid);
-		if (!strAboutMenu.IsEmpty())
-		{
-			pSysMenu->AppendMenu(MF_SEPARATOR);
-			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
-		}
-	}
+    CMenu* pSysMenu = GetSystemMenu(FALSE);
+    if (pSysMenu != NULL)
+    {
+        BOOL bNameValid;
+        CString strAboutMenu;
+        bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+        ASSERT(bNameValid);
+        if (!strAboutMenu.IsEmpty())
+        {
+            pSysMenu->AppendMenu(MF_SEPARATOR);
+            pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+        }
+    }
 
-	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
-	//  执行此操作
-	SetIcon(m_hIcon, TRUE);			// 设置大图标
-	SetIcon(m_hIcon, FALSE);		// 设置小图标
+    // 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
+    //  执行此操作
+    SetIcon(m_hIcon, TRUE);            // 设置大图标
+    SetIcon(m_hIcon, FALSE);        // 设置小图标
     SetDlgItemText(IDC_EDIT_NAV, L"0");
     SetDlgItemInt(IDC_EDIT_X, 0);
     SetDlgItemInt(IDC_EDIT_Y, 0);
@@ -362,20 +364,20 @@ BOOL CAntiFloodDlg::OnInitDialog()
     m_combo_welcome.SetWindowTextW(base::UintToString16(level).c_str());
     m_combo_welcome.EnableWindow(!enable_welcome);
 
-	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+    return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
 void CAntiFloodDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
-	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
-	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
-	}
-	else
-	{
-		CDialogEx::OnSysCommand(nID, lParam);
-	}
+    if ((nID & 0xFFF0) == IDM_ABOUTBOX)
+    {
+        CAboutDlg dlgAbout;
+        dlgAbout.DoModal();
+    }
+    else
+    {
+        CDialogEx::OnSysCommand(nID, lParam);
+    }
 }
 
 // 如果向对话框添加最小化按钮，则需要下面的代码
@@ -397,25 +399,25 @@ void CAntiFloodDlg::OnPaint()
         //CDialogEx::OnPaint();
     }
 
-	if (IsIconic())
-	{
-		CPaintDC dc(this); // 用于绘制的设备上下文
+    if (IsIconic())
+    {
+        CPaintDC dc(this); // 用于绘制的设备上下文
 
-		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+        SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
 
-		// 使图标在工作区矩形中居中
-		int cxIcon = GetSystemMetrics(SM_CXICON);
-		int cyIcon = GetSystemMetrics(SM_CYICON);
-		CRect rect;
-		GetClientRect(&rect);
-		int x = (rect.Width() - cxIcon + 1) / 2;
-		int y = (rect.Height() - cyIcon + 1) / 2;
+        // 使图标在工作区矩形中居中
+        int cxIcon = GetSystemMetrics(SM_CXICON);
+        int cyIcon = GetSystemMetrics(SM_CYICON);
+        CRect rect;
+        GetClientRect(&rect);
+        int x = (rect.Width() - cxIcon + 1) / 2;
+        int y = (rect.Height() - cyIcon + 1) / 2;
 
-		// 绘制图标
-		dc.DrawIcon(x, y, m_hIcon);
-	}
+        // 绘制图标
+        dc.DrawIcon(x, y, m_hIcon);
+    }
 
-	CDialogEx::OnPaint();
+    CDialogEx::OnPaint();
 }
 
 void CAntiFloodDlg::OnClose()
@@ -437,7 +439,7 @@ void CAntiFloodDlg::OnCancel()
 //显示。
 HCURSOR CAntiFloodDlg::OnQueryDragIcon()
 {
-	return static_cast<HCURSOR>(m_hIcon);
+    return static_cast<HCURSOR>(m_hIcon);
 }
 
 // 登录功能
@@ -668,30 +670,30 @@ bool CAntiFloodDlg::RefreshVerifyCode()
 
 bool CAntiFloodDlg::GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
 {
-	if (!enterRoomUserInfos)
-		return false;
+    if (!enterRoomUserInfos)
+        return false;
 
-	int count = m_ListCtrl_Viewers.GetItemCount();
-	for (int i = count - 1; i >= 0; --i)
-	{
-		if (m_ListCtrl_Viewers.GetCheck(i))
-		{
-			// 发送踢出房间的网络请求
-			EnterRoomUserInfo enterRoomUserInfo;
-			uint32 roomid = 0;
-			base::StringToUint(m_ListCtrl_Viewers.GetItemText(i, 4).GetBuffer(), &roomid);
-			enterRoomUserInfo.roomid = roomid_;
-			uint32 richlevel = 0;
-			base::StringToUint(m_ListCtrl_Viewers.GetItemText(i, 1).GetBuffer(), &richlevel);
-			enterRoomUserInfo.richlevel = richlevel;
-			enterRoomUserInfo.nickname = base::WideToUTF8(m_ListCtrl_Viewers.GetItemText(i, 0).GetBuffer());
-			uint32 userid = 0;
-			base::StringToUint(m_ListCtrl_Viewers.GetItemText(i, 2).GetBuffer(), &userid);
-			enterRoomUserInfo.userid = userid;
-			enterRoomUserInfos->push_back(enterRoomUserInfo);
-		}
-	}
-	return true;
+    int count = m_ListCtrl_Viewers.GetItemCount();
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_ListCtrl_Viewers.GetCheck(i))
+        {
+            // 发送踢出房间的网络请求
+            EnterRoomUserInfo enterRoomUserInfo;
+            uint32 roomid = 0;
+            base::StringToUint(m_ListCtrl_Viewers.GetItemText(i, 4).GetBuffer(), &roomid);
+            enterRoomUserInfo.roomid = roomid_;
+            uint32 richlevel = 0;
+            base::StringToUint(m_ListCtrl_Viewers.GetItemText(i, 1).GetBuffer(), &richlevel);
+            enterRoomUserInfo.richlevel = richlevel;
+            enterRoomUserInfo.nickname = base::WideToUTF8(m_ListCtrl_Viewers.GetItemText(i, 0).GetBuffer());
+            uint32 userid = 0;
+            base::StringToUint(m_ListCtrl_Viewers.GetItemText(i, 2).GetBuffer(), &userid);
+            enterRoomUserInfo.userid = userid;
+            enterRoomUserInfos->push_back(enterRoomUserInfo);
+        }
+    }
+    return true;
 }
 
 bool CAntiFloodDlg::GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos)
@@ -735,7 +737,7 @@ bool CAntiFloodDlg::KickOut_(
         }
         else
         {
-            // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
+            // 把要删除的消息发到日志记录列表上, id = 2 是用户id                
             msg += L"被踢出";
         }
         Notify(msg);
@@ -759,7 +761,7 @@ bool CAntiFloodDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUser
         }
         else
         {
-            // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
+            // 把要删除的消息发到日志记录列表上, id = 2 是用户id                
             msg += L"被禁言五分钟";
         }
         Notify(msg);
@@ -782,7 +784,7 @@ bool CAntiFloodDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUs
         }
         else
         {
-            // 把要删除的消息发到日志记录列表上, id = 2 是用户id				
+            // 把要删除的消息发到日志记录列表上, id = 2 是用户id                
             msg += L"被恢复发言";
         }
         Notify(msg);
@@ -1006,8 +1008,8 @@ void CAntiFloodDlg::OnBnClickedBtnKickoutMonth()
         Notify(NOPRIVILEGE_NOTICE);
         return;
     }
-	std::vector<EnterRoomUserInfo> enterRoomUserInfos;
-	GetSelectViewers(&enterRoomUserInfos);
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectViewers(&enterRoomUserInfos);
     KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_MONTH);
 }
 
@@ -1024,8 +1026,8 @@ void CAntiFloodDlg::OnBnClickedBtnKickoutHour()
         Notify(privilegeMsg);
         return;
     }
-	std::vector<EnterRoomUserInfo> enterRoomUserInfos;
-	GetSelectViewers(&enterRoomUserInfos);
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectViewers(&enterRoomUserInfos);
     KickOut_(enterRoomUserInfos, KICK_TYPE::KICK_TYPE_HOUR);
 }
 
@@ -1672,3 +1674,8 @@ void CAntiFloodDlg::OnBnClickedBtnRemoveWelcome()
     enterRoomStrategy_->SetWelcomeContent(welcome_info_map);
 }
 
+void CAntiFloodDlg::OnBnClickedChkCheckVipV()
+{
+    bool enable = !!m_chk_vip_v.GetCheck();
+    enterRoomStrategy_->SetWelcomeVipV(enable);
+}

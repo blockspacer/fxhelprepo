@@ -462,16 +462,38 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
             Json::Value extdata(Json::objectValue);
             if (reader.parse(decodeext, extdata, false))
             {
-                Json::Value stli = extdata.get("stli", jvDefault);
-                auto members = stli.getMemberNames();
-                for (const auto& member : members)
-                {
-                    if (member.compare("isAdmin")==0)
-                    {
-                        uint32 isAdmin = stli.get(member, 0).asInt();
-                        enterRoomUserInfo.isAdmin = !!isAdmin;
-                    }
-                }
+				auto extdata_members = extdata.getMemberNames();
+				for (const auto& extdata_member : extdata_members)
+				{
+					if (extdata_member.compare("stli") == 0)
+					{
+						Json::Value stli = extdata.get(extdata_member, jvDefault);
+						auto stli_members = stli.getMemberNames();
+						for (const auto& member : stli_members)
+						{
+							if (member.compare("isAdmin") == 0)
+							{
+								uint32 isAdmin = stli.get(member, 0).asInt();
+								enterRoomUserInfo.isAdmin = !!isAdmin;
+							}
+						}
+					}
+					else if (extdata_member.compare("vipData") == 0)
+					{
+						Json::Value vipData = extdata.get(extdata_member, jvDefault);
+						auto vipData_members = vipData.getMemberNames();
+						for (const auto& member : vipData_members)
+						{
+							if (member.compare("v") == 0)
+							{
+								uint32 vip_v = GetInt32FromJsonValue(vipData, member);
+								enterRoomUserInfo.vip_v = (vip_v == 2); // 2是白金vip, 进入房间是隐身的
+							}
+						}
+					}
+
+				}
+
             }
 
             auto jvArray = rootdata.get("userGuard", jvDefault);

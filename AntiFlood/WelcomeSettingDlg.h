@@ -6,23 +6,23 @@
 
 class WelcomeSettingDlg : public CDialogEx
 {
-	DECLARE_DYNAMIC(WelcomeSettingDlg)
+    DECLARE_DYNAMIC(WelcomeSettingDlg)
 
 public:
-	WelcomeSettingDlg(CWnd* pParent = NULL);   // 标准构造函数
-	virtual ~WelcomeSettingDlg();
+    WelcomeSettingDlg(CWnd* pParent = NULL);   // 标准构造函数
+    virtual ~WelcomeSettingDlg();
     afx_msg void OnBnClickedOk();
     afx_msg void OnBnClickedCancel();
 
     bool GetSettingInfo(std::wstring* fanxingid, std::wstring* name, 
         std::wstring* content) const;
 // 对话框数据
-	enum { IDD = IDD_WELCOME_SETTING };
+    enum { IDD = IDD_WELCOME_SETTING };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
+    virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
-	DECLARE_MESSAGE_MAP()
+    DECLARE_MESSAGE_MAP()
 
 private:
     CEdit m_edit_welcome_fanxingid;
