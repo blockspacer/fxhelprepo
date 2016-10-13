@@ -5,6 +5,7 @@
 #include "IpProxy.h"
 #include "TcpManager.h"
 #include "EncodeHelper.h"
+#include "ServerHelper.h"
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/json/json.h"
@@ -21,8 +22,7 @@ namespace
 {
 static int threadindex = 0;
 const uint32 char_millisecond_space = 2500;// 发言间隔使用2.5秒
-const char* targetip = "114.54.2.204";
-//const char* targetip = "114.54.2.205";
+
 const uint16 port843 = 843;
 const uint16 port8080 = 8080;
 struct cmd201package
@@ -323,7 +323,14 @@ void MessageNotifyManager::SetTcpManager(TcpManager* tcpManager)
 
 void MessageNotifyManager::SetServerIp(const std::string& serverip)
 {
-    serverip_ = serverip;
+    std::vector<std::string> hostips;
+    if (!ServerHelper::GetChatServerIp(&hostips))
+        return;
+
+    if (hostips.empty())
+        return;
+    
+    serverip_ = *hostips.begin();
 }
 
 void MessageNotifyManager::SetIpProxy(const IpProxy& ipproxy)
