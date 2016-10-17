@@ -11,7 +11,8 @@
 #include "Network/TcpManager.h"
 #include "Network/TcpClient.h"
 #include "afxdialogex.h"
-#
+
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -25,7 +26,8 @@ namespace{
         L"用户id",
         L"昵称",
         L"财富等级",
-        L"房间数"
+        L"星币",
+        L"免费票"
     };
 
     const wchar_t* roomcolumnlist[] = {
@@ -65,8 +67,8 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_USERS, m_ListCtrl_Users);
     DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
     DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
-    DDX_Control(pDX, IDC_EDIT_MV_COLLECTION_ID, m_mv_collection_id);
-    DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
+    //DDX_Control(pDX, IDC_EDIT_MV_COLLECTION_ID, m_mv_collection_id);
+    //DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
     DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
 }
 
@@ -82,8 +84,8 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_MESSAGE(WM_USER_ROOM_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToRoomList)
 
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CBatchLoginDlg::OnBnClickedBtnLogin)
-    ON_BN_CLICKED(IDC_BTN_UP_MV_BILLBOARD, &CBatchLoginDlg::OnBnClickedBtnUpMvBillboard)
     ON_BN_CLICKED(IDC_BTN_SAVE_USER_PWD_COOKIE, &CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie)
+    ON_NOTIFY(NM_CLICK, IDC_LIST_ROOM, &CBatchLoginDlg::OnNMClickListRoom)
 END_MESSAGE_MAP()
 
 
@@ -111,7 +113,7 @@ BOOL CBatchLoginDlg::OnInitDialog()
         m_ListCtrl_Users.DeleteColumn(i);
     uint32 index = 0;
     for (const auto& it : usercolumnlist)
-        m_ListCtrl_Users.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
+        m_ListCtrl_Users.InsertColumn(index++, it, LVCFMT_LEFT, 90);//插入列
 
 
     m_ListCtrl_Rooms.SetExtendedStyle(dwStyle); //设置扩展风格
@@ -121,7 +123,6 @@ BOOL CBatchLoginDlg::OnInitDialog()
     index = 0;
     for (const auto& it : roomcolumnlist)
         m_ListCtrl_Rooms.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
-
     
     m_list_proxy.SetExtendedStyle(dwStyle); //设置扩展风格
     nColumnCount = m_list_proxy.GetHeaderCtrl()->GetItemCount();
@@ -373,4 +374,19 @@ void CBatchLoginDlg::OnBnClickedBtnUpMvBillboard()
 void CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie()
 {
     userRoomManager_->SaveUserLoginConfig();
+}
+
+void CBatchLoginDlg::OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult)
+{
+    LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+    // TODO:  在此添加控件通知处理程序代码
+    int row_id = m_ListCtrl_Rooms.GetSelectionMark();
+    
+    assert(pNMItemActivate->iItem == row_id);
+
+    for (int i = 0; i < sizeof(roomcolumnlist) / sizeof(roomcolumnlist[0]);i++)
+    {
+        CString text = m_ListCtrl_Rooms.GetItemText(row_id, i);
+    }
+    *pResult = 0;
 }

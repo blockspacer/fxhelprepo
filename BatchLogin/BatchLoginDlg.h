@@ -49,6 +49,8 @@ protected:
     afx_msg void OnBnClickedBtnImportRoom();
     afx_msg void OnBnClickedBtnUpMvBillboard();
     afx_msg void OnBnClickedBtnSaveUserPwdCookie();
+    afx_msg void OnLvnItemchangedListRoom(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult);
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -69,5 +71,4 @@ private:
 
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;    
-
 };
