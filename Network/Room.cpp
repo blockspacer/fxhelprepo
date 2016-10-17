@@ -112,6 +112,60 @@ bool Room::GetGiftList(const std::string& cookies, std::string* content)
     return true;
 }
 
+// 主播繁星号, 礼物id, 数量, 房间号 _是时间
+// GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
+bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count)
+{
+    std::string url = "http://fanxing.kugou.com/";
+    url += "/UServices/GiftService/GiftService/sendGift";
+    HttpRequest request;
+    request.url = url;
+    std::string time_string = GetNowTimeString();
+    request.queries["d"] = time_string;
+    request.queries["args"] = "%5B%22" + base::UintToString(singerid_) +
+        "%22%2C%22" + base::UintToString(gift_id) + "%22%2C" + base::UintToString(gift_count) +
+        "%2C%22" + base::UintToString(roomid_) + "%22%2Cfalse%5D";
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid_);
+    request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    uint32 errorno = GetInt32FromJsonValue(rootdata, "errorno");
+    if (status != 1 || errorno!=0 )
+    {
+        assert(false && L"送礼物请求失败");
+        return false;
+    }
+    
+    return true;
+}
+
 bool Room::GetViewerList(const std::string& cookies,
     std::vector<EnterRoomUserInfo>* enterRoomUserInfoList)
 {
