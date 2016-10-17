@@ -859,6 +859,10 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
     {
         user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
     }
+    if (notify_)
+    {
+        notify_(chatmsg);
+    }
 }
 
 void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo)
@@ -883,6 +887,10 @@ void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo
     if (enterRoomStrategy_->GetEnterWelcome(enterRoomUserInfo, &chatmsg))
     {
         user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
+    }
+    if (notify_)
+    {
+        notify_(chatmsg);
     }
 }
 
