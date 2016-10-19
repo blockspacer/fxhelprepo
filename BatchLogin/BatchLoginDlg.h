@@ -51,6 +51,8 @@ protected:
     afx_msg void OnBnClickedBtnSaveUserPwdCookie();
     afx_msg void OnLvnItemchangedListRoom(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnBnClickedBtnSendAward();
+    afx_msg void OnBnClickedBtnLottery();
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -71,4 +73,5 @@ private:
 
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;    
+    CEdit m_roomid;
 };

@@ -70,6 +70,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     //DDX_Control(pDX, IDC_EDIT_MV_COLLECTION_ID, m_mv_collection_id);
     //DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
     DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
+    DDX_Control(pDX, IDC_EDIT_ROOMID, m_roomid);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -86,6 +87,8 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CBatchLoginDlg::OnBnClickedBtnLogin)
     ON_BN_CLICKED(IDC_BTN_SAVE_USER_PWD_COOKIE, &CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie)
     ON_NOTIFY(NM_CLICK, IDC_LIST_ROOM, &CBatchLoginDlg::OnNMClickListRoom)
+    ON_BN_CLICKED(IDC_BTN_SEND_AWARD, &CBatchLoginDlg::OnBnClickedBtnSendAward)
+    ON_BN_CLICKED(IDC_BTN_LOTTERY, &CBatchLoginDlg::OnBnClickedBtnLottery)
 END_MESSAGE_MAP()
 
 
@@ -314,16 +317,20 @@ void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 
 void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
 {
-    int itemcount = m_ListCtrl_Rooms.GetItemCount();
+    //int itemcount = m_ListCtrl_Rooms.GetItemCount();
+    //std::vector<std::wstring> roomids;
+    //for (int32 index = 0; index < itemcount; ++index)
+    //{
+    //    if (!!m_ListCtrl_Rooms.GetCheck(index))
+    //    {
+    //        CString roomid = m_ListCtrl_Rooms.GetItemText(index, 0);
+    //        roomids.push_back(roomid.GetBuffer());
+    //    }
+    //}
     std::vector<std::wstring> roomids;
-    for (int32 index = 0; index < itemcount; ++index)
-    {
-        if (!!m_ListCtrl_Rooms.GetCheck(index))
-        {
-            CString roomid = m_ListCtrl_Rooms.GetItemText(index, 0);
-            roomids.push_back(roomid.GetBuffer());
-        }
-    }
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+    roomids.push_back(cs_roomid.GetBuffer());
     userRoomManager_->FillRooms(roomids);
 }
 
@@ -389,4 +396,16 @@ void CBatchLoginDlg::OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult)
         CString text = m_ListCtrl_Rooms.GetItemText(row_id, i);
     }
     *pResult = 0;
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnSendAward()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnLottery()
+{
+    // TODO:  在此添加控件通知处理程序代码
 }
