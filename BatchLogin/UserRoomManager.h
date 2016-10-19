@@ -39,6 +39,11 @@ public:
 
     bool UpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
 
+    bool SendGifts(const std::vector<std::wstring>& users, const std::wstring& room_id,
+        uint32 gift_id, uint32 gift_count);
+
+    void SetBreakRequest(bool interrupt);
+
 protected:
     void Notify(const std::wstring& msg);
     void DoSaveUserLoginConfig();
@@ -48,12 +53,14 @@ protected:
     void FillSingleRoom(uint32 roomid);
 
     void DoUpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
-
+    void DoSendGifts(const std::vector<std::wstring>& users,
+        uint32 roomid, uint32 gift_id, uint32 gift_count);
 private:
     base::Thread workerThread_;
     std::function<void(std::wstring)> notify_ = nullptr;
     std::unique_ptr<UserController> userController_ = nullptr;
     std::unique_ptr<RoomController> roomController_ = nullptr;
     std::map<std::string, IpProxy> ipProxys_;
+    bool break_request_ = false;
 };
 

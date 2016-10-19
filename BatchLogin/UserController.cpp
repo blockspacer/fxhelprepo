@@ -4,6 +4,7 @@
 #include "Network/User.h"
 #include "Network/IpProxy.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 
 namespace
 {
@@ -89,12 +90,52 @@ bool UserController::GetUserLoginInfo(std::vector<UserLoginInfo>* userlogininfo)
     return true;
 }
 
-bool UserController::FillRoom(uint32 roomid, uint32 count)
+bool UserController::SendGifts(const std::vector<std::string>& accounts,
+    uint32 roomid, uint32 gift_id, uint32 gift_count,
+    const std::function<void(const std::wstring& msg)>& callback)
+{
+    for (const auto& account : accounts)
+    {
+        auto result =users_.find(account);
+        if (result == users_.end())
+        {
+            assert(false && L"找不到对应用户");
+            continue;
+        }
+        std::wstring msg = base::UTF8ToWide(result->first) + L" 赠送 [" + 
+            base::UintToString16(gift_count) + L"] 个 giftid = " + 
+            base::UintToString16(gift_id) + L" 礼物";
+        if (!result->second->SendGift(roomid, gift_id, gift_count))
+        {
+            msg += L"失败";
+        }
+        else
+        {
+            msg += L"成功";
+        }
+        callback(msg);
+    }
+    return true;
+}
+
+bool UserController::FillRoom(uint32 roomid, uint32 count,
+    const std::function<void(const std::wstring& msg)>& callback)
 {
     for (const auto& it : users_)
     {
-        Sleep(1000);
-        it.second->EnterRoomFopAlive(roomid);
+        Sleep(1);
+        //it.second->EnterRoomFopAlive(roomid);
+        // 年度需求, 需要获取到足够信息，但是不需要连接信息
+        std::wstring msg = base::UTF8ToWide(it.first) + L" 进入房间";
+        if (!it.second->EnterRoomFopOperation(roomid, nullptr))
+        {
+            msg += L"失败";
+        }
+        else
+        {
+            msg += L"成功";
+        }
+        callback(msg);
     }
     return true;
 }

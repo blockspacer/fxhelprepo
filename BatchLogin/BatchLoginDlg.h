@@ -60,6 +60,7 @@ private:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToUserList(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam);
+    bool SendGifts(uint32 gift_id);
 
     std::unique_ptr<UserRoomManager> userRoomManager_;
     std::unique_ptr<TcpManager> tcpManager_;
@@ -74,4 +75,8 @@ private:
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;    
     CEdit m_roomid;
+public:
+    afx_msg void OnBnClickedBtnSendSingle();
+    afx_msg void OnBnClickedBtnBreak();
+    CEdit m_gift_count;
 };

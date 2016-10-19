@@ -337,6 +337,18 @@ void RemoveSpace(std::string* str)
         str->erase(pos, 1);
         pos = str->find(' ');
     }
+    pos = str->find('\r');
+    while (pos != std::string::npos)
+    {
+        str->erase(pos, 1);
+        pos = str->find('\r');
+    }
+    pos = str->find('\n');
+    while (pos != std::string::npos)
+    {
+        str->erase(pos, 1);
+        pos = str->find('\n');
+    }
 }
 
 uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name)

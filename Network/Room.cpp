@@ -52,13 +52,14 @@ bool Room::EnterForOperation(const std::string& cookies,
     if (!GetStarInfo(cookies))
         return false;
 
-    GetStarGuard();
+    // 年度大奖需求，不需要连接房间
+    //GetStarGuard();
 
-    if (!EnterRoom(cookies, userid, usertoken))
-        return false;
-    
-    if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
-        return false;
+    //if (!EnterRoom(cookies, userid, usertoken))
+    //    return false;
+    //
+    //if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
+    //    return false;
 
     if (singer_clanid)
         *singer_clanid = clanid_;
@@ -116,6 +117,9 @@ bool Room::GetGiftList(const std::string& cookies, std::string* content)
 // GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
 bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count)
 {
+    assert(singerid_);
+    assert(roomid_);
+
     std::string url = "http://fanxing.kugou.com/";
     url += "/UServices/GiftService/GiftService/sendGift";
     HttpRequest request;
@@ -466,7 +470,7 @@ bool Room::OpenRoom(const std::string& cookies)
 
     for (const auto& it : response.cookies)
     {
-        assert(false && L"这里应该是不会设置cookie的");
+        //assert(false && L"这里应该是不会设置cookie的");
         cookiesHelper_->SetCookies(it);
     }
 

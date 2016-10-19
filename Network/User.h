@@ -86,7 +86,7 @@ public:
     bool RequestRobot(uint32 senderid, const std::string& request, std::string* response);
     bool SendStar(uint32 count);
     bool RetrieveStart();
-    bool SendGift(uint32 giftid);
+    bool SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count);
 
     bool GetGiftList(uint32 roomid, std::string* content);
     bool GetViewerList(uint32 roomid, 
@@ -96,7 +96,12 @@ public:
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
-    
+
+    bool GetAnnualInfo(std::string* username, uint32 coin_count,
+        uint32* award_count, uint32* single_count) const;
+    bool AchriveFreeTickets(uint32* award_count, uint32* single_count);
+    bool SendTickets(uint32 gift_id, uint32 count);
+
 private:
     bool CheckVerifyCode(const std::string& verifycode, std::string* errormsg);
     bool LoginHttps(const std::string& username, const std::string& password, 
@@ -134,5 +139,9 @@ private:
     Notify201 notify201_;
     Notify501 notify501_;
     Notify601 notify601_;
+
+    // 年度活动需求，记录当前免费的大奖票和单项票数据
+    uint32 awards_ticket_count_;
+    uint32 single_ticket_count_;
 };
 

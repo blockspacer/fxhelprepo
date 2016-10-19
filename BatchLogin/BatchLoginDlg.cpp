@@ -13,6 +13,7 @@
 #include "afxdialogex.h"
 
 #include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,10 +68,9 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_USERS, m_ListCtrl_Users);
     DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
     DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
-    //DDX_Control(pDX, IDC_EDIT_MV_COLLECTION_ID, m_mv_collection_id);
-    //DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
     DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
     DDX_Control(pDX, IDC_EDIT_ROOMID, m_roomid);
+    DDX_Control(pDX, IDC_EDIT_GIFT_COUNT, m_gift_count);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -89,6 +89,8 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_NOTIFY(NM_CLICK, IDC_LIST_ROOM, &CBatchLoginDlg::OnNMClickListRoom)
     ON_BN_CLICKED(IDC_BTN_SEND_AWARD, &CBatchLoginDlg::OnBnClickedBtnSendAward)
     ON_BN_CLICKED(IDC_BTN_LOTTERY, &CBatchLoginDlg::OnBnClickedBtnLottery)
+    ON_BN_CLICKED(IDC_BTN_SEND_SINGLE, &CBatchLoginDlg::OnBnClickedBtnSendSingle)
+    ON_BN_CLICKED(IDC_BTN_BREAK, &CBatchLoginDlg::OnBnClickedBtnBreak)
 END_MESSAGE_MAP()
 
 
@@ -220,6 +222,7 @@ void CBatchLoginDlg::OnBnClickedBtnImportUser()
 
 void CBatchLoginDlg::OnBnClickedBtnLogin()
 {
+    userRoomManager_->SetBreakRequest(false);
     int itemcount = m_ListCtrl_Users.GetItemCount();
     std::map<std::wstring, std::wstring> accountPassword;
     std::map<std::wstring, std::wstring> accountCookies;
@@ -230,11 +233,11 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
         CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
 
         // 暂时全部走用户名密码登录流程
-        accountPassword[account.GetBuffer()] = password.GetBuffer();
-        //if (cookies.IsEmpty())
-        //    accountPassword[account.GetBuffer()] = password.GetBuffer();
-        //else
-        //    accountCookies[account.GetBuffer()] = cookies.GetBuffer();
+        //accountPassword[account.GetBuffer()] = password.GetBuffer();
+        if (cookies.IsEmpty())
+            accountPassword[account.GetBuffer()] = password.GetBuffer();
+        else
+            accountCookies[account.GetBuffer()] = cookies.GetBuffer();
     }
     if (!accountPassword.empty())
         userRoomManager_->BatchLogUsers(accountPassword);
@@ -245,6 +248,7 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
 
 void CBatchLoginDlg::OnBnClickedBtnImportRoom()
 {
+    assert(false && L"年度不需要操作");
     GridData griddata;
     uint32 total = 0;
     if (!userRoomManager_->LoadRoomConfig(&griddata, &total))
@@ -283,6 +287,7 @@ void CBatchLoginDlg::OnBnClickedBtnImportRoom()
 
 void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 {
+    assert(false && L"年度不需要操作");
     GridData griddata;
     if (!userRoomManager_->LoadIpProxy(&griddata))
         return;
@@ -317,6 +322,7 @@ void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 
 void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
 {
+    userRoomManager_->SetBreakRequest(false);
     //int itemcount = m_ListCtrl_Rooms.GetItemCount();
     //std::vector<std::wstring> roomids;
     //for (int32 index = 0; index < itemcount; ++index)
@@ -371,6 +377,8 @@ LRESULT CBatchLoginDlg::OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam)
 
 void CBatchLoginDlg::OnBnClickedBtnUpMvBillboard()
 {
+    assert(false && L"年度不需要操作");
+    userRoomManager_->SetBreakRequest(false);
     CString collectionid;
     CString mvid;
     m_mv_collection_id.GetWindowTextW(collectionid);
@@ -401,11 +409,68 @@ void CBatchLoginDlg::OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CBatchLoginDlg::OnBnClickedBtnSendAward()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    userRoomManager_->SetBreakRequest(false);
+
+    // 869是大奖票
+    uint32 gift_id = 869;// 玫瑰的id是1
+#ifdef _DEBUG
+    gift_id = 1;
+#endif
+    SendGifts(gift_id);
 }
 
+void CBatchLoginDlg::OnBnClickedBtnSendSingle()
+{
+    userRoomManager_->SetBreakRequest(false);
+
+    // 871是单项票
+    uint32 gift_id = 871;
+#ifdef _DEBUG
+    gift_id = 1;// 玫瑰的id是1
+#endif
+    SendGifts(gift_id);
+}
+
+bool CBatchLoginDlg::SendGifts(uint32 gift_id)
+{
+    CString cs_gift_count;
+    m_gift_count.GetWindowTextW(cs_gift_count);
+    uint32 gift_count = 0;
+    base::StringToUint(base::WideToUTF8(cs_gift_count.GetBuffer()), &gift_count);
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    // 从界面获取勾选的用户名
+    std::vector<std::wstring> users;
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        CString account = m_ListCtrl_Users.GetItemText(index, 0);
+        if (!!m_ListCtrl_Users.GetCheck(index))
+        {
+            users.push_back(account.GetBuffer());
+        }
+    }
+
+    if (users.empty())
+    {
+        Notify(L"没有设置用户的投票任务");
+        return false;
+    }
+
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+
+    userRoomManager_->SendGifts(users,
+        cs_roomid.GetBuffer(), gift_id, gift_count);
+    return true;
+}
 
 void CBatchLoginDlg::OnBnClickedBtnLottery()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    userRoomManager_->SetBreakRequest(false);
+
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnBreak()
+{
+    userRoomManager_->SetBreakRequest(true);
 }

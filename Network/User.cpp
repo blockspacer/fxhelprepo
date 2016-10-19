@@ -326,6 +326,7 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid)
 
 bool User::EnterRoomFopAlive(uint32 roomid)
 {
+    assert(false);// 年度大奖不要调这个接口
     std::shared_ptr<Room> room(new Room(roomid));
     room->SetTcpManager(tcpManager_);
     room->SetRoomServerIp(serverip_);
@@ -466,9 +467,24 @@ bool User::RetrieveStart()
     return false;
 }
 
-bool User::SendGift(uint32 giftid)
+bool User::SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count)
 {
-    return false;
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+    return room->second->SendGift(cookies, gift_id, gift_count);
 }
 
 bool User::GetGiftList(uint32 roomid, std::string* content)
@@ -571,6 +587,22 @@ bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
     return room->second->UnbanChat(cookies, enterRoomUserInfo);
+}
+
+bool User::GetAnnualInfo(std::string* username, uint32 coin_count,
+    uint32* award_count, uint32* single_count) const
+{
+    return false;
+}
+
+bool User::AchriveFreeTickets(uint32* award_count, uint32* single_count)
+{
+    return false;
+}
+
+bool User::SendTickets(uint32 gift_id, uint32 count)
+{
+    return false;
 }
 
 bool User::CheckVerifyCode(const std::string& verifycode, std::string* errormsg)

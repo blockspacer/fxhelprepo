@@ -26,6 +26,7 @@ UserRoomManager::UserRoomManager(TcpManager* tcpManager)
     :userController_(new UserController(tcpManager))
     , roomController_(new RoomController)
     , workerThread_("UserRoomManagerThread")
+    , break_request_(false)
 {
 }
 
@@ -299,6 +300,11 @@ void UserRoomManager::DoBatchLogUsers(
         }
 
         Notify(message);
+        if (break_request_)
+        {
+            Notify(L"用户中止操作，登录过程中断");
+            break;
+        }
     }
 }
 
@@ -333,6 +339,11 @@ void UserRoomManager::DoBatchLogUsersWithCookie(
         }
 
         Notify(message);
+        if (break_request_)
+        {
+            Notify(L"用户中止操作，登录过程中断");
+            break;
+        }
     }
 }
 
@@ -357,12 +368,19 @@ void UserRoomManager::DoFillRooms(const std::vector<uint32>& roomids)
     for (const auto& roomid : roomids)
     {
         FillSingleRoom(roomid);
+
+        if (break_request_)
+        {
+            Notify(L"用户中止操作，进入房间过程中断");
+            break;
+        }
     }
 }
 
 void UserRoomManager::FillSingleRoom(uint32 roomid)
 {
-    bool result = userController_->FillRoom(roomid, roomusercount);
+    bool result = userController_->FillRoom(roomid, roomusercount,
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
     assert(result && L"进入房间失败");
     std::wstring message = L"Fill Room ";
     message += result ? L"Success!" : L"Failed!";
@@ -378,9 +396,40 @@ bool UserRoomManager::UpMVBillboard(const std::wstring& collectionid,
     return true;
 }
 
+bool UserRoomManager::SendGifts(const std::vector<std::wstring>& users,
+    const std::wstring& room_id, uint32 gift_id, uint32 gift_count)
+{
+    uint32 i_room_id = 0;
+    base::StringToUint(base::WideToUTF8(room_id), &i_room_id);
+    assert(i_room_id);
+    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserRoomManager::DoSendGifts, this, users,
+        i_room_id, gift_id, gift_count));
+    return true;
+}
+
+void UserRoomManager::DoSendGifts(const std::vector<std::wstring>& users, 
+    uint32 roomid, uint32 gift_id, uint32 gift_count)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    userController_->SendGifts(accounts, roomid, gift_id, gift_count,
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
+}
+
+void UserRoomManager::SetBreakRequest(bool interrupt)
+{
+    break_request_ = interrupt;
+}
+
 void UserRoomManager::DoUpMVBillboard(const std::wstring& collectionid,
     const std::wstring& mvid)
 {
+    // 这个函数年度不需要用,不执行中断操作
     bool result = userController_->UpMVBillboard(
         base::WideToUTF8(collectionid), base::WideToUTF8(mvid),
         std::bind(&UserRoomManager::Notify,this,std::placeholders::_1));
