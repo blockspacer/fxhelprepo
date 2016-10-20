@@ -463,6 +463,21 @@ void UserRoomManager::DoRobVotes(const std::vector<std::wstring>& users, uint32 
                               this, std::placeholders::_1));
 }
 
+bool UserRoomManager::GetUserStorageInfos(const std::vector<std::wstring>& users, 
+    std::vector<UserStorageInfo>* user_storage_infos)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+
+    return userController_->GetUserStorageInfos(accounts, user_storage_infos,
+        std::bind(&UserRoomManager::Notify,
+        this, std::placeholders::_1));
+}
+
 void UserRoomManager::SetBreakRequest(bool interrupt)
 {
     break_request_ = interrupt;

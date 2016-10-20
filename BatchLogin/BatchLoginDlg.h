@@ -44,6 +44,7 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
     afx_msg void OnBnClickedBtnImportUser();
     afx_msg void OnBnClickedBtnLogin();
+    afx_msg void OnBnClickedBtnGetUserinfo();// 仓库信息，年度盛典使用
     afx_msg void OnBnClickedBtnGetProxy();
     afx_msg void OnBnClickedBtnBatchEnterRoom();
     //afx_msg void OnBnClickedBtnImportRoom();

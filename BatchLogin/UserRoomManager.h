@@ -44,6 +44,9 @@ public:
 
     bool RobVotes(const std::vector<std::wstring>& users, const std::wstring& room_id);
 
+    bool GetUserStorageInfos(const std::vector<std::wstring>& users,
+        std::vector<UserStorageInfo>* user_storage_infos);
+
     void SetBreakRequest(bool interrupt);
 
 protected:

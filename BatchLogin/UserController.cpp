@@ -150,6 +150,38 @@ bool UserController::RobVotes(
     return true;
 }
 
+bool UserController::GetUserStorageInfos(const std::vector<std::string>& users,
+    std::vector<UserStorageInfo>* user_storage_infos,
+    const std::function<void(const std::wstring& msg)>& callback)
+{
+    for (const auto& account : users)
+    {
+        auto result = users_.find(account);
+        if (result == users_.end())
+        {
+            callback(L"本地数据错误, 找不到对应用户或用户未登录");
+            continue;
+        }
+
+        std::string errormsg;
+        UserStorageInfo user_storage_info;
+        std::wstring msg = base::UTF8ToWide(result->first) + L" 获取仓库信息 ";
+        if (!result->second->GetStorageGift(&user_storage_info, &errormsg))
+        {
+            msg += L"失败 " + base::UTF8ToWide(errormsg);
+            callback(msg);
+            continue;
+        }
+        else
+        {
+            msg += L"成功 ";
+            callback(msg);
+        }
+        user_storage_infos->push_back(user_storage_info);
+    }
+    return true;
+}
+
 bool UserController::FillRoom(uint32 roomid, uint32 count,
     const std::function<void(const std::wstring& msg)>& callback)
 {

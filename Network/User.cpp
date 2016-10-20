@@ -663,6 +663,91 @@ bool User::RobVotes(uint32 roomid, uint32* award_count, uint32* single_count,
     return true;
 }
 
+bool User::GetStorageGift(UserStorageInfo* user_storage_info, std::string* errormsg)
+{
+    ///UServices/GiftService/StorageService/getStorageByUserId?args=[]&_=1476974477980
+    std::string url = "http://fanxing.kugou.com/UServices/GiftService/StorageService/getStorageByUserId";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://fanxing.kugou.com/index.php?action=userStorage";
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    queries["args"] = "[]";
+    queries["&_"] = GetNowTimeString();
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"请求仓库数据失败");
+        *errormsg = errorcode;
+        return false;
+    }
+
+    Json::Value jvdata(Json::ValueType::arrayValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull() || !data.isArray())
+    {
+        assert(false);
+        return false;
+    }
+
+    for (auto& giftitem : data)
+    {
+        uint32 gift_count = GetInt32FromJsonValue(giftitem, "num");
+        Json::Value iteminfo = giftitem.get("itemInfo", "");
+        if (iteminfo.isNull() || !iteminfo.isObject())
+        {
+            assert(false);
+            continue;
+        }
+        uint32 gift_id = GetInt32FromJsonValue(iteminfo, "id");
+        std::string gift_name = iteminfo.get("name", "no name").asString();
+        if (gift_id == TICKET_AWARD)
+        {
+            user_storage_info->gift_award += gift_count;
+        }
+        else if (gift_id == TICKET_SINGLE)
+        {
+            user_storage_info->gift_single += gift_count;
+        }
+    }
+
+    std::string temp;
+    LoginUServiceGetMyUserDataInfo(&temp);// 更新coin，丑陋一点先实现
+    user_storage_info->accountname = username_;
+    user_storage_info->nickname = nickname_;
+    user_storage_info->rich_level = richlevel_;
+    user_storage_info->coin = coin_;
+    return true;
+}
 bool User::CheckVerifyCode(const std::string& verifycode, std::string* errormsg)
 {
     HttpRequest request;

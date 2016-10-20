@@ -26,9 +26,10 @@ namespace{
         L"Cookie",
         L"用户id",
         L"昵称",
-        L"财富等级",
+        L"等级",
         L"星币",
-        L"免费票"
+        L"大奖票",
+        L"单项票"
     };
 
     const wchar_t* roomcolumnlist[] = {
@@ -94,6 +95,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CBatchLoginDlg::OnBnClickedBtnSelectAll)
     ON_BN_CLICKED(IDC_BTN_REVERSE_SELECT, &CBatchLoginDlg::OnBnClickedBtnReverseSelect)
     ON_BN_CLICKED(IDC_BTN_DELETE, &CBatchLoginDlg::OnBnClickedBtnDelete)
+    ON_BN_CLICKED(IDC_BTN_GET_USERINFO, &CBatchLoginDlg::OnBnClickedBtnGetUserinfo)
 END_MESSAGE_MAP()
 
 
@@ -121,7 +123,14 @@ BOOL CBatchLoginDlg::OnInitDialog()
         m_ListCtrl_Users.DeleteColumn(i);
     uint32 index = 0;
     for (const auto& it : usercolumnlist)
-        m_ListCtrl_Users.InsertColumn(index++, it, LVCFMT_LEFT, 90);//插入列
+    {
+        int len = 60;
+        if (index == 0 || index == 1 || index == 4)
+            len = 110;
+
+        m_ListCtrl_Users.InsertColumn(index++, it, LVCFMT_LEFT, len);//插入列
+    }
+        
 
 
     //m_ListCtrl_Rooms.SetExtendedStyle(dwStyle); //设置扩展风格
@@ -546,4 +555,44 @@ void CBatchLoginDlg::OnBnClickedBtnDelete()
     }
     std::wstring msg = L"已经删 " + base::IntToString16(delete_count) + L"/" + base::IntToString16(count);
     Notify(msg);
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnGetUserinfo()
+{
+    userRoomManager_->SetBreakRequest(true);
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    std::vector<UserStorageInfo> user_storage_infos;
+    userRoomManager_->GetUserStorageInfos(users, &user_storage_infos);
+
+
+    int count = m_ListCtrl_Users.GetItemCount();
+    for (int index = count - 1; index >= 0; --index)
+    {
+        if (!m_ListCtrl_Users.GetCheck(index))
+            continue;
+
+        CString cs_username = m_ListCtrl_Users.GetItemText(index, 0);
+        std::string username = base::WideToUTF8(cs_username.GetBuffer());
+        for (const auto& user_storage_info : user_storage_infos)
+        {
+            if (username.compare(user_storage_info.accountname) == 0)
+            {
+                m_ListCtrl_Users.SetItemText(index, 4,
+                    base::UTF8ToWide(user_storage_info.nickname).c_str());
+                m_ListCtrl_Users.SetItemText(index, 5,
+                    base::UintToString16(user_storage_info.rich_level).c_str());
+                m_ListCtrl_Users.SetItemText(index, 6,
+                    base::UintToString16(user_storage_info.coin).c_str());
+                m_ListCtrl_Users.SetItemText(index, 7,
+                    base::UintToString16(user_storage_info.gift_award).c_str());
+                m_ListCtrl_Users.SetItemText(index, 8,
+                    base::UintToString16(user_storage_info.gift_single).c_str());
+                break;
+            }
+        }
+    }
 }

@@ -7,6 +7,8 @@
 #undef min
 #include "third_party/chromium/base/basictypes.h"
 
+#include "Network/User.h"
+
 class TcpManager;
 class User;
 class MVBillboard;
@@ -40,6 +42,10 @@ public:
 
     bool RobVotes(const std::vector<std::string>& users, uint32 room_id,
                   const std::function<void(const std::wstring& msg)>& callback);
+
+    bool GetUserStorageInfos(const std::vector<std::string>& users,
+        std::vector<UserStorageInfo>* user_storage_infos,
+        const std::function<void(const std::wstring& msg)>& callback);
 
     bool FillRoom(uint32 roomid, uint32 count,
         const std::function<void(const std::wstring& msg)>& callback);

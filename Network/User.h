@@ -22,6 +22,23 @@ enum class ROOM_STATE
     IN_ROOM = 1
 };
 
+enum TICKET_TYPE
+{
+    TICKET_AWARD = 870,
+    TICKET_SINGLE = 872
+};
+
+
+struct UserStorageInfo
+{
+    std::string accountname;
+    std::string nickname;
+    uint32 rich_level;
+    uint32 coin = 0;
+    uint32 gift_award = 0; // ¥ÛΩ±∆±
+    uint32 gift_single = 0; // µ•œÓ∆±
+};
+
 class TcpManager;
 class CurlWrapper;
 class CookiesHelper;
@@ -104,6 +121,7 @@ public:
         uint32* award_count, uint32* single_count) const;
     bool RobVotes(uint32 roomid, uint32* award_count, uint32* single_count,
                   std::string* errormsg);
+    bool GetStorageGift(UserStorageInfo* user_storage_info, std::string* errormsg);
 
 private:
     bool CheckVerifyCode(const std::string& verifycode, std::string* errormsg);
