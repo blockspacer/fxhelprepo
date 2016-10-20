@@ -720,7 +720,7 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
         std::placeholders::_1));
     roomid_ = roomid;
 
-    return user_->EnterRoomFopOperation(roomid, &singer_clanid_);
+    return user_->EnterRoomFopOperation(roomid, &singer_clanid_, nullptr);
 }
 
 bool NetworkHelper::GetViewerList(uint32 roomid,

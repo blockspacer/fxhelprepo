@@ -20,8 +20,9 @@ public:
     void SetTcpManager(TcpManager* tcpManager);
 
     // 需要获得房间信息来做下一步操作的函数, 传出singer_clanid是为判断授权使用
-    bool EnterForOperation(const std::string& cookies, 
-        const std::string& usertoken, uint32 userid, uint32* singer_clanid);
+    bool EnterForOperation(const std::string& cookies,
+                           const std::string& usertoken, uint32 userid, 
+                           uint32* singer_clanid, std::string* nickname);
 
     // 不需要获取房间信息，仅仅为了连接，不做业务操作的进房请求
     bool EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid);
@@ -35,7 +36,11 @@ public:
     bool GetGiftList(const std::string& cookies, std::string* content);
 
     // GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
-    bool SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count);
+    bool SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count,
+                  std::string* errormsg);
+
+    bool RobVotes(uint32* award_count, uint32* single_count,
+                  std::string* errormsg);
 
     bool GetViewerList(const std::string& cookies, 
         std::vector<EnterRoomUserInfo>* enterRoomUserInfo);

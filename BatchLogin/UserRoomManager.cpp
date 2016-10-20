@@ -328,7 +328,7 @@ void UserRoomManager::DoBatchLogUsersWithCookie(
         std::string account = base::WideToUTF8(it.first);
         std::string cookie = base::WideToUTF8(it.second);
         std::string errormsg;
-        std::wstring message = base::UTF8ToWide(account) + L" c登录";
+        std::wstring message = base::UTF8ToWide(account) + L" cookie登录";
         if (!userController_->AddUserWithCookies(account, cookie, ipproxy, &errormsg))
         {
             message += L"失败," + base::UTF8ToWide(errormsg);
@@ -396,11 +396,26 @@ bool UserRoomManager::UpMVBillboard(const std::wstring& collectionid,
     return true;
 }
 
+void UserRoomManager::DoUpMVBillboard(const std::wstring& collectionid,
+                                      const std::wstring& mvid)
+{
+    // 这个函数年度不需要用,不执行中断操作
+    bool result = userController_->UpMVBillboard(
+        base::WideToUTF8(collectionid), base::WideToUTF8(mvid),
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
+    assert(result && L"打榜失败");
+    std::wstring message = L"upgrade mv billboard ";
+    message += result ? L"Success!" : L"Failed!";
+    Notify(message);
+}
+
 bool UserRoomManager::SendGifts(const std::vector<std::wstring>& users,
     const std::wstring& room_id, uint32 gift_id, uint32 gift_count)
 {
     uint32 i_room_id = 0;
-    base::StringToUint(base::WideToUTF8(room_id), &i_room_id);
+    if (!base::StringToUint(base::WideToUTF8(room_id), &i_room_id))
+        return false;
+
     assert(i_room_id);
     workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
         base::Bind(&UserRoomManager::DoSendGifts, this, users,
@@ -421,20 +436,34 @@ void UserRoomManager::DoSendGifts(const std::vector<std::wstring>& users,
         std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
 }
 
+bool UserRoomManager::RobVotes(const std::vector<std::wstring>& users, const std::wstring& room_id)
+{
+    uint32 i_room_id = 0;
+    if (!base::StringToUint(base::WideToUTF8(room_id), &i_room_id))
+        return false;
+
+    assert(i_room_id);
+    workerThread_.message_loop_proxy()->PostTask(
+        FROM_HERE, base::Bind(&UserRoomManager::DoRobVotes, this, users, 
+        i_room_id));
+
+    return true;
+}
+
+void UserRoomManager::DoRobVotes(const std::vector<std::wstring>& users, uint32 roomid)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    userController_->RobVotes(accounts, roomid,
+                              std::bind(&UserRoomManager::Notify, 
+                              this, std::placeholders::_1));
+}
+
 void UserRoomManager::SetBreakRequest(bool interrupt)
 {
     break_request_ = interrupt;
-}
-
-void UserRoomManager::DoUpMVBillboard(const std::wstring& collectionid,
-    const std::wstring& mvid)
-{
-    // 这个函数年度不需要用,不执行中断操作
-    bool result = userController_->UpMVBillboard(
-        base::WideToUTF8(collectionid), base::WideToUTF8(mvid),
-        std::bind(&UserRoomManager::Notify,this,std::placeholders::_1));
-    assert(result && L"打榜失败");
-    std::wstring message = L"upgrade mv billboard ";
-    message += result ? L"Success!" : L"Failed!";
-    Notify(message);
 }

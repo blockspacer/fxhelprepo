@@ -66,7 +66,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_LIST_USERS, m_ListCtrl_Users);
-    DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
+    //DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
     DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
     DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
     DDX_Control(pDX, IDC_EDIT_ROOMID, m_roomid);
@@ -79,18 +79,21 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_IMPORT_USER, &CBatchLoginDlg::OnBnClickedBtnImportUser)
     ON_BN_CLICKED(IDC_BTN_GET_PROXY, &CBatchLoginDlg::OnBnClickedBtnGetProxy)
     ON_BN_CLICKED(IDC_BTN_BATCH_ENTER_ROOM, &CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom)
-    ON_BN_CLICKED(IDC_BTN_IMPORT_ROOM, &CBatchLoginDlg::OnBnClickedBtnImportRoom)
+    //ON_BN_CLICKED(IDC_BTN_IMPORT_ROOM, &CBatchLoginDlg::OnBnClickedBtnImportRoom)
     ON_MESSAGE(WM_USER_NOTIFY_MESSAGE, &CBatchLoginDlg::OnNotifyMessage)
     ON_MESSAGE(WM_USER_USER_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToUserList)
     ON_MESSAGE(WM_USER_ROOM_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToRoomList)
 
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CBatchLoginDlg::OnBnClickedBtnLogin)
     ON_BN_CLICKED(IDC_BTN_SAVE_USER_PWD_COOKIE, &CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie)
-    ON_NOTIFY(NM_CLICK, IDC_LIST_ROOM, &CBatchLoginDlg::OnNMClickListRoom)
+    //ON_NOTIFY(NM_CLICK, IDC_LIST_ROOM, &CBatchLoginDlg::OnNMClickListRoom)
     ON_BN_CLICKED(IDC_BTN_SEND_AWARD, &CBatchLoginDlg::OnBnClickedBtnSendAward)
     ON_BN_CLICKED(IDC_BTN_LOTTERY, &CBatchLoginDlg::OnBnClickedBtnLottery)
     ON_BN_CLICKED(IDC_BTN_SEND_SINGLE, &CBatchLoginDlg::OnBnClickedBtnSendSingle)
     ON_BN_CLICKED(IDC_BTN_BREAK, &CBatchLoginDlg::OnBnClickedBtnBreak)
+    ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CBatchLoginDlg::OnBnClickedBtnSelectAll)
+    ON_BN_CLICKED(IDC_BTN_REVERSE_SELECT, &CBatchLoginDlg::OnBnClickedBtnReverseSelect)
+    ON_BN_CLICKED(IDC_BTN_DELETE, &CBatchLoginDlg::OnBnClickedBtnDelete)
 END_MESSAGE_MAP()
 
 
@@ -121,13 +124,13 @@ BOOL CBatchLoginDlg::OnInitDialog()
         m_ListCtrl_Users.InsertColumn(index++, it, LVCFMT_LEFT, 90);//插入列
 
 
-    m_ListCtrl_Rooms.SetExtendedStyle(dwStyle); //设置扩展风格
-    nColumnCount = m_ListCtrl_Rooms.GetHeaderCtrl()->GetItemCount();
-    for (int i = nColumnCount - 1; i >= 0; i--)
-        m_ListCtrl_Rooms.DeleteColumn(i);
-    index = 0;
-    for (const auto& it : roomcolumnlist)
-        m_ListCtrl_Rooms.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
+    //m_ListCtrl_Rooms.SetExtendedStyle(dwStyle); //设置扩展风格
+    //nColumnCount = m_ListCtrl_Rooms.GetHeaderCtrl()->GetItemCount();
+    //for (int i = nColumnCount - 1; i >= 0; i--)
+    //    m_ListCtrl_Rooms.DeleteColumn(i);
+    //index = 0;
+    //for (const auto& it : roomcolumnlist)
+    //    m_ListCtrl_Rooms.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
     
     m_list_proxy.SetExtendedStyle(dwStyle); //设置扩展风格
     nColumnCount = m_list_proxy.GetHeaderCtrl()->GetItemCount();
@@ -229,15 +232,19 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
     for (int32 index = 0; index < itemcount; ++index)
     {
         CString account = m_ListCtrl_Users.GetItemText(index, 0);
-        CString password = m_ListCtrl_Users.GetItemText(index, 1);
-        CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
+        if (!!m_ListCtrl_Users.GetCheck(index))
+        {
+            CString account = m_ListCtrl_Users.GetItemText(index, 0);
+            CString password = m_ListCtrl_Users.GetItemText(index, 1);
+            CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
 
-        // 暂时全部走用户名密码登录流程
-        //accountPassword[account.GetBuffer()] = password.GetBuffer();
-        if (cookies.IsEmpty())
-            accountPassword[account.GetBuffer()] = password.GetBuffer();
-        else
-            accountCookies[account.GetBuffer()] = cookies.GetBuffer();
+            // 暂时全部走用户名密码登录流程
+            //accountPassword[account.GetBuffer()] = password.GetBuffer();
+            if (cookies.IsEmpty())
+                accountPassword[account.GetBuffer()] = password.GetBuffer();
+            else
+                accountCookies[account.GetBuffer()] = cookies.GetBuffer();
+        }
     }
     if (!accountPassword.empty())
         userRoomManager_->BatchLogUsers(accountPassword);
@@ -246,44 +253,44 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
         userRoomManager_->BatchLogUsersWithCookie(accountCookies);
 }
 
-void CBatchLoginDlg::OnBnClickedBtnImportRoom()
-{
-    assert(false && L"年度不需要操作");
-    GridData griddata;
-    uint32 total = 0;
-    if (!userRoomManager_->LoadRoomConfig(&griddata, &total))
-        return;
-
-    assert(griddata.size() == total);
-
-    // 显示数据到界面
-    int itemcount = m_ListCtrl_Rooms.GetItemCount();
-
-    for (uint32 i = 0; i < griddata.size(); ++i)
-    {
-        bool exist = false;
-        // 检测是否存在相同用户id
-        for (int index = 0; index < itemcount; index++)
-        {
-            CString text = m_ListCtrl_Rooms.GetItemText(index, 0);
-            if (griddata[i][0].compare(text.GetBuffer()) == 0) // 相同房间号
-            {
-                exist = true;
-                break;
-            }
-        }
-
-        if (!exist) // 如果不存在，需要插入新数据
-        {
-            int nitem = m_ListCtrl_Rooms.InsertItem(itemcount + i, griddata[i][0].c_str());
-            //m_ListCtrl_UserStatus.SetItemData(nitem, i);
-            for (uint32 j = 0; j < griddata[i].size(); ++j)
-            {
-                m_ListCtrl_Rooms.SetItemText(nitem, j, griddata[i][j].c_str());
-            }
-        }
-    }
-}
+//void CBatchLoginDlg::OnBnClickedBtnImportRoom()
+//{
+//    assert(false && L"年度不需要操作");
+//    GridData griddata;
+//    uint32 total = 0;
+//    if (!userRoomManager_->LoadRoomConfig(&griddata, &total))
+//        return;
+//
+//    assert(griddata.size() == total);
+//
+//    // 显示数据到界面
+//    int itemcount = m_ListCtrl_Rooms.GetItemCount();
+//
+//    for (uint32 i = 0; i < griddata.size(); ++i)
+//    {
+//        bool exist = false;
+//        // 检测是否存在相同用户id
+//        for (int index = 0; index < itemcount; index++)
+//        {
+//            CString text = m_ListCtrl_Rooms.GetItemText(index, 0);
+//            if (griddata[i][0].compare(text.GetBuffer()) == 0) // 相同房间号
+//            {
+//                exist = true;
+//                break;
+//            }
+//        }
+//
+//        if (!exist) // 如果不存在，需要插入新数据
+//        {
+//            int nitem = m_ListCtrl_Rooms.InsertItem(itemcount + i, griddata[i][0].c_str());
+//            //m_ListCtrl_UserStatus.SetItemData(nitem, i);
+//            for (uint32 j = 0; j < griddata[i].size(); ++j)
+//            {
+//                m_ListCtrl_Rooms.SetItemText(nitem, j, griddata[i][j].c_str());
+//            }
+//        }
+//    }
+//}
 
 void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 {
@@ -391,20 +398,20 @@ void CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie()
     userRoomManager_->SaveUserLoginConfig();
 }
 
-void CBatchLoginDlg::OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult)
-{
-    LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
-    // TODO:  在此添加控件通知处理程序代码
-    int row_id = m_ListCtrl_Rooms.GetSelectionMark();
-    
-    assert(pNMItemActivate->iItem == row_id);
-
-    for (int i = 0; i < sizeof(roomcolumnlist) / sizeof(roomcolumnlist[0]);i++)
-    {
-        CString text = m_ListCtrl_Rooms.GetItemText(row_id, i);
-    }
-    *pResult = 0;
-}
+//void CBatchLoginDlg::OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult)
+//{
+//    LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+//    // TODO:  在此添加控件通知处理程序代码
+//    int row_id = m_ListCtrl_Rooms.GetSelectionMark();
+//    
+//    assert(pNMItemActivate->iItem == row_id);
+//
+//    for (int i = 0; i < sizeof(roomcolumnlist) / sizeof(roomcolumnlist[0]);i++)
+//    {
+//        CString text = m_ListCtrl_Rooms.GetItemText(row_id, i);
+//    }
+//    *pResult = 0;
+//}
 
 
 void CBatchLoginDlg::OnBnClickedBtnSendAward()
@@ -437,17 +444,9 @@ bool CBatchLoginDlg::SendGifts(uint32 gift_id)
     m_gift_count.GetWindowTextW(cs_gift_count);
     uint32 gift_count = 0;
     base::StringToUint(base::WideToUTF8(cs_gift_count.GetBuffer()), &gift_count);
-    int itemcount = m_ListCtrl_Users.GetItemCount();
-    // 从界面获取勾选的用户名
+
     std::vector<std::wstring> users;
-    for (int32 index = 0; index < itemcount; ++index)
-    {
-        CString account = m_ListCtrl_Users.GetItemText(index, 0);
-        if (!!m_ListCtrl_Users.GetCheck(index))
-        {
-            users.push_back(account.GetBuffer());
-        }
-    }
+    GetSelectUsers(&users);
 
     if (users.empty())
     {
@@ -466,11 +465,85 @@ bool CBatchLoginDlg::SendGifts(uint32 gift_id)
 void CBatchLoginDlg::OnBnClickedBtnLottery()
 {
     userRoomManager_->SetBreakRequest(false);
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
 
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    // 从界面获取勾选的用户名
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    if (users.empty())
+    {
+        Notify(L"没有设置用户的抽奖任务");
+        return;
+    }
+    if (cs_roomid.IsEmpty())
+    {
+        Notify(L"请输入房间号");
+        return;
+    }
+
+    userRoomManager_->RobVotes(users, cs_roomid.GetBuffer());
 }
 
 
 void CBatchLoginDlg::OnBnClickedBtnBreak()
 {
     userRoomManager_->SetBreakRequest(true);
+}
+
+void CBatchLoginDlg::GetSelectUsers(std::vector<std::wstring>* users)
+{
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    // 从界面获取勾选的用户名
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        CString account = m_ListCtrl_Users.GetItemText(index, 0);
+        if (!!m_ListCtrl_Users.GetCheck(index))
+        {
+            users->push_back(account.GetBuffer());
+        }
+    }
+}
+
+void CBatchLoginDlg::OnBnClickedBtnSelectAll()
+{
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        m_ListCtrl_Users.SetCheck(index, TRUE);
+    }
+}
+
+void CBatchLoginDlg::OnBnClickedBtnReverseSelect()
+{
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        if (m_ListCtrl_Users.GetCheck(index))
+        {
+            m_ListCtrl_Users.SetCheck(index, FALSE);
+        }
+        else
+        {
+            m_ListCtrl_Users.SetCheck(index, TRUE);
+        }
+    }
+}
+
+void CBatchLoginDlg::OnBnClickedBtnDelete()
+{
+    int count = m_ListCtrl_Users.GetItemCount();
+    int delete_count = 0;
+    for (int index = count - 1; index >= 0; --index)
+    {
+        if (m_ListCtrl_Users.GetCheck(index))
+        {
+            m_ListCtrl_Users.DeleteItem(index);
+            delete_count++;
+        }  
+    }
+    std::wstring msg = L"已经删 " + base::IntToString16(delete_count) + L"/" + base::IntToString16(count);
+    Notify(msg);
 }

@@ -75,7 +75,8 @@ public:
     uint32 GetFanxingId() const;
     uint32 GetClanId() const;
 
-    bool EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid);
+    bool EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
+                               std::string* nickname);
     bool EnterRoomFopAlive(uint32 roomid);
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
@@ -86,7 +87,8 @@ public:
     bool RequestRobot(uint32 senderid, const std::string& request, std::string* response);
     bool SendStar(uint32 count);
     bool RetrieveStart();
-    bool SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count);
+    bool SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
+                  std::string* errormsg);
 
     bool GetGiftList(uint32 roomid, std::string* content);
     bool GetViewerList(uint32 roomid, 
@@ -97,10 +99,11 @@ public:
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
 
+    // 年度相关功能
     bool GetAnnualInfo(std::string* username, uint32 coin_count,
         uint32* award_count, uint32* single_count) const;
-    bool AchriveFreeTickets(uint32* award_count, uint32* single_count);
-    bool SendTickets(uint32 gift_id, uint32 count);
+    bool RobVotes(uint32 roomid, uint32* award_count, uint32* single_count,
+                  std::string* errormsg);
 
 private:
     bool CheckVerifyCode(const std::string& verifycode, std::string* errormsg);

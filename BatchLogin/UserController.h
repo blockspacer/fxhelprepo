@@ -38,6 +38,9 @@ public:
         uint32 roomid, uint32 gift_id, uint32 gift_count,
         const std::function<void(const std::wstring& msg)>& callback);
 
+    bool RobVotes(const std::vector<std::string>& users, uint32 room_id,
+                  const std::function<void(const std::wstring& msg)>& callback);
+
     bool FillRoom(uint32 roomid, uint32 count,
         const std::function<void(const std::wstring& msg)>& callback);
     bool UpMVBillboard(const std::string& collectionid, const std::string& mvid,

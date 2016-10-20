@@ -67,8 +67,6 @@ bool UserController::AddUserWithCookies(const std::string& username,
         assert(false && L"登录失败");
         return false;
     }
-    
-
 
     shared_user->SetTcpManager(tcpManager_);
     shared_user->SetRoomServerIp(serverip);
@@ -105,13 +103,47 @@ bool UserController::SendGifts(const std::vector<std::string>& accounts,
         std::wstring msg = base::UTF8ToWide(result->first) + L" 赠送 [" + 
             base::UintToString16(gift_count) + L"] 个 giftid = " + 
             base::UintToString16(gift_id) + L" 礼物";
-        if (!result->second->SendGift(roomid, gift_id, gift_count))
+        std::string errormsg;
+        if (!result->second->SendGift(roomid, gift_id, gift_count, &errormsg))
         {
             msg += L"失败";
+            callback(msg);
+            callback(base::UTF8ToWide(errormsg));
         }
         else
         {
             msg += L"成功";
+            callback(msg);
+        }
+    }
+    return true;
+}
+
+bool UserController::RobVotes(
+    const std::vector<std::string>& users, uint32 room_id,
+    const std::function<void(const std::wstring& msg)>& callback)
+{
+    for (const auto& account : users)
+    {
+        auto result = users_.find(account);
+        if (result == users_.end())
+        {
+            callback(L"本地数据错误, 找不到对应用户或用户未登录");
+            continue;
+        }
+
+        uint32 award_count = 0;
+        uint32 single_count = 0;
+        std::string errormsg;
+        std::wstring msg = base::UTF8ToWide(result->first) + L" 开启大奖宝箱 ";
+        if (!result->second->RobVotes(room_id, &award_count, &single_count, &errormsg))
+        {
+            msg += L"失败 " + base::UTF8ToWide(errormsg);
+        }
+        else
+        {
+            msg += L"成功 [" + base::UintToString16(award_count) +L"/"
+                + base::UintToString16(award_count) + L"] " + base::UTF8ToWide(errormsg);
         }
         callback(msg);
     }
@@ -127,14 +159,16 @@ bool UserController::FillRoom(uint32 roomid, uint32 count,
         //it.second->EnterRoomFopAlive(roomid);
         // 年度需求, 需要获取到足够信息，但是不需要连接信息
         std::wstring msg = base::UTF8ToWide(it.first) + L" 进入房间";
-        if (!it.second->EnterRoomFopOperation(roomid, nullptr))
+        std::string nickname;
+        if (!it.second->EnterRoomFopOperation(roomid, nullptr, &nickname))
         {
-            msg += L"失败";
+            msg += L" 失败 ";
         }
         else
         {
-            msg += L"成功";
+            msg += L" 成功 ";
         }
+        msg += base::UTF8ToUTF16(nickname);
         callback(msg);
     }
     return true;

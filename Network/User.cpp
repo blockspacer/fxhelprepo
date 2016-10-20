@@ -274,7 +274,8 @@ uint32 User::GetClanId() const
     return clanid_;
 }
 
-bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid)
+bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
+                                 std::string* nickname)
 {
     std::shared_ptr<Room> room(new Room(roomid));
     room->SetTcpManager(tcpManager_);
@@ -315,7 +316,7 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid)
         room->SetIpProxy(ipproxy_);
     }
 
-    if (!room->EnterForOperation(cookie, usertoken_, kugouid_, singer_clanid))
+    if (!room->EnterForOperation(cookie, usertoken_, kugouid_, singer_clanid, nickname))
     {
         return false;
     }
@@ -467,7 +468,8 @@ bool User::RetrieveStart()
     return false;
 }
 
-bool User::SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count)
+bool User::SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
+                    std::string* errormsg)
 {
     auto room = rooms_.find(roomid);
     if (room == rooms_.end())
@@ -484,7 +486,7 @@ bool User::SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count)
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
     std::string cookies = cookiesHelper_->GetCookies(keys);
-    return room->second->SendGift(cookies, gift_id, gift_count);
+    return room->second->SendGift(cookies, gift_id, gift_count, errormsg);
 }
 
 bool User::GetGiftList(uint32 roomid, std::string* content)
@@ -595,14 +597,70 @@ bool User::GetAnnualInfo(std::string* username, uint32 coin_count,
     return false;
 }
 
-bool User::AchriveFreeTickets(uint32* award_count, uint32* single_count)
+bool User::RobVotes(uint32 roomid, uint32* award_count, uint32* single_count,
+                    std::string* errormsg)
 {
-    return false;
-}
+    if (rooms_.find(roomid) == rooms_.end())
+    {
+        *errormsg = base::WideToUTF8(L"本地数据错误, 未进入房间");
+        return false;
+    }
 
-bool User::SendTickets(uint32 gift_id, uint32 count)
-{
-    return false;
+    std::string url = "http://service.fanxing.kugou.com/fxannualawards/api/StarAnnualAwards/robVotes";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://www.fanxing.kugou.com/" + base::UintToString(roomid);
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    queries["args"] = "[]";
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"开大奖票宝箱失败");
+        *errormsg = errorcode;
+        return false;
+    }
+
+    Json::Value jvdata(Json::ValueType::objectValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull() || !data.isObject())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string notifymsg = data.get(std::string("msg"), "").asString();
+    *errormsg = notifymsg;
+    return true;
 }
 
 bool User::CheckVerifyCode(const std::string& verifycode, std::string* errormsg)

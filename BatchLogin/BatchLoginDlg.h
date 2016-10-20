@@ -46,13 +46,19 @@ protected:
     afx_msg void OnBnClickedBtnLogin();
     afx_msg void OnBnClickedBtnGetProxy();
     afx_msg void OnBnClickedBtnBatchEnterRoom();
-    afx_msg void OnBnClickedBtnImportRoom();
+    //afx_msg void OnBnClickedBtnImportRoom();
     afx_msg void OnBnClickedBtnUpMvBillboard();
     afx_msg void OnBnClickedBtnSaveUserPwdCookie();
     afx_msg void OnLvnItemchangedListRoom(NMHDR *pNMHDR, LRESULT *pResult);
-    afx_msg void OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult);
+    //afx_msg void OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnBnClickedBtnSendAward();
+    afx_msg void OnBnClickedBtnSendSingle();
     afx_msg void OnBnClickedBtnLottery();
+    afx_msg void OnBnClickedBtnBreak();
+
+    afx_msg void OnBnClickedBtnSelectAll();
+    afx_msg void OnBnClickedBtnReverseSelect();
+    afx_msg void OnBnClickedBtnDelete();
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -61,11 +67,12 @@ private:
     LRESULT OnDisplayDataToUserList(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam);
     bool SendGifts(uint32 gift_id);
+    void GetSelectUsers(std::vector<std::wstring>* users);
 
     std::unique_ptr<UserRoomManager> userRoomManager_;
     std::unique_ptr<TcpManager> tcpManager_;
     CListCtrl m_ListCtrl_Users;
-    CListCtrl m_ListCtrl_Rooms;
+    //CListCtrl m_ListCtrl_Rooms;
     CListCtrl m_list_proxy;
     CEdit m_mv_collection_id;
     CEdit m_mv_id;
@@ -75,8 +82,5 @@ private:
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;    
     CEdit m_roomid;
-public:
-    afx_msg void OnBnClickedBtnSendSingle();
-    afx_msg void OnBnClickedBtnBreak();
     CEdit m_gift_count;
 };

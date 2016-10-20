@@ -42,6 +42,8 @@ public:
     bool SendGifts(const std::vector<std::wstring>& users, const std::wstring& room_id,
         uint32 gift_id, uint32 gift_count);
 
+    bool RobVotes(const std::vector<std::wstring>& users, const std::wstring& room_id);
+
     void SetBreakRequest(bool interrupt);
 
 protected:
@@ -55,6 +57,8 @@ protected:
     void DoUpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
     void DoSendGifts(const std::vector<std::wstring>& users,
         uint32 roomid, uint32 gift_id, uint32 gift_count);
+    void DoRobVotes(const std::vector<std::wstring>& users, uint32 roomid);
+
 private:
     base::Thread workerThread_;
     std::function<void(std::wstring)> notify_ = nullptr;

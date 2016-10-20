@@ -37,9 +37,9 @@ void Room::SetTcpManager(TcpManager* tcpManager)
 }
 
 bool Room::EnterForOperation(const std::string& cookies, 
-    const std::string& usertoken, uint32 userid, uint32* singer_clanid)
+    const std::string& usertoken, uint32 userid, uint32* singer_clanid,
+    std::string* nickname)
 {
-    std::string nickname = "";
     uint32 richlevel = 0;
     uint32 ismaster = 0;
     uint32 singerid = 0;
@@ -63,6 +63,9 @@ bool Room::EnterForOperation(const std::string& cookies,
 
     if (singer_clanid)
         *singer_clanid = clanid_;
+
+    if (nickname)
+        *nickname = nickname_;
 
     return true;
 }
@@ -115,7 +118,8 @@ bool Room::GetGiftList(const std::string& cookies, std::string* content)
 
 // 主播繁星号, 礼物id, 数量, 房间号 _是时间
 // GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
-bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count)
+bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count,
+                    std::string* errormsg)
 {
     assert(singerid_);
     assert(roomid_);
@@ -163,7 +167,7 @@ bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_coun
     uint32 errorno = GetInt32FromJsonValue(rootdata, "errorno");
     if (status != 1 || errorno!=0 )
     {
-        assert(false && L"送礼物请求失败");
+        *errormsg = rootdata.get("errorcode", "").asString();
         return false;
     }
     
