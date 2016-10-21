@@ -47,6 +47,9 @@ public:
     bool GetUserStorageInfos(const std::vector<std::wstring>& users,
         std::vector<UserStorageInfo>* user_storage_infos);
 
+    bool BatchChangeNickname(const const std::vector<std::wstring>& users,
+        const std::wstring& nickname_pre);
+
     void SetBreakRequest(bool interrupt);
 
 protected:

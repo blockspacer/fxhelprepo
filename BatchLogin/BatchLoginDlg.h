@@ -84,4 +84,7 @@ private:
     std::vector<std::wstring> messageQueen_;    
     CEdit m_roomid;
     CEdit m_gift_count;
+public:
+    CEdit m_nickname;
+    afx_msg void OnBnClickedBtnChangeNickname();
 };

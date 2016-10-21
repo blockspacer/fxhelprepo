@@ -478,6 +478,21 @@ bool UserRoomManager::GetUserStorageInfos(const std::vector<std::wstring>& users
         this, std::placeholders::_1));
 }
 
+bool UserRoomManager::BatchChangeNickname(const const std::vector<std::wstring>& users,
+    const std::wstring& nickname_pre)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    std::string str_nickname_pre = base::WideToUTF8(nickname_pre);
+    return userController_->BatchChangeNickname(accounts, str_nickname_pre,
+        std::bind(&UserRoomManager::Notify,
+        this, std::placeholders::_1));
+    return false;
+}
 void UserRoomManager::SetBreakRequest(bool interrupt)
 {
     break_request_ = interrupt;

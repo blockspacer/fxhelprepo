@@ -2,6 +2,7 @@
 #include "UserController.h"
 #include "MVBillboard.h"
 #include "Network/User.h"
+#include "Network/EncodeHelper.h"
 #include "Network/IpProxy.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
@@ -178,6 +179,38 @@ bool UserController::GetUserStorageInfos(const std::vector<std::string>& users,
             callback(msg);
         }
         user_storage_infos->push_back(user_storage_info);
+    }
+    return true;
+}
+
+bool UserController::BatchChangeNickname(const std::vector<std::string>& users,
+    const std::string& nickname_pre, 
+    const std::function<void(const std::wstring& msg)>& callback)
+{
+    for (const auto& account : users)
+    {
+        auto result = users_.find(account);
+        if (result == users_.end())
+        {
+            callback(L"本地数据错误, 找不到对应用户或用户未登录");
+            continue;
+        }
+
+        std::string errormsg;
+        std::string timestamp = GetNowTimeString().substr(8, 5);
+        std::string nickname = nickname_pre + timestamp;
+        std::wstring msg = base::UTF8ToWide(result->first) + L" 改名";
+        if (!result->second->ChangeNickname(nickname, &errormsg))
+        {
+            msg += L"失败 " + base::UTF8ToWide(errormsg);
+            callback(msg);
+            continue;
+        }
+        else
+        {
+            msg += L"成功 ";
+            callback(msg);
+        }
     }
     return true;
 }

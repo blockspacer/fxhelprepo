@@ -72,6 +72,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
     DDX_Control(pDX, IDC_EDIT_ROOMID, m_roomid);
     DDX_Control(pDX, IDC_EDIT_GIFT_COUNT, m_gift_count);
+    DDX_Control(pDX, IDC_EDIT_NICKNAME_PRE, m_nickname);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -96,6 +97,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_REVERSE_SELECT, &CBatchLoginDlg::OnBnClickedBtnReverseSelect)
     ON_BN_CLICKED(IDC_BTN_DELETE, &CBatchLoginDlg::OnBnClickedBtnDelete)
     ON_BN_CLICKED(IDC_BTN_GET_USERINFO, &CBatchLoginDlg::OnBnClickedBtnGetUserinfo)
+    ON_BN_CLICKED(IDC_BTN_CHANGE_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeNickname)
 END_MESSAGE_MAP()
 
 
@@ -595,4 +597,26 @@ void CBatchLoginDlg::OnBnClickedBtnGetUserinfo()
             }
         }
     }
+}
+
+void CBatchLoginDlg::OnBnClickedBtnChangeNickname()
+{
+    CString nickname_pre;
+    m_nickname.GetWindowTextW(nickname_pre);
+    if (nickname_pre.IsEmpty())
+    {
+        Notify(L"改名失败");
+        return;
+    }
+
+    if (nickname_pre.GetLength() > 5)
+    {
+        Notify(L"改名失败,名字前缀不能超过5个字符");
+        return;
+    }
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    userRoomManager_->BatchChangeNickname(users, nickname_pre.GetBuffer());
 }
