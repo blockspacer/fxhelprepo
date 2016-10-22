@@ -242,7 +242,8 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     if (res != CURLE_OK)
     {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        LOG(ERROR) << curl_easy_strerror(res);       
+        LOG(ERROR) << curl_easy_strerror(res); 
+        curl_easy_cleanup(curl);
         return false;
     }
 
@@ -252,6 +253,7 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     if (responsecode != 200)
     {
         fprintf(stderr, "reponsecode: %ld\n", responsecode);
+        curl_easy_cleanup(curl);
         return false;
     }
 
@@ -261,7 +263,7 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     {
         response->cookies = setcookies;
     }
-
+    curl_easy_cleanup(curl);
     return true;
 }
 
