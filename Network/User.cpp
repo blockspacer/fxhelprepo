@@ -796,7 +796,56 @@ bool User::ChangeNickname(const std::string& nickname, std::string* errormsg)
         *errormsg = errorcode;
         return false;
     }
+    return true;
+}
 
+bool User::ChangeLogo(const std::string& logo_path, std::string* errormsg)
+{
+    std::string url = "http://fanxing.kugou.com/UServices/UserService/UserService/setUserInfo";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://fanxing.kugou.com/index.php?action=userChangeLogo";
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    std::string args = std::string(R"([{"userLogo":")") + logo_path + R"("}])";
+    queries["args"] = UrlEncode(args);
+    queries["&_"] = GetNowTimeString();
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"¸ü¸ÄÍ·ÏñÊ§°Ü");
+        *errormsg = errorcode;
+        return false;
+    }
     return true;
 }
 

@@ -478,7 +478,15 @@ bool UserRoomManager::GetUserStorageInfos(const std::vector<std::wstring>& users
         this, std::placeholders::_1));
 }
 
-bool UserRoomManager::BatchChangeNickname(const const std::vector<std::wstring>& users,
+bool UserRoomManager::BatchChangeNickname(const std::vector<std::wstring>& users,
+    const std::wstring& nickname_pre)
+{
+    return workerThread_.message_loop_proxy()->PostTask(
+        FROM_HERE, base::Bind(&UserRoomManager::DoBatchChangeNickname,
+        base::Unretained(this), users, nickname_pre));
+}
+
+void UserRoomManager::DoBatchChangeNickname(const std::vector<std::wstring>& users,
     const std::wstring& nickname_pre)
 {
     std::vector<std::string> accounts;
@@ -488,11 +496,34 @@ bool UserRoomManager::BatchChangeNickname(const const std::vector<std::wstring>&
         accounts.push_back(account);
     }
     std::string str_nickname_pre = base::WideToUTF8(nickname_pre);
-    return userController_->BatchChangeNickname(accounts, str_nickname_pre,
+    userController_->BatchChangeNickname(accounts, str_nickname_pre,
         std::bind(&UserRoomManager::Notify,
         this, std::placeholders::_1));
-    return false;
 }
+
+bool UserRoomManager::BatchChangeLogo(const std::vector<std::wstring>& users,
+    const std::wstring& logo_path)
+{
+    return workerThread_.message_loop_proxy()->PostTask(
+        FROM_HERE, base::Bind(&UserRoomManager::DoBatchChangeLogo, this, users,
+        logo_path));
+}
+
+void UserRoomManager::DoBatchChangeLogo(const std::vector<std::wstring>& users,
+    const std::wstring& logo_path)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    std::string str_logo_path = base::WideToUTF8(logo_path);
+    userController_->BatchChangeLogo(accounts, str_logo_path,
+        std::bind(&UserRoomManager::Notify,
+        this, std::placeholders::_1));
+}
+
 void UserRoomManager::SetBreakRequest(bool interrupt)
 {
     break_request_ = interrupt;

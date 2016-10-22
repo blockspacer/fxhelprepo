@@ -73,6 +73,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_ROOMID, m_roomid);
     DDX_Control(pDX, IDC_EDIT_GIFT_COUNT, m_gift_count);
     DDX_Control(pDX, IDC_EDIT_NICKNAME_PRE, m_nickname);
+    DDX_Control(pDX, IDC_EDIT_PIC_PATH, m_logo_path);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -98,6 +99,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_DELETE, &CBatchLoginDlg::OnBnClickedBtnDelete)
     ON_BN_CLICKED(IDC_BTN_GET_USERINFO, &CBatchLoginDlg::OnBnClickedBtnGetUserinfo)
     ON_BN_CLICKED(IDC_BTN_CHANGE_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeNickname)
+    ON_BN_CLICKED(IDC_BTN_CHANGE_LOGO, &CBatchLoginDlg::OnBnClickedBtnChangeLogo)
 END_MESSAGE_MAP()
 
 
@@ -619,4 +621,23 @@ void CBatchLoginDlg::OnBnClickedBtnChangeNickname()
     GetSelectUsers(&users);
 
     userRoomManager_->BatchChangeNickname(users, nickname_pre.GetBuffer());
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnChangeLogo()
+{
+    userRoomManager_->SetBreakRequest(true);
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    CString cs_logo_path;
+    m_logo_path.GetWindowTextW(cs_logo_path);
+    if (cs_logo_path.IsEmpty())
+    {
+        Notify(L"ÇëÊäÈëÍ·ÏñÂ·¾¶");
+        return;
+    }
+
+    userRoomManager_->BatchChangeLogo(users, cs_logo_path.GetBuffer());
 }

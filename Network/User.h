@@ -125,6 +125,8 @@ public:
 
     bool ChangeNickname(const std::string& nickname, std::string* errormsg);
 
+    bool ChangeLogo(const std::string& logo_path, std::string* errormsg);
+
 private:
     bool CheckVerifyCode(const std::string& verifycode, std::string* errormsg);
     bool LoginHttps(const std::string& username, const std::string& password, 

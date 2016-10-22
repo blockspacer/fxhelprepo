@@ -47,8 +47,11 @@ public:
     bool GetUserStorageInfos(const std::vector<std::wstring>& users,
         std::vector<UserStorageInfo>* user_storage_infos);
 
-    bool BatchChangeNickname(const const std::vector<std::wstring>& users,
+    bool BatchChangeNickname(const std::vector<std::wstring>& users,
         const std::wstring& nickname_pre);
+
+    bool BatchChangeLogo(const std::vector<std::wstring>& users,
+        const std::wstring& logo_path);
 
     void SetBreakRequest(bool interrupt);
 
@@ -64,6 +67,10 @@ protected:
     void DoSendGifts(const std::vector<std::wstring>& users,
         uint32 roomid, uint32 gift_id, uint32 gift_count);
     void DoRobVotes(const std::vector<std::wstring>& users, uint32 roomid);
+    void DoBatchChangeNickname(const std::vector<std::wstring>& users,
+        const std::wstring& nickname_pre);
+    void DoBatchChangeLogo(const std::vector<std::wstring>& users,
+        const std::wstring& logo_path);
 
 private:
     base::Thread workerThread_;

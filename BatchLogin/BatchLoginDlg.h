@@ -87,4 +87,6 @@ private:
 public:
     CEdit m_nickname;
     afx_msg void OnBnClickedBtnChangeNickname();
+    CEdit m_logo_path;
+    afx_msg void OnBnClickedBtnChangeLogo();
 };

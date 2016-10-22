@@ -197,10 +197,40 @@ bool UserController::BatchChangeNickname(const std::vector<std::string>& users,
         }
 
         std::string errormsg;
-        std::string timestamp = GetNowTimeString().substr(8, 5);
+        std::string timestamp = GetNowTimeString().substr(5, 5);
         std::string nickname = nickname_pre + timestamp;
         std::wstring msg = base::UTF8ToWide(result->first) + L" 改名";
         if (!result->second->ChangeNickname(nickname, &errormsg))
+        {
+            msg += L"失败 " + base::UTF8ToWide(errormsg);
+            callback(msg);
+            continue;
+        }
+        else
+        {
+            msg += L"成功 ";
+            callback(msg);
+        }
+    }
+    return true;
+}
+
+bool UserController::BatchChangeLogo(const std::vector<std::string>& users,
+    const std::string& logo_path,
+    const std::function<void(const std::wstring& msg)>& callback)
+{
+    for (const auto& account : users)
+    {
+        auto result = users_.find(account);
+        if (result == users_.end())
+        {
+            callback(L"本地数据错误, 找不到对应用户或用户未登录");
+            continue;
+        }
+
+        std::string errormsg;
+        std::wstring msg = base::UTF8ToWide(result->first) + L" 更改头像";
+        if (!result->second->ChangeLogo(logo_path, &errormsg))
         {
             msg += L"失败 " + base::UTF8ToWide(errormsg);
             callback(msg);

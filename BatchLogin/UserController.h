@@ -51,6 +51,10 @@ public:
         const std::string& nickname_pre,
         const std::function<void(const std::wstring& msg)>& callback);
 
+    bool BatchChangeLogo(const std::vector<std::string>& users,
+        const std::string& logo_path,
+        const std::function<void(const std::wstring& msg)>& callback);
+
     bool FillRoom(uint32 roomid, uint32 count,
         const std::function<void(const std::wstring& msg)>& callback);
     bool UpMVBillboard(const std::string& collectionid, const std::string& mvid,
