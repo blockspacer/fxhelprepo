@@ -197,7 +197,7 @@ bool UserController::BatchChangeNickname(const std::vector<std::string>& users,
         }
 
         std::string errormsg;
-        std::string timestamp = GetNowTimeString().substr(5, 5);
+        std::string timestamp = GetNowTimeString().substr(6, 5);
         std::string nickname = nickname_pre + timestamp;
         std::wstring msg = base::UTF8ToWide(result->first) + L" ¸ÄÃû";
         if (!result->second->ChangeNickname(nickname, &errormsg))
