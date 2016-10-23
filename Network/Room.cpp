@@ -154,8 +154,8 @@ bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_coun
         return false;
     }
 
-    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
-    uint32 status = rootdata.get("status", 0).asUInt();
+    uint32 unixtime = GetInt32FromJsonValue(rootdata, "servertime");
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
     uint32 errorno = GetInt32FromJsonValue(rootdata, "errorno");
     if (status != 1 || errorno!=0 )
     {
