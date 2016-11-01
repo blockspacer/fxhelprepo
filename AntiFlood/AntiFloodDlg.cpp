@@ -225,6 +225,9 @@ BOOL CAntiFloodDlg::OnInitDialog()
 
     // 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
     //  执行此操作
+
+    SetWindowText(L"房间管理工具5.5");
+
     SetIcon(m_hIcon, TRUE);            // 设置大图标
     SetIcon(m_hIcon, FALSE);        // 设置小图标
     SetDlgItemText(IDC_EDIT_NAV, L"0");
