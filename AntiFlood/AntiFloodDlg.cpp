@@ -1363,11 +1363,11 @@ void CAntiFloodDlg::OnBnClickedBtnRemoveVest()
         if (m_list_vest.GetCheck(i))
         {
             // 把要删除的消息发到日志记录列表上
-            CString itemtext = m_list_vest.GetItemText(i, 0);
+            CString itemtext = m_list_vest.GetItemText(i, 1);
             std::string utfvestname = base::WideToUTF8(itemtext.GetBuffer());
             antiStrategy_->RemoveNickname(utfvestname);
 
-            itemtext = m_list_vest.GetItemText(i, 1);
+            itemtext = m_list_vest.GetItemText(i, 2);
             std::string utfsensitive = base::WideToUTF8(itemtext.GetBuffer());
             antiStrategy_->RemoveSensitive(utfsensitive);
 
