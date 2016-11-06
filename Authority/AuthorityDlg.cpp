@@ -74,6 +74,10 @@ BEGIN_MESSAGE_MAP(CAuthorityDlg, CDialogEx)
     ON_BN_CLICKED(IDCANCEL, &CAuthorityDlg::OnBnClickedCancel)
     ON_BN_CLICKED(IDC_BTN_GENERATE, &CAuthorityDlg::OnBnClickedBtnGenerate)
     ON_BN_CLICKED(IDC_BTN_VIEW, &CAuthorityDlg::OnBnClickedBtnView)
+    ON_BN_CLICKED(IDC_BTN_ADD_1_MON, &CAuthorityDlg::OnBnClickedBtnAdd1Mon)
+    ON_BN_CLICKED(IDC_BTN_3_MON, &CAuthorityDlg::OnBnClickedBtn3Mon)
+    ON_BN_CLICKED(IDC_BTN_6_MON, &CAuthorityDlg::OnBnClickedBtn6Mon)
+    ON_BN_CLICKED(IDC_BTN_PACKAGE, &CAuthorityDlg::OnBnClickedBtnPackage)
 END_MESSAGE_MAP()
 
 
@@ -214,4 +218,28 @@ void CAuthorityDlg::OnBnClickedBtnView()
     m_oleDateTime_End.SetDate(
         exploded.year, exploded.month, exploded.day_of_month);
     UpdateData(FALSE);
+}
+
+
+void CAuthorityDlg::OnBnClickedBtnAdd1Mon()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CAuthorityDlg::OnBnClickedBtn3Mon()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CAuthorityDlg::OnBnClickedBtn6Mon()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CAuthorityDlg::OnBnClickedBtnPackage()
+{
+    // TODO:  在此添加控件通知处理程序代码
 }

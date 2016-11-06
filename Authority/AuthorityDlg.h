@@ -43,4 +43,8 @@ public:
     CButton m_chk_anti_advance;
     COleDateTime m_oleDateTime_End;
     CEdit m_edit_serverip;
+    afx_msg void OnBnClickedBtnAdd1Mon();
+    afx_msg void OnBnClickedBtn3Mon();
+    afx_msg void OnBnClickedBtn6Mon();
+    afx_msg void OnBnClickedBtnPackage();
 };
