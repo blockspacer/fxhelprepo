@@ -4,5 +4,7 @@ class RobotTest
 public:
     RobotTest();
     ~RobotTest();
+
+    void DoTest();
 };
 

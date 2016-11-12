@@ -4,13 +4,14 @@
 #include "Network/CurlWrapper.h"
 
 
-void SingleUserSingleRoomTest()
+void SingleUserSingleRoomTest(TcpManager* tcp_manager)
 {
     bool result = true;
     User user;
     std::string errormsg;
-    result &= user.Login("fanxingtest001", "123321","", &errormsg);
-    result &= user.EnterRoomFopOperation(1084594, nullptr);
+    user.SetTcpManager(tcp_manager);
+    result &= user.Login("fanxingtest002", "1233211234567","", &errormsg);
+    result &= user.EnterRoomFopAlive(1201793);
 
     while (1);
 }

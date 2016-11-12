@@ -10,56 +10,48 @@
 #include "Network/CurlWrapper.h"
 #include "Network/EncodeHelper.h"
 #include "Network/Network.h"
+#include "Network/TcpManager.h"
 #include "third_party/chromium/base/at_exit.h"
 #include "third_party/chromium/base/run_loop.h"
+#include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_util.h"
+#include "third_party/chromium/base/command_line.h"
+#include "third_party/chromium/base/at_exit.h"
 
-bool MakePostdata(const std::map<std::string, std::string>& postmap,
-    std::vector<uint8>* postdata)
-{
-    if (postmap.empty())
-        return false;
-
-    std::string temp;
-    bool first = true;
-    for (const auto& param : postmap)
-    {
-        if (first)
-            first = false;
-        else
-            temp += "&";
-
-        temp += param.first + "=" + UrlEncode(param.second);
-    }
-    postdata->assign(temp.begin(), temp.end());
-    return true;
-}
-
-void DoRobotTest()
-{
-    CurlWrapper curlWrapper;
-    HttpRequest httpRequest;
-    httpRequest.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_POST;
-    httpRequest.url = "http://www.tuling123.com//openapi/api";
-    std::map<std::string, std::string> postmap;
-    postmap["key"] = "21ef7a39254642f721736081e8e2226d";
-    postmap["info"] = "chat info";
-    postmap["userid"] = "123";
-    bool result = MakePostdata(postmap, &httpRequest.postdata);
-
-    HttpResponse httpResponse;
-    result = curlWrapper.Execute(httpRequest, &httpResponse);
-
-}
+extern void SingleUserSingleRoomTest(TcpManager* tcp_manager);
+void InitAppLog();
 
 int _tmain(int argc, _TCHAR* argv[])
 {   
     base::AtExitManager atExitManager;
-
+    InitAppLog();
     NetworkInitialize();
 
-    DoRobotTest();
-
+    std::unique_ptr<TcpManager> tcp_manager(new TcpManager);
+    tcp_manager->Initialize();
+    SingleUserSingleRoomTest(tcp_manager.get());
+    tcp_manager->Finalize();
     NetworkFainalize();
 	return 0;
+}
+
+void InitAppLog()
+{
+    CommandLine::Init(0, NULL);
+    base::FilePath path;
+    PathService::Get(base::DIR_APP_DATA, &path);
+    path = path.Append(L"FanXingHelper").Append(L"fanxinghelper.log");
+    logging::LoggingSettings setting;
+#ifdef _DEBUG
+    setting.logging_dest = logging::LOG_TO_ALL;
+    setting.lock_log = logging::LOCK_LOG_FILE;
+#else
+    setting.logging_dest = logging::LOG_NONE;
+    setting.lock_log = logging::DONT_LOCK_LOG_FILE;
+#endif
+    setting.log_file = path.value().c_str();
+    setting.delete_old = logging::APPEND_TO_OLD_LOG_FILE;
+    logging::InitLogging(setting);
+    logging::SetLogItems(false, true, true, true);
 }
 
