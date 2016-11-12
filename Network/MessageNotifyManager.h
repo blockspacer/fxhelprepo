@@ -41,6 +41,19 @@ struct RoomChatMessage
     std::string chatmessage = "";
 };
 
+struct BetShowData
+{
+    uint32 bet_gid;
+    uint32 odds;
+    //uint32 count;
+};
+
+struct BetResult
+{
+    uint32 result;
+    uint32 random;
+};
+
 struct RoomGiftInfo601
 {
     uint32 time;
@@ -152,5 +165,8 @@ private:
     base::RepeatingTimer<MessageNotifyManager> newRepeatingTimer_;
     base::TimeDelta chat_message_space_;
     base::Time last_chat_time_;
+
+    // 屠龙相关数据
+    std::vector<BetShowData> bet_show_datas_;
 };
 
