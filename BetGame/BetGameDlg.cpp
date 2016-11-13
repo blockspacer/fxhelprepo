@@ -30,6 +30,9 @@ void CBetGameDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CBetGameDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+    ON_BN_CLICKED(IDC_BUTTON_NAV, &CBetGameDlg::OnBnClickedButtonNav)
+    ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CBetGameDlg::OnBnClickedButtonLogin)
+    ON_BN_CLICKED(IDC_CHECK_REMEMBER, &CBetGameDlg::OnBnClickedCheckRemember)
 END_MESSAGE_MAP()
 
 
@@ -85,3 +88,21 @@ HCURSOR CBetGameDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CBetGameDlg::OnBnClickedButtonNav()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CBetGameDlg::OnBnClickedButtonLogin()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
+
+
+void CBetGameDlg::OnBnClickedCheckRemember()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
