@@ -4,7 +4,13 @@
 
 #pragma once
 
+#include <memory>
+#include "afxcmn.h"
+#include "afxwin.h"
 
+#include "BetNetworkHelper.h"
+
+class BetNetworkHelper;
 // CBetGameDlg ¶Ô»°¿ò
 class CBetGameDlg : public CDialogEx
 {
@@ -28,8 +34,15 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
-public:
-    afx_msg void OnBnClickedButtonNav();
+
+private:
+    afx_msg void OnBnClickedButtonEnterRoom();
     afx_msg void OnBnClickedButtonLogin();
-    afx_msg void OnBnClickedCheckRemember();
+    CListCtrl m_list_bet_data;
+    CEdit m_edit_username;
+    CEdit m_edit_password;
+    CEdit m_edit_room_id;
+
+    std::unique_ptr<BetNetworkHelper> bet_network_;
+    CButton m_check_remember;
 };

@@ -7,32 +7,54 @@
 #include "BetGameDlg.h"
 #include "afxdialogex.h"
 
+#undef max
+#undef min
+
+#include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
 // CBetGameDlg 对话框
-
-
+namespace
+{
+    const wchar_t* betcolumnlist[] = {
+        L"1",
+        L"2",
+        L"3",
+        L"4",
+        L"5",
+        L"6",
+        L"7",
+        L"8",
+    };
+}
 
 CBetGameDlg::CBetGameDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CBetGameDlg::IDD, pParent)
+    , bet_network_(nullptr)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 void CBetGameDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+    CDialogEx::DoDataExchange(pDX);
+    DDX_Control(pDX, IDC_LIST_BETDATA, m_list_bet_data);
+    DDX_Control(pDX, IDC_EDIT_Username, m_edit_username);
+    DDX_Control(pDX, IDC_EDIT_Password, m_edit_password);
+    DDX_Control(pDX, IDC_EDIT_NAV, m_edit_room_id);
+    DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
 }
 
 BEGIN_MESSAGE_MAP(CBetGameDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-    ON_BN_CLICKED(IDC_BUTTON_NAV, &CBetGameDlg::OnBnClickedButtonNav)
+    ON_BN_CLICKED(IDC_BUTTON_NAV, &CBetGameDlg::OnBnClickedButtonEnterRoom)
     ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CBetGameDlg::OnBnClickedButtonLogin)
-    ON_BN_CLICKED(IDC_CHECK_REMEMBER, &CBetGameDlg::OnBnClickedCheckRemember)
 END_MESSAGE_MAP()
 
 
@@ -48,6 +70,21 @@ BOOL CBetGameDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
+    DWORD dwStyle = m_list_bet_data.GetExtendedStyle();
+    dwStyle |= LVS_EX_CHECKBOXES;
+    dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
+    dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
+
+    m_list_bet_data.SetExtendedStyle(dwStyle); //设置扩展风格
+    int nColumnCount = m_list_bet_data.GetHeaderCtrl()->GetItemCount();
+    for (int i = nColumnCount - 1; i >= 0; i--)
+        m_list_bet_data.DeleteColumn(i);
+    int index = 0;
+    RECT rect;
+    m_list_bet_data.GetWindowRect(&rect);
+    int width = (rect.right - rect.left) / (sizeof(betcolumnlist) / sizeof(betcolumnlist[0]));
+    for (const auto& it : betcolumnlist)
+        m_list_bet_data.InsertColumn(index++, it, LVCFMT_LEFT, width);//插入列
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -90,19 +127,34 @@ HCURSOR CBetGameDlg::OnQueryDragIcon()
 
 
 
-void CBetGameDlg::OnBnClickedButtonNav()
+void CBetGameDlg::OnBnClickedButtonEnterRoom()
 {
-    // TODO:  在此添加控件通知处理程序代码
-}
+    CString cs_roomid;
+    m_edit_room_id.GetWindowTextW(cs_roomid);
+    
 
+}
 
 void CBetGameDlg::OnBnClickedButtonLogin()
 {
-    // TODO:  在此添加控件通知处理程序代码
-}
+    CString cs_username;
+    CString cs_password;
+    m_edit_username.GetWindowTextW(cs_username);
+    m_edit_password.GetWindowTextW(cs_password);
 
+    std::string username = base::WideToUTF8(cs_username.GetBuffer());
+    std::string password = base::WideToUTF8(cs_password.GetBuffer());
 
-void CBetGameDlg::OnBnClickedCheckRemember()
-{
-    // TODO:  在此添加控件通知处理程序代码
+    bet_network_.reset(new BetNetworkHelper);
+    
+    bet_network_->Initialize();
+
+    if (!bet_network_->Login(username, password))
+        return;
+
+    if (m_check_remember.GetCheck())
+    {
+        // 保存登录成功配置
+    }
+
 }

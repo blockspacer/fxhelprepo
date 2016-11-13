@@ -444,6 +444,11 @@ void Room::SetNotify601(Notify601 notify601)
         std::bind(&Room::TranferNotify601,this,std::placeholders::_1));
 }
 
+void Room::SetNotify620(Notify620 notify_620)
+{
+    messageNotifyManager_->SetNotify620(notify_620);
+}
+
 bool Room::OpenRoom(const std::string& cookies)
 {
     HttpRequest request;

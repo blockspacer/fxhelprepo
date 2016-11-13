@@ -111,6 +111,7 @@
   <ItemGroup>
     <ClInclude Include="BetGame.h" />
     <ClInclude Include="BetGameDlg.h" />
+    <ClInclude Include="BetNetworkHelper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -118,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="BetGame.cpp" />
     <ClCompile Include="BetGameDlg.cpp" />
+    <ClCompile Include="BetNetworkHelper.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -131,6 +133,29 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\BetGame.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Network\Network.vcxproj">
+      <Project>{2147cb51-23f6-4022-8e4a-291b70570cb7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
+      <Project>{ed99d404-f6b3-517a-4ea7-604a10269355}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\chromium\base\third_party\dynamic_annotations\dynamic_annotations.vcxproj">
+      <Project>{b68ee2bd-0ba9-9949-464b-39ffe5cabd0a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\json\json.vcxproj">
+      <Project>{0deca417-fd94-4652-9881-53f935d89245}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\libcurl\curl\lib\libcurl.vcxproj">
+      <Project>{a9b789e9-ca2d-4b2f-b5fb-6d515ecfb31e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\libeay32\libeay32.vcxproj">
+      <Project>{ac33ff8e-59e7-4e1e-8111-f446e9fb0231}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\ssleay32\ssleay32.vcxproj">
+      <Project>{057ea5b8-8c47-4519-b5fc-9b28191d6843}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

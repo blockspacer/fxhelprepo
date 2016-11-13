@@ -1,8 +1,17 @@
 
 // BetGame.cpp : 定义应用程序的类行为。
 //
-
 #include "stdafx.h"
+#include <memory>
+
+#undef max
+#undef min
+#include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_util.h"
+#include "third_party/chromium/base/command_line.h"
+#include "third_party/chromium/base/at_exit.h"
+
+
 #include "BetGame.h"
 #include "BetGameDlg.h"
 
@@ -24,6 +33,9 @@ CBetGameApp::CBetGameApp()
 {
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
+    atExitManager_.reset(new base::AtExitManager);
+    InitAppLog();
+    LOG(INFO) << __FUNCTION__;
 }
 
 
@@ -96,4 +108,26 @@ BOOL CBetGameApp::InitInstance()
 	//  而不是启动应用程序的消息泵。
 	return FALSE;
 }
+
+
+void CBetGameApp::InitAppLog()
+{
+    CommandLine::Init(0, NULL);
+    base::FilePath path;
+    PathService::Get(base::DIR_APP_DATA, &path);
+    path = path.Append(L"FanXingHelper").Append(L"fanxinghelper.log");
+    logging::LoggingSettings setting;
+#ifdef _DEBUG
+    setting.logging_dest = logging::LOG_TO_ALL;
+    setting.lock_log = logging::LOCK_LOG_FILE;
+#else
+    setting.logging_dest = logging::LOG_NONE;
+    setting.lock_log = logging::DONT_LOCK_LOG_FILE;
+#endif
+    setting.log_file = path.value().c_str();
+    setting.delete_old = logging::APPEND_TO_OLD_LOG_FILE;
+    logging::InitLogging(setting);
+    logging::SetLogItems(false, true, true, true);
+}
+
 

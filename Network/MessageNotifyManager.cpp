@@ -464,6 +464,13 @@ void MessageNotifyManager::SetNotify601(Notify601 notify601)
         base::Bind(&MessageNotifyManager::DoSetNotify601, this, notify601));
 }
 
+void MessageNotifyManager::SetNotify620(Notify620 notify_620)
+{
+    notify_620_ = notify_620;
+    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSetNotify620, this, notify_620));
+}
+
 void MessageNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 {
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
@@ -483,6 +490,11 @@ void MessageNotifyManager::DoSetNotify501(Notify501 notify501)
 void MessageNotifyManager::DoSetNotify601(Notify601 notify601)
 {
     notify601_ = notify601;
+}
+
+void MessageNotifyManager::DoSetNotify620(Notify620 notify620)
+{
+    notify_620_ = notify620;
 }
 
 void MessageNotifyManager::DoSetNormalNotify(NormalNotify normalNotify)
@@ -663,6 +675,10 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
                 {
                     LOG(INFO) << L"tulong result = " + base::UintToString16(bet_result.result) +
                         L" random = " + base::UintToString16(bet_result.random);
+                    if (notify_620_)
+                    {
+                        notify_620_(bet_result);
+                    }
                 }
             }
         }

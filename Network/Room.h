@@ -29,6 +29,8 @@ public:
     void SetNotify201(Notify201 notify201);
     void SetNotify501(Notify501 notify501);
     void SetNotify601(Notify601 notify601);
+
+    void SetNotify620(Notify620 notify_620);
     // 中断接收数据的连接
     bool Exit();
 
