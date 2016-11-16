@@ -21,6 +21,12 @@ public:
 // 对话框数据
 	enum { IDD = IDD_BETGAME_DIALOG };
 
+    enum
+    {
+        WM_USER_TIPS = WM_USER + 1,
+        WM_USER_BET_RESULT = WM_USER + 2,
+    };
+
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
@@ -38,11 +44,21 @@ protected:
 private:
     afx_msg void OnBnClickedButtonEnterRoom();
     afx_msg void OnBnClickedButtonLogin();
+
+    void TipMessageCallback(const std::wstring& message);
+    void DisplayBetResultCallback(uint32 bet_result);
+
+    LRESULT OnTipsMessage(WPARAM wParam, LPARAM lParam);
+    LRESULT OnDisplayBetResult(WPARAM wParam, LPARAM lParam);
+
+    int message_count_;
+    CListBox m_list_msg;
     CListCtrl m_list_bet_data;
     CEdit m_edit_username;
     CEdit m_edit_password;
     CEdit m_edit_room_id;
+    CButton m_check_remember;
+    
 
     std::unique_ptr<BetNetworkHelper> bet_network_;
-    CButton m_check_remember;
 };

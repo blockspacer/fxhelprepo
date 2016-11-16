@@ -12,6 +12,7 @@
 
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+//#include "third_party/chromium/base/strings/str"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -22,6 +23,7 @@
 namespace
 {
     const wchar_t* betcolumnlist[] = {
+        L"0",
         L"1",
         L"2",
         L"3",
@@ -35,6 +37,7 @@ namespace
 
 CBetGameDlg::CBetGameDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CBetGameDlg::IDD, pParent)
+    , message_count_(0)
     , bet_network_(nullptr)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -48,13 +51,16 @@ void CBetGameDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_Password, m_edit_password);
     DDX_Control(pDX, IDC_EDIT_NAV, m_edit_room_id);
     DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
+    DDX_Control(pDX, IDC_LIST_MSG, m_list_msg);
 }
 
 BEGIN_MESSAGE_MAP(CBetGameDlg, CDialogEx)
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
+    ON_WM_PAINT()
+    ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BUTTON_NAV, &CBetGameDlg::OnBnClickedButtonEnterRoom)
     ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CBetGameDlg::OnBnClickedButtonLogin)
+    ON_MESSAGE(WM_USER_TIPS, &CBetGameDlg::OnTipsMessage)
+    ON_MESSAGE(WM_USER_BET_RESULT, &CBetGameDlg::OnDisplayBetResult)
 END_MESSAGE_MAP()
 
 
@@ -71,7 +77,7 @@ BOOL CBetGameDlg::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化代码
     DWORD dwStyle = m_list_bet_data.GetExtendedStyle();
-    dwStyle |= LVS_EX_CHECKBOXES;
+    //dwStyle |= LVS_EX_CHECKBOXES;
     dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
     dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
 
@@ -85,6 +91,8 @@ BOOL CBetGameDlg::OnInitDialog()
     int width = (rect.right - rect.left) / (sizeof(betcolumnlist) / sizeof(betcolumnlist[0]));
     for (const auto& it : betcolumnlist)
         m_list_bet_data.InsertColumn(index++, it, LVCFMT_LEFT, width);//插入列
+
+    m_list_msg.InsertString(message_count_++, L"程序启动");
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -131,8 +139,11 @@ void CBetGameDlg::OnBnClickedButtonEnterRoom()
 {
     CString cs_roomid;
     m_edit_room_id.GetWindowTextW(cs_roomid);
-    
-
+    uint32 room_id = 0;
+    base::StringToUint(base::WideToUTF8(cs_roomid.GetBuffer()), &room_id);
+    if (!bet_network_->EnterRoom(room_id))
+    {
+    }
 }
 
 void CBetGameDlg::OnBnClickedButtonLogin()
@@ -148,6 +159,13 @@ void CBetGameDlg::OnBnClickedButtonLogin()
     bet_network_.reset(new BetNetworkHelper);
     
     bet_network_->Initialize();
+    bet_network_->SetTipMessage(
+        base::Bind(&CBetGameDlg::TipMessageCallback,
+        base::Unretained(this)));
+
+    bet_network_->SetBetResultNotify(
+        base::Bind(&CBetGameDlg::DisplayBetResultCallback,
+        base::Unretained(this)));
 
     if (!bet_network_->Login(username, password))
         return;
@@ -156,5 +174,45 @@ void CBetGameDlg::OnBnClickedButtonLogin()
     {
         // 保存登录成功配置
     }
+}
 
+void CBetGameDlg::TipMessageCallback(const std::wstring& message)
+{
+    std::wstring* param = new std::wstring(message);
+    this->PostMessage(WM_USER_TIPS, 0, (LPARAM)param);
+}
+
+void CBetGameDlg::DisplayBetResultCallback(uint32 bet_result)
+{
+    this->PostMessage(WM_USER_BET_RESULT, 0, bet_result);
+}
+
+LRESULT CBetGameDlg::OnTipsMessage(WPARAM wParam, LPARAM lParam)
+{
+    std::wstring* param = (std::wstring*)(lParam);
+
+    // 显示在界面
+    m_list_msg.InsertString(message_count_++, param->c_str());
+
+    delete param;
+    return 0;
+}
+LRESULT CBetGameDlg::OnDisplayBetResult(WPARAM wParam, LPARAM lParam)
+{
+    uint32 result = (uint32)(lParam);
+    // 显示在界面
+    int itemcount = m_list_bet_data.GetItemCount();
+    std::wstring wresult = base::UintToString16(result - 1);
+    int nitem = 0;
+    if (result == 1)
+    {
+        nitem = m_list_bet_data.InsertItem(itemcount++, wresult.c_str());
+    }
+    else
+    {
+        nitem = m_list_bet_data.InsertItem(itemcount++, L"");
+        m_list_bet_data.SetItemText(nitem, result - 1, wresult.c_str());
+    }
+
+    return 0;
 }
