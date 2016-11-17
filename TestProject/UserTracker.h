@@ -37,6 +37,7 @@ private:
     bool GetUserConcernList(); // 获取用户关注主播的信息, 这是可选的辅助功能
 
     bool GetAllStarRoomInfos(std::vector<uint32>* roomids); // 从全站获取所有正在直播的主播直播粗略信息，为下一步获取房间用户列表做准备
+    bool GetTargetStarRoomInfos(const std::string& url, std::vector<uint32>* roomids);
     bool GetRoomViwerList(uint32 roomid, std::vector<EnterRoomUserInfo>* enterRoomUserInfoList); // 从指定房间获取用户列表，追踪用户
 
     std::unique_ptr<User> user_;
