@@ -63,6 +63,7 @@ BEGIN_MESSAGE_MAP(CBetGameDlg, CDialogEx)
     ON_MESSAGE(WM_USER_TIPS, &CBetGameDlg::OnTipsMessage)
     ON_MESSAGE(WM_USER_BET_RESULT, &CBetGameDlg::OnDisplayBetResult)
     ON_MESSAGE(WM_USER_BET_TIME, &CBetGameDlg::OnDisplayBetTime)
+    ON_NOTIFY(HDN_BEGINTRACK, 0, &CBetGameDlg::OnHdnBegintrackListBetdata)
 END_MESSAGE_MAP()
 
 
@@ -90,9 +91,22 @@ BOOL CBetGameDlg::OnInitDialog()
     int index = 0;
     RECT rect;
     m_list_bet_data.GetWindowRect(&rect);
-    int width = (rect.right - rect.left) / (sizeof(betcolumnlist) / sizeof(betcolumnlist[0]));
+    int time_width = 60;
+    int width = (rect.right - rect.left - time_width) / ((sizeof(betcolumnlist) / sizeof(betcolumnlist[0])-1));
+    bool first = true;
     for (const auto& it : betcolumnlist)
-        m_list_bet_data.InsertColumn(index++, it, LVCFMT_LEFT, width);//插入列
+    {
+        if (first)
+        {
+            first = false;
+            m_list_bet_data.InsertColumn(index++, it, LVCFMT_LEFT, time_width);//插入列
+        }
+        else
+        {
+            m_list_bet_data.InsertColumn(index++, it, LVCFMT_LEFT, width);//插入列
+        }
+    }
+        
 
     m_list_msg.InsertString(message_count_++, L"程序启动");
 
@@ -243,4 +257,11 @@ LRESULT CBetGameDlg::OnDisplayBetTime(WPARAM wParam, LPARAM lParam)
     m_list_msg.InsertString(message_count_++, str_time.c_str());
 
     return 0;
+}
+
+void CBetGameDlg::OnHdnBegintrackListBetdata(NMHDR *pNMHDR, LRESULT *pResult)
+{
+    LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+    // 保证列头不能拖动
+    *pResult = TRUE;
 }

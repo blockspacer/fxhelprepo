@@ -46,6 +46,7 @@ protected:
 private:
     afx_msg void OnBnClickedButtonEnterRoom();
     afx_msg void OnBnClickedButtonLogin();
+    afx_msg void OnHdnBegintrackListBetdata(NMHDR *pNMHDR, LRESULT *pResult);
 
     void TipMessageCallback(const std::wstring& message);
     void DisplayBetResultCallback(const BetResult& bet_result);
@@ -62,7 +63,6 @@ private:
     CEdit m_edit_password;
     CEdit m_edit_room_id;
     CButton m_check_remember;
-    
 
     std::unique_ptr<BetNetworkHelper> bet_network_;
 };
