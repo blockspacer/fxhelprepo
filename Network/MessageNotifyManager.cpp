@@ -644,6 +644,7 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
         {
             std::vector<BetShowData> bet_show_datas;
             BetResult bet_result;
+            bet_result.time = time;
             if (CommandHandle_620(rootdata, &bet_show_datas, &bet_result))
             {
                 if (!bet_show_datas.empty())
@@ -675,10 +676,10 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
                 {
                     LOG(INFO) << L"tulong result = " + base::UintToString16(bet_result.result) +
                         L" random = " + base::UintToString16(bet_result.random);
-                    if (notify_620_)
-                    {
-                        notify_620_(bet_result);
-                    }
+                }
+                if (notify_620_)
+                {
+                    notify_620_(bet_result);
                 }
             }
         }

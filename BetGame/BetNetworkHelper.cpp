@@ -58,15 +58,21 @@ void BetNetworkHelper::SetTipMessage(const base::Callback<void(const std::wstrin
     tips_callback_ = callback;
 }
 
-void BetNetworkHelper::SetBetResultNotify(const base::Callback<void(uint32)>& callback)
+void BetNetworkHelper::SetBetResultNotify(const base::Callback<void(const  BetResult&)>& callback)
 {
     result_callback_ = callback;
 }
 
+void BetNetworkHelper::SetBetTimeNotify(const base::Callback<void(uint32 time)>& callback)
+{
+    time_callback_ = callback;
+}
+
 bool BetNetworkHelper::EnterRoom(uint32 room_id)
 {
-    user_->SetNotify620(std::bind(&BetNetworkHelper::OnBetNotify,
-        this, std::placeholders::_1));
+    user_->SetNotify620(
+        std::bind(&BetNetworkHelper::OnBetNotify, this, std::placeholders::_1));
+
     if (!user_->EnterRoomFopAlive(room_id))
     {
         tips_callback_.Run(L"进入房间失败");
@@ -78,11 +84,18 @@ bool BetNetworkHelper::EnterRoom(uint32 room_id)
 
 void BetNetworkHelper::OnBetNotify(const BetResult& bet_result)
 {
+    if (bet_result.result == 0)
+    {
+        time_callback_.Run(bet_result.time);
+        return;
+    }
+    
     auto it = result_map_.find(bet_result.result);
     if (it == result_map_.end())
     {
         return;
     }
-    
-    result_callback_.Run(it->second);
+    BetResult new_result = bet_result;
+    new_result.display_result = it->second;
+    result_callback_.Run(new_result);
 }

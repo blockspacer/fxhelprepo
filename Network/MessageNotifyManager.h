@@ -50,8 +50,10 @@ struct BetShowData
 
 struct BetResult
 {
-    uint32 result;
-    uint32 random;
+    uint32 time = 0;
+    uint32 result = 0;
+    uint32 display_result = 0;
+    uint32 random = 0; 
 };
 
 struct RoomGiftInfo601

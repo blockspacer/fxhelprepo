@@ -11,6 +11,7 @@
 #include "BetNetworkHelper.h"
 
 class BetNetworkHelper;
+class BetResult;
 // CBetGameDlg ¶Ô»°¿ò
 class CBetGameDlg : public CDialogEx
 {
@@ -25,6 +26,7 @@ public:
     {
         WM_USER_TIPS = WM_USER + 1,
         WM_USER_BET_RESULT = WM_USER + 2,
+        WM_USER_BET_TIME = WM_USER + 3
     };
 
 	protected:
@@ -46,10 +48,12 @@ private:
     afx_msg void OnBnClickedButtonLogin();
 
     void TipMessageCallback(const std::wstring& message);
-    void DisplayBetResultCallback(uint32 bet_result);
+    void DisplayBetResultCallback(const BetResult& bet_result);
+    void DisplayBetTimeCallback(uint32 time);
 
     LRESULT OnTipsMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayBetResult(WPARAM wParam, LPARAM lParam);
+    LRESULT OnDisplayBetTime(WPARAM wParam, LPARAM lParam);
 
     int message_count_;
     CListBox m_list_msg;

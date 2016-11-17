@@ -6,6 +6,7 @@
 #include "BetGame.h"
 #include "BetGameDlg.h"
 #include "afxdialogex.h"
+#include "Network/EncodeHelper.h"
 
 #undef max
 #undef min
@@ -23,7 +24,7 @@
 namespace
 {
     const wchar_t* betcolumnlist[] = {
-        L"0",
+        L"时间",
         L"1",
         L"2",
         L"3",
@@ -61,6 +62,7 @@ BEGIN_MESSAGE_MAP(CBetGameDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CBetGameDlg::OnBnClickedButtonLogin)
     ON_MESSAGE(WM_USER_TIPS, &CBetGameDlg::OnTipsMessage)
     ON_MESSAGE(WM_USER_BET_RESULT, &CBetGameDlg::OnDisplayBetResult)
+    ON_MESSAGE(WM_USER_BET_TIME, &CBetGameDlg::OnDisplayBetTime)
 END_MESSAGE_MAP()
 
 
@@ -93,6 +95,10 @@ BOOL CBetGameDlg::OnInitDialog()
         m_list_bet_data.InsertColumn(index++, it, LVCFMT_LEFT, width);//插入列
 
     m_list_msg.InsertString(message_count_++, L"程序启动");
+
+    m_edit_username.SetWindowTextW(L"fanxingtest002");
+    m_edit_password.SetWindowTextW(L"1233211234567");
+    m_edit_room_id.SetWindowTextW(L"1201793");
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -167,6 +173,10 @@ void CBetGameDlg::OnBnClickedButtonLogin()
         base::Bind(&CBetGameDlg::DisplayBetResultCallback,
         base::Unretained(this)));
 
+    bet_network_->SetBetTimeNotify(
+        base::Bind(&CBetGameDlg::DisplayBetTimeCallback,
+        base::Unretained(this)));
+
     if (!bet_network_->Login(username, password))
         return;
 
@@ -182,9 +192,15 @@ void CBetGameDlg::TipMessageCallback(const std::wstring& message)
     this->PostMessage(WM_USER_TIPS, 0, (LPARAM)param);
 }
 
-void CBetGameDlg::DisplayBetResultCallback(uint32 bet_result)
+void CBetGameDlg::DisplayBetResultCallback(const BetResult& bet_result)
 {
-    this->PostMessage(WM_USER_BET_RESULT, 0, bet_result);
+    BetResult* param = new BetResult(bet_result);
+    this->PostMessage(WM_USER_BET_RESULT, 0, (LPARAM)param);
+}
+
+void CBetGameDlg::DisplayBetTimeCallback(uint32 time)
+{
+    this->PostMessage(WM_USER_BET_TIME, 0, (LPARAM)time);
 }
 
 LRESULT CBetGameDlg::OnTipsMessage(WPARAM wParam, LPARAM lParam)
@@ -197,22 +213,34 @@ LRESULT CBetGameDlg::OnTipsMessage(WPARAM wParam, LPARAM lParam)
     delete param;
     return 0;
 }
+
 LRESULT CBetGameDlg::OnDisplayBetResult(WPARAM wParam, LPARAM lParam)
 {
-    uint32 result = (uint32)(lParam);
+    BetResult* bet_result = (BetResult*)(lParam);
+    uint32 result = bet_result->display_result;
+    uint32 time = bet_result->time;
+    base::Time server_time = base::Time::FromDoubleT(time);
+    std::wstring str_time = base::UTF8ToWide(MakeFormatTimeString(server_time));
+
     // 显示在界面
     int itemcount = m_list_bet_data.GetItemCount();
-    std::wstring wresult = base::UintToString16(result - 1);
+    std::wstring wresult = base::UintToString16(result);
     int nitem = 0;
-    if (result == 1)
-    {
-        nitem = m_list_bet_data.InsertItem(itemcount++, wresult.c_str());
-    }
-    else
-    {
-        nitem = m_list_bet_data.InsertItem(itemcount++, L"");
-        m_list_bet_data.SetItemText(nitem, result - 1, wresult.c_str());
-    }
+    nitem = m_list_bet_data.InsertItem(itemcount++, str_time.c_str());
+    m_list_bet_data.SetItemText(nitem, result, wresult.c_str());
+    delete bet_result;
+
+    return 0;
+}
+
+LRESULT CBetGameDlg::OnDisplayBetTime(WPARAM wParam, LPARAM lParam)
+{
+    uint32 time = (uint32)(lParam);
+    base::Time server_time = base::Time::FromDoubleT(time);
+    std::wstring str_time = base::UTF8ToWide(MakeFormatTimeString(server_time));
+
+    // 显示在界面
+    m_list_msg.InsertString(message_count_++, str_time.c_str());
 
     return 0;
 }
