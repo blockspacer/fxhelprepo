@@ -33,13 +33,8 @@
 
 #include <afxcontrolbars.h>     // 功能区和控件条的 MFC 支持
 
-
-
-
-
-
-
-
+#include "third_party/chromium/base/logging.h"
+#include <string>
 
 #ifdef _UNICODE
 #if defined _M_IX86
