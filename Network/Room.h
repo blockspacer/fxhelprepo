@@ -41,8 +41,8 @@ public:
     bool OpenRoomAndGetViewerList(const std::string& cookies,
         std::vector<EnterRoomUserInfo>* enterRoomUserInfoList);
 
-    bool GetViewerList(const std::string& cookies, 
-        std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
+    bool GetViewerList(const std::string& cookies,
+        std::vector<EnterRoomUserInfo>* enterRoomUserInfoList);
 	bool KickOutUser(KICK_TYPE kicktype, const std::string& cookies,
         const EnterRoomUserInfo& enterRoomUserInfo);
 
