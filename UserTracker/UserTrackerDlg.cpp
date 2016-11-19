@@ -50,6 +50,7 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_UPDATA_FIND, &CUserTrackerDlg::OnBnClickedBtnUpdataFind)
     ON_MESSAGE(WM_USER_MSG, &CUserTrackerDlg::OnNotifyMessage)
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CUserTrackerDlg::OnBnClickedBtnLogin)
+    ON_BN_CLICKED(IDC_BTN_CANCEL, &CUserTrackerDlg::OnBnClickedBtnCancel)
 END_MESSAGE_MAP()
 
 
@@ -70,6 +71,11 @@ BOOL CUserTrackerDlg::OnInitDialog()
         base::Bind(&CUserTrackerDlg::Notify, base::Unretained(this)));
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+}
+
+void CUserTrackerDlg::OnOK()
+{
+    // 避免按回车直接退出
 }
 
 // 如果向对话框添加最小化按钮，则需要下面的代码
@@ -191,4 +197,10 @@ void CUserTrackerDlg::OnBnClickedBtnLogin()
     std::string account = base::WideToUTF8(cs_account.GetBuffer());
     std::string password = base::WideToUTF8(cs_password.GetBuffer());
     tracker_helper_->LoginUser(account, password);
+}
+
+
+void CUserTrackerDlg::OnBnClickedBtnCancel()
+{
+    tracker_helper_->CancelCurrentOperation();
 }

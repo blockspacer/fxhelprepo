@@ -33,6 +33,8 @@ public:
 
     void SetNotifyMessageCallback(const base::Callback<void(const std::wstring&)> callback);
 
+    void CancelCurrentOperation();
+
     bool LoginUser(const std::string& user_name, const std::string& password);
 
     // 强制更新全站主播房间用户列表数据
@@ -43,6 +45,8 @@ public:
 
     // 从已经更新好的全站缓存中查找用户信息
     bool GetUserLocationByUserId(const std::vector<uint32> user_ids);
+
+    
 
 private:
 
@@ -87,5 +91,7 @@ private:
     std::map<uint32, std::map<uint32, EnterRoomUserInfo>> roomid_userid_map_;
 
     base::Callback<void(const std::wstring&)> message_callback_;
+
+    bool cancel_flag_ = false;
 };
 

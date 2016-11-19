@@ -39,6 +39,7 @@ protected:
 
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
+    afx_msg void OnOK();
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
     afx_msg void OnBnClickedBtnLogin();
@@ -60,4 +61,6 @@ private:
     std::vector<std::wstring> messageQueen_;
     CEdit m_edit_account;
     CEdit m_edit_password;
+public:
+    afx_msg void OnBnClickedBtnCancel();
 };

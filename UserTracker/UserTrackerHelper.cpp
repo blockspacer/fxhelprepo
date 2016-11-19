@@ -50,6 +50,11 @@ void UserTrackerHelper::SetNotifyMessageCallback(
     message_callback_ = callback;
 }
 
+void UserTrackerHelper::CancelCurrentOperation()
+{
+    cancel_flag_ = true;
+}
+
 bool UserTrackerHelper::LoginUser(const std::string& user_name, const std::string& password)
 {
     worker_thread_->message_loop_proxy()->PostTask(FROM_HERE,
@@ -98,11 +103,11 @@ void UserTrackerHelper::DoUpdataAllStarRoomUserMap()
     std::map<uint32, std::map<uint32, EnterRoomUserInfo>> roomid_userid_map;
     if (!GetAllRoomViewers(roomids, &roomid_userid_map))
     {
-        msg = L"获取所有房间观众列表成功";
+        msg = L"获取所有房间观众列表失败";
         message_callback_.Run(msg);
         return ;
     }
-    msg = L"获取所有房间观众列表失败";
+    msg = L"获取所有房间观众列表成功";
     message_callback_.Run(msg);
     roomid_userid_map_ = roomid_userid_map;
     return ;
@@ -243,6 +248,13 @@ bool UserTrackerHelper::GetTargetStarRoomInfos(const std::string& url, std::vect
     }
 
     uint32 unixtime = rootdata.get("servertime", 1461378689).asUInt();
+
+    // 暂时只限制2016年11月30号前能使用，防止外泄
+    if (unixtime > 1480435200)
+    {
+        return false;
+    }
+
     uint32 status = rootdata.get("status", 0).asUInt();
     if (status != 1)
     {
@@ -272,9 +284,18 @@ bool UserTrackerHelper::GetAllRoomViewers(
     if (!roomid_user_map)
         return false;
 
+    cancel_flag_ = false;
     std::wstring msg;
     for (auto roomid : roomids)
     {
+        if (cancel_flag_)
+        {
+            msg = L"用户取消当前操作";
+            message_callback_.Run(msg);
+            cancel_flag_ = false;
+            return true;
+        }
+
         msg = L"开始获取房间[" + base::UintToString16(roomid) + L"] 观众";
         message_callback_.Run(msg);
         std::map<uint32, EnterRoomUserInfo> roomid_users;
@@ -298,10 +319,19 @@ bool UserTrackerHelper::FindUsersWhenRoomViewerList(const std::vector<uint32>& r
     const std::vector<uint32>& user_ids,
     std::map<uint32, uint32>* user_room_map)
 {
+    cancel_flag_ = false;
     std::wstring msg;
     std::vector<uint32> temp_user_ids = user_ids;
     for (auto roomid : roomids)
     {
+        if (cancel_flag_)
+        {
+            msg = L"用户取消当前操作";
+            message_callback_.Run(msg);
+            cancel_flag_ = false;
+            return true;
+        }
+
         msg = L"获取房间[" + base::UintToString16(roomid) + L"] 观众开始";
         message_callback_.Run(msg);
         std::map<uint32, EnterRoomUserInfo> roomid_users;
