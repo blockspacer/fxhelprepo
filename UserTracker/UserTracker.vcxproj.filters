@@ -36,6 +36,9 @@
     <ClInclude Include="UserTrackerHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LoginDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UserTracker.cpp">
@@ -48,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="UserTrackerHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LoginDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

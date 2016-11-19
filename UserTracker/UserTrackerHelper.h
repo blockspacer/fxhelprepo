@@ -35,7 +35,11 @@ public:
 
     void CancelCurrentOperation();
 
-    bool LoginUser(const std::string& user_name, const std::string& password);
+    bool LoginGetVerifyCode(std::vector<uint8>* picture);
+
+    bool LoginUser(const std::string& user_name, const std::string& password,
+        const std::string& verifycode, 
+        const base::Callback<void(bool,const std::string&)>& callback);
 
     // 强制更新全站主播房间用户列表数据
     bool UpdataAllStarRoomUserMap(const base::Callback<void(uint32,uint32)>& callback);
@@ -50,7 +54,9 @@ public:
 
 private:
 
-    void DoLoginUser(const std::string& user_name, const std::string& password);
+    void DoLoginUser(const std::string& user_name, 
+        const std::string& password, const std::string& verifycode,
+        const base::Callback<void(bool, const std::string&)>& callback);
 
     // 强制更新全站主播房间用户列表数据
     void DoUpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& callback);

@@ -19,6 +19,9 @@ namespace base
 // CUserTrackerApp: 
 // 有关此类的实现，请参阅 UserTracker.cpp
 //
+class UserTrackerHelper;
+class CLoginDlg;
+class CUserTrackerDlg;
 
 class CUserTrackerApp : public CWinApp
 {
@@ -34,6 +37,8 @@ public:
 	DECLARE_MESSAGE_MAP()
 
 private:
+    bool LoginProcedure(UserTrackerHelper* tracker_helper);
+    bool TrackerProcedure(UserTrackerHelper* tracker_helper);
     void InitAppLog();
     scoped_ptr<base::AtExitManager> atExitManager_;
 };

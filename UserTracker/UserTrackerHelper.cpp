@@ -35,14 +35,6 @@ void UserTrackerHelper::Finalize()
 
 void UserTrackerHelper::Test()
 {
-    LoginUser("fanxingtest002", "1233211234567");
-
-    std::vector<uint32> users = { 40297520 };
-
-    //std::map<uint32, uint32> user_room_map;
-    //UpdateForFindUser(users);
-
-    int k = 123;
 }
 
 void UserTrackerHelper::SetNotifyMessageCallback(
@@ -56,29 +48,40 @@ void UserTrackerHelper::CancelCurrentOperation()
     cancel_flag_ = true;
 }
 
-bool UserTrackerHelper::LoginUser(const std::string& user_name, const std::string& password)
+bool UserTrackerHelper::LoginGetVerifyCode(std::vector<uint8>* picture)
 {
-    worker_thread_->message_loop_proxy()->PostTask(FROM_HERE,
-        base::Bind(&UserTrackerHelper::DoLoginUser,
-        base::Unretained(this), user_name, password));
-    return true;
+    return user_->LoginGetVerifyCode(picture);
 }
 
-void UserTrackerHelper::DoLoginUser(const std::string& user_name, const std::string& password)
+bool UserTrackerHelper::LoginUser(
+    const std::string& user_name, const std::string& password,
+    const std::string& verifycode,
+    const base::Callback<void(bool, const std::string&)>& callback)
+{
+    return worker_thread_->message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserTrackerHelper::DoLoginUser,
+        base::Unretained(this), user_name, password, verifycode, callback));
+}
+
+void UserTrackerHelper::DoLoginUser(const std::string& user_name, 
+    const std::string& password, const std::string& verifycode,
+    const base::Callback<void(bool, const std::string&)>& callback)
 {
     if (!user_)
         user_.reset(new User);
 
     std::wstring msg;
     std::string error_msg;
-    if (!user_->Login(user_name, password, "", &error_msg))
+    if (!user_->Login(user_name, password, verifycode, &error_msg))
     {
         msg = L"µÇÂ¼Ê§°Ü";
         message_callback_.Run(msg);
+        callback.Run(false, error_msg);
         return;
     }
     msg = L"µÇÂ¼³É¹¦";
     message_callback_.Run(msg);
+    callback.Run(true, error_msg);
     return;
 }
 

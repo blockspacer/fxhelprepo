@@ -12,8 +12,10 @@
 #include "third_party/chromium/base/command_line.h"
 #include "third_party/chromium/base/at_exit.h"
 
+#include "UserTrackerHelper.h"
 #include "UserTracker.h"
 #include "UserTrackerDlg.h"
+#include "LoginDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -80,24 +82,14 @@ BOOL CUserTrackerApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
-	CUserTrackerDlg dlg;
-	m_pMainWnd = &dlg;
-	INT_PTR nResponse = dlg.DoModal();
-	if (nResponse == IDOK)
-	{
-		// TODO:  在此放置处理何时用
-		//  “确定”来关闭对话框的代码
-	}
-	else if (nResponse == IDCANCEL)
-	{
-		// TODO:  在此放置处理何时用
-		//  “取消”来关闭对话框的代码
-	}
-	else if (nResponse == -1)
-	{
-		TRACE(traceAppMsg, 0, "警告: 对话框创建失败，应用程序将意外终止。\n");
-		TRACE(traceAppMsg, 0, "警告: 如果您在对话框上使用 MFC 控件，则无法 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS。\n");
-	}
+    UserTrackerHelper tracker_helper;
+    tracker_helper.Initialize();
+
+    if (LoginProcedure(&tracker_helper))
+    {
+        TrackerProcedure(&tracker_helper);
+    }
+    tracker_helper.Finalize();
 
 	// 删除上面创建的 shell 管理器。
 	if (pShellManager != NULL)
@@ -105,11 +97,51 @@ BOOL CUserTrackerApp::InitInstance()
 		delete pShellManager;
 	}
 
+    
 	// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
 	//  而不是启动应用程序的消息泵。
 	return FALSE;
 }
 
+bool CUserTrackerApp::LoginProcedure(UserTrackerHelper* tracker_helper)
+{
+    CLoginDlg login_dlg(NULL, tracker_helper);
+    INT_PTR nResponse = login_dlg.DoModal();
+    if (nResponse == IDOK)
+    {
+        return true;
+    }
+    else if (nResponse == IDCANCEL)
+    {
+        return false;
+    }
+    else if (nResponse == -1)
+    {
+        TRACE(traceAppMsg, 0, "警告: 对话框创建失败，应用程序将意外终止。\n");
+        TRACE(traceAppMsg, 0, "警告: 如果您在对话框上使用 MFC 控件，则无法 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS。\n");
+    }
+    return false;
+}
+
+bool CUserTrackerApp::TrackerProcedure(UserTrackerHelper* tracker_helper)
+{
+    CUserTrackerDlg tracker_dlg(NULL, tracker_helper);
+    INT_PTR nResponse = tracker_dlg.DoModal();
+    if (nResponse == IDOK)
+    {
+        return true;
+    }
+    else if (nResponse == IDCANCEL)
+    {
+        return false;
+    }
+    else if (nResponse == -1)
+    {
+        TRACE(traceAppMsg, 0, "警告: 对话框创建失败，应用程序将意外终止。\n");
+        TRACE(traceAppMsg, 0, "警告: 如果您在对话框上使用 MFC 控件，则无法 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS。\n");
+    }
+    return false;
+}
 
 void CUserTrackerApp::InitAppLog()
 {

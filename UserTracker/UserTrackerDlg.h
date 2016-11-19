@@ -17,7 +17,8 @@ class CUserTrackerDlg : public CDialogEx
 {
 // 构造
 public:
-	CUserTrackerDlg(CWnd* pParent = NULL);	// 标准构造函数
+	CUserTrackerDlg(CWnd* pParent,
+        UserTrackerHelper* tracker_helper);	// 标准构造函数
     ~CUserTrackerDlg();
 
 // 对话框数据
@@ -67,7 +68,7 @@ private:
     CListBox m_list_message;
     int list_info_count;
 
-    std::unique_ptr<UserTrackerHelper> tracker_helper_;
+    UserTrackerHelper* tracker_helper_;
 
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;
@@ -75,5 +76,4 @@ private:
     CEdit m_edit_password;
     CStatic m_static_room_progress;
     CProgressCtrl m_progress1;
-    int m_pro_ = 0;
 };

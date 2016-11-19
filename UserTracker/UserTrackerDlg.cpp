@@ -27,9 +27,10 @@ namespace
 }
 
 
-CUserTrackerDlg::CUserTrackerDlg(CWnd* pParent /*=NULL*/)
+CUserTrackerDlg::CUserTrackerDlg(CWnd* pParent,
+    UserTrackerHelper* tracker_helper)
 	: CDialogEx(CUserTrackerDlg::IDD, pParent)
-    , tracker_helper_(new UserTrackerHelper)
+    , tracker_helper_(tracker_helper)
     , list_info_count(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -76,7 +77,7 @@ BOOL CUserTrackerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
-    tracker_helper_->Initialize();
+    //tracker_helper_->Initialize();
     tracker_helper_->SetNotifyMessageCallback(
         base::Bind(&CUserTrackerDlg::Notify, base::Unretained(this)));
 
@@ -88,7 +89,7 @@ BOOL CUserTrackerDlg::OnInitDialog()
 void CUserTrackerDlg::OnClose()
 {
     tracker_helper_->CancelCurrentOperation();
-    tracker_helper_->Finalize();
+    //tracker_helper_->Finalize();
     CDialogEx::OnClose();
 }
 
@@ -257,14 +258,14 @@ LRESULT CUserTrackerDlg::OnRoomProgress(WPARAM wParam, LPARAM lParam)
 
 void CUserTrackerDlg::OnBnClickedBtnLogin()
 {
-    CString cs_account;
-    CString cs_password;
-    m_edit_account.GetWindowText(cs_account);
-    m_edit_password.GetWindowText(cs_password);
+    //CString cs_account;
+    //CString cs_password;
+    //m_edit_account.GetWindowText(cs_account);
+    //m_edit_password.GetWindowText(cs_password);
 
-    std::string account = base::WideToUTF8(cs_account.GetBuffer());
-    std::string password = base::WideToUTF8(cs_password.GetBuffer());
-    tracker_helper_->LoginUser(account, password);
+    //std::string account = base::WideToUTF8(cs_account.GetBuffer());
+    //std::string password = base::WideToUTF8(cs_password.GetBuffer());
+    //tracker_helper_->LoginUser(account, password);
 }
 
 
