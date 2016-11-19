@@ -91,4 +91,8 @@ private:
     int result_index_ = 0;
 
     CEdit m_edit_roomid;
+    CButton m_check_star;
+    CButton m_check_diamon;
+    CButton m_check_1_3_crown;
+    CButton m_check_4_crown_up;
 };

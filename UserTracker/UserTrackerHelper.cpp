@@ -43,6 +43,15 @@ void UserTrackerHelper::SetNotifyMessageCallback(
     message_callback_ = callback;
 }
 
+void UserTrackerHelper::SetSearchConfig(bool check_star, bool check_diamon,
+    bool check_1_3_crown, bool check_4_crown_up)
+{
+    check_star_ = check_star;
+    check_diamon_ = check_diamon;
+    check_1_3_crown_ = check_1_3_crown;
+    check_4_crown_up_ = check_4_crown_up;
+}
+
 void UserTrackerHelper::CancelCurrentOperation()
 {
     cancel_flag_ = true;
@@ -243,30 +252,47 @@ void UserTrackerHelper::DoClearCache()
 
 bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
 {
-    std::string url1 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-1-1/";
-    std::string url2 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-2-1/";
-    std::string url3 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-3-1/";
-    std::string url4 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-4-1/";
-
+    
     std::vector<uint32> roomid1;
     std::vector<uint32> roomid2;
     std::vector<uint32> roomid3;
     std::vector<uint32> roomid4;
 
-    std::wstring msg = L"正在获取房间列表 ...";
-    message_callback_.Run(msg);
-    GetTargetStarRoomInfos(url1, &roomid1);
-    message_callback_.Run(msg);
-    GetTargetStarRoomInfos(url2, &roomid2);
-    message_callback_.Run(msg);
-    GetTargetStarRoomInfos(url3, &roomid3);
-    message_callback_.Run(msg);
-    GetTargetStarRoomInfos(url4, &roomid4);
+    if (check_star_)
+    {
+        std::string url1 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-1-1/";
+        std::wstring msg = L"正在获取星级主播房间列表 ...";
+        message_callback_.Run(msg);
+        GetTargetStarRoomInfos(url1, &roomid1);
+        roomids->insert(roomids->end(), roomid1.begin(), roomid1.end());
+    }
 
-    roomids->insert(roomids->end(), roomid1.begin(), roomid1.end());
-    roomids->insert(roomids->end(), roomid2.begin(), roomid2.end());
-    roomids->insert(roomids->end(), roomid3.begin(), roomid3.end());
-    roomids->insert(roomids->end(), roomid4.begin(), roomid4.end());
+    if (check_diamon_)
+    {
+        std::string url2 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-2-1/";
+        std::wstring msg = L"正在获取钻级主播房间列表 ...";
+        message_callback_.Run(msg);
+        GetTargetStarRoomInfos(url2, &roomid2);
+        roomids->insert(roomids->end(), roomid2.begin(), roomid2.end());
+    }
+
+    if (check_1_3_crown_)
+    {
+        std::string url3 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-3-1/";
+        std::wstring msg = L"正在获取1-3冠主播房间列表 ...";
+        message_callback_.Run(msg);
+        GetTargetStarRoomInfos(url3, &roomid3);
+        roomids->insert(roomids->end(), roomid3.begin(), roomid3.end());
+    }
+
+    if (check_4_crown_up_)
+    {
+        std::string url4 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-4-1/";
+        std::wstring msg = L"正在获取4冠以上主播房间列表 ...";
+        message_callback_.Run(msg);
+        GetTargetStarRoomInfos(url4, &roomid4);
+        roomids->insert(roomids->end(), roomid4.begin(), roomid4.end());
+    }
 
     return true;
 }

@@ -33,6 +33,9 @@ public:
 
     void SetNotifyMessageCallback(const base::Callback<void(const std::wstring&)> callback);
 
+    void SetSearchConfig(bool check_star, bool check_diamon,
+        bool check_1_3_crown, bool check_4_crown_up);
+
     void CancelCurrentOperation();
 
     bool LoginGetVerifyCode(std::vector<uint8>* picture);
@@ -112,5 +115,10 @@ private:
     base::Callback<void(const std::wstring&)> message_callback_;
 
     bool cancel_flag_ = false;
+
+    bool check_star_ = false;
+    bool check_diamon_ = false;
+    bool check_1_3_crown_ = false;
+    bool check_4_crown_up_ = false;
 };
 

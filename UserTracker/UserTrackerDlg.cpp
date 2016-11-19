@@ -51,6 +51,10 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_PROGRESS1, m_progress1);
     DDX_Control(pDX, IDC_LIST_RESULT, m_list_result);
     DDX_Control(pDX, IDC_EDIT_ROOM_ID, m_edit_roomid);
+    DDX_Control(pDX, IDC_CHK_STAR, m_check_star);
+    DDX_Control(pDX, IDC_CHK_DIAMON, m_check_diamon);
+    DDX_Control(pDX, IDC_CHK_1_3_CROWN, m_check_1_3_crown);
+    DDX_Control(pDX, IDC_CHK_4_CROWN_UP, m_check_4_crown_up);
 }
 
 BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
@@ -100,6 +104,11 @@ BOOL CUserTrackerDlg::OnInitDialog()
     int width = (rect.right - rect.left) / 2;
     m_list_result.InsertColumn(0, L"id", LVCFMT_LEFT, width);//插入列
     m_list_result.InsertColumn(1, L"房间号", LVCFMT_LEFT, width-2);//插入列
+
+    m_check_star.SetCheck(TRUE);
+    m_check_diamon.SetCheck(TRUE);
+    m_check_1_3_crown.SetCheck(TRUE);
+    m_check_4_crown_up.SetCheck(TRUE);
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -173,6 +182,12 @@ void CUserTrackerDlg::SetHScroll()
 
 void CUserTrackerDlg::OnBnClickedBtnGetAllRoomData()
 {
+    tracker_helper_->SetSearchConfig(
+        !!m_check_star.GetCheck(),
+        !!m_check_diamon.GetCheck(),
+        !!m_check_1_3_crown.GetCheck(),
+        !!m_check_4_crown_up.GetCheck());
+
     if (!tracker_helper_->UpdataAllStarRoomUserMap(
         base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this))))
     {
@@ -203,6 +218,12 @@ void CUserTrackerDlg::OnBnClickedBtnClearCache()
 
 void CUserTrackerDlg::OnBnClickedBtnUpdataFind()
 {
+    tracker_helper_->SetSearchConfig(
+        !!m_check_star.GetCheck(),
+        !!m_check_diamon.GetCheck(),
+        !!m_check_1_3_crown.GetCheck(),
+        !!m_check_4_crown_up.GetCheck());
+
     CString cs_user_id;
     m_edit_target_fanxing_id.GetWindowTextW(cs_user_id);
     uint32 user_id = 0;
