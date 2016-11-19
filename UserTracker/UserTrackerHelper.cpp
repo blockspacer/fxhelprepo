@@ -207,17 +207,15 @@ void UserTrackerHelper::DoGetUserLocationByUserId(
             if (it != room.second.end())
             {
                 user_room_map[user_id] = room.first;
+                // 避免漏掉一个用户在多个房间的情况
+                msg = L"用户[" + base::UintToString16(user_id) + L"]";
+                msg += L"在房间[" + base::UintToString16(room.first) + L"]";
+                message_callback_.Run(msg);
             }
         }
         callback.Run(current, all);
     }
 
-    for (auto user_room : user_room_map)
-    {
-        msg = L"用户[" + base::UintToString16(user_room.first) + L"]";
-        msg += L"在房间[" + base::UintToString16(user_room.second) + L"]";
-        message_callback_.Run(msg);
-    }
     msg = L"在缓存中查找用户结束";
     message_callback_.Run(msg);
     return;
