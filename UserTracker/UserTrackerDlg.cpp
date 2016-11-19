@@ -17,7 +17,14 @@
 
 
 // CUserTrackerDlg 对话框
-
+namespace
+{
+    struct ProgressStruct 
+    {
+        uint32 current;
+        uint32 all;
+    };
+}
 
 
 CUserTrackerDlg::CUserTrackerDlg(CWnd* pParent /*=NULL*/)
@@ -30,7 +37,6 @@ CUserTrackerDlg::CUserTrackerDlg(CWnd* pParent /*=NULL*/)
 
 CUserTrackerDlg::~CUserTrackerDlg()
 {
-    tracker_helper_->Finalize();
 }
 
 void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
@@ -40,15 +46,19 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_MESSAGE, m_list_message);
     DDX_Control(pDX, IDC_EDIT_ACCOUNT, m_edit_account);
     DDX_Control(pDX, IDC_EDIT_PASSWORD, m_edit_password);
+    DDX_Control(pDX, IDC_STATIC_ROOM_PROGRESS, m_static_room_progress);
+    DDX_Control(pDX, IDC_PROGRESS1, m_progress1);
 }
 
 BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
+    ON_WM_PAINT()
+    ON_WM_CLOSE()
+    ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BTN_GETALLROOMDATA, &CUserTrackerDlg::OnBnClickedBtnGetAllRoomData)
     ON_BN_CLICKED(IDC_BTN_FIND_IN_CACHE, &CUserTrackerDlg::OnBnClickedBtnFindInCache)
     ON_BN_CLICKED(IDC_BTN_UPDATA_FIND, &CUserTrackerDlg::OnBnClickedBtnUpdataFind)
     ON_MESSAGE(WM_USER_MSG, &CUserTrackerDlg::OnNotifyMessage)
+    ON_MESSAGE(WM_USER_PROGRESS, &CUserTrackerDlg::OnRoomProgress)
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CUserTrackerDlg::OnBnClickedBtnLogin)
     ON_BN_CLICKED(IDC_BTN_CANCEL, &CUserTrackerDlg::OnBnClickedBtnCancel)
 END_MESSAGE_MAP()
@@ -70,7 +80,16 @@ BOOL CUserTrackerDlg::OnInitDialog()
     tracker_helper_->SetNotifyMessageCallback(
         base::Bind(&CUserTrackerDlg::Notify, base::Unretained(this)));
 
+    m_progress1.SetRange(0, 100);
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+}
+
+void CUserTrackerDlg::OnClose()
+{
+    tracker_helper_->CancelCurrentOperation();
+    tracker_helper_->Finalize();
+    CDialogEx::OnClose();
 }
 
 void CUserTrackerDlg::OnOK()
@@ -136,7 +155,12 @@ void CUserTrackerDlg::SetHScroll()
 
 void CUserTrackerDlg::OnBnClickedBtnGetAllRoomData()
 {
-    tracker_helper_->UpdataAllStarRoomUserMap();
+    if (!tracker_helper_->UpdataAllStarRoomUserMap(
+        base::Bind(&CUserTrackerDlg::RoomProgress,
+        base::Unretained(this))))
+    {
+        Notify(L"操作失败, 请先登录");
+    } 
 }
 
 void CUserTrackerDlg::OnBnClickedBtnFindInCache()
@@ -147,7 +171,13 @@ void CUserTrackerDlg::OnBnClickedBtnFindInCache()
     base::StringToUint(base::WideToUTF8(cs_user_id.GetBuffer()), &user_id);
     std::vector<uint32> users;
     users.push_back(user_id);
-    tracker_helper_->GetUserLocationByUserId(users);
+    if (!tracker_helper_->GetUserLocationByUserId(users,
+        base::Bind(&CUserTrackerDlg::RoomProgress,
+        base::Unretained(this))))
+    {
+        Notify(L"操作失败, 请先登录");
+    }
+
 }
 
 void CUserTrackerDlg::OnBnClickedBtnUpdataFind()
@@ -158,7 +188,13 @@ void CUserTrackerDlg::OnBnClickedBtnUpdataFind()
     base::StringToUint(base::WideToUTF8(cs_user_id.GetBuffer()), &user_id);
     std::vector<uint32> users;
     users.push_back(user_id);
-    tracker_helper_->UpdateForFindUser(users);
+    if (!tracker_helper_->UpdateForFindUser(users,
+        base::Bind(&CUserTrackerDlg::RoomProgress,
+        base::Unretained(this))))
+    {
+        Notify(L"操作失败, 请先登录");
+    }
+
 }
 
 void CUserTrackerDlg::Notify(const std::wstring& message)
@@ -168,6 +204,14 @@ void CUserTrackerDlg::Notify(const std::wstring& message)
     messageQueen_.push_back(message);
     messageMutex_.unlock();
     this->PostMessage(WM_USER_MSG, 0, 0);
+}
+
+void CUserTrackerDlg::RoomProgress(uint32 current, uint32 all)
+{
+    ProgressStruct* progress = new ProgressStruct;
+    progress->all = all;
+    progress->current = current;
+    this->PostMessage(WM_USER_PROGRESS, (WPARAM)(PROGRESSTYPE_ROOM), (LPARAM)progress);
 }
 
 LRESULT CUserTrackerDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
@@ -184,6 +228,30 @@ LRESULT CUserTrackerDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 
     m_list_message.SetCurSel(list_info_count - 1);
     SetHScroll();
+    return 0;
+}
+
+LRESULT CUserTrackerDlg::OnRoomProgress(WPARAM wParam, LPARAM lParam)
+{
+    ProgressType pt = (ProgressType)(wParam);
+    ProgressStruct* ps = (ProgressStruct*)(lParam);
+
+    int pos = static_cast<int>(ps->current*100.0 / ps->all);
+    std::wstring show_msg = base::UintToString16(ps->current) +
+        L" / " + base::UintToString16(ps->all);
+    switch (pt)
+    {
+    case CUserTrackerDlg::PROGRESSTYPE_ROOM:   
+        m_progress1.SetPos(pos);
+        m_static_room_progress.SetWindowTextW(show_msg.c_str());
+        break;
+    case CUserTrackerDlg::PROGRESSTYPE_USER:
+        break;
+    default:
+        break;
+    }
+
+    delete ps;
     return 0;
 }
 
