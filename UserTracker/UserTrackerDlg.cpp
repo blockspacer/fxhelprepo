@@ -31,7 +31,7 @@ CUserTrackerDlg::CUserTrackerDlg(CWnd* pParent,
     UserTrackerHelper* tracker_helper)
 	: CDialogEx(CUserTrackerDlg::IDD, pParent)
     , tracker_helper_(tracker_helper)
-    , list_info_count(0)
+    , list_info_count_(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -50,6 +50,7 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_STATIC_ROOM_PROGRESS, m_static_room_progress);
     DDX_Control(pDX, IDC_PROGRESS1, m_progress1);
     DDX_Control(pDX, IDC_LIST_RESULT, m_list_result);
+    DDX_Control(pDX, IDC_EDIT_ROOM_ID, m_edit_roomid);
 }
 
 BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
@@ -64,6 +65,9 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_MESSAGE(WM_USER_FOUND_RESULT, &CUserTrackerDlg::OnFoundResult)
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CUserTrackerDlg::OnBnClickedBtnLogin)
     ON_BN_CLICKED(IDC_BTN_CANCEL, &CUserTrackerDlg::OnBnClickedBtnCancel)
+    ON_NOTIFY(NM_CLICK, IDC_LIST_RESULT, &CUserTrackerDlg::OnNMClickListResult)
+    ON_NOTIFY(HDN_BEGINTRACK, 0, &CUserTrackerDlg::OnHdnBegintrackListResult)
+    ON_BN_CLICKED(IDC_BTN_CLEAR_LIST, &CUserTrackerDlg::OnBnClickedBtnClearList)
 END_MESSAGE_MAP()
 
 
@@ -94,7 +98,7 @@ BOOL CUserTrackerDlg::OnInitDialog()
     m_list_result.GetWindowRect(&rect);
     int width = (rect.right - rect.left) / 2;
     m_list_result.InsertColumn(0, L"id", LVCFMT_LEFT, width);//插入列
-    m_list_result.InsertColumn(1, L"房间号", LVCFMT_LEFT, width);//插入列
+    m_list_result.InsertColumn(1, L"房间号", LVCFMT_LEFT, width-2);//插入列
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -211,9 +215,9 @@ void CUserTrackerDlg::OnBnClickedBtnUpdataFind()
 void CUserTrackerDlg::NotifyMessage(const std::wstring& message)
 {
     // 发送数据给窗口
-    messageMutex_.lock();
-    messageQueen_.push_back(message);
-    messageMutex_.unlock();
+    message_mutex_.lock();
+    message_queen_.push_back(message);
+    message_mutex_.unlock();
     this->PostMessage(WM_USER_MSG, 0, 0);
 }
 
@@ -233,16 +237,16 @@ void CUserTrackerDlg::FoundResult(uint32 user_id, uint32 room_id)
 LRESULT CUserTrackerDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 {
     std::vector<std::wstring> messages;
-    messageMutex_.lock();
-    messages.swap(messageQueen_);
-    messageMutex_.unlock();
+    message_mutex_.lock();
+    messages.swap(message_queen_);
+    message_mutex_.unlock();
 
     for (auto str : messages)
     {
-        m_list_message.InsertString(list_info_count++, str.c_str());
+        m_list_message.InsertString(list_info_count_++, str.c_str());
     }
 
-    m_list_message.SetCurSel(list_info_count - 1);
+    m_list_message.SetCurSel(list_info_count_ - 1);
     SetHScroll();
     return 0;
 }
@@ -277,7 +281,7 @@ LRESULT CUserTrackerDlg::OnFoundResult(WPARAM wParam, LPARAM lParam)
     uint32 room_id = (uint32)(lParam);
 
     int nitem = m_list_result.InsertItem(0, L"");
-    m_list_result.SetItemData(nitem, result_index++);
+    m_list_result.SetItemData(nitem, result_index_++);
     m_list_result.SetItemText(nitem, 0, base::UintToString16(user_id).c_str());
     m_list_result.SetItemText(nitem, 1, base::UintToString16(room_id).c_str());
 
@@ -300,4 +304,37 @@ void CUserTrackerDlg::OnBnClickedBtnLogin()
 void CUserTrackerDlg::OnBnClickedBtnCancel()
 {
     tracker_helper_->CancelCurrentOperation();
+}
+
+void CUserTrackerDlg::OnNMClickListResult(NMHDR *pNMHDR, LRESULT *pResult)
+{
+    LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+    // TODO:  在此添加控件通知处理程序代码
+    NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+    if (pNMListView->iItem != -1)
+    {
+        CString cs_item = m_list_result.GetItemText(
+            pNMListView->iItem, pNMListView->iSubItem);
+        m_edit_roomid.SetWindowTextW(cs_item);
+    }
+
+    *pResult = 0;
+}
+
+void CUserTrackerDlg::OnHdnBegintrackListResult(NMHDR *pNMHDR, LRESULT *pResult)
+{
+    LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
+    // 禁止拖动列头
+    *pResult = TRUE;
+}
+
+
+void CUserTrackerDlg::OnBnClickedBtnClearList()
+{
+    int itemcount = m_list_result.GetItemCount();
+    for (int index = itemcount - 1; index >= 0; --index)
+    {
+        m_list_result.DeleteItem(index);
+        result_index_--;
+    }
 }

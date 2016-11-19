@@ -58,6 +58,7 @@ protected:
     afx_msg void OnBnClickedBtnFindInCache();
     afx_msg void OnBnClickedBtnUpdataFind();
     afx_msg void OnBnClickedBtnCancel();
+    afx_msg void OnNMClickListResult(NMHDR *pNMHDR, LRESULT *pResult);
 
 protected:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
@@ -70,18 +71,24 @@ private:
     void RoomProgress(uint32 current, uint32 all);
     void FoundResult(uint32 user_id, uint32 room_id);
 
-    CEdit m_edit_target_fanxing_id;
-    CListBox m_list_message;
-    int list_info_count;
 
     UserTrackerHelper* tracker_helper_;
+    std::mutex message_mutex_;
+    std::vector<std::wstring> message_queen_;
 
-    std::mutex messageMutex_;
-    std::vector<std::wstring> messageQueen_;
+    CEdit m_edit_target_fanxing_id;
+    CListBox m_list_message;
+    int list_info_count_;
+
     CEdit m_edit_account;
     CEdit m_edit_password;
     CStatic m_static_room_progress;
     CProgressCtrl m_progress1;
     CListCtrl m_list_result;
-    int result_index = 0;
+    int result_index_ = 0;
+
+    CEdit m_edit_roomid;
+public:
+    afx_msg void OnHdnBegintrackListResult(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnBnClickedBtnClearList();
 };
