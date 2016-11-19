@@ -126,6 +126,7 @@ bool CUserTrackerApp::LoginProcedure(UserTrackerHelper* tracker_helper)
 bool CUserTrackerApp::TrackerProcedure(UserTrackerHelper* tracker_helper)
 {
     CUserTrackerDlg tracker_dlg(NULL, tracker_helper);
+    m_pMainWnd = &tracker_dlg;
     INT_PTR nResponse = tracker_dlg.DoModal();
     if (nResponse == IDOK)
     {
