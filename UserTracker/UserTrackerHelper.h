@@ -42,32 +42,36 @@ public:
         const base::Callback<void(bool,const std::string&)>& callback);
 
     // 强制更新全站主播房间用户列表数据
-    bool UpdataAllStarRoomUserMap(const base::Callback<void(uint32,uint32)>& callback);
+    bool UpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& progress_callback);
 
     // 不使用缓存数据，边更新缓存边查找用户，只要找到就停止，不继续往后面找
     bool UpdateForFindUser(const std::vector<uint32> user_ids,
-        const base::Callback<void(uint32, uint32)>& callback);
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
 
     // 从已经更新好的全站缓存中查找用户信息
     bool GetUserLocationByUserId(const std::vector<uint32> user_ids,
-        const base::Callback<void(uint32, uint32)>& callback);
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
 
 private:
 
     void DoLoginUser(const std::string& user_name, 
         const std::string& password, const std::string& verifycode,
-        const base::Callback<void(bool, const std::string&)>& callback);
+        const base::Callback<void(bool, const std::string&)>& progress_callback);
 
     // 强制更新全站主播房间用户列表数据
-    void DoUpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& callback);
+    void DoUpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& progress_callback);
 
     // 不使用缓存数据，边更新缓存边查找用户，只要找到就停止，不继续往后面找
     void DoUpdateForFindUser(const std::vector<uint32> user_ids,
-        const base::Callback<void(uint32, uint32)>& callback);
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
 
     // 从已经更新好的全站缓存中查找用户信息
     void DoGetUserLocationByUserId(const std::vector<uint32> user_ids,
-        const base::Callback<void(uint32, uint32)>& callback);
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
 
     bool GetAllStarRoomInfos(std::vector<uint32>* roomids); // 从全站获取所有正在直播的主播直播粗略信息，为下一步获取房间用户列表做准备
     bool GetTargetStarRoomInfos(const std::string& url, std::vector<uint32>* roomids);
@@ -75,14 +79,15 @@ private:
     // 强制更新房间用户信息，roomid_user_map返回所有房间在线用户信息
     bool GetAllRoomViewers(const std::vector<uint32>& roomids,
         std::map<uint32, std::map<uint32, EnterRoomUserInfo>>* roomid_user_map,
-        const base::Callback<void(uint32, uint32)>& callback);
+        const base::Callback<void(uint32, uint32)>& progress_callback);
 
     // 边找用户边更新房间用户信息，只要找完用户，就不更新了，roomid_user_map只返回查找过的房间在线用户信息
     bool FindUsersWhenUpdateRoomViewerList(const std::vector<uint32>& roomids,
         std::map<uint32, std::map<uint32, EnterRoomUserInfo>>* roomid_user_map,
         const std::vector<uint32>& user_ids,
         std::map<uint32, uint32>* user_room_map,
-        const base::Callback<void(uint32, uint32)>& callback);
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
 
     bool GetRoomViewerList(uint32 roomid, std::map<uint32, EnterRoomUserInfo>* user_map); // 从指定房间获取用户列表，追踪用户
     

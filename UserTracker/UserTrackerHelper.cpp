@@ -11,7 +11,7 @@
 UserTrackerHelper::UserTrackerHelper()
     :curl_wrapper_(new CurlWrapper)
     , worker_thread_(new base::Thread("UserTrackerHelper"))
-    //, user_(new User)
+    , user_(nullptr) //必须先登录再让操作
 {
 }
 
@@ -124,20 +124,23 @@ void UserTrackerHelper::DoUpdataAllStarRoomUserMap(
 
 bool UserTrackerHelper::UpdateForFindUser(
     const std::vector<uint32> user_ids,
-    const base::Callback<void(uint32, uint32)>& callback)
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
 {
     if (!user_)
         return false;
 
     worker_thread_->message_loop_proxy()->PostTask(FROM_HERE,
         base::Bind(&UserTrackerHelper::DoUpdateForFindUser,
-        base::Unretained(this), user_ids, callback));
+        base::Unretained(this), user_ids, progress_callback, result_callback));
     return true;
 }
+
 // 不使用缓存数据，边更新缓存边查找用户，只要找到就停止，不继续往后面找
 void UserTrackerHelper::DoUpdateForFindUser(
     const std::vector<uint32> user_ids,
-    const base::Callback<void(uint32, uint32)>& callback)
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
 {
     std::wstring msg = L"更新并查找用户开始";
     message_callback_.Run(msg);
@@ -153,7 +156,7 @@ void UserTrackerHelper::DoUpdateForFindUser(
     std::map<uint32, std::map<uint32, EnterRoomUserInfo>> roomid_userid_map;
     std::map<uint32, uint32> user_room_map;
     FindUsersWhenUpdateRoomViewerList(roomids, &roomid_userid_map, 
-        user_ids, &user_room_map, callback);
+        user_ids, &user_room_map, progress_callback, result_callback);
 
     for (auto user_room : user_room_map)
     {
@@ -174,21 +177,24 @@ void UserTrackerHelper::DoUpdateForFindUser(
     return;
 }
 
-bool UserTrackerHelper::GetUserLocationByUserId(const std::vector<uint32> user_ids,
-    const base::Callback<void(uint32, uint32)>& callback)
+bool UserTrackerHelper::GetUserLocationByUserId(
+    const std::vector<uint32> user_ids,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
 {
     if (!user_)
         return false;
 
     worker_thread_->message_loop_proxy()->PostTask(FROM_HERE,
         base::Bind(&UserTrackerHelper::DoGetUserLocationByUserId,
-        base::Unretained(this), user_ids, callback));
+        base::Unretained(this), user_ids, progress_callback, result_callback));
     return true;
 }
 
 void UserTrackerHelper::DoGetUserLocationByUserId(
     const std::vector<uint32> user_ids,
-    const base::Callback<void(uint32, uint32)>& callback)
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
 {
     if (roomid_userid_map_.empty())
         return;
@@ -211,9 +217,10 @@ void UserTrackerHelper::DoGetUserLocationByUserId(
                 msg = L"用户[" + base::UintToString16(user_id) + L"]";
                 msg += L"在房间[" + base::UintToString16(room.first) + L"]";
                 message_callback_.Run(msg);
+                result_callback.Run(user_id, room.first);
             }
         }
-        callback.Run(current, all);
+        progress_callback.Run(current, all);
     }
 
     msg = L"在缓存中查找用户结束";
@@ -351,11 +358,13 @@ bool UserTrackerHelper::GetAllRoomViewers(
     return !roomid_user_map->empty();
 }
 
-bool UserTrackerHelper::FindUsersWhenUpdateRoomViewerList(const std::vector<uint32>& roomids,
+bool UserTrackerHelper::FindUsersWhenUpdateRoomViewerList(
+    const std::vector<uint32>& roomids,
     std::map<uint32, std::map<uint32, EnterRoomUserInfo>>* roomid_user_map,
     const std::vector<uint32>& user_ids,
     std::map<uint32, uint32>* user_room_map,
-    const base::Callback<void(uint32, uint32)>& callback)
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
 {
     cancel_flag_ = false;
     std::wstring msg;
@@ -381,12 +390,12 @@ bool UserTrackerHelper::FindUsersWhenUpdateRoomViewerList(const std::vector<uint
             //assert(false); 可能在pk房，也会出现进房和获取房间成员失败
             msg = L"获取房间[" + base::UintToString16(roomid) + L"] 观众失败";
             message_callback_.Run(msg);
-            callback.Run(current, all);
+            progress_callback.Run(current, all);
             continue;
         }
         msg = L"获取房间[" + base::UintToString16(roomid) + L"] 观众成功";
         message_callback_.Run(msg);
-        callback.Run(current, all);
+        progress_callback.Run(current, all);
 
         (*roomid_user_map)[roomid] = roomid_users;
 
@@ -399,6 +408,7 @@ bool UserTrackerHelper::FindUsersWhenUpdateRoomViewerList(const std::vector<uint
                 msg = L"在房间[" + base::UintToString16(roomid) + 
                     L"] 找到目标 [" + base::UintToString16(*user_it) + L"]";
                 message_callback_.Run(msg);
+                result_callback.Run(*user_it, roomid);
                 temp_user_ids.erase(user_it);
                 break;
             }

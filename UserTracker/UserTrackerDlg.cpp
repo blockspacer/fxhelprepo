@@ -49,6 +49,7 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_PASSWORD, m_edit_password);
     DDX_Control(pDX, IDC_STATIC_ROOM_PROGRESS, m_static_room_progress);
     DDX_Control(pDX, IDC_PROGRESS1, m_progress1);
+    DDX_Control(pDX, IDC_LIST_RESULT, m_list_result);
 }
 
 BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
@@ -60,6 +61,7 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_UPDATA_FIND, &CUserTrackerDlg::OnBnClickedBtnUpdataFind)
     ON_MESSAGE(WM_USER_MSG, &CUserTrackerDlg::OnNotifyMessage)
     ON_MESSAGE(WM_USER_PROGRESS, &CUserTrackerDlg::OnRoomProgress)
+    ON_MESSAGE(WM_USER_FOUND_RESULT, &CUserTrackerDlg::OnFoundResult)
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CUserTrackerDlg::OnBnClickedBtnLogin)
     ON_BN_CLICKED(IDC_BTN_CANCEL, &CUserTrackerDlg::OnBnClickedBtnCancel)
 END_MESSAGE_MAP()
@@ -79,10 +81,20 @@ BOOL CUserTrackerDlg::OnInitDialog()
 	// TODO:  在此添加额外的初始化代码
     //tracker_helper_->Initialize();
     tracker_helper_->SetNotifyMessageCallback(
-        base::Bind(&CUserTrackerDlg::Notify, base::Unretained(this)));
+        base::Bind(&CUserTrackerDlg::NotifyMessage, base::Unretained(this)));
 
     m_progress1.SetRange(0, 100);
+    DWORD dwStyle = m_list_result.GetExtendedStyle();
+    dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
+    dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
 
+    m_list_result.SetExtendedStyle(dwStyle); //设置扩展风格
+
+    RECT rect;
+    m_list_result.GetWindowRect(&rect);
+    int width = (rect.right - rect.left) / 2;
+    m_list_result.InsertColumn(0, L"id", LVCFMT_LEFT, width);//插入列
+    m_list_result.InsertColumn(1, L"房间号", LVCFMT_LEFT, width);//插入列
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -157,10 +169,9 @@ void CUserTrackerDlg::SetHScroll()
 void CUserTrackerDlg::OnBnClickedBtnGetAllRoomData()
 {
     if (!tracker_helper_->UpdataAllStarRoomUserMap(
-        base::Bind(&CUserTrackerDlg::RoomProgress,
-        base::Unretained(this))))
+        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this))))
     {
-        Notify(L"操作失败, 请先登录");
+        NotifyMessage(L"操作失败, 请先登录");
     } 
 }
 
@@ -173,12 +184,11 @@ void CUserTrackerDlg::OnBnClickedBtnFindInCache()
     std::vector<uint32> users;
     users.push_back(user_id);
     if (!tracker_helper_->GetUserLocationByUserId(users,
-        base::Bind(&CUserTrackerDlg::RoomProgress,
-        base::Unretained(this))))
+        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
+        base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this))))
     {
-        Notify(L"操作失败, 请先登录");
+        NotifyMessage(L"操作失败, 请先登录");
     }
-
 }
 
 void CUserTrackerDlg::OnBnClickedBtnUpdataFind()
@@ -190,15 +200,15 @@ void CUserTrackerDlg::OnBnClickedBtnUpdataFind()
     std::vector<uint32> users;
     users.push_back(user_id);
     if (!tracker_helper_->UpdateForFindUser(users,
-        base::Bind(&CUserTrackerDlg::RoomProgress,
-        base::Unretained(this))))
+        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
+        base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this))))
     {
-        Notify(L"操作失败, 请先登录");
+        NotifyMessage(L"操作失败, 请先登录");
     }
 
 }
 
-void CUserTrackerDlg::Notify(const std::wstring& message)
+void CUserTrackerDlg::NotifyMessage(const std::wstring& message)
 {
     // 发送数据给窗口
     messageMutex_.lock();
@@ -213,6 +223,11 @@ void CUserTrackerDlg::RoomProgress(uint32 current, uint32 all)
     progress->all = all;
     progress->current = current;
     this->PostMessage(WM_USER_PROGRESS, (WPARAM)(PROGRESSTYPE_ROOM), (LPARAM)progress);
+}
+
+void CUserTrackerDlg::FoundResult(uint32 user_id, uint32 room_id)
+{
+    this->PostMessage(WM_USER_FOUND_RESULT, (WPARAM)(user_id), (LPARAM)room_id);
 }
 
 LRESULT CUserTrackerDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
@@ -253,6 +268,19 @@ LRESULT CUserTrackerDlg::OnRoomProgress(WPARAM wParam, LPARAM lParam)
     }
 
     delete ps;
+    return 0;
+}
+
+LRESULT CUserTrackerDlg::OnFoundResult(WPARAM wParam, LPARAM lParam)
+{
+    uint32 user_id = (uint32)(wParam);
+    uint32 room_id = (uint32)(lParam);
+
+    int nitem = m_list_result.InsertItem(0, L"");
+    m_list_result.SetItemData(nitem, result_index++);
+    m_list_result.SetItemText(nitem, 0, base::UintToString16(user_id).c_str());
+    m_list_result.SetItemText(nitem, 1, base::UintToString16(room_id).c_str());
+
     return 0;
 }
 

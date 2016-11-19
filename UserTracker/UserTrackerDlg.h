@@ -28,6 +28,7 @@ public:
     {
         WM_USER_MSG = WM_USER + 1,
         WM_USER_PROGRESS = WM_USER + 2,
+        WM_USER_FOUND_RESULT = WM_USER +3,
     };
 
     enum ProgressType
@@ -57,13 +58,18 @@ protected:
     afx_msg void OnBnClickedBtnFindInCache();
     afx_msg void OnBnClickedBtnUpdataFind();
     afx_msg void OnBnClickedBtnCancel();
+
+protected:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnRoomProgress(WPARAM wParam, LPARAM lParam);
+    LRESULT OnFoundResult(WPARAM wParam, LPARAM lParam);
 
 private:
     void SetHScroll();
-    void Notify(const std::wstring& message);
+    void NotifyMessage(const std::wstring& message);
     void RoomProgress(uint32 current, uint32 all);
+    void FoundResult(uint32 user_id, uint32 room_id);
+
     CEdit m_edit_target_fanxing_id;
     CListBox m_list_message;
     int list_info_count;
@@ -76,4 +82,6 @@ private:
     CEdit m_edit_password;
     CStatic m_static_room_progress;
     CProgressCtrl m_progress1;
+    CListCtrl m_list_result;
+    int result_index = 0;
 };
