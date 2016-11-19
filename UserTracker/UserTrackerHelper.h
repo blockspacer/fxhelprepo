@@ -54,6 +54,8 @@ public:
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
 
+    bool ClearCache();
+
 private:
 
     void DoLoginUser(const std::string& user_name, 
@@ -72,6 +74,8 @@ private:
     void DoGetUserLocationByUserId(const std::vector<uint32> user_ids,
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
+
+    void DoClearCache();
 
     bool GetAllStarRoomInfos(std::vector<uint32>* roomids); // 从全站获取所有正在直播的主播直播粗略信息，为下一步获取房间用户列表做准备
     bool GetTargetStarRoomInfos(const std::string& url, std::vector<uint32>* roomids);

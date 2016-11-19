@@ -68,6 +68,7 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_NOTIFY(NM_CLICK, IDC_LIST_RESULT, &CUserTrackerDlg::OnNMClickListResult)
     ON_NOTIFY(HDN_BEGINTRACK, 0, &CUserTrackerDlg::OnHdnBegintrackListResult)
     ON_BN_CLICKED(IDC_BTN_CLEAR_LIST, &CUserTrackerDlg::OnBnClickedBtnClearList)
+    ON_BN_CLICKED(IDC_BTN_CLEAR_CACHE, &CUserTrackerDlg::OnBnClickedBtnClearCache)
 END_MESSAGE_MAP()
 
 
@@ -193,6 +194,11 @@ void CUserTrackerDlg::OnBnClickedBtnFindInCache()
     {
         NotifyMessage(L"²Ù×÷Ê§°Ü, ÇëÏÈµÇÂ¼");
     }
+}
+
+void CUserTrackerDlg::OnBnClickedBtnClearCache()
+{
+    tracker_helper_->ClearCache();
 }
 
 void CUserTrackerDlg::OnBnClickedBtnUpdataFind()

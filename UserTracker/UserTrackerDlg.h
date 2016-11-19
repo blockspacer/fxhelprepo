@@ -59,6 +59,9 @@ protected:
     afx_msg void OnBnClickedBtnUpdataFind();
     afx_msg void OnBnClickedBtnCancel();
     afx_msg void OnNMClickListResult(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnHdnBegintrackListResult(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnBnClickedBtnClearList();
+    afx_msg void OnBnClickedBtnClearCache();
 
 protected:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
@@ -88,7 +91,4 @@ private:
     int result_index_ = 0;
 
     CEdit m_edit_roomid;
-public:
-    afx_msg void OnHdnBegintrackListResult(NMHDR *pNMHDR, LRESULT *pResult);
-    afx_msg void OnBnClickedBtnClearList();
 };

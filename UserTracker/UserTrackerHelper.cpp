@@ -109,8 +109,7 @@ void UserTrackerHelper::DoUpdataAllStarRoomUserMap(
     }
     msg = L"获取房间列表成功";
     message_callback_.Run(msg);
-    std::map<uint32, std::map<uint32, EnterRoomUserInfo>> roomid_userid_map;
-    if (!GetAllRoomViewers(roomids, &roomid_userid_map, callback))
+    if (!GetAllRoomViewers(roomids, &roomid_userid_map_, callback))
     {
         msg = L"获取所有房间观众列表失败";
         message_callback_.Run(msg);
@@ -118,7 +117,6 @@ void UserTrackerHelper::DoUpdataAllStarRoomUserMap(
     }
     msg = L"获取所有房间观众列表成功";
     message_callback_.Run(msg);
-    roomid_userid_map_ = roomid_userid_map;
     return ;
 }
 
@@ -226,6 +224,21 @@ void UserTrackerHelper::DoGetUserLocationByUserId(
     msg = L"在缓存中查找用户结束";
     message_callback_.Run(msg);
     return;
+}
+
+bool UserTrackerHelper::ClearCache()
+{
+    if (!user_)
+        return false;
+
+    return worker_thread_->message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserTrackerHelper::DoClearCache,
+        base::Unretained(this)));
+}
+
+void UserTrackerHelper::DoClearCache()
+{
+    roomid_userid_map_.clear();
 }
 
 bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
