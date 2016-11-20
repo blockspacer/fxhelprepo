@@ -105,6 +105,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AuthorityHelper.h" />
     <ClInclude Include="LoginDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -114,6 +115,7 @@
     <ClInclude Include="UserTrackerHelper.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AuthorityHelper.cpp" />
     <ClCompile Include="LoginDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

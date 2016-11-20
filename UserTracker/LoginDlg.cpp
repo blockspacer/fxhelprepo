@@ -6,6 +6,7 @@
 #include "LoginDlg.h"
 #include "afxdialogex.h"
 #include "UserTrackerHelper.h"
+#include "AuthorityHelper.h"
 #include "third_party/chromium/base/bind.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
@@ -38,7 +39,15 @@ void CLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_STATIC_VERIFYCODE, m_static_verifycode);
 }
 
+BOOL CLoginDlg::OnInitDialog()
+{
+    CDialogEx::OnInitDialog();
+    std::wstring display_info;
+    std::wstring title = L" Ç§Àï×·×ÙÆ÷1.0 ";
+    SetWindowTextW(title.c_str());
 
+    return TRUE;
+}
 BEGIN_MESSAGE_MAP(CLoginDlg, CDialogEx)
     ON_WM_PAINT()
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CLoginDlg::OnBnClickedBtnLogin)
@@ -118,7 +127,7 @@ LRESULT CLoginDlg::OnLoginResult(WPARAM wParam, LPARAM lParam)
 }
 
 void CLoginDlg::LoginResult(
-    bool result, const std::string& errormsg)
+    bool result, uint32 servertime, const std::string& errormsg)
 {
     std::string* msg = new std::string(errormsg);
     this->PostMessage(WM_USER_LOGIN_RESULT, (int)(result), (LPARAM)(msg));

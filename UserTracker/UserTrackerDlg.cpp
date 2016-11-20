@@ -7,6 +7,7 @@
 #include "UserTrackerDlg.h"
 #include "afxdialogex.h"
 #include "UserTrackerHelper.h"
+#include "AuthorityHelper.h"
 #include "third_party/chromium/base/bind.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
@@ -53,8 +54,8 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_ROOM_ID, m_edit_roomid);
     DDX_Control(pDX, IDC_CHK_STAR, m_check_star);
     DDX_Control(pDX, IDC_CHK_DIAMON, m_check_diamon);
-    DDX_Control(pDX, IDC_CHK_1_3_CROWN, m_check_1_3_crown);
-    DDX_Control(pDX, IDC_CHK_4_CROWN_UP, m_check_4_crown_up);
+    DDX_Control(pDX, IDC_CHK_1_4_CROWN, m_check_1_3_crown);
+    DDX_Control(pDX, IDC_CHK_5_CROWN, m_check_4_crown_up);
 }
 
 BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
@@ -115,7 +116,7 @@ BOOL CUserTrackerDlg::OnInitDialog()
 void CUserTrackerDlg::OnClose()
 {
     tracker_helper_->CancelCurrentOperation();
-    //tracker_helper_->Finalize();
+    tracker_helper_->Finalize();
     CDialogEx::OnClose();
 }
 

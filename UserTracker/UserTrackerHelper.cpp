@@ -4,6 +4,7 @@
 #include "Network/User.h"
 #include "Network/CurlWrapper.h"
 #include "Network/EncodeHelper.h"
+#include "AuthorityHelper.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/bind.h"
@@ -23,7 +24,10 @@ UserTrackerHelper::~UserTrackerHelper()
 bool UserTrackerHelper::Initialize()
 {
     CurlWrapper::CurlInit();
-    worker_thread_->Start();
+    tracker_authority_.reset(new UserTrackerAuthority);
+    authority_helper_.reset(new AuthorityHelper);
+    authority_helper_->LoadUserTrackerAuthority(tracker_authority_.get());
+    worker_thread_->Start();   
     return true;
 }
 
@@ -65,7 +69,7 @@ bool UserTrackerHelper::LoginGetVerifyCode(std::vector<uint8>* picture)
 bool UserTrackerHelper::LoginUser(
     const std::string& user_name, const std::string& password,
     const std::string& verifycode,
-    const base::Callback<void(bool, const std::string&)>& callback)
+    const base::Callback<void(bool, uint32, const std::string&)>& callback)
 {
     return worker_thread_->message_loop_proxy()->PostTask(FROM_HERE,
         base::Bind(&UserTrackerHelper::DoLoginUser,
@@ -74,7 +78,7 @@ bool UserTrackerHelper::LoginUser(
 
 void UserTrackerHelper::DoLoginUser(const std::string& user_name, 
     const std::string& password, const std::string& verifycode,
-    const base::Callback<void(bool, const std::string&)>& callback)
+    const base::Callback<void(bool, uint32, const std::string&)>& callback)
 {
     if (!user_)
         user_.reset(new User);
@@ -83,14 +87,40 @@ void UserTrackerHelper::DoLoginUser(const std::string& user_name,
     std::string error_msg;
     if (!user_->Login(user_name, password, verifycode, &error_msg))
     {
-        msg = L"登录失败";
+        msg = L"登录失败." + base::UTF8ToWide(error_msg);;
         message_callback_.Run(msg);
-        callback.Run(false, error_msg);
+        uint32 servertime = user_->GetServerTime();
+        callback.Run(false, servertime, base::WideToUTF8(msg));
         return;
     }
+
+    uint32 servertime = user_->GetServerTime();
     msg = L"登录成功";
     message_callback_.Run(msg);
-    callback.Run(true, error_msg);
+
+    std::wstring authority_msg;
+    authority_helper_->GetTrackerAuthorityDisplayInfo(
+        *tracker_authority_.get(), &authority_msg);
+
+    if (tracker_authority_->user_id != user_->GetFanxingId())
+    {
+        msg = authority_msg + L". 当前用户未授权";
+        message_callback_.Run(msg);
+        callback.Run(false, servertime, base::WideToUTF8(msg));
+        return;
+    }
+
+    uint64 expiretime = tracker_authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
+    expiretime /= 1000000;
+    if (servertime > expiretime)
+    {
+        msg = authority_msg + L"用户授权已到期，请续费!";
+        message_callback_.Run(msg);
+        callback.Run(false, servertime, base::WideToUTF8(msg));
+        return;
+    }
+       
+    callback.Run(true, servertime, error_msg);
     return;
 }
 
@@ -258,9 +288,11 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
     std::vector<uint32> roomid3;
     std::vector<uint32> roomid4;
 
+    const std::string& host = tracker_authority_->tracker_host;
+    std::string url = "http://" + host + "/VServices/IndexService.IndexService.getLiveList";
     if (check_star_)
     {
-        std::string url1 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-1-1/";
+        std::string url1 = url + "/1-1-1/";
         std::wstring msg = L"正在获取星级主播房间列表 ...";
         message_callback_.Run(msg);
         GetTargetStarRoomInfos(url1, &roomid1);
@@ -269,7 +301,7 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
 
     if (check_diamon_)
     {
-        std::string url2 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-2-1/";
+        std::string url2 = url + "/1-2-1/";
         std::wstring msg = L"正在获取钻级主播房间列表 ...";
         message_callback_.Run(msg);
         GetTargetStarRoomInfos(url2, &roomid2);
@@ -278,8 +310,8 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
 
     if (check_1_3_crown_)
     {
-        std::string url3 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-3-1/";
-        std::wstring msg = L"正在获取1-3冠主播房间列表 ...";
+        std::string url3 = url + "/1-3-1/";
+        std::wstring msg = L"正在获取1-4冠主播房间列表 ...";
         message_callback_.Run(msg);
         GetTargetStarRoomInfos(url3, &roomid3);
         roomids->insert(roomids->end(), roomid3.begin(), roomid3.end());
@@ -287,8 +319,8 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
 
     if (check_4_crown_up_)
     {
-        std::string url4 = "http://visitor.fanxing.kugou.com/VServices/IndexService.IndexService.getLiveList/1-4-1/";
-        std::wstring msg = L"正在获取4冠以上主播房间列表 ...";
+        std::string url4 = url + "/1-4-1/";
+        std::wstring msg = L"正在获取5冠以上主播房间列表 ...";
         message_callback_.Run(msg);
         GetTargetStarRoomInfos(url4, &roomid4);
         roomids->insert(roomids->end(), roomid4.begin(), roomid4.end());

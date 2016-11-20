@@ -10,8 +10,11 @@
 #include "third_party/chromium/base/threading/thread.h"
 #include "Network/MessageNotifyManager.h"
 
+
 class User;
 class CurlWrapper;
+class AuthorityHelper;
+class UserTrackerAuthority;
 
 struct FollowUserInfo
 {
@@ -42,7 +45,7 @@ public:
 
     bool LoginUser(const std::string& user_name, const std::string& password,
         const std::string& verifycode, 
-        const base::Callback<void(bool,const std::string&)>& callback);
+        const base::Callback<void(bool,uint32, const std::string&)>& callback);
 
     // 强制更新全站主播房间用户列表数据
     bool UpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& progress_callback);
@@ -63,7 +66,7 @@ private:
 
     void DoLoginUser(const std::string& user_name, 
         const std::string& password, const std::string& verifycode,
-        const base::Callback<void(bool, const std::string&)>& progress_callback);
+        const base::Callback<void(bool, uint32, const std::string&)>& progress_callback);
 
     // 强制更新全站主播房间用户列表数据
     void DoUpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& progress_callback);
@@ -109,6 +112,8 @@ private:
     scoped_ptr<base::Thread> worker_thread_;
     std::unique_ptr<User> user_;
     std::unique_ptr<CurlWrapper> curl_wrapper_;
+    std::unique_ptr<AuthorityHelper> authority_helper_;
+    std::unique_ptr<UserTrackerAuthority> tracker_authority_;
 
     std::map<uint32, std::map<uint32, EnterRoomUserInfo>> roomid_userid_map_;
 

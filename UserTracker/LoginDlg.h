@@ -1,11 +1,16 @@
 #pragma once
 #include "afxwin.h"
+#include <string>
+#include <memory>
 
 
 // CDlgLogin 对话框
 class UserTrackerHelper;
+class AuthorityHelper;
 
 class CLoginDlg : public CDialogEx
+
+
 {
 	DECLARE_DYNAMIC(CLoginDlg)
 
@@ -23,6 +28,7 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
+    virtual BOOL OnInitDialog();
 
 	DECLARE_MESSAGE_MAP()
 public:
@@ -32,8 +38,10 @@ public:
 
 private:
     LRESULT OnLoginResult(WPARAM wParam, LPARAM lParam);
-    void LoginResult(bool result, const std::string& errormsg);
+    void LoginResult(bool result, uint32 server_time, const std::string& errormsg);
     bool RefreshVerifyCode();
+
+    bool authority_ = false;;
 
     CImage image;
     CEdit m_edit_account;
