@@ -1,7 +1,7 @@
 #pragma once
 #include "third_party/chromium/base/basictypes.h"
 
-struct Authority
+struct AntiFloodAuthority
 {
     uint32 userid = 0;
     uint32 roomid = 0;
@@ -19,7 +19,7 @@ public:
     AuthorityHelper();
     ~AuthorityHelper();
 
-    bool Load(Authority* authority);
+    bool LoadAntiFloodAuthority(AntiFloodAuthority* authority);
     bool GetAuthorityDisplayInfo(std::wstring* display);
 };
 

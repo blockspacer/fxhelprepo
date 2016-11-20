@@ -47,7 +47,7 @@ AuthorityHelper::~AuthorityHelper()
 {
 }
 
-bool AuthorityHelper::Load(Authority* authority)
+bool AuthorityHelper::LoadAntiFloodAuthority(AntiFloodAuthority* authority)
 {
     base::FilePath filepath;
     if (!GetEncrptyFileName(&filepath))
@@ -102,8 +102,8 @@ bool AuthorityHelper::Load(Authority* authority)
 
 bool AuthorityHelper::GetAuthorityDisplayInfo(std::wstring* display)
 {
-    Authority authority;
-    if (!Load(&authority))
+    AntiFloodAuthority authority;
+    if (!LoadAntiFloodAuthority(&authority))
         return false;
 
     std::wstring userid = base::UintToString16(authority.userid);
