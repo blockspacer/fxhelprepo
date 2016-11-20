@@ -534,7 +534,7 @@ bool EnterRoomStrategy::GetEnterWelcome(const EnterRoomUserInfo& enterinfo,
 }
 
 NetworkHelper::NetworkHelper()
-    : authority_(new Authority)
+    : authority_(new AntiFloodAuthority)
     , tcpmanager_(new TcpManager)
     , workThread_(new base::Thread("NetworkHelper"))
 {
@@ -551,7 +551,7 @@ bool NetworkHelper::Initialize()
     user_.reset(new User);
     tcpmanager_->Initialize();
     AuthorityHelper authorityHelper;
-    bool result = authorityHelper.Load(authority_.get());
+    bool result = authorityHelper.LoadAntiFloodAuthority(authority_.get());
     assert(!authority_->serverip.empty());
     user_->SetRoomServerIp(authority_->serverip);
     user_->SetTcpManager(tcpmanager_.get());

@@ -172,7 +172,7 @@ void CAuthorityDlg::OnBnClickedBtnGenerate()
     int antiadvance = m_chk_anti_advance.GetCheck();
 
     AuthorityHelper authorityHelper;
-    Authority authority;
+    AntiFloodAuthority authority;
     base::StringToUint(base::WideToUTF8(csUserid.GetBuffer()), &authority.userid);
     base::StringToUint(base::WideToUTF8(csRoomid.GetBuffer()), &authority.roomid);
     base::StringToUint(base::WideToUTF8(csClanid.GetBuffer()), &authority.clanid);
@@ -182,7 +182,7 @@ void CAuthorityDlg::OnBnClickedBtnGenerate()
     authority.expiretime = expiretime;
     authority.serverip = base::WideToUTF8(csServerIp.GetBuffer());
 
-    if (!authorityHelper.Save(authority))
+    if (!authorityHelper.SaveAntiFloodAuthority(authority))
         return;
 }
 
@@ -190,8 +190,8 @@ void CAuthorityDlg::OnBnClickedBtnGenerate()
 void CAuthorityDlg::OnBnClickedBtnView()
 {
     AuthorityHelper authorityHelper;
-    Authority authority;
-    if (!authorityHelper.Load(&authority))
+    AntiFloodAuthority authority;
+    if (!authorityHelper.LoadAntiFloodAuthority(&authority))
         return;
 
     CString csUserid = base::UTF8ToWide(
