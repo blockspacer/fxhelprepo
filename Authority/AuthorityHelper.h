@@ -18,7 +18,7 @@ struct UserTrackerAuthority
 {
     uint32 user_id = 0;
     uint64 expiretime = 0;
-    std::string server_host = "";// 保证未授权的情况没有配置使用目标服务器
+    std::string tracker_host = "";// 保证未授权的情况没有配置使用目标服务器
 };
 
 // 提供授权文件明文格式读写功能

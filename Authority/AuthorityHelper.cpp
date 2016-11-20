@@ -167,7 +167,7 @@ bool AuthorityHelper::LoadUserTrackerAuthority(UserTrackerAuthority* authority)
         return false;
 
     authority->user_id = GetInt32FromJsonValue(rootdata, "userid");
-    authority->server_host = rootdata.get("serverhost", "").asString();
+    authority->tracker_host = rootdata.get("trackerhost", "").asString();
     std::string expire = rootdata.get("expiretime", "0").asString();
     base::StringToUint64(expire, &authority->expiretime);
 
@@ -180,7 +180,7 @@ bool AuthorityHelper::SaveUserTrackerAuthority(const UserTrackerAuthority& autho
     Json::Value root(Json::objectValue);
     root["userid"] = authority.user_id;
     root["expiretime"] = base::Uint64ToString(authority.expiretime);
-    root["serverhost"] = authority.server_host;
+    root["trackerhost"] = authority.tracker_host;
 
     std::string writestring = writer.write(root);
 
