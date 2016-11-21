@@ -91,6 +91,7 @@ bool AuthorityHelper::GetTrackerAuthorityDisplayInfo(
     const UserTrackerAuthority& authority, std::wstring* display)
 {
     std::wstring userid = base::UintToString16(authority.user_id);
+    *display = L"Èí¼şÎ´ÊÚÈ¨";
     if (!authority.user_id)
         return false;
 

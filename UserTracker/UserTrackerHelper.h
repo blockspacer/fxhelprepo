@@ -39,6 +39,8 @@ public:
     void SetSearchConfig(bool check_star, bool check_diamon,
         bool check_1_3_crown, bool check_4_crown_up);
 
+    std::wstring GetAuthorityMessage() const;
+
     void CancelCurrentOperation();
 
     bool LoginGetVerifyCode(std::vector<uint8>* picture);
@@ -112,8 +114,8 @@ private:
     scoped_ptr<base::Thread> worker_thread_;
     std::unique_ptr<User> user_;
     std::unique_ptr<CurlWrapper> curl_wrapper_;
-    std::unique_ptr<AuthorityHelper> authority_helper_;
     std::unique_ptr<UserTrackerAuthority> tracker_authority_;
+    std::wstring authority_msg_;
 
     std::map<uint32, std::map<uint32, EnterRoomUserInfo>> roomid_userid_map_;
 

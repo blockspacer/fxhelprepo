@@ -93,6 +93,13 @@ BOOL CUserTrackerDlg::OnInitDialog()
     tracker_helper_->SetNotifyMessageCallback(
         base::Bind(&CUserTrackerDlg::NotifyMessage, base::Unretained(this)));
 
+    // 在窗口标题增加授权信息
+    std::wstring title_post = tracker_helper_->GetAuthorityMessage();
+    CString title;
+    GetWindowTextW(title);
+    title += title_post.c_str();
+    SetWindowTextW(title);
+
     m_progress1.SetRange(0, 100);
     DWORD dwStyle = m_list_result.GetExtendedStyle();
     dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）

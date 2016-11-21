@@ -42,9 +42,13 @@ void CLoginDlg::DoDataExchange(CDataExchange* pDX)
 BOOL CLoginDlg::OnInitDialog()
 {
     CDialogEx::OnInitDialog();
-    std::wstring display_info;
-    std::wstring title = L" 千里追踪器1.0 ";
-    SetWindowTextW(title.c_str());
+
+    // 在窗口标题增加授权信息
+    std::wstring title_post = tracker_helper_->GetAuthorityMessage();
+    CString title;
+    GetWindowTextW(title);
+    title += title_post.c_str();
+    SetWindowTextW(title);
 
     return TRUE;
 }

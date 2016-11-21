@@ -25,8 +25,11 @@ bool UserTrackerHelper::Initialize()
 {
     CurlWrapper::CurlInit();
     tracker_authority_.reset(new UserTrackerAuthority);
-    authority_helper_.reset(new AuthorityHelper);
-    authority_helper_->LoadUserTrackerAuthority(tracker_authority_.get());
+    AuthorityHelper authority_helper;
+    authority_helper.LoadUserTrackerAuthority(tracker_authority_.get());
+    authority_helper.GetTrackerAuthorityDisplayInfo(
+        *tracker_authority_.get(), &authority_msg_);
+
     worker_thread_->Start();   
     return true;
 }
@@ -54,6 +57,11 @@ void UserTrackerHelper::SetSearchConfig(bool check_star, bool check_diamon,
     check_diamon_ = check_diamon;
     check_1_3_crown_ = check_1_3_crown;
     check_4_crown_up_ = check_4_crown_up;
+}
+
+std::wstring UserTrackerHelper::GetAuthorityMessage() const
+{
+    return authority_msg_;
 }
 
 void UserTrackerHelper::CancelCurrentOperation()
@@ -98,13 +106,9 @@ void UserTrackerHelper::DoLoginUser(const std::string& user_name,
     msg = L"登录成功";
     message_callback_.Run(msg);
 
-    std::wstring authority_msg;
-    authority_helper_->GetTrackerAuthorityDisplayInfo(
-        *tracker_authority_.get(), &authority_msg);
-
     if (tracker_authority_->user_id != user_->GetFanxingId())
     {
-        msg = authority_msg + L". 当前用户未授权";
+        msg = authority_msg_ + L". 当前用户未授权";
         message_callback_.Run(msg);
         callback.Run(false, servertime, base::WideToUTF8(msg));
         return;
@@ -114,7 +118,7 @@ void UserTrackerHelper::DoLoginUser(const std::string& user_name,
     expiretime /= 1000000;
     if (servertime > expiretime)
     {
-        msg = authority_msg + L"用户授权已到期，请续费!";
+        msg = authority_msg_ + L"用户授权已到期，请续费!";
         message_callback_.Run(msg);
         callback.Run(false, servertime, base::WideToUTF8(msg));
         return;
