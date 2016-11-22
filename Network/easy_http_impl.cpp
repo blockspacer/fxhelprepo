@@ -15,7 +15,7 @@ namespace
 {
 const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
 const char* acceptencode = "gzip";//目前都不应该接收压缩数据，免得解压麻烦
-const uint32 max_parallel = 8;
+const uint32 max_parallel = 3;
 
 }
 EasyHandle::EasyHandle(const HttpRequest& httpParams)
@@ -120,6 +120,7 @@ bool EasyHandle::Initialize()
     EASYHANDLE_SETOPT(CURLOPT_WRITEFUNCTION, EasyHandle::curl_write_callback);
     EASYHANDLE_SETOPT(CURLOPT_WRITEDATA, this);
     EASYHANDLE_SETOPT(CURLOPT_VERBOSE, 1L);
+    EASYHANDLE_SETOPT(CURLOPT_PRIVATE, this);//回调结果的时候要使用
 
     struct curl_httppost* post = nullptr;
     struct curl_httppost* last = nullptr;
@@ -237,6 +238,7 @@ void EasyHandle::FinishCallback(int statuscode)
         httpResponse.curlcode = 0;
         httpResponse.statuscode = statuscode;
         httpResponse.content.assign(responseData_.begin(), responseData_.end());
+        callback(httpResponse);
     }
 }
 
