@@ -3,6 +3,7 @@
 #include "UserTrackerHelper.h"
 #include "Network/User.h"
 #include "Network/CurlWrapper.h"
+#include "Network/easy_http_impl.h"
 #include "Network/EncodeHelper.h"
 #include "AuthorityHelper.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
@@ -11,6 +12,7 @@
 
 UserTrackerHelper::UserTrackerHelper()
     :curl_wrapper_(new CurlWrapper)
+    , easy_http_impl_(new EasyHttpImpl)
     , worker_thread_(new base::Thread("UserTrackerHelper"))
     , user_(nullptr) //必须先登录再让操作
 {
@@ -36,6 +38,7 @@ bool UserTrackerHelper::Initialize()
 
 void UserTrackerHelper::Finalize()
 {
+    easy_http_impl_->ShutdownService();
     worker_thread_->Stop();
     CurlWrapper::CurlCleanup();
 }
@@ -399,12 +402,13 @@ bool UserTrackerHelper::GetAllRoomViewers(
 
     cancel_flag_ = false;
     std::wstring msg;
-    uint32 all = roomids.size();
-    uint32 current = 0;
+    //uint32 all = roomids.size();
+    //uint32 current = 0;
+    all_room_count_ = roomids.size();
+    current_room_count_ = 0;
 
     for (auto roomid : roomids)
     {
-        current++;
         if (cancel_flag_)
         {
             msg = L"用户取消当前操作";
@@ -413,24 +417,25 @@ bool UserTrackerHelper::GetAllRoomViewers(
             return true;
         }
 
-        msg = L"开始获取房间[" + base::UintToString16(roomid) + L"] 观众";
-        message_callback_.Run(msg);
+        //msg = L"开始获取房间[" + base::UintToString16(roomid) + L"] 观众";
+        //message_callback_.Run(msg);
         std::map<uint32, EnterRoomUserInfo> roomid_users;
-        if (!GetRoomViewerList(roomid, &roomid_users))
+        if (!AsyncOpenRoom(roomid, callback))
         {
             //assert(false); 可能在pk房，也会出现进房和获取房间成员失败
-            msg = L"获取房间[" + base::UintToString16(roomid) + L"] 观众失败";
-            message_callback_.Run(msg);
-            callback.Run(current, all);
+            //msg = L"获取房间[" + base::UintToString16(roomid) + L"] 观众失败";
+            //message_callback_.Run(msg);
+            //callback.Run(current, all);
             continue;
         }
-        msg = L"获取房间[" + base::UintToString16(roomid) + L"] 观众成功";
-        message_callback_.Run(msg);
-        callback.Run(current, all);
-        (*roomid_user_map)[roomid] = roomid_users;
+        //msg = L"获取房间[" + base::UintToString16(roomid) + L"] 观众成功";
+        //message_callback_.Run(msg);
+        //callback.Run(current, all);
+        //(*roomid_user_map)[roomid] = roomid_users;
     }
 
-    return !roomid_user_map->empty();
+    //return !roomid_user_map->empty();
+    return true;
 }
 
 bool UserTrackerHelper::FindUsersWhenUpdateRoomViewerList(
@@ -542,6 +547,175 @@ bool UserTrackerHelper::GetUserInfoByUserId()
 bool UserTrackerHelper::GetUserConcernList()
 {
     return false;
+}
+
+bool UserTrackerHelper::AsyncOpenRoom(
+    uint32 roomid, const base::Callback<void(uint32, uint32)>& progress_callback)
+{
+    auto callback = std::bind(&UserTrackerHelper::OpenRoomCallback,
+        this, roomid, progress_callback, std::placeholders::_1);
+    HttpRequest request;
+    request.url = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid);
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/";
+    request.cookies = user_->GetCookies();
+    request.asyncHttpResponseCallback = callback;
+
+    return easy_http_impl_->AsyncHttpRequest(request);  
+}
+
+// 切换线程回来处理
+void UserTrackerHelper::OpenRoomCallback(uint32 roomid,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const HttpResponse& response)
+{
+    if ( base::MessageLoop::current()!= worker_thread_->message_loop())
+    {
+        worker_thread_->message_loop()->PostTask(FROM_HERE,
+            base::Bind(&UserTrackerHelper::OpenRoomCallback,
+            base::Unretained(this), roomid, progress_callback, response));
+        return;
+    }
+
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+    do
+    {
+        if (content.empty())
+        {
+            break;
+        }
+        std::string isClanRoomMark = "isClanRoom";
+        std::string starId = "starId";
+        auto isClanRoomPos = content.find(isClanRoomMark);
+        if (isClanRoomPos == std::string::npos)
+        {
+            break;
+        }
+        auto starPos = content.find(starId, isClanRoomPos + isClanRoomMark.length());
+
+        auto beginPos = content.find("\"", starPos);
+        beginPos += 1;
+        auto endPos = content.find("\"", beginPos);
+
+        std::string str_singerid = content.substr(beginPos, endPos - beginPos);
+        uint32 singerid = 0;
+        base::StringToUint(str_singerid, &singerid);
+
+        // 成功获取主播信息，继续走下一步
+        worker_thread_->message_loop()->PostTask(
+            FROM_HERE,
+            base::Bind(&UserTrackerHelper::AsyncGetRoomViewerList,
+            base::Unretained(this), roomid, singerid, progress_callback));
+        return;        
+    } while (0);
+
+    // 获取主播信息失败，放弃房间
+    std::wstring msg = L"获取房间[" + base::UintToString16(roomid) + L"] 信息-失败";
+    message_callback_.Run(msg);
+    progress_callback.Run(++current_room_count_, all_room_count_);
+}
+
+void UserTrackerHelper::AsyncGetRoomViewerList(uint32 roomid, uint32 singerid,
+    const base::Callback<void(uint32, uint32)>& progress_callback)
+{
+    std::string url = "http://visitor.fanxing.kugou.com";
+    url += "/VServices/RoomService.RoomService.getViewerList/";
+    url += base::UintToString(roomid) + "-" + base::UintToString(singerid);
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid);
+    request.cookies = user_->GetCookies();
+
+    auto callback = std::bind(&UserTrackerHelper::GetRoomViewerListCallback,
+        this, roomid, progress_callback, std::placeholders::_1);
+
+    request.asyncHttpResponseCallback = callback;
+
+    easy_http_impl_->AsyncHttpRequest(request);
+}
+
+// 切换线程回来处理
+void UserTrackerHelper::GetRoomViewerListCallback(uint32 roomid,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const HttpResponse& response)
+{
+    if (base::MessageLoop::current() != worker_thread_->message_loop())
+    {
+        worker_thread_->message_loop()->PostTask(FROM_HERE,
+            base::Bind(&UserTrackerHelper::GetRoomViewerListCallback,
+            base::Unretained(this), roomid, progress_callback, response));
+
+        return;
+    }
+
+    std::wstring msg = L"获取房间[" + base::UintToString16(roomid) + L"] 观众-";
+    do 
+    {
+        if (response.content.empty())
+        {
+            assert(false);
+            break;
+        }
+
+        std::string responsedata(response.content.begin(), response.content.end());
+        std::string jsondata = PickJson(responsedata);
+
+        Json::Reader reader;
+        Json::Value rootdata(Json::objectValue);
+        if (!reader.parse(jsondata, rootdata, false))
+        {
+            assert(false);
+            break;
+        }
+
+        uint32 unixtime = rootdata.get("servertime", 1461378689).asUInt();
+        uint32 status = rootdata.get("status", 0).asUInt();
+        if (status != 1)
+        {
+            assert(false);
+            break;
+        }
+        Json::Value jvdata(Json::ValueType::objectValue);
+        Json::Value data = rootdata.get(std::string("data"), jvdata);
+        if (data.isNull() || !data.isObject())
+        {
+            assert(false);
+            break;
+        }
+
+        Json::Value jvlist(Json::ValueType::objectValue);
+        Json::Value list = data.get(std::string("list"), jvlist);
+        if (!list.isArray())
+        {
+            assert(false);
+            break;
+        }
+
+        roomid_userid_map_[roomid].clear();
+        for (const auto& item : list)
+        {
+            EnterRoomUserInfo enterRoomUserInfo;
+            enterRoomUserInfo.nickname = item.get("nickname", "").asString();
+            enterRoomUserInfo.richlevel = GetInt32FromJsonValue(item, "richlevel");
+            enterRoomUserInfo.userid = GetInt32FromJsonValue(item, "userid");
+            enterRoomUserInfo.unixtime = unixtime;
+            enterRoomUserInfo.roomid = roomid;
+            roomid_userid_map_[roomid].insert(std::make_pair(enterRoomUserInfo.userid, enterRoomUserInfo));
+        }
+        msg += L"成功";
+        message_callback_.Run(msg);
+        progress_callback.Run(++current_room_count_, all_room_count_);
+        return;
+    } while (0);
+
+    // 获取主播信息失败，放弃房间
+    msg += L"失败";
+    message_callback_.Run(msg);
+    progress_callback.Run(++current_room_count_, all_room_count_);
 }
 
 

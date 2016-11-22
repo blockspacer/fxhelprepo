@@ -13,6 +13,8 @@
 
 class User;
 class CurlWrapper;
+class EasyHttpImpl;
+class HttpResponse;
 class AuthorityHelper;
 class UserTrackerAuthority;
 
@@ -101,19 +103,38 @@ private:
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
 
-    bool GetRoomViewerList(uint32 roomid, std::map<uint32, EnterRoomUserInfo>* user_map); // 从指定房间获取用户列表，追踪用户
+    // 从指定房间获取用户列表，追踪用户
+    bool GetRoomViewerList(uint32 roomid, std::map<uint32, EnterRoomUserInfo>* user_map);
     
     //GET /UServices/UserService/UserExtService/getFollowList?args=[1,10,0,%22%22,0,3]&_=1478426799924
     //Referer: http://fanxing.kugou.com/index.php?action=userFollowList
     bool GetMyConcernList(std::vector<FollowUserInfo>* follow_user_infos); // 获取登录用户的关注列表
 
-    bool GetUserInfoByUserId(); // 获取用户个人页面信息, 用来判断其是否为主播, 这是可选的辅助功能
+    // 获取用户个人页面信息, 用来判断其是否为主播, 这是可选的辅助功能
+    bool GetUserInfoByUserId(); 
 
-    bool GetUserConcernList(); // 获取用户关注主播的信息, 这是可选的辅助功能
+    // 获取用户关注主播的信息, 这是可选的辅助功能
+    bool GetUserConcernList(); 
+
+    //========= 以下函数为提高拉取房间数据效率使用 =========================
+    bool AsyncOpenRoom(uint32 roomid, 
+        const base::Callback<void(uint32, uint32)>& progress_callback);
+
+    void OpenRoomCallback(uint32 roomid,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const HttpResponse& response);
+
+    void AsyncGetRoomViewerList(uint32 roomid, uint32 singerid,
+        const base::Callback<void(uint32, uint32)>& progress_callback);
+
+    void GetRoomViewerListCallback(uint32 roomid,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const HttpResponse& response);
 
     scoped_ptr<base::Thread> worker_thread_;
     std::unique_ptr<User> user_;
     std::unique_ptr<CurlWrapper> curl_wrapper_;
+    std::unique_ptr<EasyHttpImpl> easy_http_impl_;
     std::unique_ptr<UserTrackerAuthority> tracker_authority_;
     std::wstring authority_msg_;
 
@@ -127,5 +148,8 @@ private:
     bool check_diamon_ = false;
     bool check_1_3_crown_ = false;
     bool check_4_crown_up_ = false;
+
+    uint32 all_room_count_ = 0;
+    uint32 current_room_count_ = 0;
 };
 
