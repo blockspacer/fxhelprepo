@@ -621,11 +621,10 @@ bool User::Worship_(const std::string& cookies, uint32 roomid, uint32 userid,
         return false;
     }
 
-    uint32 unixtime = rootdata.get("servertime", 1461378689).asUInt();
+    uint32 unixtime = GetInt32FromJsonValue(rootdata, "servertime");
     uint32 status = rootdata.get("status", 0).asUInt();
     if (status != 1)
     {
-        assert(false);
         *errormsg = rootdata.get("errorcode", "").asString();
         if (!errormsg->empty())
         {
