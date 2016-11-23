@@ -170,7 +170,6 @@ void WorshipDlg::OnBnClickedBtnWorshipSelect()
         if (!network_helper_->Worship(roomid, fanxingid, &error_msg))
         {
             std::wstring w_error_msg = base::UTF8ToWide(error_msg);
-            return;
         }
     }
 }

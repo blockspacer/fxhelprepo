@@ -101,13 +101,6 @@ CAntiFloodDlg::CAntiFloodDlg(CWnd* pParent /*=NULL*/)
 
 CAntiFloodDlg::~CAntiFloodDlg()
 {
-    if (network_)
-    {
-        network_->RemoveNotify();
-        network_->RemoveNotify201();
-        network_->RemoveNotify501();
-        network_->Finalize();
-    }  
 }
 
 void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
@@ -433,6 +426,9 @@ void CAntiFloodDlg::OnClose()
     if (network_)
     {
         network_->RemoveNotify();
+        network_->RemoveNotify201();
+        network_->RemoveNotify501();
+        network_->Finalize();
     }  
 }
 
