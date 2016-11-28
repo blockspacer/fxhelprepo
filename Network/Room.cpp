@@ -484,12 +484,18 @@ bool Room::OpenRoom(const std::string& cookies)
     }
     auto starPos = content.find(starId, isClanRoomPos + isClanRoomMark.length());
 
-    auto beginPos = content.find("\"", starPos);
+    auto beginPos = content.find(':', starPos);
     beginPos += 1;
-    auto endPos = content.find("\"", beginPos);
-
-    std::string singerid = content.substr(beginPos, endPos - beginPos);
+    auto endPos = content.find(',', beginPos);
+    std::string temp = content.substr(beginPos + 1, endPos - beginPos - 1);
+    RemoveSpace(&temp);
+    if (temp.length() < 6)
+    {
+        return false;
+    }
+    std::string singerid = temp.substr(1, temp.length() - 2);
     base::StringToUint(singerid, &singerid_);
+    assert(singerid_);
     return true;
 }
 
