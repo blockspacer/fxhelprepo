@@ -61,6 +61,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AntiFlood", "AntiFlood\Anti
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IpProxyAchiever", "IpProxyAchiever\IpProxyAchiever.vcxproj", "{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VMPTest", "VMPTest\VMPTest.vcxproj", "{5052943D-FC92-432B-9D9D-723593192E39}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -183,6 +185,12 @@ Global
 		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Release|Win32.ActiveCfg = Release|Win32
 		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Release|Win32.Build.0 = Release|Win32
 		{65231C03-C0AA-43A9-AF34-E7C2AC4E699E}.Release|x64.ActiveCfg = Release|Win32
+		{5052943D-FC92-432B-9D9D-723593192E39}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5052943D-FC92-432B-9D9D-723593192E39}.Debug|Win32.Build.0 = Debug|Win32
+		{5052943D-FC92-432B-9D9D-723593192E39}.Debug|x64.ActiveCfg = Debug|Win32
+		{5052943D-FC92-432B-9D9D-723593192E39}.Release|Win32.ActiveCfg = Release|Win32
+		{5052943D-FC92-432B-9D9D-723593192E39}.Release|Win32.Build.0 = Release|Win32
+		{5052943D-FC92-432B-9D9D-723593192E39}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
