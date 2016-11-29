@@ -5,7 +5,6 @@
 #include "IpProxy.h"
 #include "TcpManager.h"
 #include "EncodeHelper.h"
-#include "ServerHelper.h"
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/json/json.h"
@@ -323,14 +322,7 @@ void MessageNotifyManager::SetTcpManager(TcpManager* tcpManager)
 
 void MessageNotifyManager::SetServerIp(const std::string& serverip)
 {
-    std::vector<std::string> hostips;
-    if (!ServerHelper::GetChatServerIp(&hostips))
-        return;
-
-    if (hostips.empty())
-        return;
-    
-    serverip_ = *hostips.begin();
+    serverip_ = serverip;
 }
 
 void MessageNotifyManager::SetIpProxy(const IpProxy& ipproxy)

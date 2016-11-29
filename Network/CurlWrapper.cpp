@@ -239,6 +239,12 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
 
     res = curl_easy_perform(curl);
     response->curlcode = res;
+
+    char* ipstr = nullptr;
+    res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP, &ipstr);
+    if (res == CURLE_OK)
+        response->server_ip = ipstr;
+
     if (res != CURLE_OK)
     {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
@@ -250,7 +256,7 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     long responsecode = 0;
     res = curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responsecode);
     response->statuscode = responsecode;
-    if (responsecode != 200)
+    if (responsecode/100 != 2)
     {
         fprintf(stderr, "reponsecode: %ld\n", responsecode);
         curl_easy_cleanup(curl);
@@ -263,6 +269,7 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     {
         response->cookies = setcookies;
     }
+
     curl_easy_cleanup(curl);
     return true;
 }

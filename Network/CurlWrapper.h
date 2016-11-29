@@ -49,6 +49,7 @@ public:
     uint32 statuscode;
     std::vector<std::string> cookies;
     std::vector<uint8> content;
+    std::string server_ip;
 
 };
 
