@@ -364,8 +364,8 @@ bool UserTrackerHelper::GetTargetStarRoomInfos(const std::string& url, std::vect
 
     uint32 unixtime = rootdata.get("servertime", 1461378689).asUInt();
 
-    // 暂时只限制2016年11月30号前能使用，防止外泄
-    if (unixtime > 1480435200)
+    // 暂时只限制2017年1月1号前能使用，防止外泄
+    if (unixtime > 1483203600)
     {
         return false;
     }
@@ -595,11 +595,16 @@ void UserTrackerHelper::OpenRoomCallback(uint32 roomid,
         }
         auto starPos = content.find(starId, isClanRoomPos + isClanRoomMark.length());
 
-        auto beginPos = content.find("\"", starPos);
+        auto beginPos = content.find(':', starPos);
         beginPos += 1;
-        auto endPos = content.find("\"", beginPos);
-
-        std::string str_singerid = content.substr(beginPos, endPos - beginPos);
+        auto endPos = content.find(',', beginPos);
+        std::string temp = content.substr(beginPos + 1, endPos - beginPos - 1);
+        RemoveSpace(&temp);
+        if (temp.length() < 6)
+        {
+            break;
+        }
+        std::string str_singerid = temp.substr(1, temp.length() - 2);
         uint32 singerid = 0;
         base::StringToUint(str_singerid, &singerid);
 
