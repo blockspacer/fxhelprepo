@@ -41,6 +41,21 @@ struct RoomChatMessage
     std::string chatmessage = "";
 };
 
+struct BetShowData
+{
+    uint32 bet_gid;
+    uint32 odds;
+    //uint32 count;
+};
+
+struct BetResult
+{
+    uint32 time = 0;
+    uint32 result = 0;
+    uint32 display_result = 0;
+    uint32 random = 0; 
+};
+
 struct RoomGiftInfo601
 {
     uint32 time;
@@ -59,6 +74,7 @@ struct RoomGiftInfo601
 };
 
 typedef std::function<void(const RoomGiftInfo601& roomgiftinfo)> Notify601;
+typedef std::function<void(const BetResult& bet_result)> Notify620;
 typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify201;
 typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo,
     const RoomChatMessage& roomChatMessage)> Notify501;
@@ -84,6 +100,7 @@ public:
     void SetNotify201(Notify201 notify201);
     void SetNotify501(Notify501 notify201);
     void SetNotify601(Notify601 notify601);
+    void SetNotify620(Notify620 notify_620);
     void SetNormalNotify(NormalNotify normalNotify);
 
     // 使用新的高效的多路tcp请求分发模式
@@ -100,6 +117,7 @@ private:
     void DoSetNotify201(Notify201 notify201);
     void DoSetNotify501(Notify501 notify201);
     void DoSetNotify601(Notify601 notify601);
+    void DoSetNotify620(Notify620 notify_620);
     void DoSetNormalNotify(NormalNotify normalNotify);
 
     void Notify(const std::vector<char>& data);
@@ -146,11 +164,16 @@ private:
     Notify201 notify201_;
     Notify501 notify501_;
     Notify601 notify601_;
+    Notify620 notify_620_;
+
     NormalNotify normalNotify_;
 
     TcpManager* tcpManager_;
     base::RepeatingTimer<MessageNotifyManager> newRepeatingTimer_;
     base::TimeDelta chat_message_space_;
     base::Time last_chat_time_;
+
+    // 屠龙相关数据
+    std::vector<BetShowData> bet_show_datas_;
 };
 

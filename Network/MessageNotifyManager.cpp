@@ -99,13 +99,15 @@ bool CommandHandle_100(const Json::Value& jvalue, std::string* outmsg)
         Json::Value  content = jvalue.get("content", jvContent);
         if (content.isNull())
         {
+            assert(false);
             return false;
         }
 
         Json::Value jvdata(Json::ValueType::objectValue);
-        Json::Value data = jvdata.get(std::string("data"), jvdata);
+        Json::Value data = content.get(std::string("data"), jvdata);
         if (data.isNull())
         {
+            assert(false);
             return false;
         }
 
@@ -119,6 +121,7 @@ bool CommandHandle_100(const Json::Value& jvalue, std::string* outmsg)
     }
     catch (...)
     {
+        assert(false);
         return false;
     }
     return true;
@@ -133,6 +136,7 @@ bool CommandHandle_201(const Json::Value& jvalue, std::string* outmsg)
         Json::Value  content = jvalue.get("content", jvContent);
         if (content.isNull())
         {
+            assert(false);
             return false;
         }
         Json::Value jvString("");
@@ -143,6 +147,7 @@ bool CommandHandle_201(const Json::Value& jvalue, std::string* outmsg)
     }
     catch (...)
     {
+        assert(false);
         return false;
     }
     return true;
@@ -165,6 +170,7 @@ bool CommandHandle_501(const Json::Value& jvalue,
         Json::Value  content = jvalue.get("content", jvContent);
         if (content.isNull())
         {
+            assert(false);
             return false;
         }
 
@@ -196,6 +202,7 @@ bool CommandHandle_501(const Json::Value& jvalue,
     }
     catch (...)
     {
+        assert(false);
         return false;
     }
     return true;
@@ -210,6 +217,7 @@ bool CommandHandle_602(const Json::Value& jvalue, std::string* outmsg)
         Json::Value  content = jvalue.get("content", jvContent);
         if (content.isNull())
         {
+            assert(false);
             return false;
         }
 
@@ -228,6 +236,7 @@ bool CommandHandle_602(const Json::Value& jvalue, std::string* outmsg)
     }
     catch (...)
     {
+        assert(false);
         return false;
     }
     return true;
@@ -242,6 +251,7 @@ bool CommandHandle_601(const Json::Value& jvalue, std::string* outmsg)
         Json::Value  content = jvalue.get("content", jvContent);
         if (content.isNull())
         {
+            assert(false);
             return false;
         }
 
@@ -262,6 +272,7 @@ bool CommandHandle_601(const Json::Value& jvalue, std::string* outmsg)
     }
     catch (...)
     {
+        assert(false);
         return false;
     }
     return true;
@@ -270,6 +281,98 @@ bool CommandHandle_601(const Json::Value& jvalue, std::string* outmsg)
 bool CommandHandle_606(const Json::Value& jvalue, std::string* outmsg)
 {
     return false;
+}
+
+// 屠龙消息通知
+bool CommandHandle_620(const Json::Value& jvalue, 
+    std::vector<BetShowData>* bet_show_datas, BetResult* bet_result)
+{
+    std::string errmsg;
+    //LOG(INFO) << L"++++++++++++++++ tulong message +++++++++++++++++++++++++++++";
+    Json::Value jvContent(Json::ValueType::objectValue);
+    Json::Value  content = jvalue.get("content", jvContent);
+    if (content.isNull())
+    {
+        assert(false);
+        return false;
+    }
+
+    Json::Value jvString("");
+    uint32 actionId = GetInt32FromJsonValue(content, "actionId");
+    if (actionId == 1)
+    {
+        Json::Value jvdata(Json::ValueType::arrayValue);
+        Json::Value data = content.get(std::string("data"), jvdata);
+        if (data.isNull())
+        {
+            assert(false);
+            return false;
+        }
+        if (!data.isArray())
+        {
+            assert(false);
+            return false;
+        }
+
+        for (auto bet_data : data)
+        {
+            BetShowData bet_show_data;
+            auto members = bet_data.getMemberNames();
+            for (auto member : members)
+            {
+                if (member.compare("betGid")==0)
+                {
+                    bet_show_data.bet_gid = GetInt32FromJsonValue(bet_data, member);
+                }
+                else if (member.compare("odds") == 0)
+                {
+                    bet_show_data.odds = GetInt32FromJsonValue(bet_data, member);
+                }
+                else if (member.compare("count") == 0)
+                {
+                    //bet_show_data.count = GetInt32FromJsonValue(bet_data, member);
+                }
+            }
+            bet_show_datas->push_back(bet_show_data);
+        }
+
+        errmsg = base::WideToUTF8(L"屠龙数据更新");
+    }
+    else if (actionId == 3)
+    {
+        Json::Value jvdata(Json::ValueType::objectValue);
+        Json::Value data = content.get(std::string("data"), jvdata);
+        if (data.isNull())
+        {
+            assert(false);
+            return false;
+        }
+
+        uint32 result = 0;
+        uint32 random = 0;
+        for (auto member : data.getMemberNames())
+        {
+            if (member.compare("result")==0)
+            {
+                result = GetInt32FromJsonValue(data, member);
+            }
+            else if ((member.compare("randmon") == 0)// 因为繁星开发人员写错，这里只能检测这个字段
+                || (member.compare("random") == 0))
+            {
+                random = GetInt32FromJsonValue(data, member);
+            }
+        }
+        bet_result->result = result;
+        bet_result->random = random;
+
+        errmsg = base::WideToUTF8(L"屠龙结果: result( ") + base::UintToString(result)
+            + " ), random( " + base::UintToString(random);
+    }
+    else
+    {
+        return false;
+    }
+    return true;
 }
 
 };
@@ -353,6 +456,13 @@ void MessageNotifyManager::SetNotify601(Notify601 notify601)
         base::Bind(&MessageNotifyManager::DoSetNotify601, this, notify601));
 }
 
+void MessageNotifyManager::SetNotify620(Notify620 notify_620)
+{
+    notify_620_ = notify_620;
+    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSetNotify620, this, notify_620));
+}
+
 void MessageNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 {
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
@@ -372,6 +482,11 @@ void MessageNotifyManager::DoSetNotify501(Notify501 notify501)
 void MessageNotifyManager::DoSetNotify601(Notify601 notify601)
 {
     notify601_ = notify601;
+}
+
+void MessageNotifyManager::DoSetNotify620(Notify620 notify620)
+{
+    notify_620_ = notify620;
 }
 
 void MessageNotifyManager::DoSetNormalNotify(NormalNotify normalNotify)
@@ -488,12 +603,10 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
 								uint32 vip_v = GetInt32FromJsonValue(vipData, member);
 								enterRoomUserInfo.vip_v = (vip_v == 2); // 2是白金vip, 进入房间是隐身的
 							}
-						}
+						}// for vipData_members
 					}
-
-				}
-
-            }
+				}// for extdata_members
+            }//if reader
 
             auto jvArray = rootdata.get("userGuard", jvDefault);
             if (jvArray.isArray())
@@ -513,9 +626,53 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
                 enterRoomUserInfo.richlevel = GetInt32FromJsonValue(content, "richlevel");
                 enterRoomUserInfo.userid = GetInt32FromJsonValue(content, "userid");
             }
+
             if (notify201_)
             {
                 notify201_(enterRoomUserInfo);
+            }
+        }
+        else if (cmd==620)
+        {
+            std::vector<BetShowData> bet_show_datas;
+            BetResult bet_result;
+            bet_result.time = time;
+            if (CommandHandle_620(rootdata, &bet_show_datas, &bet_result))
+            {
+                if (!bet_show_datas.empty())
+                {
+                    if (bet_show_datas_.empty())
+                    {
+                        bet_show_datas_ = bet_show_datas;
+                    }
+                    else
+                    {
+                        auto show_data = bet_show_datas.begin();
+                        auto show_data_ = bet_show_datas_.begin();
+                        for (; (show_data != bet_show_datas.end()) 
+                            && (show_data_ != bet_show_datas_.end());
+                            show_data++, show_data_++)
+                        {
+                            if ((show_data->bet_gid != show_data_->bet_gid)
+                                || (show_data->odds != show_data_->odds))
+                            {
+                                assert(false);
+                                LOG(ERROR) << L"两次通知的开奖数据不一致，有问题";
+                                break;
+                            }
+                        }
+                    }
+                    LOG(INFO) << L"tulong +++++++++++++++++++++++++++++++++++++++++++++";
+                }
+                else // 开奖结果数据
+                {
+                    LOG(INFO) << L"tulong result = " + base::UintToString16(bet_result.result) +
+                        L" random = " + base::UintToString16(bet_result.random);
+                }
+                if (notify_620_)
+                {
+                    notify_620_(bet_result);
+                }
             }
         }
 
@@ -552,6 +709,8 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
             break;
         case 606:
             CommandHandle_606(rootdata, &outmsg);
+            break;
+        case 620:
             break;
         default:
             break;

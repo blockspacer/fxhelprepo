@@ -64,6 +64,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AuthorityServer", "AuthorityServer\AuthorityServer.vcxproj", "{518DE013-1C14-41A3-90DD-9D30B8ACC421}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UserTracker", "UserTracker\UserTracker.vcxproj", "{6B681212-0AAE-4614-9404-0710FEA8A7B1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BetGame", "BetGame\BetGame.vcxproj", "{B6BB0A72-B9E0-4BC8-8B16-2549E13DE27D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -199,6 +200,12 @@ Global
 		{6B681212-0AAE-4614-9404-0710FEA8A7B1}.Release|Win32.ActiveCfg = Release|Win32
 		{6B681212-0AAE-4614-9404-0710FEA8A7B1}.Release|Win32.Build.0 = Release|Win32
 		{6B681212-0AAE-4614-9404-0710FEA8A7B1}.Release|x64.ActiveCfg = Release|Win32
+		{B6BB0A72-B9E0-4BC8-8B16-2549E13DE27D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B6BB0A72-B9E0-4BC8-8B16-2549E13DE27D}.Debug|Win32.Build.0 = Debug|Win32
+		{B6BB0A72-B9E0-4BC8-8B16-2549E13DE27D}.Debug|x64.ActiveCfg = Debug|Win32
+		{B6BB0A72-B9E0-4BC8-8B16-2549E13DE27D}.Release|Win32.ActiveCfg = Release|Win32
+		{B6BB0A72-B9E0-4BC8-8B16-2549E13DE27D}.Release|Win32.Build.0 = Release|Win32
+		{B6BB0A72-B9E0-4BC8-8B16-2549E13DE27D}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
