@@ -475,28 +475,57 @@ bool Room::OpenRoom(const std::string& cookies)
     {
         return false;
     }
-    std::string isClanRoomMark = "isClanRoom";
-    std::string starId = "starId";
-    auto isClanRoomPos = content.find(isClanRoomMark);
-    if (isClanRoomPos == std::string::npos)
-    {
-        return false;
-    }
-    auto starPos = content.find(starId, isClanRoomPos + isClanRoomMark.length());
 
-    auto beginPos = content.find(':', starPos);
-    beginPos += 1;
-    auto endPos = content.find(',', beginPos);
-    std::string temp = content.substr(beginPos + 1, endPos - beginPos - 1);
-    RemoveSpace(&temp);
-    if (temp.length() < 6)
+    do 
+    {// 普通房间
+        std::string isClanRoomMark = "isClanRoom";
+        std::string starId = "starId";
+        auto isClanRoomPos = content.find(isClanRoomMark);
+        if (isClanRoomPos == std::string::npos)
+        {
+            break;
+        }
+        auto starPos = content.find(starId, isClanRoomPos + isClanRoomMark.length());
+
+        auto beginPos = content.find(':', starPos);
+        beginPos += 1;
+        auto endPos = content.find(',', beginPos);
+        std::string temp = content.substr(beginPos, endPos - beginPos);
+
+        RemoveSpace(&temp);
+        temp = temp.substr(1, temp.length() - 2);
+        if (temp.length() < 5)
+        {
+            break;
+        }
+        std::string singerid = temp;
+        base::StringToUint(singerid, &singerid_);
+    } while (0);
+
+    if (singerid_==0)
     {
-        return false;
+        // pk房间
+        std::string target = "/index.php?action=user&id=";
+        auto target_pos = content.find(target);
+        if (target_pos == std::string::npos)
+        {
+            return false;
+        }
+        auto begin_pos = target_pos + target.size();
+        auto end_pos = content.find('\"', begin_pos);
+        std::string temp = content.substr(begin_pos, end_pos - begin_pos);
+
+        RemoveSpace(&temp);
+        if (temp.length() < 5)
+        {
+            return false;
+        }
+        std::string singerid = temp;
+        base::StringToUint(singerid, &singerid_);
+        assert(singerid_);
     }
-    std::string singerid = temp.substr(1, temp.length() - 2);
-    base::StringToUint(singerid, &singerid_);
-    assert(singerid_);
-    return true;
+
+    return !!singerid_;
 }
 
 bool Room::GetStarInfo(const std::string& cookies)
