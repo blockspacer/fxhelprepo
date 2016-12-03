@@ -166,6 +166,22 @@ bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_coun
     return true;
 }
 
+bool Room::OpenRoomAndGetViewerList(const std::string& cookies,
+    std::vector<EnterRoomUserInfo>* enterRoomUserInfoList)
+{
+    if (!OpenRoom(cookies))
+    {
+        return false;
+    }
+
+    if (!GetViewerList(cookies, enterRoomUserInfoList))
+    {
+        return false;
+    }
+
+    return true;
+}
+
 bool Room::GetViewerList(const std::string& cookies,
     std::vector<EnterRoomUserInfo>* enterRoomUserInfoList)
 {

@@ -382,6 +382,27 @@ bool User::EnterRoomFopAlive(uint32 roomid)
     rooms_[roomid] = room;
     return true;
 }
+
+bool User::OpenRoomAndGetViewerList(uint32 roomid,
+    std::vector<EnterRoomUserInfo>* enterRoomUserInfoList)
+{
+    std::shared_ptr<Room> room(new Room(roomid));
+    std::vector<std::string> keys;
+    keys.push_back("_fx_coin");
+    keys.push_back("_fx_user");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    keys.push_back("KuGoo");
+    std::string cookie = cookiesHelper_->GetCookies(keys);
+    if (!room->OpenRoomAndGetViewerList(cookie, enterRoomUserInfoList))
+        return false;
+
+    return true;
+}
+
 bool User::ExitRoom(uint32 roomid)
 {
     auto it = rooms_.find(roomid);

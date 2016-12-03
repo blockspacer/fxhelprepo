@@ -77,6 +77,8 @@ public:
 
     bool EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid);
     bool EnterRoomFopAlive(uint32 roomid);
+    bool OpenRoomAndGetViewerList(uint32 roomid,
+        std::vector<EnterRoomUserInfo>* enterRoomUserInfoList);
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
 

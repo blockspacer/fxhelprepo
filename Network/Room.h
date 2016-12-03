@@ -37,8 +37,12 @@ public:
     // GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
     bool SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count);
 
-    bool GetViewerList(const std::string& cookies, 
-        std::vector<EnterRoomUserInfo>* enterRoomUserInfo);
+    // 这个函数是为了不建立房间连接而获取房间里观众列表使用，是为了追踪指定用户
+    bool OpenRoomAndGetViewerList(const std::string& cookies,
+        std::vector<EnterRoomUserInfo>* enterRoomUserInfoList);
+
+    bool GetViewerList(const std::string& cookies,
+        std::vector<EnterRoomUserInfo>* enterRoomUserInfoList);
 	bool KickOutUser(KICK_TYPE kicktype, const std::string& cookies,
         const EnterRoomUserInfo& enterRoomUserInfo);
 

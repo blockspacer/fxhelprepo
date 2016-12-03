@@ -42,10 +42,33 @@ namespace
         *basetime = base::Time::FromLocalExploded(exploded);
         return true;
     }
+
+    bool BaseTimeToOleDateTime(const  base::Time& basetime, COleDateTime* oletime)
+    {
+        if (!oletime)
+            return false;
+
+        base::Time::Exploded exploded;
+        basetime.LocalExplode(&exploded);
+
+        try
+        {
+            // 如果格式不对,会抛出异常
+            oletime->SetDateTime(exploded.year,
+                exploded.month,
+                exploded.day_of_month,
+                exploded.hour,
+                exploded.minute,
+                exploded.second);
+        }
+        catch (CException* e)
+        {
+            return false;
+        }
+        return true;
+    }
 }
 // CAuthorityDlg 对话框
-
-
 
 CAuthorityDlg::CAuthorityDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CAuthorityDlg::IDD, pParent)
@@ -70,10 +93,14 @@ void CAuthorityDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAuthorityDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-    ON_BN_CLICKED(IDOK, &CAuthorityDlg::OnBnClickedOk)
     ON_BN_CLICKED(IDCANCEL, &CAuthorityDlg::OnBnClickedCancel)
-    ON_BN_CLICKED(IDC_BTN_GENERATE, &CAuthorityDlg::OnBnClickedBtnGenerate)
+    ON_BN_CLICKED(IDC_BTN_ANTIFLOOD_AUTHORITY, &CAuthorityDlg::OnBnClickedBtnAntiFloodAuthority)
     ON_BN_CLICKED(IDC_BTN_VIEW, &CAuthorityDlg::OnBnClickedBtnView)
+    ON_BN_CLICKED(IDC_BTN_ADD_1_MON, &CAuthorityDlg::OnBnClickedBtnAdd1Mon)
+    ON_BN_CLICKED(IDC_BTN_3_MON, &CAuthorityDlg::OnBnClickedBtn3Mon)
+    ON_BN_CLICKED(IDC_BTN_6_MON, &CAuthorityDlg::OnBnClickedBtn6Mon)
+    ON_BN_CLICKED(IDC_BTN_PACKAGE, &CAuthorityDlg::OnBnClickedBtnPackage)
+    ON_BN_CLICKED(IDC_BTN_TRACK_AUTHORITY, &CAuthorityDlg::OnBnClickedBtnTrackAuthority)
 END_MESSAGE_MAP()
 
 
@@ -95,6 +122,13 @@ BOOL CAuthorityDlg::OnInitDialog()
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
+void CAuthorityDlg::OnOK()
+{
+}
+
+void CAuthorityDlg::OnCancel()
+{
+}
 // 如果向对话框添加最小化按钮，则需要下面的代码
 //  来绘制该图标。  对于使用文档/视图模型的 MFC 应用程序，
 //  这将由框架自动完成。
@@ -131,23 +165,12 @@ HCURSOR CAuthorityDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
-void CAuthorityDlg::OnBnClickedOk()
-{
-    // TODO:  在此添加控件通知处理程序代码
-    CDialogEx::OnOK();
-}
-
-
 void CAuthorityDlg::OnBnClickedCancel()
 {
-    // TODO:  在此添加控件通知处理程序代码
     CDialogEx::OnCancel();
 }
 
-
-void CAuthorityDlg::OnBnClickedBtnGenerate()
+void CAuthorityDlg::OnBnClickedBtnAntiFloodAuthority()
 {
     UpdateData(TRUE);
     base::Time endTime;
@@ -168,7 +191,7 @@ void CAuthorityDlg::OnBnClickedBtnGenerate()
     int antiadvance = m_chk_anti_advance.GetCheck();
 
     AuthorityHelper authorityHelper;
-    Authority authority;
+    AntiFloodAuthority authority;
     base::StringToUint(base::WideToUTF8(csUserid.GetBuffer()), &authority.userid);
     base::StringToUint(base::WideToUTF8(csRoomid.GetBuffer()), &authority.roomid);
     base::StringToUint(base::WideToUTF8(csClanid.GetBuffer()), &authority.clanid);
@@ -178,7 +201,7 @@ void CAuthorityDlg::OnBnClickedBtnGenerate()
     authority.expiretime = expiretime;
     authority.serverip = base::WideToUTF8(csServerIp.GetBuffer());
 
-    if (!authorityHelper.Save(authority))
+    if (!authorityHelper.SaveAntiFloodAuthority(authority))
         return;
 }
 
@@ -186,8 +209,8 @@ void CAuthorityDlg::OnBnClickedBtnGenerate()
 void CAuthorityDlg::OnBnClickedBtnView()
 {
     AuthorityHelper authorityHelper;
-    Authority authority;
-    if (!authorityHelper.Load(&authority))
+    AntiFloodAuthority authority;
+    if (!authorityHelper.LoadAntiFloodAuthority(&authority))
         return;
 
     CString csUserid = base::UTF8ToWide(
@@ -214,4 +237,66 @@ void CAuthorityDlg::OnBnClickedBtnView()
     m_oleDateTime_End.SetDate(
         exploded.year, exploded.month, exploded.day_of_month);
     UpdateData(FALSE);
+}
+
+
+void CAuthorityDlg::OnBnClickedBtnAdd1Mon()
+{
+    UpdateData(TRUE);
+    base::Time endTime;
+    OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
+    uint64 expiretime = endTime.ToInternalValue();
+    COleDateTimeSpan span;
+    span.SetDateTimeSpan(30, 0, 0, 0);
+    m_oleDateTime_End += span;
+    UpdateData(FALSE);
+}
+
+void CAuthorityDlg::OnBnClickedBtn3Mon()
+{
+    UpdateData(TRUE);
+    base::Time endTime;
+    OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
+    uint64 expiretime = endTime.ToInternalValue();
+    COleDateTimeSpan span;
+    span.SetDateTimeSpan(30*3, 0, 0, 0);
+    m_oleDateTime_End += span;
+    UpdateData(FALSE);
+}
+
+void CAuthorityDlg::OnBnClickedBtn6Mon()
+{
+    UpdateData(TRUE);
+    base::Time endTime;
+    OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
+    uint64 expiretime = endTime.ToInternalValue();
+    COleDateTimeSpan span;
+    span.SetDateTimeSpan(30*6, 0, 0, 0);
+    m_oleDateTime_End += span;
+    UpdateData(FALSE);
+}
+
+void CAuthorityDlg::OnBnClickedBtnPackage()
+{
+    ::MessageBox(NULL, L"功能未实现", L"提示", 0);
+}
+
+void CAuthorityDlg::OnBnClickedBtnTrackAuthority()
+{
+    UpdateData(TRUE);
+    base::Time endTime;
+    OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
+    uint64 expiretime = endTime.ToInternalValue();
+
+    CString csUserid = L"0";
+    m_edit_userid.GetWindowTextW(csUserid);
+
+    AuthorityHelper authorityHelper;
+    UserTrackerAuthority authority;
+    base::StringToUint(base::WideToUTF8(csUserid.GetBuffer()), &authority.user_id);
+    authority.expiretime = expiretime;
+    authority.tracker_host = "visitor.fanxing.kugou.com";
+
+    if (!authorityHelper.SaveUserTrackerAuthority(authority))
+        return;
 }
