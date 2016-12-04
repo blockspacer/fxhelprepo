@@ -100,6 +100,8 @@ public:
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     
+    bool Worship(uint32 roomid, uint32 userid, std::string* errormsg);
+
 private:
     bool CheckVerifyCode(const std::string& verifycode, std::string* errormsg);
     bool LoginHttps(const std::string& username, const std::string& password, 
@@ -108,6 +110,9 @@ private:
     bool LoginUServiceGetMyUserDataInfo(std::string* errormsg);
 
     bool LoginIndexServiceGetUserCenter(std::string* errormsg);
+
+    bool Worship_(const std::string& cookies, uint32 roomid, uint32 userid,
+        std::string* errormsg);
 
     TcpManager* tcpManager_;
     std::string username_;
