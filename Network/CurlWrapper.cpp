@@ -238,8 +238,11 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 12L);
 
     res = curl_easy_perform(curl);
-    response->curlcode = res;
 
+    // 释放资源,防止内存泄露
+    curl_slist_free_all(headers);
+
+    response->curlcode = res;
     char* ipstr = nullptr;
     res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP, &ipstr);
     if (res == CURLE_OK)

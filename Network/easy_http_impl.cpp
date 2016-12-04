@@ -81,17 +81,16 @@ bool EasyHandle::Initialize()
     EASYHANDLE_SETOPT(CURLOPT_FOLLOWLOCATION, 1L);
     EASYHANDLE_SETOPT(CURLOPT_HEADER, 0L);
     EASYHANDLE_SETOPT(CURLOPT_TCP_KEEPALIVE, 1L);
-    struct curl_slist *headers = 0;
-    headers = curl_slist_append(headers, "Connection:Keep-Alive");
-    headers = curl_slist_append(headers, "Accept-Language:zh-CN");
-    headers = curl_slist_append(headers, "Accept-Encoding:gzip,deflate,sdch");
-    headers = curl_slist_append(headers, "Accept:*/*");
+    headers_ = curl_slist_append(headers_, "Connection:Keep-Alive");
+    headers_ = curl_slist_append(headers_, "Accept-Language:zh-CN");
+    headers_ = curl_slist_append(headers_, "Accept-Encoding:gzip,deflate,sdch");
+    headers_ = curl_slist_append(headers_, "Accept:*/*");
     for (const auto& it : request.headers)
     {
         std::string header = it.first + ":" + it.second;
-        headers = curl_slist_append(headers, header.c_str());
+        headers_ = curl_slist_append(headers_, header.c_str());
     }
-    EASYHANDLE_SETOPT(CURLOPT_HTTPHEADER, headers);
+    EASYHANDLE_SETOPT(CURLOPT_HTTPHEADER, headers_);
     EASYHANDLE_SETOPT(CURLOPT_AUTOREFERER, 1L);
     EASYHANDLE_SETOPT(CURLOPT_ACCEPT_ENCODING, acceptencode);
 
