@@ -28,11 +28,11 @@ WorshipHelper::~WorshipHelper()
 bool WorshipHelper::Initialize()
 {
     CurlWrapper::CurlInit();
-    tracker_authority_.reset(new WorshipAuthority);
+    worship_authority_.reset(new WorshipAuthority);
     AuthorityHelper authority_helper;
-    authority_helper.LoadUserTrackerAuthority(tracker_authority_.get());
+    authority_helper.LoadUserTrackerAuthority(worship_authority_.get());
     authority_helper.GetTrackerAuthorityDisplayInfo(
-        *tracker_authority_.get(), &authority_msg_);
+        *worship_authority_.get(), &authority_msg_);
 
     tcp_manager_->Initialize();
 
@@ -110,16 +110,17 @@ void WorshipHelper::DoLoginUser(const std::string& user_name,
     msg = L"登录成功";
     message_callback_.Run(msg);
 
-    if (tracker_authority_->user_id != user_->GetFanxingId())
-    {
-        msg = authority_msg_ + L". 当前用户未授权";
-        message_callback_.Run(msg);
-        callback.Run(false, servertime, base::WideToUTF8(msg));
-        return;
-    }
+    // 内部使用，暂时不限制用户登录使用
+    //if (worship_authority_->user_id != user_->GetFanxingId())
+    //{
+    //    msg = authority_msg_ + L". 当前用户未授权";
+    //    message_callback_.Run(msg);
+    //    callback.Run(false, servertime, base::WideToUTF8(msg));
+    //    return;
+    //}
 
-    uint64 expiretime = tracker_authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
-    expiretime /= 1000000;
+    //uint64 expiretime = worship_authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
+    uint64 expiretime = 1485882061; // 暂时为了避免外泄而做时间限制20170201日过期
     if (servertime > expiretime)
     {
         msg = authority_msg_ + L"用户授权已到期，请续费!";
@@ -325,6 +326,50 @@ bool WorshipHelper::EnterRoom(uint32 roomid)
         base::Unretained(this), roomid));
 }
 
+bool WorshipHelper::SetTimerTask(const base::Time& action_time, 
+    uint32 roomid, uint32 fanxingid,
+    const base::Callback<void(const std::wstring&)>& callback)
+{
+    if (!user_)
+        return false;
+
+    auto delay = action_time - base::Time::Now();
+    uint32 count = 0;
+    return worker_thread_->message_loop_proxy()->PostDelayedTask(FROM_HERE,
+        base::Bind(&WorshipHelper::DoTimerTask,
+        base::Unretained(this), count, roomid, fanxingid, callback), delay);
+}
+
+void WorshipHelper::DoTimerTask(uint32 count, uint32 roomid, uint32 fanxingid,
+    const base::Callback<void(const std::wstring&)>& callback)
+{
+    count++;
+    std::string errormsg;
+    std::wstring message = base::UintToString16(roomid);
+    if (user_->Worship(roomid, fanxingid, &errormsg))
+    {
+        message += L"膜拜成功[" + base::UintToString16(count) + L"]" + base::UTF8ToWide(errormsg);
+        callback.Run(message);
+        return;
+    }
+
+    message += L"膜拜失败[" + base::UintToString16(count) + L"]" + base::UTF8ToWide(errormsg);
+    callback.Run(message);
+    if (count > 6)
+        return;
+
+    base::TimeDelta delay = base::TimeDelta::FromSeconds(1);
+    worker_thread_->message_loop_proxy()->PostDelayedTask(FROM_HERE,
+        base::Bind(&WorshipHelper::DoTimerTask,
+        base::Unretained(this), count, roomid, fanxingid, callback), delay);
+}
+
+bool WorshipHelper::CancelTimerTask()
+{
+    // 未处理取消任务
+    return true;
+}
+
 void WorshipHelper::DoEnterRoom(uint32 roomid)
 {
     user_->ExitRooms();
@@ -344,7 +389,7 @@ bool WorshipHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
     std::vector<uint32> roomid3;
     std::vector<uint32> roomid4;
 
-    const std::string& host = tracker_authority_->tracker_host;
+    const std::string& host = worship_authority_->tracker_host;
     std::string url = "http://" + host + "/VServices/IndexService.IndexService.getLiveList";
     if (check_star_)
     {

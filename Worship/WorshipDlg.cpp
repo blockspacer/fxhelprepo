@@ -15,6 +15,28 @@ namespace
         L"神号", 
         L"房间号",
     };
+
+    bool CTimeToBaseTime(const CTime& oletime, base::Time* basetime)
+    {
+        if (!basetime)
+            return false;
+
+        SYSTEMTIME systemtime;
+        if (!oletime.GetAsSystemTime(systemtime))
+            return false;
+
+        base::Time::Exploded exploded;
+        exploded.year = systemtime.wYear;
+        exploded.month = systemtime.wMonth;
+        exploded.day_of_month = systemtime.wDay;
+        exploded.day_of_week = systemtime.wDayOfWeek;
+        exploded.hour = systemtime.wHour;
+        exploded.minute = systemtime.wMinute;
+        exploded.second = systemtime.wSecond;
+        exploded.millisecond = systemtime.wMilliseconds;
+        *basetime = base::Time::FromLocalExploded(exploded);
+        return true;
+    }
 }
 IMPLEMENT_DYNAMIC(WorshipDlg, CDialogEx)
 
@@ -48,6 +70,10 @@ BOOL WorshipDlg::OnInitDialog()
     uint32 index = 0;
     for (const auto& it : worshiplist)
         m_list_worship.InsertColumn(index++, it, LVCFMT_LEFT, 80);//插入列
+
+    CTime time = CTime::GetCurrentTime();
+    CTime future_time(time.GetYear(), time.GetMonth(), time.GetDay(), 23, 59, 59);
+    m_time_worship.SetTime(&future_time);
 
     return TRUE;
 }
@@ -251,9 +277,38 @@ LRESULT WorshipDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 
 void WorshipDlg::OnBnClickedChkAutoWorship()
 {
-    // 禁用时间控件
+    if (m_check_auto_worship.GetCheck())
+    {
+        // 禁用时间控件
+        m_time_worship.EnableWindow(FALSE);
 
-    // 执行定时任务
+        CString cs_worship_fanxingid;
+        m_edit_fanxing_id.GetWindowTextW(cs_worship_fanxingid);
+        CString cs_worship_roomid;
+        m_edit_roomid.GetWindowTextW(cs_worship_roomid);
+
+        std::string str_roomid = base::WideToUTF8(cs_worship_roomid.GetBuffer());
+        uint32 roomid = 0;
+        base::StringToUint(str_roomid, &roomid);
+
+        std::string str_fanxingid = base::WideToUTF8(cs_worship_fanxingid.GetBuffer());
+        uint32 fanxingid = 0;
+        base::StringToUint(str_fanxingid, &fanxingid);
+
+        // 执行定时任务
+        CTime time ;
+        m_time_worship.GetTime(time);
+        base::Time action_time;
+        CTimeToBaseTime(time, &action_time);
+        worship_helper_->SetTimerTask(action_time, roomid, fanxingid,
+            base::Bind(&WorshipDlg::TipMessageCallback,
+            base::Unretained(this)));
+    }
+    else
+    {
+        m_time_worship.EnableWindow(TRUE);
+        worship_helper_->CancelTimerTask();
+    }
 }
 
 

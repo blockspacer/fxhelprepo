@@ -69,6 +69,11 @@ public:
 
     bool EnterRoom(uint32 roomid);
 
+    bool SetTimerTask(const base::Time& action_time, uint32 roomid, uint32 fanxingid,
+        const base::Callback<void(const std::wstring&)>& callback);
+
+    bool CancelTimerTask();
+
 private:
 
     void DoLoginUser(const std::string& user_name, 
@@ -94,6 +99,9 @@ private:
         const base::Callback<void(const std::wstring&)>& callback);
 
     void DoEnterRoom(uint32 roomid);
+
+    void DoTimerTask(uint32 count, uint32 roomid, uint32 fanxingid,
+        const base::Callback<void(const std::wstring&)>& callback);
 
     bool GetAllStarRoomInfos(std::vector<uint32>* roomids); // 从全站获取所有正在直播的主播直播粗略信息，为下一步获取房间用户列表做准备
     bool GetTargetStarRoomInfos(const std::string& url, std::vector<uint32>* roomids);
@@ -145,7 +153,7 @@ private:
     std::unique_ptr<User> user_;
     std::unique_ptr<CurlWrapper> curl_wrapper_;
     std::unique_ptr<EasyHttpImpl> easy_http_impl_;
-    std::unique_ptr<WorshipAuthority> tracker_authority_;
+    std::unique_ptr<WorshipAuthority> worship_authority_;
     std::unique_ptr<TcpManager> tcp_manager_;
     std::wstring authority_msg_;
 
