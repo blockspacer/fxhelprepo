@@ -14,6 +14,7 @@
 
 #include "BetGame.h"
 #include "BetGameDlg.h"
+#include "BetGameDatabase.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

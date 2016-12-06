@@ -11,6 +11,7 @@
 #include "third_party/chromium/base/threading/thread.h"
 #include "Network/IpProxy.h"
 #include "Network/TcpClient.h"
+#include "Network/BetData.h"
 
 class TcpClient;
 class TcpManager;
@@ -41,20 +42,7 @@ struct RoomChatMessage
     std::string chatmessage = "";
 };
 
-struct BetShowData
-{
-    uint32 bet_gid;
-    uint32 odds;
-    //uint32 count;
-};
 
-struct BetResult
-{
-    uint32 time = 0;
-    uint32 result = 0;
-    uint32 display_result = 0;
-    uint32 random = 0; 
-};
 
 struct RoomGiftInfo601
 {

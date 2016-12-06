@@ -11,7 +11,7 @@
 #include "BetNetworkHelper.h"
 
 class BetNetworkHelper;
-class BetResult;
+struct BetResult;
 // CBetGameDlg ¶Ô»°¿ò
 class CBetGameDlg : public CDialogEx
 {

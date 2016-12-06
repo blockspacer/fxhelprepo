@@ -10,6 +10,7 @@
 #include "Network/TcpManager.h"
 #include "Network/User.h"
 
+class BetGameDatabase;
 class BetNetworkHelper
 {
 public:
@@ -36,5 +37,6 @@ private:
     base::Callback<void(uint32)> time_callback_;
     scoped_ptr<base::Thread> worker_thread_;
     std::map<uint32, uint32> result_map_;
+    std::unique_ptr<BetGameDatabase> database_;
 };
 

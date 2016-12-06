@@ -63,6 +63,9 @@
     <ClInclude Include="easy_http_impl.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="BetData.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

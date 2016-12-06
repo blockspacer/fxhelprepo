@@ -244,14 +244,14 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
 
     response->curlcode = res;
     char* ipstr = nullptr;
-    res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP, &ipstr);
-    if (res == CURLE_OK)
+    CURLcode get_info_res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_IP, &ipstr);
+    if (get_info_res == CURLE_OK)
         response->server_ip = ipstr;
 
     if (res != CURLE_OK)
     {
         fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-        LOG(ERROR) << curl_easy_strerror(res); 
+        LOG(ERROR) << curl_easy_strerror(res);
         curl_easy_cleanup(curl);
         return false;
     }

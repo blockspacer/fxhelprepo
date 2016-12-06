@@ -36,6 +36,9 @@
     <ClInclude Include="BetNetworkHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="BetGameDatabase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BetGame.cpp">
@@ -48,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="BetNetworkHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BetGameDatabase.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

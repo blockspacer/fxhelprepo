@@ -86,6 +86,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BetData.h" />
     <ClInclude Include="CookiesHelper.h" />
     <ClInclude Include="CurlWrapper.h" />
     <ClInclude Include="easy_http_impl.h" />

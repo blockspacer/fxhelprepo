@@ -2,13 +2,15 @@
 
 #include <memory>
 #include "BetNetworkHelper.h"
-
+#include "BetGameDatabase.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
-
+#include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_util.h"
 
 BetNetworkHelper::BetNetworkHelper()
-    :tcp_manager_(new TcpManager)
-    ,worker_thread_(new base::Thread("worker_thread"))
+    : tcp_manager_(new TcpManager)
+    , worker_thread_(new base::Thread("worker_thread"))
+    , database_(new BetGameDatabase)
 {
     result_map_[31] = 1;
     result_map_[29] = 2;
@@ -26,11 +28,15 @@ BetNetworkHelper::~BetNetworkHelper()
 
 bool BetNetworkHelper::Initialize()
 {
-    return true;
+    base::FilePath path;
+    PathService::Get(base::DIR_EXE, &path);
+    path = path.Append(L"betgame.db");
+    return database_->Initialize(path.value());
 }
 
 void BetNetworkHelper::Finalize()
 {
+    database_->Finalize();
 }
 
 bool BetNetworkHelper::Login(const std::string& account, const std::string& password)
@@ -98,4 +104,5 @@ void BetNetworkHelper::OnBetNotify(const BetResult& bet_result)
     BetResult new_result = bet_result;
     new_result.display_result = it->second;
     result_callback_.Run(new_result);
+    database_->InsertRecord(new_result);
 }
