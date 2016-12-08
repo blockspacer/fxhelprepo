@@ -53,7 +53,7 @@ namespace
     std::string GetInsertWorshipRecodeSql(const BetResult& bet_result)
     {
         std::string sql = "Insert Into tb_worship_raw ";
-        sql += "( server_time, result, display_result, random )";
+        sql += "( server_time, result, display_result, random ) Values ";
         sql += "(" + base::UintToString(bet_result.time);
         sql += "," + base::UintToString(bet_result.result);
         sql += "," + base::UintToString(bet_result.display_result);
