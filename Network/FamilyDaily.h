@@ -29,6 +29,9 @@ public:
     std::string singerlevel;    //主播等级
     uint32 onlinecount;         //开播次数
     uint32 onlineminute;        //累计直播时长（分钟）
+    std::string total_hours;    // 累计直播时长(小时)
+    std::string pc_hours;
+    std::string phone_hours;
     uint32 effectivecount;      //有效直播次数（大于1个小时）
     uint32 maxusers;            //直播间最高人气
     double revenue;             // 星豆收入

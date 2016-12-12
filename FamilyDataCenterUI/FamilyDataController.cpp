@@ -12,20 +12,22 @@
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/files/file.h"
 
-//
-//struct SingerSummaryData
+//class SingerSummaryData
 //{
+//public:
 //    uint32 singerid;
 //    uint32 roomid;
 //    std::string nickname;
 //    std::string singerlevel;    //主播等级
 //    uint32 onlinecount;         //开播次数
 //    uint32 onlineminute;        //累计直播时长（分钟）
+//    std::string total_hours;    // 累计直播时长(小时)
+//    std::string pc_hours;
+//    std::string phone_hours;
 //    uint32 effectivecount;      //有效直播次数（大于1个小时）
 //    uint32 maxusers;            //直播间最高人气
 //    double revenue;             // 星豆收入
 //};
-//
 
 namespace{
     const wchar_t* patternName = L"pattern.xlsx";
@@ -45,6 +47,9 @@ namespace{
             rowdata.push_back(base::UTF8ToWide(it.singerlevel));
             rowdata.push_back(base::UintToString16(it.onlinecount));
             rowdata.push_back(base::UintToString16(it.onlineminute));
+            rowdata.push_back(base::UTF8ToWide(it.total_hours));
+            rowdata.push_back(base::UTF8ToWide(it.pc_hours));
+            rowdata.push_back(base::UTF8ToWide(it.phone_hours));
             rowdata.push_back(base::UintToString16(it.effectivecount));
             rowdata.push_back(base::UintToString16(it.maxusers));
             std::wstring revenue = base::UTF8ToWide(base::DoubleToString(it.revenue));

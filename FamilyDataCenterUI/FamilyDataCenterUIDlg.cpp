@@ -270,7 +270,10 @@ void CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData()
         L"主播等级",
         L"开播次数",
         L"累计直播",
-        L"有效直播",
+        L"直播时长",
+        L"PC直播时长",
+        L"手机直播时长",
+        L"直播次数",
         L"直播间最高人气",
         L"星豆收入"
     };

@@ -7,6 +7,7 @@
 #include "third_party/libcurl/curl/curl.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/strings/string_split.h"
 #include "third_party/chromium/base/time/time.h"
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/files/file.h"
@@ -55,6 +56,36 @@ namespace{
             pos = temp.find(':');
         }
         return std::move(temp);
+    }
+
+    uint32 OnlineTimeToMinutes(const std::string& online_time)
+    {
+        assert(online_time.size());
+        std::wstring w_online_time = base::UTF8ToWide(online_time);
+        w_online_time = w_online_time.substr(0, w_online_time.size() - 1);
+        std::vector<std::wstring> hours_minutes;
+        base::SplitStringUsingSubstr(w_online_time, L"时", &hours_minutes);
+        uint32 online_minutes = 0;
+        bool result = false;
+        if (hours_minutes.size() == 1) // 只有分钟
+        {
+            result = base::StringToUint(base::WideToUTF8(w_online_time), &online_minutes);
+            assert(result);
+        }
+        else if (hours_minutes.size() == 2)
+        {
+            uint32 online_hours = 0;
+            result = base::StringToUint(base::WideToUTF8(hours_minutes.at(0)), &online_hours);
+            assert(result);
+            result = base::StringToUint(base::WideToUTF8(hours_minutes.at(1)), &online_minutes);
+            assert(result);
+            online_minutes += online_hours * 60;
+        }
+        else
+        {
+            assert(false);
+        }
+        return online_minutes;
     }
 
     std::string MakeFormatDateString(const base::Time time)
@@ -765,8 +796,7 @@ bool FamilyDaily::ParseSummaryData(const std::string& pagedata,
     {
         trvector.erase(trvector.end()-1);
     }
-    
-    
+
     std::vector<SingerSummaryData> singerSummaryDataVector;
     for (const auto& it : trvector)
     {
@@ -825,22 +855,55 @@ bool FamilyDaily::ParseSummaryData(const std::string& pagedata,
 
         singerSummaryData.onlinecount = onlinecount;
 
-        // 累计直播时长（分钟）
+        //// 累计直播时长（分钟）
+        //beginpos = endpos;
+        //if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        //{
+        //    assert(false);
+        //    continue;
+        //}
+        //
+        //uint32 onlineminute = 0;
+        //if (!base::StringToUint(tddata, &onlineminute))
+        //{
+        //    assert(false);
+        //    return false;
+        //}
+        //singerSummaryData.onlineminute = onlineminute;
+
+
+        std::string total_hours;    // 累计直播时长(小时)
         beginpos = endpos;
-        if (!GetTdData(trdata, beginpos, &endpos, &tddata))
+        if (!GetTdData(trdata, beginpos, &endpos, &total_hours))
         {
             assert(false);
             continue;
         }
-        
-        uint32 onlineminute = 0;
-        if (!base::StringToUint(tddata, &onlineminute))
+        singerSummaryData.total_hours = total_hours;
+
+        singerSummaryData.onlineminute = 0;
+        if (total_hours.compare("0")!=0)
         {
-            assert(false);
-            return false;
+            singerSummaryData.onlineminute = OnlineTimeToMinutes(total_hours);
         }
 
-        singerSummaryData.onlineminute = onlineminute;
+        std::string pc_hours;
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &pc_hours))
+        {
+            assert(false);
+            continue;
+        }
+        singerSummaryData.pc_hours = pc_hours;
+
+        std::string phone_hours;
+        beginpos = endpos;
+        if (!GetTdData(trdata, beginpos, &endpos, &phone_hours))
+        {
+            assert(false);
+            continue;
+        }
+        singerSummaryData.phone_hours = phone_hours;
 
         // 有效直播次数（大于1个小时）
         beginpos = endpos;
@@ -1034,7 +1097,7 @@ bool FamilyDaily::ParseSingerDailyData(const std::string& pagedata,
 
 bool FamilyDaily::ParsePageCount(const std::string& pagedata, uint32* pagenumber)
 {
-    static const char* colspan = R"(<tr><td colspan=")";
+    static const char* colspan = R"(colspan)";
     static const char* doublequote = R"(")";
     std::string str = colspan;
     auto pos = pagedata.find(str);
@@ -1042,8 +1105,12 @@ bool FamilyDaily::ParsePageCount(const std::string& pagedata, uint32* pagenumber
         return false;
 
     pos += strlen(colspan);
-    auto endpos = pagedata.find(doublequote, pos);
-    std::string count = pagedata.substr(pos, endpos - pos);
+    auto beginpos = pagedata.find(doublequote, pos);
+    if (beginpos == pagedata.npos)
+        return false;
+
+    auto endpos = pagedata.find(doublequote, beginpos+1);
+    std::string count = pagedata.substr(beginpos+1, endpos - beginpos-1);
     uint32 countperpage = 0;
     if (!base::StringToUint(count, &countperpage))
         return false;
