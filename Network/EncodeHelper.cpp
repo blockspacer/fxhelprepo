@@ -143,36 +143,39 @@ std::wstring MbsToWide(const std::string& str)
 std::string UrlEncode(const std::string& str)
 {
     CURL *curl = curl_easy_init();
-    if (curl)
+    std::string result;
+    if (!curl)
+        return result;
+
+    char *output = curl_easy_escape(curl, str.c_str(), str.length());
+    if (output)
     {
-        char *output = curl_easy_escape(curl, str.c_str(), str.length());
-        if (output)
-        {
-            std::string result(output);
-            printf("Encoded: %sn", output);
-            curl_free(output);
-            return std::move(result);
-        }
+        result = output;
+        printf("Encoded: %sn", output);
+        curl_free(output);
     }
-    return "";
+    curl_easy_cleanup(curl);
+
+    return std::move(result);
 }
 
 std::string UrlDecode(const std::string& str)
 {
     CURL *curl = curl_easy_init();
-    if (curl)
+    std::string result;
+    if (!curl)
+        return result;
+
+    int outlen = 0;
+    char *output = curl_easy_unescape(curl, str.c_str(), str.length(), &outlen);
+    if (output)
     {
-        int outlen = 0;
-        char *output = curl_easy_unescape(curl, str.c_str(), str.length(), &outlen);
-        if (output)
-        {
-            std::string result;
-            result.assign(output, output + outlen);
-            curl_free(output);
-            return std::move(result);
-        }
+        result.assign(output, output + outlen);
+        curl_free(output);
     }
-    return "";
+    curl_easy_cleanup(curl);
+
+    return std::move(result);
 }
 
 std::string WideToGBK(const std::wstring& text)
