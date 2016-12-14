@@ -4,6 +4,10 @@
 #include "Network/CurlWrapper.h"
 
 
+void ConnectBreakCallback()
+{
+}
+
 void SingleUserSingleRoomTest(TcpManager* tcp_manager)
 {
     bool result = true;
@@ -11,17 +15,20 @@ void SingleUserSingleRoomTest(TcpManager* tcp_manager)
     std::string errormsg;
     user.SetTcpManager(tcp_manager);
     result &= user.Login("fanxingtest002", "1233211234567","", &errormsg);
-    result &= user.EnterRoomFopAlive(1201793);
+    result &= user.EnterRoomFopAlive(1201793, base::Bind(&ConnectBreakCallback));
 
     while (1);
 }
+
 
 void SingleUserMultiRoomTest(std::shared_ptr<User> user)
 {
     bool result = true;
     result &= user->Login();
-    result &= user->EnterRoomFopOperation(1084594, nullptr);
-    result &= user->EnterRoomFopOperation(1053564, nullptr);
+    result &= user->EnterRoomFopOperation(1084594, nullptr,
+        base::Bind(&ConnectBreakCallback));
+    result &= user->EnterRoomFopOperation(1053564, nullptr,
+        base::Bind(&ConnectBreakCallback));
 }
 
 void MultiUserMultiRoomTest()

@@ -190,6 +190,8 @@ private:
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
     void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,
         const RoomChatMessage& roomChatMessage);
+    void ConnectionBreakCallback();
+
     void SetHandleRichLevel(uint32 rich_level);
     void TryHandleUser(const EnterRoomUserInfo& enterRoomUserInfo);
     void TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo,

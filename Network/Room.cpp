@@ -37,7 +37,8 @@ void Room::SetTcpManager(TcpManager* tcpManager)
 }
 
 bool Room::EnterForOperation(const std::string& cookies, 
-    const std::string& usertoken, uint32 userid, uint32* singer_clanid)
+    const std::string& usertoken, uint32 userid, uint32* singer_clanid,
+    const base::Callback<void()>& conn_break_callback)
 {
     std::string nickname = "";
     uint32 richlevel = 0;
@@ -57,7 +58,7 @@ bool Room::EnterForOperation(const std::string& cookies,
     if (!EnterRoom(cookies, userid, usertoken))
         return false;
     
-    if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
+    if (!ConnectToNotifyServer_(roomid_, userid, usertoken, conn_break_callback))
         return false;
 
     if (singer_clanid)
@@ -66,9 +67,10 @@ bool Room::EnterForOperation(const std::string& cookies,
     return true;
 }
 
-bool Room::EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid)
+bool Room::EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid,
+    const base::Callback<void()>& conn_break_callback)
 {
-    if (!ConnectToNotifyServer_(roomid_, userid, usertoken))
+    if (!ConnectToNotifyServer_(roomid_, userid, usertoken, conn_break_callback))
     {
         return false;
     }
@@ -749,7 +751,8 @@ void Room::TranferNotify601(const RoomGiftInfo601& roomgiftinfo)
 }
 
 bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
-    const std::string& usertoken)
+    const std::string& usertoken,
+    const base::Callback<void()>& conn_break_callback)
 {
     bool ret = false;
     if (ipproxy_.GetProxyType()!= IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
@@ -757,7 +760,7 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
         messageNotifyManager_->SetIpProxy(ipproxy_);
     }
     
-    ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken);
+    ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken, conn_break_callback);
     assert(ret);
     return ret;
 }

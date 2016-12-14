@@ -93,7 +93,8 @@ public:
 
     // 使用新的高效的多路tcp请求分发模式
     bool NewConnect843(uint32 roomid, uint32 userid,
-        const std::string& usertoken);
+        const std::string& usertoken, 
+        const base::Callback<void()>& conn_break_callback);
     bool NewConnect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
     bool NewSendChatMessage(const std::string& nickname, uint32 richlevel,
                          const std::string& message);
@@ -123,6 +124,8 @@ private:
         const std::vector<uint8>& data);
     static void NewData8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
         bool result, const std::vector<uint8>& data);
+    static void NewSendDataCallback(std::weak_ptr<MessageNotifyManager> weakptr, 
+        TcpHandle handle, bool result);
 
     void DoNewConnect843Callback(bool result, TcpHandle handle);
     void DoNewConnect8080Callback(uint32 roomid, uint32 userid,
@@ -134,7 +137,7 @@ private:
 
     void DoNewSendHeartBeat(TcpHandle handle);
     void DoNewSendChatMessage(const std::vector<char>& msg); // 发言需要符合间隔时间
-    void NewSendDataCallback(TcpHandle handle, bool result);
+    void DoNewSendDataCallback(TcpHandle handle, bool result);
 
     base::Thread baseThread_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;
@@ -157,6 +160,9 @@ private:
     NormalNotify normalNotify_;
 
     TcpManager* tcpManager_;
+    base::Callback<void()> conn_break_callback_; // 处理掉线问题
+    bool connected_;// 未连接时和连接失败后，都不应该处理回调和线程任务
+
     base::RepeatingTimer<MessageNotifyManager> newRepeatingTimer_;
     base::TimeDelta chat_message_space_;
     base::Time last_chat_time_;

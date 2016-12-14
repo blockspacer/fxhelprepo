@@ -42,6 +42,9 @@ public:
     void Run();
 
 private:
+    // 提供连接状态出错重连的功能
+    void ConnectionBreakCallback(const std::string& user_name, uint32 room_id);
+
     TcpManager* tcpManager_;
     std::map<std::string, std::shared_ptr<User> > users_;
     std::unique_ptr<MVBillboard> mvBillboard_;

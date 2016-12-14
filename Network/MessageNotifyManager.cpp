@@ -383,6 +383,9 @@ MessageNotifyManager::MessageNotifyManager()
     notify501_(nullptr),
     notify601_(nullptr),
     baseThread_("NetworkHelperThread" + base::IntToString(threadindex)),
+    tcpManager_(nullptr),
+    conn_break_callback_(),
+    connected_(false),
     chat_message_space_(base::TimeDelta::FromMilliseconds(char_millisecond_space)),
     last_chat_time_(base::Time::Now())
 {
@@ -774,9 +777,11 @@ std::vector<std::string> MessageNotifyManager::HandleMixPackage(const std::strin
 
 bool MessageNotifyManager::NewConnect843(
     uint32 roomid, uint32 userid,
-    const std::string& usertoken)
+    const std::string& usertoken,
+    const base::Callback<void()>& conn_break_callback)
 {
-    tcpManager_->AddClient(
+    conn_break_callback_ = conn_break_callback;
+    bool result = tcpManager_->AddClient(
         std::bind(&MessageNotifyManager::NewConnect843Callback, 
         std::weak_ptr<MessageNotifyManager>(shared_from_this()),
         std::placeholders::_1, std::placeholders::_2), 
@@ -785,7 +790,7 @@ bool MessageNotifyManager::NewConnect843(
         std::weak_ptr<MessageNotifyManager>(shared_from_this()), 
         roomid, userid, usertoken, 
         std::placeholders::_1, std::placeholders::_2));
-    return true;
+    return result;
 }
 
 void MessageNotifyManager::NewConnect843Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
@@ -838,11 +843,25 @@ void MessageNotifyManager::NewData8080Callback(std::weak_ptr<MessageNotifyManage
         obj.get(), result, data));
 }
 
+void MessageNotifyManager::NewSendDataCallback(
+    std::weak_ptr<MessageNotifyManager> weakptr, TcpHandle handle, bool result)
+{
+    auto obj = weakptr.lock();
+    if (!obj)
+        return;
+
+    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoNewSendDataCallback,
+        obj.get(), handle, result));
+}
+
 void MessageNotifyManager::DoNewConnect843Callback(bool result, TcpHandle handle)
 {
     if (!result)
     {
         assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        connected_ = false;
+        conn_break_callback_.Run();
         return;
     }
 
@@ -853,9 +872,13 @@ void MessageNotifyManager::DoNewConnect843Callback(bool result, TcpHandle handle
     tcphandle_843_ = handle;
     if (!tcpManager_->Send(handle, data,
         std::bind(&MessageNotifyManager::NewSendDataCallback,
-        this, tcphandle_843_, std::placeholders::_1)))
+        std::weak_ptr<MessageNotifyManager>(shared_from_this()), 
+        tcphandle_843_, std::placeholders::_1)))
     {
         assert(false && L"发送数据错误，要结束流程");
+        // 要向上层通知，确认是否出错重连
+        connected_ = false;
+        conn_break_callback_.Run();
     }
 }
 
@@ -882,9 +905,13 @@ void MessageNotifyManager::DoNewConnect8080Callback(uint32 roomid, uint32 userid
     if (!result)
     {
         assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        // 要向上层通知，确认是否出错重连
+        connected_ = false;
+        conn_break_callback_.Run();
         return;
     }
 
+    connected_ = true; // 唯一标记连接成功的地方
     tcphandle_8080_ = handle;
     uint32 keytime = static_cast<uint32>(base::Time::Now().ToDoubleT());
     std::vector<uint8> data_for_send;
@@ -895,7 +922,8 @@ void MessageNotifyManager::DoNewConnect8080Callback(uint32 roomid, uint32 userid
     data_8080.assign(data_for_send.begin(), data_for_send.end());
     tcpManager_->Send(tcphandle_8080_, data_8080,
         std::bind(&MessageNotifyManager::NewSendDataCallback,
-        this, tcphandle_8080_, std::placeholders::_1));
+        std::weak_ptr<MessageNotifyManager>(shared_from_this()), 
+        tcphandle_8080_, std::placeholders::_1));
 
     if (newRepeatingTimer_.IsRunning())
         newRepeatingTimer_.Stop();
@@ -912,7 +940,10 @@ void MessageNotifyManager::DoNewData843Callback(uint32 roomid, uint32 userid,
     tcpManager_->RemoveClient(tcphandle_843_);
     if (!result)
     {
-        //assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        // 要向上层通知，确认是否出错重连
+        connected_ = false;
+        conn_break_callback_.Run();
         return;
     }
 
@@ -921,10 +952,16 @@ void MessageNotifyManager::DoNewData843Callback(uint32 roomid, uint32 userid,
 
 void MessageNotifyManager::DoNewData8080Callback(bool result, const std::vector<uint8>& data)
 {
+    if (!connected_) // 如果已经被标记为断开连接，那么不要回调了，此时上层的room可能已经被使用者删除
+        return;
+
     if (!result)
     {
         newRepeatingTimer_.Stop();
         tcpManager_->RemoveClient(tcphandle_8080_);
+        // 要向上层通知，确认是否出错重连
+        connected_ = false;
+        conn_break_callback_.Run();
         return;
     }
 
@@ -943,7 +980,8 @@ void MessageNotifyManager::DoNewSendHeartBeat(TcpHandle handle)
     heardbeatvec.assign(heartbeat.begin(), heartbeat.end());
     tcpManager_->Send(handle, heardbeatvec, 
         std::bind(&MessageNotifyManager::NewSendDataCallback,
-        this, handle, std::placeholders::_1));
+        std::weak_ptr<MessageNotifyManager>(shared_from_this()),
+        handle, std::placeholders::_1));
 }
 
 void MessageNotifyManager::DoNewSendChatMessage(const std::vector<char>& msg)
@@ -961,18 +999,24 @@ void MessageNotifyManager::DoNewSendChatMessage(const std::vector<char>& msg)
 
     tcpManager_->Send(tcphandle_8080_, msg, 
         std::bind(&MessageNotifyManager::NewSendDataCallback,
-        this, tcphandle_8080_, std::placeholders::_1));
+        std::weak_ptr<MessageNotifyManager>(shared_from_this()),
+        tcphandle_8080_, std::placeholders::_1));
     
 }
 
-void MessageNotifyManager::NewSendDataCallback(TcpHandle handle, bool result)
+void MessageNotifyManager::DoNewSendDataCallback(TcpHandle handle, bool result)
 {
+    if (!connected_)
+        return;
+
     std::wstring state = L"发送数据正常";
     if (!result)
     {
         state = L"发送数据异常，请重新进入房间";
         newRepeatingTimer_.Stop();
         tcpManager_->RemoveClient(handle);
+        // 要向上层通知，确认是否出错重连
+        conn_break_callback_.Run();
     }
 
     if (normalNotify_)

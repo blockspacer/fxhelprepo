@@ -4,7 +4,7 @@
 #include "third_party/chromium/sql/connection.h"
 
 
-class BetResult;
+struct BetResult;
 
 class BetGameDatabase
 {

@@ -161,9 +161,7 @@ void CBetGameDlg::OnBnClickedButtonEnterRoom()
     m_edit_room_id.GetWindowTextW(cs_roomid);
     uint32 room_id = 0;
     base::StringToUint(base::WideToUTF8(cs_roomid.GetBuffer()), &room_id);
-    if (!bet_network_->EnterRoom(room_id))
-    {
-    }
+    bet_network_->EnterRoom(room_id);
 }
 
 void CBetGameDlg::OnBnClickedButtonLogin()

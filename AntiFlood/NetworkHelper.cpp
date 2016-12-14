@@ -720,7 +720,9 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
         std::placeholders::_1));
     roomid_ = roomid;
 
-    return user_->EnterRoomFopOperation(roomid, &singer_clanid_);
+    return user_->EnterRoomFopOperation(roomid, &singer_clanid_,
+        base::Bind(&NetworkHelper::ConnectionBreakCallback,
+        base::Unretained(this)));
 }
 
 bool NetworkHelper::GetViewerList(uint32 roomid,
@@ -914,6 +916,11 @@ void NetworkHelper::NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo
     TryHandleUser(enterRoomUserInfo);
     RobotHandleChatMessage(enterRoomUserInfo, roomChatMessage);
     TryHandle501Msg(enterRoomUserInfo, roomChatMessage);
+}
+
+void NetworkHelper::ConnectionBreakCallback()
+{
+
 }
 
 void NetworkHelper::SetHandleRichLevel(uint32 rich_level)

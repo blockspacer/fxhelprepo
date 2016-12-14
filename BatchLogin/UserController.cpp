@@ -94,7 +94,9 @@ bool UserController::FillRoom(uint32 roomid, uint32 count)
     for (const auto& it : users_)
     {
         Sleep(1000);
-        it.second->EnterRoomFopAlive(roomid);
+        it.second->EnterRoomFopAlive(roomid,
+            base::Bind(&UserController::ConnectionBreakCallback,
+            base::Unretained(this), it.first, roomid));
     }
     return true;
 }
@@ -129,4 +131,11 @@ bool UserController::UpMVBillboard(const std::string& collectionid,
 
 void UserController::Run()
 {
+}
+
+// 提供连接状态出错重连的功能
+void UserController::ConnectionBreakCallback(const std::string& user_name, 
+    uint32 room_id)
+{
+
 }

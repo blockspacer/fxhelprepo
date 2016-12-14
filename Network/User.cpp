@@ -293,7 +293,8 @@ uint32 User::GetClanId() const
     return clanid_;
 }
 
-bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid)
+bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
+    const base::Callback<void()>& conn_break_callback)
 {
     std::shared_ptr<Room> room(new Room(roomid));
     room->SetTcpManager(tcpManager_);
@@ -334,7 +335,7 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid)
         room->SetIpProxy(ipproxy_);
     }
 
-    if (!room->EnterForOperation(cookie, usertoken_, kugouid_, singer_clanid))
+    if (!room->EnterForOperation(cookie, usertoken_, kugouid_, singer_clanid, conn_break_callback))
     {
         return false;
     }
@@ -343,7 +344,8 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid)
     return true;
 }
 
-bool User::EnterRoomFopAlive(uint32 roomid)
+bool User::EnterRoomFopAlive(uint32 roomid,
+    const base::Callback<void()>& conn_break_callback)
 {
     std::shared_ptr<Room> room(new Room(roomid));
     room->SetTcpManager(tcpManager_);
@@ -385,7 +387,7 @@ bool User::EnterRoomFopAlive(uint32 roomid)
         room->SetIpProxy(ipproxy_);
     }
 
-    if (!room->EnterForAlive(cookie, usertoken_, kugouid_))
+    if (!room->EnterForAlive(cookie, usertoken_, kugouid_, conn_break_callback))
     {
         return false;
     }

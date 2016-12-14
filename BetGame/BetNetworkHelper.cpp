@@ -7,10 +7,16 @@
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/files/file_util.h"
 
+namespace
+{
+    uint32 max_retry_break_seconds = 256;
+}
+
 BetNetworkHelper::BetNetworkHelper()
     : tcp_manager_(new TcpManager)
     , worker_thread_(new base::Thread("worker_thread"))
     , database_(new BetGameDatabase)
+    , retry_break_seconds_(1)
 {
     result_map_[31] = 1;
     result_map_[29] = 2;
@@ -36,6 +42,7 @@ bool BetNetworkHelper::Initialize()
 
 void BetNetworkHelper::Finalize()
 {
+    worker_thread_->Stop();
     database_->Finalize();
 }
 
@@ -74,22 +81,24 @@ void BetNetworkHelper::SetBetTimeNotify(const base::Callback<void(uint32 time)>&
     time_callback_ = callback;
 }
 
-bool BetNetworkHelper::EnterRoom(uint32 room_id)
+void BetNetworkHelper::EnterRoom(uint32 room_id)
 {
     user_->SetNotify620(
         std::bind(&BetNetworkHelper::OnBetNotify, this, std::placeholders::_1));
 
-    if (!user_->EnterRoomFopAlive(room_id))
+    if (!user_->EnterRoomFopAlive(room_id,
+        base::Bind(&BetNetworkHelper::ConnectionBreakCallback,
+        base::Unretained(this), room_id)))
     {
         tips_callback_.Run(L"进入房间失败");
-        return false;
+        return;
     }
     tips_callback_.Run(L"进入房间成功");
-    return true;
 }
 
 void BetNetworkHelper::OnBetNotify(const BetResult& bet_result)
 {
+    retry_break_seconds_ = 1;// 如果是正常运行的情况下，永远重置时间间隔倍数为1倍，即repeat_seconds
     if (bet_result.result == 0)
     {
         time_callback_.Run(bet_result.time);
@@ -105,4 +114,18 @@ void BetNetworkHelper::OnBetNotify(const BetResult& bet_result)
     new_result.display_result = it->second;
     result_callback_.Run(new_result);
     database_->InsertRecord(new_result);
+}
+
+void BetNetworkHelper::ConnectionBreakCallback(
+    uint32 room_id)
+{
+    if (retry_break_seconds_ <= max_retry_break_seconds)
+    {
+        retry_break_seconds_ *= 2;
+    }
+    
+    worker_thread_->message_loop()->PostDelayedTask(FROM_HERE,
+        base::Bind(&BetNetworkHelper::EnterRoom,
+        base::Unretained(this), room_id),
+        base::TimeDelta::FromSeconds(retry_break_seconds_));
 }

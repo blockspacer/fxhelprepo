@@ -21,7 +21,7 @@ public:
     void Finalize();
 
     bool Login(const std::string& account, const std::string& password);
-    bool EnterRoom(uint32 room_id);
+    void EnterRoom(uint32 room_id);
 
     void SetTipMessage(const base::Callback<void(const std::wstring&)>& callback);
     void SetBetResultNotify(const base::Callback<void(const  BetResult&)>& callback);
@@ -29,6 +29,9 @@ public:
 
 private:
     void OnBetNotify(const  BetResult& bet_result);
+
+    // 提供连接状态出错重连的功能
+    void ConnectionBreakCallback(uint32 room_id);
 
     std::unique_ptr<TcpManager> tcp_manager_;
     std::unique_ptr<User> user_;
@@ -38,5 +41,6 @@ private:
     scoped_ptr<base::Thread> worker_thread_;
     std::map<uint32, uint32> result_map_;
     std::unique_ptr<BetGameDatabase> database_;
+    uint32 retry_break_seconds_; // 用来增加每批重试的间隔
 };
 

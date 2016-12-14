@@ -129,6 +129,9 @@ private:
     // 获取用户个人页面信息, 用来判断其是否为主播, 这是可选的辅助功能
     bool GetUserInfoByUserId(); 
 
+    // 断开连接以后的动作
+    void ConnectBreakCallback(uint32 room_id);
+
     // 获取用户关注主播的信息, 这是可选的辅助功能
     bool GetUserConcernList(); 
 

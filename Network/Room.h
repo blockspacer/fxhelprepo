@@ -21,10 +21,12 @@ public:
 
     // 需要获得房间信息来做下一步操作的函数, 传出singer_clanid是为判断授权使用
     bool EnterForOperation(const std::string& cookies, 
-        const std::string& usertoken, uint32 userid, uint32* singer_clanid);
+        const std::string& usertoken, uint32 userid, uint32* singer_clanid,
+        const base::Callback<void()>& conn_break_callback);
 
     // 不需要获取房间信息，仅仅为了连接，不做业务操作的进房请求
-    bool EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid);
+    bool EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid,
+        const base::Callback<void()>& conn_break_callback);
     void SetNormalNotify(NormalNotify normalNotify);
     void SetNotify201(Notify201 notify201);
     void SetNotify501(Notify501 notify501);
@@ -63,7 +65,7 @@ private:
     void TranferNotify601(const RoomGiftInfo601& roomgiftinfo);
 
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
-        const std::string& usertoken);
+        const std::string& usertoken, const base::Callback<void()>& conn_break_callback);
 
     IpProxy ipproxy_;
     uint32 roomid_ = 0;

@@ -379,7 +379,9 @@ void WorshipHelper::DoEnterRoom(uint32 roomid)
     user_->SetTcpManager(tcp_manager_.get());
     roomid_ = roomid;
     uint32 singer_clanid = 0;
-    user_->EnterRoomFopOperation(roomid, &singer_clanid);
+    user_->EnterRoomFopOperation(roomid, &singer_clanid,
+        base::Bind(&WorshipHelper::ConnectBreakCallback,
+        base::Unretained(this), roomid));
 }
 
 bool WorshipHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
@@ -637,6 +639,9 @@ bool WorshipHelper::GetUserInfoByUserId()
     return false;
 }
 
+void WorshipHelper::ConnectBreakCallback(uint32 room_id)
+{
+}
 
 bool WorshipHelper::GetUserConcernList()
 {

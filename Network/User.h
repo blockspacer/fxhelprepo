@@ -76,8 +76,10 @@ public:
     uint32 GetFanxingId() const;
     uint32 GetClanId() const;
 
-    bool EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid);
-    bool EnterRoomFopAlive(uint32 roomid);
+    bool EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
+        const base::Callback<void()>& conn_break_callback);
+    bool EnterRoomFopAlive(uint32 roomid, 
+        const base::Callback<void ()>& conn_break_callback);
     bool OpenRoomAndGetViewerList(uint32 roomid,
         std::vector<EnterRoomUserInfo>* enterRoomUserInfoList);
     bool ExitRoom(uint32 roomid);
@@ -110,6 +112,8 @@ private:
     bool LoginUServiceGetMyUserDataInfo(std::string* errormsg);
 
     bool LoginIndexServiceGetUserCenter(std::string* errormsg);
+
+    void ConnectionBreakCallback(uint32 room_id);
 
     bool Worship_(const std::string& cookies, uint32 roomid, uint32 userid,
         std::string* errormsg);
