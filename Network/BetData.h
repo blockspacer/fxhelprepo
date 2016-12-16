@@ -13,4 +13,14 @@ struct BetResult
     uint32 result = 0;
     uint32 display_result = 0;
     uint32 random = 0;
+
+    bool operator<(const BetResult& other) const
+    {
+        return this->time < other.time;
+    }
+
+    bool operator==(const BetResult& other) const
+    {
+        return this->time == other.time;
+    }
 };
