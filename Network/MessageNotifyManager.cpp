@@ -665,7 +665,7 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
                             }
                         }
                     }
-                    LOG(INFO) << L"tulong +++++++++++++++++++++++++++++++++++++++++++++";
+                    //LOG(INFO) << L"tulong +++++++++++++++++++++++++++++++++++++++++++++";
                 }
                 else // 开奖结果数据
                 {

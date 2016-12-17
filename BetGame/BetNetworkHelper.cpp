@@ -18,11 +18,11 @@ BetNetworkHelper::BetNetworkHelper()
     , database_(new BetGameDatabase)
     , retry_break_seconds_(1)
 {
-    result_map_[31] = 1;
-    result_map_[29] = 2;
-    result_map_[27] = 7;
-    result_map_[25] = 8;
-    result_map_[30] = 6;
+    result_map_[31] = 8;
+    result_map_[29] = 7;
+    result_map_[27] = 2;
+    result_map_[25] = 1;
+    result_map_[30] = 6; // È·ÈÏ
     result_map_[28] = 5;
     result_map_[26] = 4;
     result_map_[24] = 3;
@@ -157,6 +157,10 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
     {
         if (i == display_result - 1)
         {
+            if (new_data.distance[i] > last_data.max_distance[i])
+            {
+                new_data.max_distance[i] = new_data.distance[i];
+            }
             new_data.summary[i]++;
             new_data.sum_distance[i] += last_data.distance[i];
             new_data.avg_distance[i] = (new_data.sum_distance[i]*1.0) / (new_data.summary[i]*1.0);
@@ -173,7 +177,7 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
 
         if (new_data.summary[i])// ±ÜÃâ³ı0´íÎó
         {
-            new_data.frequence[i] = new_data.index / new_data.summary[i];
+            new_data.frequence[i] = (new_data.summary[i]*1.0)/(new_data.index*1.0);
         }
     }
     //BetResult bet_result;
@@ -189,13 +193,13 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
     LOG(INFO) << L"index(" << new_data.index << L") "<< L"bet_result = " << bet_result.display_result;
     for (int i = 0; i < 8; i++)
     {
-        LOG(INFO) << L"result(" << i << L") " << L"summary= " << new_data.summary[i]
+        LOG(INFO) << L"result(" << i+1 << L") " << L"summary= " << new_data.summary[i]
             << L" sum_distance= " << new_data.sum_distance[i]
             << L" distance= " << new_data.distance[i]
             << L" max_distance= " << new_data.max_distance[i]
-            << L" mid_distance= " << new_data.mid_distance[i]
+            //<< L" mid_distance= " << new_data.mid_distance[i]
             << L" avg_distance= " << new_data.avg_distance[i]
-            << L" variance_distance= " << new_data.variance_distance[i]
+            //<< L" variance_distance= " << new_data.variance_distance[i]
             << L" frequence= " << new_data.frequence[i];
     }
     caculation_map_[bet_result] = new_data;
