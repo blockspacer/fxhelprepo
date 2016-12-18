@@ -91,10 +91,12 @@ protected:
     // 自动感谢操作
     afx_msg void OnBnClickedChkThanks();
     void UpdateThanksSetting();
+    afx_msg void OnBnClickedBtnThanksSetting();
 
     // 自动欢迎操作
     afx_msg void OnBnClickedChkWelcome();
     void UpdateWelcomeSetting();
+    afx_msg void OnBnClickedBtnWelcomeSetting();
 
     // 特殊欢迎操作
     afx_msg void OnBnClickedBtnAddWelcome();
@@ -107,6 +109,9 @@ protected:
     // 点击列头排序
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
     static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
+    // 是否识别隐身玩家功能
+    afx_msg void OnBnClickedChkCheckVipV();
 
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam);
@@ -191,7 +196,9 @@ private:
     CButton m_btn_add_sensitive;
     CButton m_btn_add_vest;
     CButton m_btn_remove_vest_sensitive;
-public:
-    afx_msg void OnBnClickedChkCheckVipV();
+
     CButton m_chk_vip_v;
+
+    CButton m_btn_welcome_setting;
+    CButton m_btn_thanks_setting;
 };

@@ -6,6 +6,7 @@
 #include <xutility>
 #include "AntiFlood.h"
 #include "AntiFloodDlg.h"
+#include "NormalWelcomeSettingDlg.h"
 #include "WelcomeSettingDlg.h"
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
@@ -141,6 +142,8 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_BTN_ADD_VEST, m_btn_add_vest);
     DDX_Control(pDX, IDC_BTN_REMOVE_VEST, m_btn_remove_vest_sensitive);
     DDX_Control(pDX, IDC_CHK_CHECK_VIP_V, m_chk_vip_v);
+    DDX_Control(pDX, IDC_BTN_WELCOME_SETTING, m_btn_welcome_setting);
+    DDX_Control(pDX, IDC_BTN_THANKS_SETTING, m_btn_thanks_setting);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -194,6 +197,8 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_REMOVE_WELCOME, &CAntiFloodDlg::OnBnClickedBtnRemoveWelcome)
     ON_BN_CLICKED(IDC_BTN_SENSITIVE, &CAntiFloodDlg::OnBnClickedBtnSensitive)
     ON_BN_CLICKED(IDC_CHK_CHECK_VIP_V, &CAntiFloodDlg::OnBnClickedChkCheckVipV)
+    ON_BN_CLICKED(IDC_BTN_THANKS_SETTING, &CAntiFloodDlg::OnBnClickedBtnThanksSetting)
+    ON_BN_CLICKED(IDC_BTN_WELCOME_SETTING, &CAntiFloodDlg::OnBnClickedBtnWelcomeSetting)
 END_MESSAGE_MAP()
 
 
@@ -305,7 +310,7 @@ BOOL CAntiFloodDlg::OnInitDialog()
         m_list_user_strategy.InsertColumn(index++, it, LVCFMT_LEFT, 100);//≤Â»Î¡–
 
     std::map<uint32, WelcomeInfo> welcome_info_map;
-    enterRoomStrategy_->GetWelcomeContent(&welcome_info_map);
+    enterRoomStrategy_->GetSpecialWelcomeContent(&welcome_info_map);
     int welcomecount = 0;
     for (auto& it : welcome_info_map)
     {
@@ -1507,6 +1512,7 @@ void CAntiFloodDlg::UpdateThanksSetting()
     bool enable = !!m_chk_thanks.GetCheck();
     m_combo_thanks.EnableWindow(!enable);
     giftStrategy_->SetThanksFlag(enable);
+    m_btn_thanks_setting.EnableWindow(!enable);
 
     CString cs_gift_value;
     m_combo_thanks.GetWindowTextW(cs_gift_value);
@@ -1542,6 +1548,7 @@ void CAntiFloodDlg::UpdateWelcomeSetting()
     bool enable = !!m_chk_welcome.GetCheck();
     m_combo_welcome.EnableWindow(!enable);
     enterRoomStrategy_->SetWelcomeFlag(enable);
+    m_btn_welcome_setting.EnableWindow(!enable);
 
     CString welcome_level;
     m_combo_welcome.GetWindowTextW(welcome_level);
@@ -1651,7 +1658,7 @@ void CAntiFloodDlg::OnBnClickedBtnAddWelcome()
         welcome_content[fanxingid] = info;
     }
 
-    enterRoomStrategy_->SetWelcomeContent(welcome_content);
+    enterRoomStrategy_->SetSpecialWelcomeContent(welcome_content);
 }
 
 
@@ -1674,11 +1681,34 @@ void CAntiFloodDlg::OnBnClickedBtnRemoveWelcome()
         WelcomeInfo welcome_info = { fanxingid, cs_name.GetBuffer(), cs_welcome.GetBuffer() };
         welcome_info_map[fanxingid] = welcome_info;
     }
-    enterRoomStrategy_->SetWelcomeContent(welcome_info_map);
+    enterRoomStrategy_->SetSpecialWelcomeContent(welcome_info_map);
 }
 
 void CAntiFloodDlg::OnBnClickedChkCheckVipV()
 {
     bool enable = !!m_chk_vip_v.GetCheck();
     enterRoomStrategy_->SetWelcomeVipV(enable);
+}
+
+void CAntiFloodDlg::OnBnClickedBtnThanksSetting()
+{
+
+}
+
+void CAntiFloodDlg::OnBnClickedBtnWelcomeSetting()
+{
+    std::wstring welcome;
+    enterRoomStrategy_->GetNormalWelcomeContent(&welcome);
+
+    NormalWelcomeSettingDlg dlg(welcome);
+    INT_PTR nResponse = dlg.DoModal();
+
+    if (nResponse == IDCANCEL)
+        return;
+
+    if (nResponse != IDOK)
+        return;
+
+    std::wstring new_welcome = dlg.GetNormalWelcome();
+    enterRoomStrategy_->SetNormalWelcomeContent(new_welcome);
 }
