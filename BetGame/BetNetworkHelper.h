@@ -21,7 +21,7 @@ struct CaculationData
     uint32 max_distance[8]; // 最大间隔
     uint32 mid_distance[8]; // 间隔中位数
     double avg_distance[8]; // 平均间隔
-    double standard_deviation[8]; // 间隔方差
+    double standard_deviation[8]; // 间隔标准差
     double frequence[8]; // 频率 = 累计期数/开奖期数
 };
 

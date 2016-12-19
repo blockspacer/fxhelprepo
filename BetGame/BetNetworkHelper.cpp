@@ -141,7 +141,7 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
             data.max_distance[i] = 0;// 最大间隔
             data.mid_distance[i] = 0; // 间隔中位数
             data.avg_distance[i] = 0.0; // 平均间隔
-            data.standard_deviation[i] = 0.0;// 间隔方差
+            data.standard_deviation[i] = 0.0;// 间隔标准差
             data.frequence[i] = 0.0; // 频率 = 累计期数/开奖期数
         }
         caculation_map_[bet_result] = data;
@@ -157,21 +157,22 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
 
     for (int i = 0; i < 8; i++)
     {
-        if (new_data.distance[i] > new_data.max_distance[i])
-        {
-            LOG(INFO) << L"max_distance" << L"[" << i << L"] update(" << new_data.max_distance[i] << L") ";
-            new_data.max_distance[i] = new_data.distance[i];
-        }
-
         if (i == display_result - 1)
         {
             new_data.summary[i]++;
             new_data.sum_distance[i] += last_data.distance[i];
             new_data.avg_distance[i] = (new_data.sum_distance[i]*1.0) / (new_data.summary[i]*1.0);
-            // 记录间隔，计算中位数和方差
+            // 记录间隔，计算中位数和间隔标准差
             distance_map_[i].push_back(last_data.distance[i]);
             new_data.mid_distance[i] = MathHelper::GetMid(distance_map_[i]);
             new_data.standard_deviation[i] = MathHelper::GetStandardDeviation(distance_map_[i], new_data.avg_distance[i]);
+
+            if (new_data.distance[i] > new_data.max_distance[i])
+            {
+                LOG(INFO) << L"max_distance" << L"[" << i << L"] update(" << new_data.max_distance[i] << L") ";
+                new_data.max_distance[i] = new_data.distance[i];
+            }
+
             new_data.distance[i] = 0; //当前开奖那个distance为0;
         }
         else
@@ -192,7 +193,7 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
     //uint32 max_distance[8]; // 最大间隔
     //uint32 mid_distance[8]; // 间隔中位数
     //double avg_distance[8]; // 平均间隔
-    //double variance_distance[8]; // 间隔方差
+    //double standard_deviation[8]; // 间隔标准差
     //double frequence[8]; // 频率 = 累计期数/开奖期数
     LOG(INFO) << L"index(" << new_data.index+1 << L") "<< L"bet_result = " << bet_result.display_result;
     for (int i = 0; i < 8; i++)
@@ -203,7 +204,7 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
             << L" max_distance= " << new_data.max_distance[i]
             << L" mid_distance= " << new_data.mid_distance[i]
             << L" avg_distance= " << base::DoubleToString(new_data.avg_distance[i])
-            << L" variance_distance= " << base::DoubleToString(new_data.standard_deviation[i])
+            << L" standard_deviation= " << base::DoubleToString(new_data.standard_deviation[i])
             << L" frequence= " << base::DoubleToString(new_data.frequence[i]);
     }
     caculation_map_[bet_result] = new_data;
