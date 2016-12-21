@@ -1020,7 +1020,11 @@ void NetworkHelper::DoSetRoomRepeatChat(bool enable, uint32 seconds,
     if (!enable)
         return;
     
-    DoChatRepeat(chatmsg);
+    // 临时解决方案, 因为如果是勾上自动重复发言再进入房间，此处未得到连接成功的前置条件，所以暂时延时10秒发送第一条消息。
+    workThread_->message_loop_proxy()->PostDelayedTask(
+        FROM_HERE, base::Bind(&NetworkHelper::DoChatRepeat,
+        base::Unretained(this), chatmsg), base::TimeDelta::FromSeconds(10));
+
     chatRepeatingTimer_.Start(
         FROM_HERE, base::TimeDelta::FromSeconds(static_cast<uint64>(seconds)),
         base::Bind(&NetworkHelper::DoChatRepeat, this, chatmsg));
