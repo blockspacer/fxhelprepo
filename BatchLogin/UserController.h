@@ -40,7 +40,7 @@ public:
         uint32 roomid, uint32 gift_id, uint32 gift_count,
         const std::function<void(const std::wstring& msg)>& callback);
 
-    bool RealSingLike(const std::vector<std::string>& accounts,
+    bool RealSingLike(const std::string& account,
         uint32 roomid, const std::wstring& song_name,
         const std::function<void(const std::wstring& msg)>& callback);
 

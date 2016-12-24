@@ -120,32 +120,30 @@ bool UserController::SendGifts(const std::vector<std::string>& accounts,
     return true;
 }
 
-bool UserController::RealSingLike(const std::vector<std::string>& accounts,
+bool UserController::RealSingLike(const std::string& account,
     uint32 roomid, const std::wstring& song_name,
     const std::function<void(const std::wstring& msg)>& callback)
 {
-    for (const auto& account : accounts)
+    auto result = users_.find(account);
+    if (result == users_.end())
     {
-        auto result = users_.find(account);
-        if (result == users_.end())
-        {
-            assert(false && L"找不到对应用户");
-            continue;
-        }
-        std::wstring msg = base::UTF8ToWide(result->first) + L" 点赞";
-        std::string errormsg;
-        if (!result->second->RealSingLike(roomid, song_name, &errormsg))
-        {
-            msg += L"失败";
-            callback(msg);
-            callback(base::UTF8ToWide(errormsg));
-        }
-        else
-        {
-            msg += L"成功";
-            callback(msg);
-        }
+        assert(false && L"找不到对应用户");
+        return false;
     }
+    std::wstring msg = base::UTF8ToWide(result->first) + L" 点赞";
+    std::string errormsg;
+    if (!result->second->RealSingLike(roomid, song_name, &errormsg))
+    {
+        msg += L"失败";
+        callback(msg);
+        callback(base::UTF8ToWide(errormsg));
+    }
+    else
+    {
+        msg += L"成功";
+        callback(msg);
+    }
+
     return true;
 }
 

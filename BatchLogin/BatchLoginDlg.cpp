@@ -75,6 +75,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_NICKNAME_PRE, m_nickname);
     DDX_Control(pDX, IDC_EDIT_PIC_PATH, m_logo_path);
     DDX_Control(pDX, IDC_EDIT_SONG_NAME, m_edit_singlike);
+    DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -241,6 +242,7 @@ void CBatchLoginDlg::OnBnClickedBtnImportUser()
 void CBatchLoginDlg::OnBnClickedBtnLogin()
 {
     userRoomManager_->SetBreakRequest(false);
+    bool use_cookie = !!m_chk_use_cookie.GetCheck();
     int itemcount = m_ListCtrl_Users.GetItemCount();
     std::map<std::wstring, std::wstring> accountPassword;
     std::map<std::wstring, std::wstring> accountCookies;
@@ -254,11 +256,10 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
             CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
 
             // 暂时全部走用户名密码登录流程
-            //accountPassword[account.GetBuffer()] = password.GetBuffer();
-            if (cookies.IsEmpty())
-                accountPassword[account.GetBuffer()] = password.GetBuffer();
+            if (use_cookie)
+                accountCookies[account.GetBuffer()] = cookies.GetBuffer(); 
             else
-                accountCookies[account.GetBuffer()] = cookies.GetBuffer();
+                accountPassword[account.GetBuffer()] = password.GetBuffer();
         }
     }
     if (!accountPassword.empty())
@@ -566,7 +567,7 @@ void CBatchLoginDlg::OnBnClickedBtnDelete()
 
 void CBatchLoginDlg::OnBnClickedBtnGetUserinfo()
 {
-    userRoomManager_->SetBreakRequest(true);
+    userRoomManager_->SetBreakRequest(false);
 
     std::vector<std::wstring> users;
     GetSelectUsers(&users);
@@ -622,13 +623,14 @@ void CBatchLoginDlg::OnBnClickedBtnChangeNickname()
     std::vector<std::wstring> users;
     GetSelectUsers(&users);
 
+    userRoomManager_->SetBreakRequest(false);
     userRoomManager_->BatchChangeNickname(users, nickname_pre.GetBuffer());
 }
 
 
 void CBatchLoginDlg::OnBnClickedBtnChangeLogo()
 {
-    userRoomManager_->SetBreakRequest(true);
+    userRoomManager_->SetBreakRequest(false);
 
     std::vector<std::wstring> users;
     GetSelectUsers(&users);
@@ -647,7 +649,7 @@ void CBatchLoginDlg::OnBnClickedBtnChangeLogo()
 
 void CBatchLoginDlg::OnBnClickedBtnSingelike()
 {
-    userRoomManager_->SetBreakRequest(true);
+    userRoomManager_->SetBreakRequest(false);
 
     std::vector<std::wstring> users;
     GetSelectUsers(&users);

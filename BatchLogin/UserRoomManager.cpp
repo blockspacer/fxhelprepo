@@ -428,8 +428,18 @@ void UserRoomManager::DoRealSingLike(const std::vector<std::wstring>& users,
     }
     uint32 roomid = 0;
     base::StringToUint(base::WideToUTF8(room_id), &roomid);
-    userController_->RealSingLike(accounts, roomid, song_name,
-        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
+
+    for (const auto& account : accounts)
+    {
+        userController_->RealSingLike(account, roomid, song_name,
+            std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
+
+        if (break_request_)
+        {
+            Notify(L"用户中止操作，点赞过程中断");
+            break;
+        }
+    }
 }
 
 bool UserRoomManager::SendGifts(const std::vector<std::wstring>& users,

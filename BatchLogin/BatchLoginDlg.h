@@ -91,4 +91,6 @@ public:
     afx_msg void OnBnClickedBtnChangeLogo();
     afx_msg void OnBnClickedBtnSingelike();
     CEdit m_edit_singlike;
+private:
+    CButton m_chk_use_cookie;
 };
