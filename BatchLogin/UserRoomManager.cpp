@@ -409,6 +409,29 @@ void UserRoomManager::DoUpMVBillboard(const std::wstring& collectionid,
     Notify(message);
 }
 
+bool UserRoomManager::RealSingLike(const std::vector<std::wstring>& users,
+    const std::wstring& room_id, const std::wstring& song_name)
+{
+    return workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserRoomManager::DoRealSingLike, this, users,
+        room_id, song_name));
+}
+
+void UserRoomManager::DoRealSingLike(const std::vector<std::wstring>& users, 
+    const std::wstring& room_id, const std::wstring& song_name)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    uint32 roomid = 0;
+    base::StringToUint(base::WideToUTF8(room_id), &roomid);
+    userController_->RealSingLike(accounts, roomid, song_name,
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
+}
+
 bool UserRoomManager::SendGifts(const std::vector<std::wstring>& users,
     const std::wstring& room_id, uint32 gift_id, uint32 gift_count)
 {

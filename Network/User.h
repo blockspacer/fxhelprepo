@@ -106,6 +106,8 @@ public:
     bool RetrieveStart();
     bool SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
                   std::string* errormsg);
+    bool RealSingLike(uint32 roomid, const std::wstring& song_name,
+        std::string* errormsg);
 
     bool GetGiftList(uint32 roomid, std::string* content);
     bool GetViewerList(uint32 roomid, 

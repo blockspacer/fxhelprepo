@@ -39,6 +39,10 @@ public:
     bool SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count,
                   std::string* errormsg);
 
+    bool RealSingLike(const std::string& cookies, 
+        uint32 user_kugou_id, const std::string& user_token,
+        const std::wstring& song_name, std::string* errormsg);
+
     bool RobVotes(uint32* award_count, uint32* single_count,
                   std::string* errormsg);
 
@@ -57,6 +61,7 @@ public:
 private:
     bool OpenRoom(const std::string& cookies);
     bool GetStarInfo(const std::string& cookies);
+    bool GetStarKugouId(const std::string& cookies);
     bool EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken);
     bool GetStarGuard();
     void TranferNotify601(const RoomGiftInfo601& roomgiftinfo);
@@ -67,6 +72,7 @@ private:
     IpProxy ipproxy_;
     uint32 roomid_ = 0;
     uint32 singerid_ = 0;
+    uint32 star_kugou_id_ = 0;
     std::string nickname_;
     uint32 clanid_ = 0;
     std::vector<uint32> guarduserids_;

@@ -89,4 +89,6 @@ public:
     afx_msg void OnBnClickedBtnChangeNickname();
     CEdit m_logo_path;
     afx_msg void OnBnClickedBtnChangeLogo();
+    afx_msg void OnBnClickedBtnSingelike();
+    CEdit m_edit_singlike;
 };

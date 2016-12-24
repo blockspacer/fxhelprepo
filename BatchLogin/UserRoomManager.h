@@ -39,6 +39,9 @@ public:
 
     bool UpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
 
+    bool RealSingLike(const std::vector<std::wstring>& users, const std::wstring& room_id,
+        const std::wstring& song_name);
+
     bool SendGifts(const std::vector<std::wstring>& users, const std::wstring& room_id,
         uint32 gift_id, uint32 gift_count);
 
@@ -64,6 +67,9 @@ protected:
     void FillSingleRoom(uint32 roomid);
 
     void DoUpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
+    void DoRealSingLike(const std::vector<std::wstring>& users, const std::wstring& room_id,
+        const std::wstring& song_name);
+
     void DoSendGifts(const std::vector<std::wstring>& users,
         uint32 roomid, uint32 gift_id, uint32 gift_count);
     void DoRobVotes(const std::vector<std::wstring>& users, uint32 roomid);

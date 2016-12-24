@@ -489,6 +489,28 @@ bool User::SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
     return room->second->SendGift(cookies, gift_id, gift_count, errormsg);
 }
 
+bool User::RealSingLike(uint32 roomid, const std::wstring& song_name,
+    std::string* errormsg)
+{
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+    return room->second->RealSingLike(cookies,
+        kugouid_, usertoken_, song_name, errormsg);
+}
+
 bool User::GetGiftList(uint32 roomid, std::string* content)
 {
     auto room = rooms_.find(roomid);

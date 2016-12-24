@@ -74,6 +74,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_GIFT_COUNT, m_gift_count);
     DDX_Control(pDX, IDC_EDIT_NICKNAME_PRE, m_nickname);
     DDX_Control(pDX, IDC_EDIT_PIC_PATH, m_logo_path);
+    DDX_Control(pDX, IDC_EDIT_SONG_NAME, m_edit_singlike);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -100,6 +101,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_GET_USERINFO, &CBatchLoginDlg::OnBnClickedBtnGetUserinfo)
     ON_BN_CLICKED(IDC_BTN_CHANGE_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeNickname)
     ON_BN_CLICKED(IDC_BTN_CHANGE_LOGO, &CBatchLoginDlg::OnBnClickedBtnChangeLogo)
+    ON_BN_CLICKED(IDC_BTN_SINGELIKE, &CBatchLoginDlg::OnBnClickedBtnSingelike)
 END_MESSAGE_MAP()
 
 
@@ -640,4 +642,20 @@ void CBatchLoginDlg::OnBnClickedBtnChangeLogo()
     }
 
     userRoomManager_->BatchChangeLogo(users, cs_logo_path.GetBuffer());
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnSingelike()
+{
+    userRoomManager_->SetBreakRequest(true);
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+
+    CString songname;
+    m_edit_singlike.GetWindowTextW(songname);
+    userRoomManager_->RealSingLike(users, cs_roomid.GetBuffer(), songname.GetBuffer());
 }
