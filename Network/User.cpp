@@ -809,8 +809,8 @@ bool User::ChangeNickname(const std::string& nickname, std::string* errormsg)
         return false;
     }
 
-    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
-    uint32 status = rootdata.get("status", 0).asUInt();
+    uint32 unixtime = GetInt32FromJsonValue(rootdata,"servertime");
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
     std::string errorcode = rootdata.get("errorcode", "").asString();
     if (status != 1)
     {
