@@ -93,4 +93,5 @@ public:
     CEdit m_edit_singlike;
 private:
     CButton m_chk_use_cookie;
+    CEdit m_edit_delta;
 };

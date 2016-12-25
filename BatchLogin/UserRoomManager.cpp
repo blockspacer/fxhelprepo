@@ -410,15 +410,8 @@ void UserRoomManager::DoUpMVBillboard(const std::wstring& collectionid,
 }
 
 bool UserRoomManager::RealSingLike(const std::vector<std::wstring>& users,
-    const std::wstring& room_id, const std::wstring& song_name)
-{
-    return workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
-        base::Bind(&UserRoomManager::DoRealSingLike, this, users,
-        room_id, song_name));
-}
-
-void UserRoomManager::DoRealSingLike(const std::vector<std::wstring>& users, 
-    const std::wstring& room_id, const std::wstring& song_name)
+    const std::wstring& room_id, const std::wstring& song_name,
+    const std::wstring& delta)
 {
     std::vector<std::string> accounts;
     for (const auto& user : users)
@@ -429,10 +422,15 @@ void UserRoomManager::DoRealSingLike(const std::vector<std::wstring>& users,
     uint32 roomid = 0;
     base::StringToUint(base::WideToUTF8(room_id), &roomid);
 
+    uint32 time_delta = 0;
+    base::StringToUint(base::WideToUTF8(delta), &time_delta);
+
+    uint32 times = 1;
     for (const auto& account : accounts)
     {
-        userController_->RealSingLike(account, roomid, song_name,
-            std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
+        workerThread_.message_loop_proxy()->PostDelayedTask(FROM_HERE,
+            base::Bind(&UserRoomManager::DoRealSingLike, this, account,
+            roomid, song_name), base::TimeDelta::FromMilliseconds(time_delta*times++));
 
         if (break_request_)
         {
@@ -440,6 +438,24 @@ void UserRoomManager::DoRealSingLike(const std::vector<std::wstring>& users,
             break;
         }
     }
+    return true;
+}
+
+void UserRoomManager::DoRealSingLike(const std::string& account,
+    uint32 room_id, const std::wstring& song_name)
+{
+    if (break_request_)
+    {
+        Notify(L"用户中止操作，点赞过程中断");
+        return;
+    }
+
+#ifdef _DEBUG
+    Notify(L"用户测试点赞成功");
+#else
+    userController_->RealSingLike(account, room_id, song_name,
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
+#endif // _DEBUG
 }
 
 bool UserRoomManager::SendGifts(const std::vector<std::wstring>& users,

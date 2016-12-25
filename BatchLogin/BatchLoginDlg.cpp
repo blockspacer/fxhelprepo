@@ -76,6 +76,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_PIC_PATH, m_logo_path);
     DDX_Control(pDX, IDC_EDIT_SONG_NAME, m_edit_singlike);
     DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
+    DDX_Control(pDX, IDC_EDIT_DELTA, m_edit_delta);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -657,7 +658,10 @@ void CBatchLoginDlg::OnBnClickedBtnSingelike()
     CString cs_roomid;
     m_roomid.GetWindowTextW(cs_roomid);
 
+    CString cs_delta;
+    m_edit_delta.GetWindowTextW(cs_delta);
+
     CString songname;
     m_edit_singlike.GetWindowTextW(songname);
-    userRoomManager_->RealSingLike(users, cs_roomid.GetBuffer(), songname.GetBuffer());
+    userRoomManager_->RealSingLike(users, cs_roomid.GetBuffer(), songname.GetBuffer(), cs_delta.GetBuffer());
 }
