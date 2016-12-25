@@ -275,21 +275,38 @@ bool UserController::BatchChangeLogo(const std::vector<std::string>& users,
 bool UserController::FillRoom(uint32 roomid, uint32 count,
     const std::function<void(const std::wstring& msg)>& callback)
 {
+    bool first = true;
     for (const auto& it : users_)
     {
-        Sleep(1);
         //it.second->EnterRoomFopAlive(roomid);
         // 年度需求, 需要获取到足够信息，但是不需要连接信息
         std::wstring msg = base::UTF8ToWide(it.first) + L" 进入房间";
         std::string nickname;
-        if (!it.second->EnterRoomFopOperation(roomid, nullptr, &nickname))
+        if (first)
         {
-            msg += L" 失败 ";
+            if (!it.second->EnterRoomFopOperation(roomid, nullptr, &nickname))
+            {
+                msg += L" 失败 ";
+            }
+            else
+            {
+                msg += L" 成功 ";
+                it.second->GetRoom(roomid, &shared_room);
+            }
+            first = false;
         }
         else
         {
-            msg += L" 成功 ";
+            if (!it.second->EnterRoomFopHttp(roomid, shared_room))
+            {
+                msg += L" 失败 ";
+            }
+            else
+            {
+                msg += L" 成功 ";
+            }
         }
+
         msg += base::UTF8ToUTF16(nickname);
         callback(msg);
     }

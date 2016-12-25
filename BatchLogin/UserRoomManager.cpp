@@ -450,12 +450,12 @@ void UserRoomManager::DoRealSingLike(const std::string& account,
         return;
     }
 
-#ifdef _DEBUG
-    Notify(L"用户测试点赞成功");
-#else
+//#ifdef _DEBUG
+//    Notify(L"用户测试点赞成功");
+//#else
     userController_->RealSingLike(account, room_id, song_name,
         std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
-#endif // _DEBUG
+//#endif // _DEBUG
 }
 
 bool UserRoomManager::SendGifts(const std::vector<std::wstring>& users,

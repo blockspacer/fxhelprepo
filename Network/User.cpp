@@ -274,6 +274,15 @@ uint32 User::GetClanId() const
     return clanid_;
 }
 
+bool User::GetRoom(uint32 roomid, std::shared_ptr<Room>* room)
+{
+    auto result = rooms_.find(roomid);
+    if (result == rooms_.end())
+        return false;
+
+    *room = result->second;
+    return true;
+}
 bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
                                  std::string* nickname)
 {
@@ -321,6 +330,12 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
         return false;
     }
     
+    rooms_[roomid] = room;
+    return true;
+}
+
+bool User::EnterRoomFopHttp(uint32 roomid, std::shared_ptr<Room> room)
+{
     rooms_[roomid] = room;
     return true;
 }

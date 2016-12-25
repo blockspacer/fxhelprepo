@@ -92,9 +92,13 @@ public:
     uint32 GetFanxingId() const;
     uint32 GetClanId() const;
 
+    bool GetRoom(uint32 roomid, std::shared_ptr<Room>* room);
     bool EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
                                std::string* nickname);
     bool EnterRoomFopAlive(uint32 roomid);
+
+    bool EnterRoomFopHttp(uint32 roomid, std::shared_ptr<Room> room);
+
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
 

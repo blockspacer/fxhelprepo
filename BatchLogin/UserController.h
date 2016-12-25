@@ -71,5 +71,7 @@ private:
     TcpManager* tcpManager_;
     std::map<std::string, std::shared_ptr<User> > users_;
     std::unique_ptr<MVBillboard> mvBillboard_;
+
+    std::shared_ptr<Room> shared_room;
 };
 
