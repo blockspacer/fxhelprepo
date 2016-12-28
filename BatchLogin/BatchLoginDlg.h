@@ -94,4 +94,6 @@ public:
 private:
     CButton m_chk_use_cookie;
     CEdit m_edit_delta;
+public:
+    afx_msg void OnBnClickedBtnChangeConfigNickname();
 };

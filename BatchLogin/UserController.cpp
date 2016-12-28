@@ -242,6 +242,31 @@ bool UserController::BatchChangeNickname(const std::vector<std::string>& users,
     return true;
 }
 
+bool UserController::SingleChangeNickname(const std::string& old_nickname,
+    const std::string& new_nickname,
+    const std::function<void(const std::wstring& msg)>& callback)
+{
+    auto result = users_.find(old_nickname);
+    if (result == users_.end())
+    {
+        callback(L"本地数据错误, 找不到对应用户或用户未登录");
+        return false;
+    }
+
+    std::string errormsg;
+    std::wstring msg = base::UTF8ToWide(result->first) + L" 改名";
+    if (!result->second->ChangeNickname(new_nickname, &errormsg))
+    {
+        msg += L"失败 " + base::UTF8ToWide(errormsg);
+        callback(msg);
+        return false;
+    }
+
+    msg += L"成功 ";
+    callback(msg);
+    return true;
+}
+
 bool UserController::BatchChangeLogo(const std::vector<std::string>& users,
     const std::string& logo_path,
     const std::function<void(const std::wstring& msg)>& callback)

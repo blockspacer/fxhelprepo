@@ -55,6 +55,10 @@ public:
         const std::string& nickname_pre,
         const std::function<void(const std::wstring& msg)>& callback);
 
+    bool SingleChangeNickname(const std::string& old_nickname,
+        const std::string& new_nickname,
+        const std::function<void(const std::wstring& msg)>& callback);
+
     bool BatchChangeLogo(const std::vector<std::string>& users,
         const std::string& logo_path,
         const std::function<void(const std::wstring& msg)>& callback);

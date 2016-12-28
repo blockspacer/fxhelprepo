@@ -10,6 +10,7 @@
 #include "UserRoomManager.h"
 #include "Network/TcpManager.h"
 #include "Network/TcpClient.h"
+#include "BlacklistHelper.h"
 #include "afxdialogex.h"
 
 #include "third_party/chromium/base/strings/string_number_conversions.h"
@@ -104,6 +105,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_CHANGE_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeNickname)
     ON_BN_CLICKED(IDC_BTN_CHANGE_LOGO, &CBatchLoginDlg::OnBnClickedBtnChangeLogo)
     ON_BN_CLICKED(IDC_BTN_SINGELIKE, &CBatchLoginDlg::OnBnClickedBtnSingelike)
+    ON_BN_CLICKED(IDC_BTN_CHANGE_CONFIG_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname)
 END_MESSAGE_MAP()
 
 
@@ -664,4 +666,25 @@ void CBatchLoginDlg::OnBnClickedBtnSingelike()
     CString songname;
     m_edit_singlike.GetWindowTextW(songname);
     userRoomManager_->RealSingLike(users, cs_roomid.GetBuffer(), songname.GetBuffer(), cs_delta.GetBuffer());
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname()
+{
+    BlacklistHelper blacklist_helper;
+
+    std::map<uint32, BlackInfo> blackInfoMap;
+    blacklist_helper.LoadFromFile(&blackInfoMap);
+
+    std::vector<std::wstring> name_list;
+    for (const auto& black : blackInfoMap)
+    {
+        name_list.push_back(base::UTF8ToWide(black.second.nickname));
+    }
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    userRoomManager_->SetBreakRequest(false);
+    userRoomManager_->BatchChangeNicknameList(users, name_list);
 }

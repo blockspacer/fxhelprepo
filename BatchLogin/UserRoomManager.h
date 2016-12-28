@@ -53,6 +53,9 @@ public:
     bool BatchChangeNickname(const std::vector<std::wstring>& users,
         const std::wstring& nickname_pre);
 
+    bool BatchChangeNicknameList(const std::vector<std::wstring>& users,
+        const std::vector<std::wstring>& nickname_list);
+
     bool BatchChangeLogo(const std::vector<std::wstring>& users,
         const std::wstring& logo_path);
 

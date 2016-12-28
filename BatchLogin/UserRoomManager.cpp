@@ -550,6 +550,38 @@ void UserRoomManager::DoBatchChangeNickname(const std::vector<std::wstring>& use
         this, std::placeholders::_1));
 }
 
+
+bool UserRoomManager::BatchChangeNicknameList(const std::vector<std::wstring>& users,
+    const std::vector<std::wstring>& nickname_list)
+{
+    if (nickname_list.size() < users.size())
+    {
+        Notify(L"新名字列表比用户列表数目少,请使用更多的名字信息");
+        return false;
+    }
+    std::vector<std::string> accounts;
+    std::wstring last_post = base::UTF8ToWide(GetNowTimeString().substr(6, 1));
+    for (uint32 index = 0; index < users.size(); index++)
+    {
+        std::string account = base::WideToUTF8(users[index]);
+        std::wstring temp = nickname_list[index];
+        temp += last_post;
+        last_post = temp[index%temp.size()];
+        if (temp.size()>15)
+        {
+            temp = temp.substr(0, 13);
+        }
+        std::string new_nickname = base::WideToUTF8(temp);
+        userController_->SingleChangeNickname(account, new_nickname,
+            std::bind(&UserRoomManager::Notify,
+            this, std::placeholders::_1));
+    }
+
+
+
+    return true;
+}
+
 bool UserRoomManager::BatchChangeLogo(const std::vector<std::wstring>& users,
     const std::wstring& logo_path)
 {
