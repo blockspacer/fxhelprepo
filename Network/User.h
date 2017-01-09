@@ -75,6 +75,7 @@ public:
     uint32 GetServerTime() const;
     uint32 GetFanxingId() const;
     uint32 GetClanId() const;
+    uint32 GetRichlevel() const;
 
     bool EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
         const base::Callback<void()>& conn_break_callback);
@@ -87,6 +88,7 @@ public:
 
     void SetRobotApiKey(const std::string& apikey);
     bool SendChatMessage(uint32 roomid, const std::string& message);
+    bool SendPrivateMessageToSinger(uint32 roomid, const std::string& message);
     bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
     bool RequestRobot(uint32 senderid, const std::string& request, std::string* response);
     bool SendStar(uint32 count);

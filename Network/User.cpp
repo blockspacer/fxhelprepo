@@ -293,6 +293,11 @@ uint32 User::GetClanId() const
     return clanid_;
 }
 
+uint32 User::GetRichlevel() const
+{
+    return richlevel_;
+}
+
 bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
     const base::Callback<void()>& conn_break_callback)
 {
@@ -446,6 +451,27 @@ bool User::SendChatMessage(uint32 roomid, const std::string& message)
         return false;
     }
     return room->second->SendChatMessage(nickname_, richlevel_, message);
+}
+
+bool User::SendPrivateMessageToSinger(uint32 roomid, const std::string& message)
+{
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+
+    RoomChatMessage responseChat;
+    responseChat.roomid = roomid;
+    responseChat.senderid = fanxingid_;
+    responseChat.sendername = nickname_;
+    responseChat.richlevel = richlevel_;
+    responseChat.receiverid = room->second->GetSingerId();
+    responseChat.receivername = room->second->GetSingerName();
+    responseChat.issecrect = true;
+    responseChat.chatmessage = message;
+
+    return room->second->SendChatMessage(responseChat);
 }
 
 bool User::SendChatMessageRobot(const RoomChatMessage& roomChatMessage)

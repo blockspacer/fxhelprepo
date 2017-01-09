@@ -98,6 +98,9 @@ protected:
     void UpdateWelcomeSetting();
     afx_msg void OnBnClickedBtnWelcomeSetting();
 
+    afx_msg void OnBnClickedChkCheckVipV(); // 公屏欢迎隐身玩家
+    afx_msg void OnBnClickedChkPrivateNotify(); // 私聊主播:通知隐身玩家进入
+
     // 特殊欢迎操作
     afx_msg void OnBnClickedBtnAddWelcome();
     afx_msg void OnBnClickedBtnRemoveWelcome();
@@ -109,9 +112,6 @@ protected:
     // 点击列头排序
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
     static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-
-    // 是否识别隐身玩家功能
-    afx_msg void OnBnClickedChkCheckVipV();
 
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam);
@@ -198,6 +198,7 @@ private:
     CButton m_btn_remove_vest_sensitive;
 
     CButton m_chk_vip_v;
+    CButton m_chk_private_notify;
 
     CButton m_btn_welcome_setting;
     CButton m_btn_thanks_setting;

@@ -35,7 +35,12 @@ void EnterRoomStrategy::SetWelcomeLevel(uint32 level)
 
 void EnterRoomStrategy::SetWelcomeVipV(bool enable)
 {
-    vip_v_ = enable;
+    public_notify_vip_ = enable;
+}
+
+void EnterRoomStrategy::SetPrivateNotify(bool enable)
+{
+    private_notify_ = enable;
 }
 
 void EnterRoomStrategy::SetSpecialWelcomeContent(
@@ -88,11 +93,11 @@ bool EnterRoomStrategy::GetNormalWelcomeContent(
     }
     
     std::wstring user_pos = L"[玩家]";
-    auto find_name = normal_welcome_.find(user_pos);
+    auto find_name = normal_welcome->find(user_pos);
     if (find_name != std::wstring::npos)
     {
-        pre_ = normal_welcome_.substr(0, find_name);
-        post_ = normal_welcome_.substr(find_name + user_pos.length());
+        pre_ = normal_welcome->substr(0, find_name);
+        post_ = normal_welcome->substr(find_name + user_pos.length());
     }
 
     normal_welcome_ = *normal_welcome;
@@ -263,20 +268,12 @@ bool EnterRoomStrategy::LoadNormalWelcomeContent(std::wstring* normal_welcome)
 }
 
 bool EnterRoomStrategy::GetEnterWelcome(const EnterRoomUserInfo& enterinfo,
-    std::wstring* chatmessage)
+    std::wstring* chatmessage, std::wstring* private_msg)
 {
-    if (!welcome_flag_)
-        return false;
-
-    LOG(INFO) << __FUNCTION__ << L"rich level = " << base::UintToString16(enterinfo.richlevel) << L" / " << base::UintToString16(welcome_level_) << L"]";
-
-    if (enterinfo.richlevel < welcome_level_)//等级低于指定等级的不设置欢迎
-        return false;
-
-    if (!vip_v_ && enterinfo.vip_v) // 如果用户是白金vip,并且主播没有设置识别隐身用户,则不欢迎.
+    // 私聊,设置识别+vip+隐身
+    if (private_notify_ && enterinfo.vip_v && !enterinfo.visable)
     {
-        *chatmessage = L"欢迎神秘嘉宾";
-        return false;
+        *private_msg = base::UTF8ToWide(enterinfo.nickname) + L" ========";
     }
 
     std::wstring msg;
@@ -291,6 +288,28 @@ bool EnterRoomStrategy::GetEnterWelcome(const EnterRoomUserInfo& enterinfo,
         msg = pre_ + base::UTF8ToWide(enterinfo.nickname) + post_;
     }
 
-    chatmessage->assign(msg.begin(), msg.end());
+    // public_notify_vip_ 主播设置识别隐身用户
+    // enterinfo.vip_v && !enterinfo.visable 用户是白金vip并开启了隐身
+    if (public_notify_vip_ && enterinfo.vip_v && !enterinfo.visable)
+    {
+        *chatmessage = msg;
+    }
+
+    if (!welcome_flag_)
+        return false;
+
+    LOG(INFO) << __FUNCTION__ << L"rich level = " << base::UintToString16(enterinfo.richlevel) << L" / " << base::UintToString16(welcome_level_) << L"]";
+
+    if (enterinfo.richlevel < welcome_level_)//等级低于指定等级的不设置欢迎
+        return false;
+
+    if (!chatmessage->empty())
+        return true;
+
+    if (enterinfo.visable) // vip没隐身或者普通用户，都会是visable
+        *chatmessage = msg;
+    else
+        *chatmessage = L"欢迎神秘嘉宾";
+
     return true;
 }

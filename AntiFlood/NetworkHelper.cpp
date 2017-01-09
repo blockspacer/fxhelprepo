@@ -720,10 +720,17 @@ void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo
     TryHandleUser(enterRoomUserInfo);
 
     std::wstring chatmsg;
-    if (enterRoomStrategy_->GetEnterWelcome(enterRoomUserInfo, &chatmsg))
+    std::wstring private_msg; // 发送给主播的特别通知
+    if (!enterRoomStrategy_->GetEnterWelcome(enterRoomUserInfo, &chatmsg, &private_msg))
+        return;
+
+    user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
+
+    if (!private_msg.empty())
     {
-        user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
+        user_->SendPrivateMessageToSinger(roomid_, base::WideToUTF8(private_msg));
     }
+
     if (notify_)
     {
         notify_(chatmsg);

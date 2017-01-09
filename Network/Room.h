@@ -19,6 +19,14 @@ public:
     void SetRoomServerIp(const std::string& serverip);
     void SetTcpManager(TcpManager* tcpManager);
 
+    uint32 GetSingerId() const{
+        return singerid_;
+    };
+    std::string GetSingerName() const{
+        return nickname_;
+    }
+
+
     // 需要获得房间信息来做下一步操作的函数, 传出singer_clanid是为判断授权使用
     bool EnterForOperation(const std::string& cookies, 
         const std::string& usertoken, uint32 userid, uint32* singer_clanid,

@@ -29,6 +29,7 @@ public:
     void SetWelcomeFlag(bool enable);
     void SetWelcomeLevel(uint32 level);
     void SetWelcomeVipV(bool enable);
+    void SetPrivateNotify(bool enable);
 
     void SetSpecialWelcomeContent(const std::map<uint32, WelcomeInfo>& special_welcome);
     void GetSpecialWelcomeContent(std::map<uint32, WelcomeInfo>* special_welcome);
@@ -36,7 +37,8 @@ public:
     void SetNormalWelcomeContent(const std::wstring& normal_welcome);
     bool GetNormalWelcomeContent(std::wstring* normal_welcome);
 
-    bool GetEnterWelcome(const EnterRoomUserInfo& enterinfo, std::wstring* chatmessage);
+    bool GetEnterWelcome(const EnterRoomUserInfo& enterinfo,
+        std::wstring* chatmessage, std::wstring* display_msg);
 
 private:
     bool SaveSpecialWelcomeContent(const std::map<uint32, WelcomeInfo>& special_welcome) const;
@@ -47,7 +49,8 @@ private:
 
     bool welcome_flag_ = false;
     uint32 welcome_level_ = 0;
-    bool vip_v_ = false;
+    bool public_notify_vip_ = false;
+    bool private_notify_ = false; // 是否私聊主播,通知有隐身玩家进入
     base::Lock welcome_lock_;
     std::map<uint32, WelcomeInfo> welcome_info_map_;
     std::wstring normal_welcome_;

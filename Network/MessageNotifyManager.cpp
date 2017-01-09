@@ -606,6 +606,11 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
 								uint32 vip_v = GetInt32FromJsonValue(vipData, member);
 								enterRoomUserInfo.vip_v = (vip_v == 2); // 2是白金vip, 进入房间是隐身的
 							}
+                            else if (member.compare("c") == 0)
+                            {
+                                uint32 visable = GetInt32FromJsonValue(vipData, member);
+                                enterRoomUserInfo.visable = (visable == 0); // 0是不开隐身的，是可见的；1是开隐身的，是不可见的。
+                            }
 						}// for vipData_members
 					}
 				}// for extdata_members
@@ -1057,7 +1062,7 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
     root["receiverid"] = roomChatMessage.receiverid;
     root["receivername"] = roomChatMessage.receivername;
     root["chatmsg"] = roomChatMessage.chatmessage;
-    root["issecrect"] = roomChatMessage.issecrect;
+    root["issecrect"] = roomChatMessage.issecrect ? "1" : "0";
 
     std::string data = writer.write(root);
     std::vector<char> msg;

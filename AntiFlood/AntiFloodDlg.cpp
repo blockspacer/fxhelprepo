@@ -142,6 +142,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_BTN_ADD_VEST, m_btn_add_vest);
     DDX_Control(pDX, IDC_BTN_REMOVE_VEST, m_btn_remove_vest_sensitive);
     DDX_Control(pDX, IDC_CHK_CHECK_VIP_V, m_chk_vip_v);
+    DDX_Control(pDX, IDC_CHK_PRIVATE_NOTIFY, m_chk_private_notify);
     DDX_Control(pDX, IDC_BTN_WELCOME_SETTING, m_btn_welcome_setting);
     DDX_Control(pDX, IDC_BTN_THANKS_SETTING, m_btn_thanks_setting);
 }
@@ -197,6 +198,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_REMOVE_WELCOME, &CAntiFloodDlg::OnBnClickedBtnRemoveWelcome)
     ON_BN_CLICKED(IDC_BTN_SENSITIVE, &CAntiFloodDlg::OnBnClickedBtnSensitive)
     ON_BN_CLICKED(IDC_CHK_CHECK_VIP_V, &CAntiFloodDlg::OnBnClickedChkCheckVipV)
+    ON_BN_CLICKED(IDC_CHK_PRIVATE_NOTIFY, &CAntiFloodDlg::OnBnClickedChkPrivateNotify)
     ON_BN_CLICKED(IDC_BTN_THANKS_SETTING, &CAntiFloodDlg::OnBnClickedBtnThanksSetting)
     ON_BN_CLICKED(IDC_BTN_WELCOME_SETTING, &CAntiFloodDlg::OnBnClickedBtnWelcomeSetting)
 END_MESSAGE_MAP()
@@ -1556,6 +1558,10 @@ void CAntiFloodDlg::UpdateWelcomeSetting()
     base::StringToUint(base::WideToUTF8(welcome_level.GetBuffer()), &level);
     enterRoomStrategy_->SetWelcomeLevel(level);
 
+    // 不是很漂亮的实现方案
+    std::wstring normal_welcome;
+    enterRoomStrategy_->GetNormalWelcomeContent(&normal_welcome);
+
     Config config;
     config.SaveEnterRoomWelcome(enable, level);   
 }
@@ -1688,6 +1694,12 @@ void CAntiFloodDlg::OnBnClickedChkCheckVipV()
 {
     bool enable = !!m_chk_vip_v.GetCheck();
     enterRoomStrategy_->SetWelcomeVipV(enable);
+}
+
+void CAntiFloodDlg::OnBnClickedChkPrivateNotify()
+{
+    bool enable = !!m_chk_private_notify.GetCheck();
+    enterRoomStrategy_->SetPrivateNotify(enable);
 }
 
 void CAntiFloodDlg::OnBnClickedBtnThanksSetting()
