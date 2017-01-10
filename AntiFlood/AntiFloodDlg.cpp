@@ -201,6 +201,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_CHK_PRIVATE_NOTIFY, &CAntiFloodDlg::OnBnClickedChkPrivateNotify)
     ON_BN_CLICKED(IDC_BTN_THANKS_SETTING, &CAntiFloodDlg::OnBnClickedBtnThanksSetting)
     ON_BN_CLICKED(IDC_BTN_WELCOME_SETTING, &CAntiFloodDlg::OnBnClickedBtnWelcomeSetting)
+    ON_BN_CLICKED(IDC_BTN_PHONE_CITY_RANK, &CAntiFloodDlg::OnBnClickedBtnPhoneCityRank)
 END_MESSAGE_MAP()
 
 
@@ -1606,6 +1607,19 @@ void CAntiFloodDlg::UpdateRepeatChatSetting()
     network_->SetRoomRepeatChat(enable, seconds.GetBuffer(), chatmsg.GetBuffer());
     Config config;
     config.SaveRepeatChat(enable, chatmsg.GetBuffer(), seconds.GetBuffer());
+}
+
+void CAntiFloodDlg::OnBnClickedBtnPhoneCityRank()
+{
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        Notify(NOPRIVILEGE_NOTICE);
+        return;
+    }
 }
 
 void CAntiFloodDlg::OnBnClickedBtnAddWelcome()

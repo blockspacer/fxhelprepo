@@ -109,9 +109,13 @@ protected:
     afx_msg void OnBnClickedChkRepeatChat();
     void UpdateRepeatChatSetting();
 
+    // 获取手机同城排名
+    afx_msg void OnBnClickedBtnPhoneCityRank();
+
     // 点击列头排序
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
     static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
 
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam);
