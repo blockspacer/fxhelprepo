@@ -154,6 +154,8 @@ public:
     void SetRobotApiKey(const std::wstring& apikey);
     bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
 
+    void GetCityRankInfos(uint32 roomid);
+
 private:
     void NotifyCallback(const std::wstring& message);
     void NotifyCallback601(uint32 roomid, const RoomGiftInfo601& roomgiftinfo);
@@ -173,6 +175,7 @@ private:
 
     void DoSetRoomRepeatChat(bool enable, uint32 seconds, const std::wstring& chatmsg);
     void DoChatRepeat(const std::wstring& chatmsg);
+    void DoGetCityRankInfos(uint32 roomid);
 
     std::map<uint32, EnterRoomUserInfo> enterRoomUserInfoMap_;
     notifyfn notify_;

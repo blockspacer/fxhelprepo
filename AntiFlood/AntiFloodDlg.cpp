@@ -1620,6 +1620,8 @@ void CAntiFloodDlg::OnBnClickedBtnPhoneCityRank()
         Notify(NOPRIVILEGE_NOTICE);
         return;
     }
+
+    network_->GetCityRankInfos(roomid_);
 }
 
 void CAntiFloodDlg::OnBnClickedBtnAddWelcome()

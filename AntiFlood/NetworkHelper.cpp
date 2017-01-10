@@ -2,6 +2,7 @@
 #include <fstream>
 #include "NetworkHelper.h"
 
+#include "PhoneRank.h"
 #include "Network/TcpManager.h"
 #include "Network/User.h"
 #include "third_party/chromium/base/strings/sys_string_conversions.h"
@@ -622,6 +623,28 @@ void NetworkHelper::SetRobotApiKey(const std::wstring& apikey)
 bool NetworkHelper::SendChatMessageRobot(const RoomChatMessage& roomChatMessage)
 {
     return user_->SendChatMessageRobot(roomChatMessage);
+}
+
+void NetworkHelper::GetCityRankInfos(uint32 roomid)
+{
+    workThread_->message_loop_proxy()->PostTask(
+        FROM_HERE,
+        base::Bind(&NetworkHelper::DoGetCityRankInfos, 
+        base::Unretained(this), roomid));
+}
+
+void NetworkHelper::DoGetCityRankInfos(uint32 roomid)
+{
+    PhoneRank phone_rank;
+    std::wstring display_msg;
+    phone_rank.GetCityRankInfos(roomid,
+        base::Bind(&NetworkHelper::NotifyCallback,
+        base::Unretained(this)), &display_msg);
+
+    if (display_msg.empty())
+        return;
+
+    SendChatMessage(roomid, base::WideToUTF8(display_msg));
 }
 
 void NetworkHelper::SetHandleChatUsers(bool handleall501)

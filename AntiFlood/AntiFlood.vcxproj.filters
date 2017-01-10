@@ -57,6 +57,9 @@
     <ClInclude Include="GiftThanksSettingDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="PhoneRank.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -90,6 +93,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GiftThanksSettingDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PhoneRank.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
