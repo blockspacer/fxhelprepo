@@ -118,7 +118,7 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid,
             singer_info = it;
         }
 
-        if (it.status == 1)
+        if (it.status) // status=1,电脑直播 status=2,手机直播
             online_num++;
     }
 
