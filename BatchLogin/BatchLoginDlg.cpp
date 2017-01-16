@@ -8,7 +8,7 @@
 #include "BatchLogin.h"
 #include "BatchLoginDlg.h"
 #include "UserRoomManager.h"
-#include "Network/TcpManager.h"
+#include "Network/TcpClientController.h"
 #include "Network/TcpClient.h"
 #include "afxdialogex.h"
 #
@@ -48,7 +48,7 @@ CBatchLoginDlg::CBatchLoginDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CBatchLoginDlg::IDD, pParent)
     , userRoomManager_(nullptr)
 {
-    tcpManager_.reset(new TcpManager);
+    tcpManager_.reset(new TcpClientController);
     userRoomManager_.reset(new UserRoomManager(tcpManager_.get()));
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }

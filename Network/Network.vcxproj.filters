@@ -51,9 +51,6 @@
     <ClInclude Include="IpProxy.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="TcpManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="TcpProxyClient.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -67,6 +64,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="TcpClientController.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpDefines.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -99,9 +99,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="IpProxy.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="TcpManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TcpProxyClient.cpp">

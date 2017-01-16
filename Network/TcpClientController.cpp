@@ -27,16 +27,16 @@ Accept-Language: en-US,en;q=0.8
     };
 }
 
-ClientController::ClientController()
+TcpClientController::TcpClientController()
 {
 }
 
 
-ClientController::~ClientController()
+TcpClientController::~TcpClientController()
 {
 }
 
-bool ClientController::Initialize()
+bool TcpClientController::Initialize()
 {
     WORD wVersionRequested;
     WSADATA wsaData;
@@ -44,12 +44,12 @@ bool ClientController::Initialize()
     wVersionRequested = MAKEWORD(2, 2);
 
     (void)WSAStartup(wVersionRequested, &wsaData);
-    worker_thread_.reset(new std::thread(std::bind(&ClientController::WorkerFunction, this)));
+    worker_thread_.reset(new std::thread(std::bind(&TcpClientController::WorkerFunction, this)));
 
     return true;
 }
 
-void ClientController::Finalize()
+void TcpClientController::Finalize()
 {
     exit_flag_ = true;
     event_active(hup_event_, EV_SIGNAL, 1);
@@ -59,13 +59,13 @@ void ClientController::Finalize()
         worker_thread_->join();
 }
 
-bool ClientController::AddClient(AddClientCallback addcallback, const IpProxy& ipproxy,
+bool TcpClientController::AddClient(AddClientCallback addcallback, const IpProxy& ipproxy,
     const std::string& ip, uint16 port, ClientCallback callback)
 {
     return AddClient(ip, port, addcallback, callback);
 }
 
-bool ClientController::AddClient(const std::string&ip, uint16 port,
+bool TcpClientController::AddClient(const std::string&ip, uint16 port,
                                  ConnectCallback connect_cb, 
                                  DataReceiveCallback data_cb)
 {
@@ -79,7 +79,7 @@ bool ClientController::AddClient(const std::string&ip, uint16 port,
     return true;
 }
 
-void ClientController::RemoveClient(SocketHandle handle)
+void TcpClientController::RemoveClient(SocketHandle handle)
 {
     auto result = tcp_client_map_.find(handle);
     if (result != tcp_client_map_.end())
@@ -89,7 +89,7 @@ void ClientController::RemoveClient(SocketHandle handle)
     }
 }
 
-bool ClientController::Send(SocketHandle handle, const std::vector<uint8>& data, 
+bool TcpClientController::Send(SocketHandle handle, const std::vector<uint8>& data, 
                             SendDataCallback callback)
 {
     auto result = tcp_client_map_.find(handle);
@@ -99,12 +99,12 @@ bool ClientController::Send(SocketHandle handle, const std::vector<uint8>& data,
     return result->second->Send(data);
 }
 
-void ClientController::signal_cb(evutil_socket_t sock, short flags, void * args)
+void TcpClientController::signal_cb(intptr_t sock, short flags, void * args)
 {
 
 }
 
-void ClientController::WorkerFunction()
+void TcpClientController::WorkerFunction()
 {
     evthread_use_windows_threads();
     event_base_ = event_base_new();

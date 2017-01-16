@@ -68,7 +68,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;NDEBUG;_LIB;NOMINMAX;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;NDEBUG;_LIB;NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)third_party/chromium;$(SolutionDir)third_party\libevent\include;$(SolutionDir)third_party\libevent\WIN32-Code;$(SolutionDir)third_party\libevent\compat;$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -99,7 +99,7 @@
     <ClInclude Include="SingleTcpClient.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TcpManager.h" />
+    <ClInclude Include="TcpDefines.h" />
     <ClInclude Include="TcpProxyClient.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="utf_help.h" />
@@ -127,7 +127,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TcpClientController.cpp" />
-    <ClCompile Include="TcpManager.cpp" />
     <ClCompile Include="TcpProxyClient.cpp" />
     <ClCompile Include="User.cpp" />
   </ItemGroup>

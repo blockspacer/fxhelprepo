@@ -3,16 +3,12 @@
 #include <vector>
 #include <thread>
 #include <memory>
-#include "event2/event.h"
-#include "event2/util.h"
-#include "event2/thread.h"
+
 #include "third_party/chromium/base/basictypes.h"
+#include "Network/TcpDefines.h"
 
-typedef evutil_socket_t SocketHandle;
-
-typedef std::function<void(bool, std::vector<uint8>&)> DataReceiveCallback;
-typedef std::function<void(bool, SocketHandle)> ConnectCallback;
-typedef std::function<void(bool)> SendDataCallback;
+struct event_base;
+struct event;
 
 class SingleTcpClient
 {
@@ -26,14 +22,14 @@ public:
     void Close();
 
 private:
-    static void write_cb(evutil_socket_t sock, short flags, void * args);
-    static void read_cb(evutil_socket_t sock, short flags, void * args);
+    static void write_cb(intptr_t sock, short flags, void * args);
+    static void read_cb(intptr_t sock, short flags, void * args);
 
-    void OnConnect(evutil_socket_t sock, short flags);
-    void OnReceive(evutil_socket_t sock, short flags);
+    void OnConnect(intptr_t sock, short flags);
+    void OnReceive(intptr_t sock, short flags);
 
     struct event_base * base_;
-    evutil_socket_t sock_;
+    intptr_t sock_;
 
     struct event *ev_read_;
     struct event *ev_write_;

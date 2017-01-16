@@ -17,7 +17,7 @@ public:
     
     void SetIpProxy(const IpProxy& ipproxy);
     void SetRoomServerIp(const std::string& serverip);
-    void SetTcpManager(TcpManager* tcpManager);
+    void SetTcpManager(TcpClientController* tcpManager);
 
     uint32 GetSingerId() const{
         return singerid_;

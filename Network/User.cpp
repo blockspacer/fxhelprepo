@@ -107,7 +107,7 @@ void User::SetRoomServerIp(const std::string& serverip)
     serverip_ = response.server_ip;
 }
 
-void User::SetTcpManager(TcpManager* tcpManager)
+void User::SetTcpManager(TcpClientController* tcpManager)
 {
     tcpManager_ = tcpManager;
 }

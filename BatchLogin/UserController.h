@@ -7,7 +7,7 @@
 #undef min
 #include "third_party/chromium/base/basictypes.h"
 
-class TcpManager;
+class TcpClientController;
 class User;
 class MVBillboard;
 class IpProxy;
@@ -22,7 +22,7 @@ struct UserLoginInfo
 class UserController
 {
 public:
-    UserController(TcpManager* tcpManager);
+    UserController(TcpClientController* tcpManager);
     ~UserController();
 
     // 在已经知道cookie的情况下不需要再做比较费时的登录操作了
@@ -45,7 +45,7 @@ private:
     // 提供连接状态出错重连的功能
     void ConnectionBreakCallback(const std::string& user_name, uint32 room_id);
 
-    TcpManager* tcpManager_;
+    TcpClientController* tcpManager_;
     std::map<std::string, std::shared_ptr<User> > users_;
     std::unique_ptr<MVBillboard> mvBillboard_;
 };

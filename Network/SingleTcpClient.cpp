@@ -25,6 +25,7 @@ static evutil_socket_t make_tcp_socket()
 
     return sock;
 }
+
 }
 SingleTcpClient::SingleTcpClient()
 {
@@ -76,19 +77,19 @@ void SingleTcpClient::Close()
 }
 
 // 通知可以进行数据发送
-void SingleTcpClient::write_cb(evutil_socket_t sock, short flags, void * args)
+void SingleTcpClient::write_cb(intptr_t sock, short flags, void * args)
 {
     SingleTcpClient *client = (SingleTcpClient*)args;
     client->OnConnect(sock, flags);
 }
 
-void SingleTcpClient::read_cb(evutil_socket_t sock, short flags, void * args)
+void SingleTcpClient::read_cb(intptr_t sock, short flags, void * args)
 {
     SingleTcpClient *client = (SingleTcpClient*)args;
     client->OnReceive(sock, flags);
 }
 
-void SingleTcpClient::OnConnect(evutil_socket_t sock, short flags)
+void SingleTcpClient::OnConnect(intptr_t sock, short flags)
 {
     bool result = true;
     if (flags == EV_WRITE)
@@ -119,7 +120,7 @@ void SingleTcpClient::OnConnect(evutil_socket_t sock, short flags)
     connect_callback_(result, sock);
 }
 
-void SingleTcpClient::OnReceive(evutil_socket_t sock, short flags)
+void SingleTcpClient::OnReceive(intptr_t sock, short flags)
 {
     char buf[128 + 1];
     int ret = recv(sock, buf, 128, 0);

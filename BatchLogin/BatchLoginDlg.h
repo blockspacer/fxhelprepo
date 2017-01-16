@@ -13,7 +13,7 @@
 #include "afxwin.h"
 
 class UserRoomManager;
-class TcpManager;
+class TcpClientController;
 // CBatchLoginDlg ¶Ô»°¿ò
 class CBatchLoginDlg : public CDialogEx
 {
@@ -58,7 +58,7 @@ private:
     LRESULT OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam);
 
     std::unique_ptr<UserRoomManager> userRoomManager_;
-    std::unique_ptr<TcpManager> tcpManager_;
+    std::unique_ptr<TcpClientController> tcpManager_;
     CListCtrl m_ListCtrl_Users;
     CListCtrl m_ListCtrl_Rooms;
     CListCtrl m_list_proxy;

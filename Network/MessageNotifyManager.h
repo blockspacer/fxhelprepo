@@ -11,12 +11,15 @@
 #include "third_party/chromium/base/threading/thread.h"
 #include "Network/IpProxy.h"
 //#include "Network/TcpClient.h"
-#include "Network/TcpProxyClient.h"
+//#include "Network/TcpProxyClient.h"
+#include "Network/TcpDefines.h"
+//#include "Network/SingleTcpClient.h"
 #include "Network/BetData.h"
 
 //class TcpClient;
-class TcpManager;
+class TcpClientController;
 
+//typedef int SocketHandle;
 // 201消息回来解析后出去的数据包
 struct EnterRoomUserInfo 
 {
@@ -82,7 +85,7 @@ public:
 
     bool Initialize();
     void Finalize();
-    void SetTcpManager(TcpManager* tcpManager);
+    void SetTcpManager(TcpClientController* tcpManager);
     void SetServerIp(const std::string& serverip);
     void SetIpProxy(const IpProxy& ipproxy);
 
@@ -161,7 +164,7 @@ private:
 
     NormalNotify normalNotify_;
 
-    TcpManager* tcpManager_;
+    TcpClientController* tcp_client_controller_;
     base::Callback<void()> conn_break_callback_; // 处理掉线问题
     bool connected_;// 未连接时和连接失败后，都不应该处理回调和线程任务
 

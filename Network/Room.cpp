@@ -31,7 +31,7 @@ void Room::SetRoomServerIp(const std::string& serverip)
     messageNotifyManager_->SetServerIp(serverip);
 }
 
-void Room::SetTcpManager(TcpManager* tcpManager)
+void Room::SetTcpManager(TcpClientController* tcpManager)
 {
     messageNotifyManager_->SetTcpManager(tcpManager);
 }

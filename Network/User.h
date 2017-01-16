@@ -22,7 +22,7 @@ enum class ROOM_STATE
     IN_ROOM = 1
 };
 
-class TcpManager;
+class TcpClientController;
 class CurlWrapper;
 class CookiesHelper;
 class Room;
@@ -51,7 +51,7 @@ public:
 
     void SetRoomServerIp(const std::string& serverip);
 
-    void SetTcpManager(TcpManager* tcpManager);
+    void SetTcpManager(TcpClientController* tcpManager);
 
     //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
     void SetNormalNotify(NormalNotify normalNotify);
@@ -120,7 +120,7 @@ private:
     bool Worship_(const std::string& cookies, uint32 roomid, uint32 userid,
         std::string* errormsg);
 
-    TcpManager* tcpManager_;
+    TcpClientController* tcpManager_;
     std::string username_;
     std::string password_;
     std::string serverip_;

@@ -10,7 +10,7 @@ namespace
     //const char* serverip = "42.62.68.50";
     const char* serverip = "114.54.2.205";
 }
-UserController::UserController(TcpManager* tcpManager)
+UserController::UserController(TcpClientController* tcpManager)
     : mvBillboard_(new MVBillboard)
     , tcpManager_(tcpManager)
 {
