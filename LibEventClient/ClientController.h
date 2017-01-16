@@ -19,7 +19,7 @@ public:
     bool Initialize();
     void Finalize();
 
-    TCPHANDLE AddClient(const std::string&ip, uint16 port,
+    bool AddClient(const std::string&ip, uint16 port,
                    ConnectCallback connect_cb, DataReceiveCallback data_cb);
     void RemoveClient(TCPHANDLE handle);
 

@@ -59,12 +59,15 @@ void ClientController::Finalize()
         worker_thread_->join();
 }
 
-TCPHANDLE ClientController::AddClient(const std::string&ip, uint16 port,
+bool ClientController::AddClient(const std::string&ip, uint16 port,
                                  ConnectCallback connect_cb, 
                                  DataReceiveCallback data_cb)
 {
     SingleTcpClient* client = new SingleTcpClient;
     TCPHANDLE handle = client->Connect(event_base_, ip, port, connect_cb, data_cb);
+    if (handle <= 0)
+        return false;
+
     tcp_client_map_.erase(handle);
     tcp_client_map_[handle] = client;
     return true;

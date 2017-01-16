@@ -26,6 +26,9 @@ private:
     static void write_cb(evutil_socket_t sock, short flags, void * args);
     static void read_cb(evutil_socket_t sock, short flags, void * args);
 
+    void OnConnect(evutil_socket_t sock, short flags);
+    void OnReceive(evutil_socket_t sock, short flags);
+
     struct event_base * base_;
     evutil_socket_t sock_;
 

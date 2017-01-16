@@ -66,6 +66,7 @@ bool SingleTcpClient::Send(const std::vector<uint8>& data)
 
 void SingleTcpClient::Close()
 {
+    closesocket(sock_);
     return;
 }
 
@@ -73,36 +74,74 @@ void SingleTcpClient::Close()
 void SingleTcpClient::write_cb(evutil_socket_t sock, short flags, void * args)
 {
     SingleTcpClient *client = (SingleTcpClient*)args;
-    //int ret = send(sock, data.data(), data.length(), 0);
-    bool result = true;
-    if (EV_TIMEOUT & flags)
-        result = false;
-
-    if (client->connect_callback_)
-    {
-        client->connect_callback_(result);
-    }
-    event_add(client->ev_read_, 0);
+    client->OnConnect(sock, flags);
 }
 
 void SingleTcpClient::read_cb(evutil_socket_t sock, short flags, void * args)
 {
     SingleTcpClient *client = (SingleTcpClient*)args;
+    client->OnReceive(sock, flags);
+}
+
+void SingleTcpClient::OnConnect(evutil_socket_t sock, short flags)
+{
+    bool result = true;
+    if (flags == EV_WRITE)
+    {
+        int err;
+        int len = sizeof(err);
+        getsockopt(sock, SOL_SOCKET, SO_ERROR, (char FAR *)(&err), &len);
+        if (err)
+        {
+            printf("connect return ev_write, but check failed\n");
+            this->Close();
+            result = false;
+        }
+        else
+        {
+            result = true;
+            event_add(ev_read_, 0);
+            printf("connect return ev_write, check ok\n");
+        }
+    }
+    else
+    {  // timeout  
+        printf("connect return failed, for timeout\n");
+        this->Close();
+        result = false;
+    }
+
+    connect_callback_(result);
+}
+
+void SingleTcpClient::OnReceive(evutil_socket_t sock, short flags)
+{
     char buf[128 + 1];
     int ret = recv(sock, buf, 128, 0);
+    std::vector<uint8> data;
 
     printf("read_cb, read %d bytes\n", ret);
-    if (ret > 0)
-    {
-        buf[ret] = 0;
-        printf("recv:%s\n", buf);
-    }
-    else if (ret == 0)
+
+    if (ret == 0)
     {
         printf("read_cb connection closed\n");
-        //event_base_loopexit(ec->base, NULL);
+        this->Close();
+        event_del(ev_read_);
+        data_receive_callback_(false, data);
+        return;
+    }
+    else if (ret < 0)
+    {
+        printf("read_cb connection error\n");
+        this->Close();
+        event_del(ev_read_);
+        data_receive_callback_(false, data);
         return;
     }
 
-    event_add(client->ev_read_, 0);
+    // 正常处理数据
+    buf[ret] = 0;
+    printf("recv:%s\n", buf);
+    data.assign(buf, buf+ret);
+    data_receive_callback_(true, data);
 }
