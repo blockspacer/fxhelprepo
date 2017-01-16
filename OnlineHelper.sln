@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "third_party", "third_party", "{5D2BA8C2-3BD9-49B6-AC01-A3C43CC2CA8E}"
 EndProject
@@ -76,6 +76,12 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sqlite", "sqlite", "{2365C98C-4EB5-4E7E-A5B9-D796373140F1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sqlite", "third_party\chromium\third_party\sqlite\sqlite.vcxproj", "{5C9BFB96-DBB0-FBFB-52B9-02D595EE5D84}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libevent", "libevent", "{F8988CEB-A81B-45E3-9632-E869C99C3110}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libevent", "third_party\libevent\libevent.vcxproj", "{122D9E2C-1EB4-488C-AD38-463F7B1BC447}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibEventClient", "LibEventClient\LibEventClient.vcxproj", "{C64550A4-1857-4A16-8D68-7BCCC434BD7C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -239,6 +245,18 @@ Global
 		{5C9BFB96-DBB0-FBFB-52B9-02D595EE5D84}.Release|Win32.Build.0 = Release|Win32
 		{5C9BFB96-DBB0-FBFB-52B9-02D595EE5D84}.Release|x64.ActiveCfg = Release|x64
 		{5C9BFB96-DBB0-FBFB-52B9-02D595EE5D84}.Release|x64.Build.0 = Release|x64
+		{122D9E2C-1EB4-488C-AD38-463F7B1BC447}.Debug|Win32.ActiveCfg = Debug|Win32
+		{122D9E2C-1EB4-488C-AD38-463F7B1BC447}.Debug|Win32.Build.0 = Debug|Win32
+		{122D9E2C-1EB4-488C-AD38-463F7B1BC447}.Debug|x64.ActiveCfg = Debug|Win32
+		{122D9E2C-1EB4-488C-AD38-463F7B1BC447}.Release|Win32.ActiveCfg = Release|Win32
+		{122D9E2C-1EB4-488C-AD38-463F7B1BC447}.Release|Win32.Build.0 = Release|Win32
+		{122D9E2C-1EB4-488C-AD38-463F7B1BC447}.Release|x64.ActiveCfg = Release|Win32
+		{C64550A4-1857-4A16-8D68-7BCCC434BD7C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C64550A4-1857-4A16-8D68-7BCCC434BD7C}.Debug|Win32.Build.0 = Debug|Win32
+		{C64550A4-1857-4A16-8D68-7BCCC434BD7C}.Debug|x64.ActiveCfg = Debug|Win32
+		{C64550A4-1857-4A16-8D68-7BCCC434BD7C}.Release|Win32.ActiveCfg = Release|Win32
+		{C64550A4-1857-4A16-8D68-7BCCC434BD7C}.Release|Win32.Build.0 = Release|Win32
+		{C64550A4-1857-4A16-8D68-7BCCC434BD7C}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -269,5 +287,7 @@ Global
 		{7D366195-6190-3F15-30C4-52836DB24C56} = {913B3457-C22F-401E-9C20-4261C98FF9EF}
 		{2365C98C-4EB5-4E7E-A5B9-D796373140F1} = {02CF909C-76F9-48D8-9B22-8C54F29D034C}
 		{5C9BFB96-DBB0-FBFB-52B9-02D595EE5D84} = {2365C98C-4EB5-4E7E-A5B9-D796373140F1}
+		{F8988CEB-A81B-45E3-9632-E869C99C3110} = {5D2BA8C2-3BD9-49B6-AC01-A3C43CC2CA8E}
+		{122D9E2C-1EB4-488C-AD38-463F7B1BC447} = {F8988CEB-A81B-45E3-9632-E869C99C3110}
 	EndGlobalSection
 EndGlobal

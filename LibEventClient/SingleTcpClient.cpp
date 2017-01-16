@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "SingleTcpClient.h"
-
+#include "assert.h"
 #include <signal.h>
 
 #include "event2/event.h"
