@@ -11,6 +11,8 @@
 #include "third_party/chromium/base/timer/timer.h"
 #include "third_party/chromium/base/threading/thread.h"
 
+// 仅供旧版本测试代码使用，新版本不使用此文件
+
 // 提供TCP连接功能，发送数据，接收数据；
 // 需要关联一个线程进去，运行收发数据
 class Thread;

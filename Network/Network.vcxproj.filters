@@ -42,9 +42,6 @@
     <ClInclude Include="CookiesHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="TcpClient.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Room.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -66,6 +63,12 @@
     <ClInclude Include="BetData.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SingleTcpClient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TcpClientController.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -81,9 +84,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="EncodeHelper.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="TcpClient.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="User.cpp">
@@ -108,6 +108,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="easy_http_impl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SingleTcpClient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TcpClientController.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

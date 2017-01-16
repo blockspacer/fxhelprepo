@@ -3,6 +3,8 @@
 #include "EncodeHelper.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
+// 仅供旧版本测试代码使用，新版本不使用此文件
+
 TcpClient::TcpClient()
     : socket_(0)
 {
