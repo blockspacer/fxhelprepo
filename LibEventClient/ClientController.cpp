@@ -83,6 +83,16 @@ void ClientController::RemoveClient(TCPHANDLE handle)
     }
 }
 
+bool ClientController::Send(TCPHANDLE handle, const std::vector<uint8>& data, 
+                            SendDataCallback callback)
+{
+    auto result = tcp_client_map_.find(handle);
+    if (result == tcp_client_map_.end())
+        return false;
+
+    return result->second->Send(data);
+}
+
 void ClientController::signal_cb(evutil_socket_t sock, short flags, void * args)
 {
 

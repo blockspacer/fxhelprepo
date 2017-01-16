@@ -23,6 +23,8 @@ public:
                    ConnectCallback connect_cb, DataReceiveCallback data_cb);
     void RemoveClient(TCPHANDLE handle);
 
+    bool Send(TCPHANDLE handle, const std::vector<uint8>& data, SendDataCallback callback);
+
 private:
     static void signal_cb(evutil_socket_t sock, short flags, void * args);
 

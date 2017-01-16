@@ -8,10 +8,13 @@
 #include "event2/thread.h"
 #include "third_party/chromium/base/basictypes.h"
 
-typedef std::function<void(bool, std::vector<uint8>&)> DataReceiveCallback;
-typedef std::function<void(bool)> ConnectCallback;
-
 typedef evutil_socket_t TCPHANDLE;
+
+typedef std::function<void(bool, std::vector<uint8>&)> DataReceiveCallback;
+typedef std::function<void(bool, TCPHANDLE)> ConnectCallback;
+typedef std::function<void(bool)> SendDataCallback;
+
+
 class SingleTcpClient
 {
 public:
@@ -19,6 +22,7 @@ public:
     ~SingleTcpClient();
     TCPHANDLE Connect(struct event_base * base, const std::string&ip, uint16 port,
                  ConnectCallback connect_cb, DataReceiveCallback data_cb);
+
     bool Send(const std::vector<uint8>& data);
     void Close();
 

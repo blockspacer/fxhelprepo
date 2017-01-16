@@ -61,7 +61,12 @@ TCPHANDLE SingleTcpClient::Connect(struct event_base * base,
 bool SingleTcpClient::Send(const std::vector<uint8>& data)
 {
     int len = send(sock_, (char*)data.data(), data.size(), 0);
-    return false;
+    if (len < 0)
+    {
+        int errorcode = WSAGetLastError();
+    }
+    
+    return (len == data.size());
 }
 
 void SingleTcpClient::Close()
@@ -111,7 +116,7 @@ void SingleTcpClient::OnConnect(evutil_socket_t sock, short flags)
         result = false;
     }
 
-    connect_callback_(result);
+    connect_callback_(result, sock);
 }
 
 void SingleTcpClient::OnReceive(evutil_socket_t sock, short flags)
