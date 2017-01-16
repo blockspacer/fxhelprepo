@@ -52,13 +52,13 @@ bool TcpManager::AddClient(AddClientCallback addcallback,
         addcallback, callback));
 }
 
-void TcpManager::RemoveClient(TcpHandle handle)
+void TcpManager::RemoveClient(SocketHandle handle)
 {
     baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
         base::Bind(&TcpManager::DoRemoveClient, this, handle));
 }
 
-bool TcpManager::Send(TcpHandle handle, const std::vector<char>& data,
+bool TcpManager::Send(SocketHandle handle, const std::vector<char>& data,
     SendDataCallback callback)
 {
     return baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
@@ -77,7 +77,7 @@ void TcpManager::DoAddClient(std::shared_ptr<TcpProxyClient> client,
                                                base::Bind(&TcpManager::DoRecv, this));
 }
 
-void TcpManager::DoRemoveClient(TcpHandle handle)
+void TcpManager::DoRemoveClient(SocketHandle handle)
 {
     auto result = newcallbacks_.find(handle);
     if (result == newcallbacks_.end())
@@ -87,7 +87,7 @@ void TcpManager::DoRemoveClient(TcpHandle handle)
     newcallbacks_.erase(result);
 }
 
-void TcpManager::DoSend(TcpHandle handle, const std::vector<char>& data, SendDataCallback callback)
+void TcpManager::DoSend(SocketHandle handle, const std::vector<char>& data, SendDataCallback callback)
 {
     int len = send(handle, data.data(), data.size(), 0);
     if (len<0)

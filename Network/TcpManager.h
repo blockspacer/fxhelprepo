@@ -8,7 +8,7 @@
 #include <WinSock.h>
 
 #include "IpProxy.h"
-#include "TcpClient.h"
+//#include "TcpClient.h"
 #include "TcpProxyClient.h"
 
 #include "third_party/chromium/base/basictypes.h"
@@ -34,17 +34,17 @@ public:
 
     bool AddClient(AddClientCallback addcallback, const IpProxy& ipproxy,
         const std::string& ip, uint16 port, ClientCallback callback);
-    void RemoveClient(TcpHandle handle);
-    bool Send(TcpHandle handle, const std::vector<char>& data, SendDataCallback callback);
+    void RemoveClient(SocketHandle handle);
+    bool Send(SocketHandle handle, const std::vector<char>& data, SendDataCallback callback);
 private:
 
     void DoAddClient(std::shared_ptr<TcpProxyClient> client, 
         AddClientCallback addcallback, ClientCallback callback);
-    void DoRemoveClient(TcpHandle handle);
-    void DoSend(TcpHandle handle, const std::vector<char>& data, SendDataCallback callback);
+    void DoRemoveClient(SocketHandle handle);
+    void DoSend(SocketHandle handle, const std::vector<char>& data, SendDataCallback callback);
     void DoRecv();
     void DoRemoveAllClient();
-    std::map<TcpHandle, ClientCallback> callbacks_;
+    std::map<SocketHandle, ClientCallback> callbacks_;
 
     std::map<SocketHandle, std::pair<std::shared_ptr<TcpProxyClient>,ClientCallback>> newcallbacks_;
 
@@ -53,8 +53,8 @@ private:
 };
 
 //
-//TcpHandle g_handle;
-//void tcpclientcallback(TcpManager* tcpmanager, bool result, TcpHandle handle)
+//SocketHandle g_handle;
+//void tcpclientcallback(TcpManager* tcpmanager, bool result, SocketHandle handle)
 //{
 //    if (!result)
 //        return;

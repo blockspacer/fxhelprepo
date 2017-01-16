@@ -10,10 +10,11 @@
 #include "third_party/chromium/base/timer/timer.h"
 #include "third_party/chromium/base/threading/thread.h"
 #include "Network/IpProxy.h"
-#include "Network/TcpClient.h"
+//#include "Network/TcpClient.h"
+#include "Network/TcpProxyClient.h"
 #include "Network/BetData.h"
 
-class TcpClient;
+//class TcpClient;
 class TcpManager;
 
 // 201消息回来解析后出去的数据包
@@ -115,30 +116,30 @@ private:
 
     // 使用新的高效的多路tcp请求分发模式
     static void NewConnect843Callback(std::weak_ptr<MessageNotifyManager> weakptr,
-        bool result, TcpHandle handle);
+        bool result, SocketHandle handle);
     static void NewConnect8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
         uint32 roomid, uint32 userid,
         const std::string& usertoken,
-        bool result, TcpHandle handle);
+        bool result, SocketHandle handle);
     static void NewData843Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
         uint32 roomid, uint32 userid, const std::string& usertoken, bool result, 
         const std::vector<uint8>& data);
     static void NewData8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
         bool result, const std::vector<uint8>& data);
     static void NewSendDataCallback(std::weak_ptr<MessageNotifyManager> weakptr, 
-        TcpHandle handle, bool result);
+        SocketHandle handle, bool result);
 
-    void DoNewConnect843Callback(bool result, TcpHandle handle);
+    void DoNewConnect843Callback(bool result, SocketHandle handle);
     void DoNewConnect8080Callback(uint32 roomid, uint32 userid,
                              const std::string& usertoken,
-                             bool result, TcpHandle handle);
+                             bool result, SocketHandle handle);
     void DoNewData843Callback(uint32 roomid, uint32 userid,
         const std::string& usertoken, bool result, const std::vector<uint8>& data);
     void DoNewData8080Callback(bool result, const std::vector<uint8>& data);
 
-    void DoNewSendHeartBeat(TcpHandle handle);
+    void DoNewSendHeartBeat(SocketHandle handle);
     void DoNewSendChatMessage(const std::vector<char>& msg); // 发言需要符合间隔时间
-    void DoNewSendDataCallback(TcpHandle handle, bool result);
+    void DoNewSendDataCallback(SocketHandle handle, bool result);
 
     base::Thread baseThread_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;
@@ -147,11 +148,11 @@ private:
     std::string Packet_ = "";
     int position_ = 0;
 
-    std::unique_ptr<TcpClient> tcpClient_8080_;
-    std::unique_ptr<TcpClient> tcpClient_843_;
+    //std::unique_ptr<TcpClient> tcpClient_8080_;
+    //std::unique_ptr<TcpClient> tcpClient_843_;
 
-    TcpHandle tcphandle_8080_ = -1;
-    TcpHandle tcphandle_843_ = -1;
+    SocketHandle SocketHandle_8080_ = -1;
+    SocketHandle SocketHandle_843_ = -1;
 
     Notify201 notify201_;
     Notify501 notify501_;

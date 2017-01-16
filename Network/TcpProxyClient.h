@@ -1,9 +1,9 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <WinSock.h>
 #include "third_party/chromium/base/basictypes.h"
 #include "IpProxy.h"
-#include "TcpClient.h"
 
 typedef SOCKET SocketHandle;
 class SocketWrapper

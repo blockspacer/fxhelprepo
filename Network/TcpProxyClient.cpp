@@ -1,7 +1,7 @@
 #include <assert.h>
 #include "IpProxy.h"
 #include "TcpProxyClient.h"
-#include "Network/TcpClient.h"
+//#include "Network/TcpClient.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
 SocketWrapper::SocketWrapper()
