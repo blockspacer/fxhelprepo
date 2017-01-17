@@ -62,10 +62,10 @@ void TcpClientController::Finalize()
 bool TcpClientController::AddClient(AddClientCallback addcallback, const IpProxy& ipproxy,
     const std::string& ip, uint16 port, ClientCallback callback)
 {
-    return AddClient(ip, port, addcallback, callback);
+    return InnerAddClient(ip, port, addcallback, callback);
 }
 
-bool TcpClientController::AddClient(const std::string&ip, uint16 port,
+bool TcpClientController::InnerAddClient(const std::string&ip, uint16 port,
                                  ConnectCallback connect_cb, 
                                  DataReceiveCallback data_cb)
 {
@@ -84,6 +84,7 @@ void TcpClientController::RemoveClient(SocketHandle handle)
     auto result = tcp_client_map_.find(handle);
     if (result != tcp_client_map_.end())
     {
+        result->second->Close();
         delete result->second;
         tcp_client_map_.erase(result);
     }

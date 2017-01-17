@@ -91,20 +91,20 @@ std::string User::GetCookies() const
 // 因为进房连接的ip是通过dns解析"chat1.fanxing.kugou.com"地址决定的
 void User::SetRoomServerIp(const std::string& serverip)
 {
-    //serverip_ = serverip;
-    const char* url = "chat1.fanxing.kugou.com";
-    HttpRequest request;
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.url = url;
-    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
-        request.ipproxy = ipproxy_;
+    serverip_ = serverip;
+    //const char* url = "chat1.fanxing.kugou.com";
+    //HttpRequest request;
+    //request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    //request.url = url;
+    //if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    //    request.ipproxy = ipproxy_;
 
-    HttpResponse response;
-    // 这里请求是都失败的，但是可以从dns解析里拿到目标地址
-    curlWrapper_->Execute(request, &response);
+    //HttpResponse response;
+    //// 这里请求是都失败的，但是可以从dns解析里拿到目标地址
+    //curlWrapper_->Execute(request, &response);
 
-    assert(!response.server_ip.empty());
-    serverip_ = response.server_ip;
+    //assert(!response.server_ip.empty());
+    //serverip_ = response.server_ip;
 }
 
 void User::SetTcpManager(TcpClientController* tcpManager)

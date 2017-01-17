@@ -226,17 +226,19 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
         CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
 
         // 暂时全部走用户名密码登录流程
-        accountPassword[account.GetBuffer()] = password.GetBuffer();
-        //if (cookies.IsEmpty())
-        //    accountPassword[account.GetBuffer()] = password.GetBuffer();
-        //else
-        //    accountCookies[account.GetBuffer()] = cookies.GetBuffer();
+        //accountPassword[account.GetBuffer()] = password.GetBuffer();
+        if (cookies.IsEmpty())
+            accountPassword[account.GetBuffer()] = password.GetBuffer();
+        else
+            accountCookies[account.GetBuffer()] = cookies.GetBuffer();
     }
+    if (!accountCookies.empty())
+        userRoomManager_->BatchLogUsersWithCookie(accountCookies);
+
     if (!accountPassword.empty())
         userRoomManager_->BatchLogUsers(accountPassword);
 
-    if (!accountCookies.empty())
-        userRoomManager_->BatchLogUsersWithCookie(accountCookies);
+
 }
 
 void CBatchLoginDlg::OnBnClickedBtnImportRoom()

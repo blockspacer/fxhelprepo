@@ -54,8 +54,9 @@ SocketHandle SingleTcpClient::Connect(struct event_base * base,
     memset(serverAddr.sin_zero, 0x00, 8);
     connect(sock_, (SOCKADDR*)&serverAddr, sizeof(serverAddr));
     ev_write_ = event_new(base_, sock_, EV_WRITE, SingleTcpClient::write_cb, (void*)this);
-    ev_read_ = event_new(base_, sock_, EV_READ, SingleTcpClient::read_cb, (void*)this);
+    ev_read_ = event_new(base_, sock_, EV_READ | EV_PERSIST, SingleTcpClient::read_cb, (void*)this);
     event_add(ev_write_, &tv);
+    //event_add(ev_read_, &tv);
     return sock_;
 }
 
@@ -73,6 +74,7 @@ bool SingleTcpClient::Send(const std::vector<uint8>& data)
 void SingleTcpClient::Close()
 {
     closesocket(sock_);
+    event_del(ev_read_);
     return;
 }
 
@@ -122,8 +124,8 @@ void SingleTcpClient::OnConnect(intptr_t sock, short flags)
 
 void SingleTcpClient::OnReceive(intptr_t sock, short flags)
 {
-    char buf[128 + 1];
-    int ret = recv(sock, buf, 128, 0);
+    char buf[4096];
+    int ret = recv(sock, buf, 4096, 0);
     std::vector<uint8> data;
 
     printf("read_cb, read %d bytes\n", ret);
@@ -146,8 +148,7 @@ void SingleTcpClient::OnReceive(intptr_t sock, short flags)
     }
 
     // 正常处理数据
-    buf[ret] = 0;
-    printf("recv:%s\n", buf);
+    printf("recv data");
     data.assign(buf, buf+ret);
     data_receive_callback_(true, data);
 }

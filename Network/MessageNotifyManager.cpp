@@ -944,7 +944,6 @@ void MessageNotifyManager::DoNewConnect8080Callback(uint32 roomid, uint32 userid
 void MessageNotifyManager::DoNewData843Callback(uint32 roomid, uint32 userid,
     const std::string& usertoken, bool result, const std::vector<uint8>& data)
 {
-    tcp_client_controller_->RemoveClient(SocketHandle_843_);
     if (!result)
     {
         assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
@@ -961,6 +960,12 @@ void MessageNotifyManager::DoNewData8080Callback(bool result, const std::vector<
 {
     if (!connected_) // 如果已经被标记为断开连接，那么不要回调了，此时上层的room可能已经被使用者删除
         return;
+
+    //if (SocketHandle_843_ > 0)
+    //{
+    //    tcp_client_controller_->RemoveClient(SocketHandle_843_);
+    //    SocketHandle_843_ = 0;
+    //}
 
     if (!result)
     {

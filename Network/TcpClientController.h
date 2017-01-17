@@ -34,7 +34,7 @@ public:
 
 private:
 
-    bool AddClient(const std::string&ip, uint16 port,
+    bool InnerAddClient(const std::string&ip, uint16 port,
         ConnectCallback connect_cb, DataReceiveCallback data_cb);
 
     static void signal_cb(intptr_t sock, short flags, void * args);
