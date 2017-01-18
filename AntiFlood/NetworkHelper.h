@@ -17,7 +17,7 @@ class GiftNotifyManager;
 class GiftInfoHelper;
 class GiftInfo;
 class User;
-class TcpManager;
+class TcpClientController;
 
 typedef std::function<void(const std::wstring&)> notifyfn;
 
@@ -192,7 +192,7 @@ private:
     std::shared_ptr<AntiStrategy> antiStrategy_;
     std::shared_ptr<GiftStrategy> giftStrategy_;
     std::shared_ptr<EnterRoomStrategy> enterRoomStrategy_;
-    std::unique_ptr<TcpManager> tcpmanager_;
+    std::unique_ptr<TcpClientController> tcp_client_controller_;
 
     scoped_ptr<base::Thread> workThread_;
     base::RepeatingTimer<NetworkHelper> chatRepeatingTimer_;

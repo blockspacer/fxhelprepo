@@ -6,7 +6,7 @@
 #include "Network/easy_http_impl.h"
 #include "Network/EncodeHelper.h"
 #include "AuthorityHelper.h"
-#include "Network/TcpManager.h"
+#include "Network/TcpClientController.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/bind.h"
@@ -15,7 +15,7 @@ WorshipHelper::WorshipHelper()
     :curl_wrapper_(new CurlWrapper)
     , easy_http_impl_(new EasyHttpImpl)
     , worker_thread_(new base::Thread("WorshipHelper"))
-    , tcp_manager_(new TcpManager)
+    , tcp_manager_(new TcpClientController)
     , user_(nullptr) //必须先登录再让操作
 {
 }

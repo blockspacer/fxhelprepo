@@ -157,7 +157,7 @@ private:
     std::unique_ptr<CurlWrapper> curl_wrapper_;
     std::unique_ptr<EasyHttpImpl> easy_http_impl_;
     std::unique_ptr<WorshipAuthority> worship_authority_;
-    std::unique_ptr<TcpManager> tcp_manager_;
+    std::unique_ptr<TcpClientController> tcp_manager_;
     std::wstring authority_msg_;
 
     std::map<uint32, std::map<uint32, EnterRoomUserInfo>> roomid_userid_map_;

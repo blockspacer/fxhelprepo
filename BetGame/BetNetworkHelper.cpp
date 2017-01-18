@@ -13,7 +13,7 @@ namespace
 }
 
 BetNetworkHelper::BetNetworkHelper()
-    : tcp_manager_(new TcpManager)
+    : tcp_manager_(new TcpClientController)
     , worker_thread_(new base::Thread("worker_thread"))
     , database_(new BetGameDatabase)
     , retry_break_seconds_(1)

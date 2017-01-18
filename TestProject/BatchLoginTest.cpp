@@ -8,7 +8,7 @@ void ConnectBreakCallback()
 {
 }
 
-void SingleUserSingleRoomTest(TcpManager* tcp_manager)
+void SingleUserSingleRoomTest(TcpClientController* tcp_manager)
 {
     bool result = true;
     User user;
