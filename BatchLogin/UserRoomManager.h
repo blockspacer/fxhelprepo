@@ -39,6 +39,28 @@ public:
 
     bool UpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
 
+    bool RealSingLike(const std::vector<std::wstring>& users, const std::wstring& room_id,
+        const std::wstring& song_name, const std::wstring& delta);
+
+    bool SendGifts(const std::vector<std::wstring>& users, const std::wstring& room_id,
+        uint32 gift_id, uint32 gift_count);
+
+    bool RobVotes(const std::vector<std::wstring>& users, const std::wstring& room_id);
+
+    bool GetUserStorageInfos(const std::vector<std::wstring>& users,
+        std::vector<UserStorageInfo>* user_storage_infos);
+
+    bool BatchChangeNickname(const std::vector<std::wstring>& users,
+        const std::wstring& nickname_pre);
+
+    bool BatchChangeNicknameList(const std::vector<std::wstring>& users,
+        const std::vector<std::wstring>& nickname_list);
+
+    bool BatchChangeLogo(const std::vector<std::wstring>& users,
+        const std::wstring& logo_path);
+
+    void SetBreakRequest(bool interrupt);
+
 protected:
     void Notify(const std::wstring& msg);
     void DoSaveUserLoginConfig();
@@ -48,6 +70,16 @@ protected:
     void FillSingleRoom(uint32 roomid);
 
     void DoUpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
+    void DoRealSingLike(const std::string& account,
+        uint32 room_id, const std::wstring& song_name);
+
+    void DoSendGifts(const std::vector<std::wstring>& users,
+        uint32 roomid, uint32 gift_id, uint32 gift_count);
+    void DoRobVotes(const std::vector<std::wstring>& users, uint32 roomid);
+    void DoBatchChangeNickname(const std::vector<std::wstring>& users,
+        const std::wstring& nickname_pre);
+    void DoBatchChangeLogo(const std::vector<std::wstring>& users,
+        const std::wstring& logo_path);
 
 private:
     base::Thread workerThread_;
@@ -55,5 +87,6 @@ private:
     std::unique_ptr<UserController> userController_ = nullptr;
     std::unique_ptr<RoomController> roomController_ = nullptr;
     std::map<std::string, IpProxy> ipProxys_;
+    bool break_request_ = false;
 };
 

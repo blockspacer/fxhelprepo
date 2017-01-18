@@ -135,7 +135,7 @@ void SingleTcpClient::OnReceive(intptr_t sock, short flags)
         printf("read_cb connection closed\n");
         this->Close();
         event_del(ev_read_);
-        data_receive_callback_(false, data);
+        //data_receive_callback_(true, data);
         return;
     }
     else if (ret < 0)

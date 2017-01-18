@@ -293,6 +293,15 @@ uint32 User::GetClanId() const
     return clanid_;
 }
 
+bool User::GetRoom(uint32 roomid, std::shared_ptr<Room>* room)
+{
+    auto result = rooms_.find(roomid);
+    if (result == rooms_.end())
+        return false;
+
+    *room = result->second;
+    return true;
+}
 uint32 User::GetRichlevel() const
 {
     return richlevel_;
@@ -352,6 +361,7 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
 bool User::EnterRoomFopAlive(uint32 roomid,
     const base::Callback<void()>& conn_break_callback)
 {
+    assert(false);// 年度大奖不要调这个接口
     std::shared_ptr<Room> room(new Room(roomid));
     room->SetTcpManager(tcpManager_);
     room->SetRoomServerIp(serverip_);
@@ -418,6 +428,12 @@ bool User::OpenRoomAndGetViewerList(uint32 roomid,
     if (!room->OpenRoomAndGetViewerList(cookie, enterRoomUserInfoList))
         return false;
 
+    return true;
+}
+
+bool User::EnterRoomFopHttp(uint32 roomid, std::shared_ptr<Room> room)
+{
+    rooms_[roomid] = room;
     return true;
 }
 
@@ -540,9 +556,47 @@ bool User::RetrieveStart()
     return false;
 }
 
-bool User::SendGift(uint32 giftid)
+bool User::SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
+                    std::string* errormsg)
 {
-    return false;
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+    return room->second->SendGift(cookies, gift_id, gift_count, errormsg);
+}
+
+bool User::RealSingLike(uint32 roomid, const std::wstring& song_name,
+    std::string* errormsg)
+{
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+    return room->second->RealSingLike(cookies,
+        kugouid_, usertoken_, song_name, errormsg);
 }
 
 bool User::GetGiftList(uint32 roomid, std::string* content)
@@ -645,6 +699,264 @@ bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
     return room->second->UnbanChat(cookies, enterRoomUserInfo);
+}
+
+bool User::GetAnnualInfo(std::string* username, uint32 coin_count,
+    uint32* award_count, uint32* single_count) const
+{
+    return false;
+}
+
+bool User::RobVotes(uint32 roomid, uint32* award_count, uint32* single_count,
+                    std::string* errormsg)
+{
+    if (rooms_.find(roomid) == rooms_.end())
+    {
+        *errormsg = base::WideToUTF8(L"本地数据错误, 未进入房间");
+        return false;
+    }
+
+    std::string url = "http://service.fanxing.kugou.com/fxannualawards/api/StarAnnualAwards/robVotes";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://www.fanxing.kugou.com/" + base::UintToString(roomid);
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    queries["args"] = "[]";
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"开大奖票宝箱失败");
+        *errormsg = errorcode;
+        return false;
+    }
+
+    Json::Value jvdata(Json::ValueType::objectValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull() || !data.isObject())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string notifymsg = data.get(std::string("msg"), "").asString();
+    *errormsg = notifymsg;
+    return true;
+}
+
+bool User::GetStorageGift(UserStorageInfo* user_storage_info, std::string* errormsg)
+{
+    ///UServices/GiftService/StorageService/getStorageByUserId?args=[]&_=1476974477980
+    std::string url = "http://fanxing.kugou.com/UServices/GiftService/StorageService/getStorageByUserId";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://fanxing.kugou.com/index.php?action=userStorage";
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    queries["args"] = "[]";
+    queries["&_"] = GetNowTimeString();
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"请求仓库数据失败");
+        *errormsg = errorcode;
+        return false;
+    }
+
+    Json::Value jvdata(Json::ValueType::arrayValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull() || !data.isArray())
+    {
+        assert(false);
+        return false;
+    }
+
+    for (auto& giftitem : data)
+    {
+        uint32 gift_count = GetInt32FromJsonValue(giftitem, "num");
+        Json::Value iteminfo = giftitem.get("itemInfo", "");
+        if (iteminfo.isNull() || !iteminfo.isObject())
+        {
+            assert(false);
+            continue;
+        }
+        uint32 gift_id = GetInt32FromJsonValue(iteminfo, "id");
+        std::string gift_name = iteminfo.get("name", "no name").asString();
+        if (gift_id == TICKET_AWARD)
+        {
+            user_storage_info->gift_award += gift_count;
+        }
+        else if (gift_id == TICKET_SINGLE)
+        {
+            user_storage_info->gift_single += gift_count;
+        }
+    }
+
+    std::string temp;
+    LoginUServiceGetMyUserDataInfo(&temp);// 更新coin，丑陋一点先实现
+    user_storage_info->accountname = username_;
+    user_storage_info->nickname = nickname_;
+    user_storage_info->rich_level = richlevel_;
+    user_storage_info->coin = coin_;
+    return true;
+}
+
+bool User::ChangeNickname(const std::string& nickname, std::string* errormsg)
+{
+    ///UServices/UserService/UserService/setNickName?args=%5B%22smile%E7%9A%84%E5%B0%8F%E8%8B%97%E8%8B%971%22%5D&_=1477054242948
+    std::string url = "http://fanxing.kugou.com/UServices/UserService/UserService/setNickName";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://fanxing.kugou.com";
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    queries["args"] = std::string("%5B%22") + nickname + std::string("%22%5D");
+    queries["&_"] = GetNowTimeString();
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = GetInt32FromJsonValue(rootdata,"servertime");
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"改名失败");
+        *errormsg = errorcode;
+        return false;
+    }
+    return true;
+}
+
+bool User::ChangeLogo(const std::string& logo_path, std::string* errormsg)
+{
+    std::string url = "http://fanxing.kugou.com/UServices/UserService/UserService/setUserInfo";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://fanxing.kugou.com/index.php?action=userChangeLogo";
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    std::string args = std::string(R"([{"userLogo":")") + logo_path + R"("}])";
+    queries["args"] = UrlEncode(args);
+    queries["&_"] = GetNowTimeString();
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"更改头像失败");
+        *errormsg = errorcode;
+        return false;
+    }
+    return true;
 }
 
 

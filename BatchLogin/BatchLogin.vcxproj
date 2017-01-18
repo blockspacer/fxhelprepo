@@ -107,6 +107,7 @@
   <ItemGroup>
     <ClInclude Include="BatchLogin.h" />
     <ClInclude Include="BatchLoginDlg.h" />
+    <ClInclude Include="BlacklistHelper.h" />
     <ClInclude Include="MVBillboard.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RoomController.h" />
@@ -118,6 +119,7 @@
   <ItemGroup>
     <ClCompile Include="BatchLogin.cpp" />
     <ClCompile Include="BatchLoginDlg.cpp" />
+    <ClCompile Include="BlacklistHelper.cpp" />
     <ClCompile Include="MVBillboard.cpp" />
     <ClCompile Include="RoomController.cpp" />
     <ClCompile Include="stdafx.cpp">

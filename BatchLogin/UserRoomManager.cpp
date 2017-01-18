@@ -26,6 +26,7 @@ UserRoomManager::UserRoomManager(TcpClientController* tcpManager)
     :userController_(new UserController(tcpManager))
     , roomController_(new RoomController)
     , workerThread_("UserRoomManagerThread")
+    , break_request_(false)
 {
 }
 
@@ -299,6 +300,11 @@ void UserRoomManager::DoBatchLogUsers(
         }
 
         Notify(message);
+        if (break_request_)
+        {
+            Notify(L"用户中止操作，登录过程中断");
+            break;
+        }
     }
 }
 
@@ -322,7 +328,7 @@ void UserRoomManager::DoBatchLogUsersWithCookie(
         std::string account = base::WideToUTF8(it.first);
         std::string cookie = base::WideToUTF8(it.second);
         std::string errormsg;
-        std::wstring message = base::UTF8ToWide(account) + L" c登录";
+        std::wstring message = base::UTF8ToWide(account) + L" cookie登录";
         if (!userController_->AddUserWithCookies(account, cookie, ipproxy, &errormsg))
         {
             message += L"失败," + base::UTF8ToWide(errormsg);
@@ -333,6 +339,11 @@ void UserRoomManager::DoBatchLogUsersWithCookie(
         }
 
         Notify(message);
+        if (break_request_)
+        {
+            Notify(L"用户中止操作，登录过程中断");
+            break;
+        }
     }
 }
 
@@ -357,12 +368,19 @@ void UserRoomManager::DoFillRooms(const std::vector<uint32>& roomids)
     for (const auto& roomid : roomids)
     {
         FillSingleRoom(roomid);
+
+        if (break_request_)
+        {
+            Notify(L"用户中止操作，进入房间过程中断");
+            break;
+        }
     }
 }
 
 void UserRoomManager::FillSingleRoom(uint32 roomid)
 {
-    bool result = userController_->FillRoom(roomid, roomusercount);
+    bool result = userController_->FillRoom(roomid, roomusercount,
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
     assert(result && L"进入房间失败");
     std::wstring message = L"Fill Room ";
     message += result ? L"Success!" : L"Failed!";
@@ -379,13 +397,215 @@ bool UserRoomManager::UpMVBillboard(const std::wstring& collectionid,
 }
 
 void UserRoomManager::DoUpMVBillboard(const std::wstring& collectionid,
-    const std::wstring& mvid)
+                                      const std::wstring& mvid)
 {
+    // 这个函数年度不需要用,不执行中断操作
     bool result = userController_->UpMVBillboard(
         base::WideToUTF8(collectionid), base::WideToUTF8(mvid),
-        std::bind(&UserRoomManager::Notify,this,std::placeholders::_1));
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
     assert(result && L"打榜失败");
     std::wstring message = L"upgrade mv billboard ";
     message += result ? L"Success!" : L"Failed!";
     Notify(message);
+}
+
+bool UserRoomManager::RealSingLike(const std::vector<std::wstring>& users,
+    const std::wstring& room_id, const std::wstring& song_name,
+    const std::wstring& delta)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    uint32 roomid = 0;
+    base::StringToUint(base::WideToUTF8(room_id), &roomid);
+
+    uint32 time_delta = 0;
+    base::StringToUint(base::WideToUTF8(delta), &time_delta);
+
+    uint32 times = 1;
+    for (const auto& account : accounts)
+    {
+        workerThread_.message_loop_proxy()->PostDelayedTask(FROM_HERE,
+            base::Bind(&UserRoomManager::DoRealSingLike, this, account,
+            roomid, song_name), base::TimeDelta::FromMilliseconds(time_delta*times++));
+
+        if (break_request_)
+        {
+            Notify(L"用户中止操作，点赞过程中断");
+            break;
+        }
+    }
+    return true;
+}
+
+void UserRoomManager::DoRealSingLike(const std::string& account,
+    uint32 room_id, const std::wstring& song_name)
+{
+    if (break_request_)
+    {
+        Notify(L"用户中止操作，点赞过程中断");
+        return;
+    }
+
+//#ifdef _DEBUG
+//    Notify(L"用户测试点赞成功");
+//#else
+    userController_->RealSingLike(account, room_id, song_name,
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
+//#endif // _DEBUG
+}
+
+bool UserRoomManager::SendGifts(const std::vector<std::wstring>& users,
+    const std::wstring& room_id, uint32 gift_id, uint32 gift_count)
+{
+    uint32 i_room_id = 0;
+    if (!base::StringToUint(base::WideToUTF8(room_id), &i_room_id))
+        return false;
+
+    assert(i_room_id);
+    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserRoomManager::DoSendGifts, this, users,
+        i_room_id, gift_id, gift_count));
+    return true;
+}
+
+void UserRoomManager::DoSendGifts(const std::vector<std::wstring>& users, 
+    uint32 roomid, uint32 gift_id, uint32 gift_count)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    userController_->SendGifts(accounts, roomid, gift_id, gift_count,
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
+}
+
+bool UserRoomManager::RobVotes(const std::vector<std::wstring>& users, const std::wstring& room_id)
+{
+    uint32 i_room_id = 0;
+    if (!base::StringToUint(base::WideToUTF8(room_id), &i_room_id))
+        return false;
+
+    assert(i_room_id);
+    workerThread_.message_loop_proxy()->PostTask(
+        FROM_HERE, base::Bind(&UserRoomManager::DoRobVotes, this, users, 
+        i_room_id));
+
+    return true;
+}
+
+void UserRoomManager::DoRobVotes(const std::vector<std::wstring>& users, uint32 roomid)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    userController_->RobVotes(accounts, roomid,
+                              std::bind(&UserRoomManager::Notify, 
+                              this, std::placeholders::_1));
+}
+
+bool UserRoomManager::GetUserStorageInfos(const std::vector<std::wstring>& users, 
+    std::vector<UserStorageInfo>* user_storage_infos)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+
+    return userController_->GetUserStorageInfos(accounts, user_storage_infos,
+        std::bind(&UserRoomManager::Notify,
+        this, std::placeholders::_1));
+}
+
+bool UserRoomManager::BatchChangeNickname(const std::vector<std::wstring>& users,
+    const std::wstring& nickname_pre)
+{
+    return workerThread_.message_loop_proxy()->PostTask(
+        FROM_HERE, base::Bind(&UserRoomManager::DoBatchChangeNickname,
+        base::Unretained(this), users, nickname_pre));
+}
+
+void UserRoomManager::DoBatchChangeNickname(const std::vector<std::wstring>& users,
+    const std::wstring& nickname_pre)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    std::string str_nickname_pre = base::WideToUTF8(nickname_pre);
+    userController_->BatchChangeNickname(accounts, str_nickname_pre,
+        std::bind(&UserRoomManager::Notify,
+        this, std::placeholders::_1));
+}
+
+
+bool UserRoomManager::BatchChangeNicknameList(const std::vector<std::wstring>& users,
+    const std::vector<std::wstring>& nickname_list)
+{
+    if (nickname_list.size() < users.size())
+    {
+        Notify(L"新名字列表比用户列表数目少,请使用更多的名字信息");
+        return false;
+    }
+    std::vector<std::string> accounts;
+    std::wstring last_post = base::UTF8ToWide(GetNowTimeString().substr(6, 1));
+    for (uint32 index = 0; index < users.size(); index++)
+    {
+        std::string account = base::WideToUTF8(users[index]);
+        std::wstring temp = nickname_list[index];
+        temp += last_post;
+        last_post = temp[index%temp.size()];
+        if (temp.size()>15)
+        {
+            temp = temp.substr(0, 13);
+        }
+        std::string new_nickname = base::WideToUTF8(temp);
+        userController_->SingleChangeNickname(account, new_nickname,
+            std::bind(&UserRoomManager::Notify,
+            this, std::placeholders::_1));
+    }
+
+
+
+    return true;
+}
+
+bool UserRoomManager::BatchChangeLogo(const std::vector<std::wstring>& users,
+    const std::wstring& logo_path)
+{
+    return workerThread_.message_loop_proxy()->PostTask(
+        FROM_HERE, base::Bind(&UserRoomManager::DoBatchChangeLogo, this, users,
+        logo_path));
+}
+
+void UserRoomManager::DoBatchChangeLogo(const std::vector<std::wstring>& users,
+    const std::wstring& logo_path)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    std::string str_logo_path = base::WideToUTF8(logo_path);
+    userController_->BatchChangeLogo(accounts, str_logo_path,
+        std::bind(&UserRoomManager::Notify,
+        this, std::placeholders::_1));
+}
+
+void UserRoomManager::SetBreakRequest(bool interrupt)
+{
+    break_request_ = interrupt;
 }

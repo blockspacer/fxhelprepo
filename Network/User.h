@@ -22,6 +22,24 @@ enum class ROOM_STATE
     IN_ROOM = 1
 };
 
+enum TICKET_TYPE
+{
+    TICKET_AWARD = 870,
+    TICKET_SINGLE = 872
+};
+
+
+struct UserStorageInfo
+{
+    std::string accountname;
+    std::string nickname;
+    uint32 rich_level;
+    uint32 coin = 0;
+    uint32 gift_award = 0; // 大奖票
+    uint32 gift_single = 0; // 单项票
+};
+
+
 class TcpClientController;
 class CurlWrapper;
 class CookiesHelper;
@@ -77,12 +95,16 @@ public:
     uint32 GetClanId() const;
     uint32 GetRichlevel() const;
 
+    bool GetRoom(uint32 roomid, std::shared_ptr<Room>* room);
     bool EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
         const base::Callback<void()>& conn_break_callback);
     bool EnterRoomFopAlive(uint32 roomid, 
         const base::Callback<void ()>& conn_break_callback);
     bool OpenRoomAndGetViewerList(uint32 roomid,
         std::vector<EnterRoomUserInfo>* enterRoomUserInfoList);
+
+    bool EnterRoomFopHttp(uint32 roomid, std::shared_ptr<Room> room);
+
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();
 
@@ -93,7 +115,10 @@ public:
     bool RequestRobot(uint32 senderid, const std::string& request, std::string* response);
     bool SendStar(uint32 count);
     bool RetrieveStart();
-    bool SendGift(uint32 giftid);
+    bool SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
+                  std::string* errormsg);
+    bool RealSingLike(uint32 roomid, const std::wstring& song_name,
+        std::string* errormsg);
 
     bool GetGiftList(uint32 roomid, std::string* content);
     bool GetViewerList(uint32 roomid, 
@@ -103,8 +128,18 @@ public:
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
-    
+
+    // 年度相关功能
+    bool GetAnnualInfo(std::string* username, uint32 coin_count,
+        uint32* award_count, uint32* single_count) const;
+    bool RobVotes(uint32 roomid, uint32* award_count, uint32* single_count,
+                  std::string* errormsg);
+    bool GetStorageGift(UserStorageInfo* user_storage_info, std::string* errormsg);
+
     bool Worship(uint32 roomid, uint32 userid, std::string* errormsg);
+    bool ChangeNickname(const std::string& nickname, std::string* errormsg);
+
+    bool ChangeLogo(const std::string& logo_path, std::string* errormsg);
 
 private:
     bool CheckVerifyCode(const std::string& verifycode, std::string* errormsg);
@@ -149,5 +184,9 @@ private:
     Notify501 notify501_;
     Notify601 notify601_;
     Notify620 notify_620_;
+
+    // 年度活动需求，记录当前免费的大奖票和单项票数据
+    uint32 awards_ticket_count_;
+    uint32 single_ticket_count_;
 };
 

@@ -4,9 +4,33 @@
 #include "CookiesHelper.h"
 #include "EncodeHelper.h"
 
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/json/json.h"
 
+namespace
+{
+    bool MakePostdata(const std::map<std::string, std::string>& postmap,
+        std::vector<uint8>* postdata)
+    {
+        if (postmap.empty())
+            return false;
+
+        std::string temp;
+        bool first = true;
+        for (const auto& param : postmap)
+        {
+            if (first)
+                first = false;
+            else
+                temp += "&";
+
+            temp += param.first + "=" + UrlEncode(param.second);
+        }
+        postdata->assign(temp.begin(), temp.end());
+        return true;
+    }
+}
 Room::Room(uint32 roomid)
     :roomid_(roomid)
     , curlWrapper_(new CurlWrapper)
@@ -40,7 +64,6 @@ bool Room::EnterForOperation(const std::string& cookies,
     const std::string& usertoken, uint32 userid, uint32* singer_clanid,
     const base::Callback<void()>& conn_break_callback)
 {
-    std::string nickname = "";
     uint32 richlevel = 0;
     uint32 ismaster = 0;
     uint32 singerid = 0;
@@ -53,7 +76,11 @@ bool Room::EnterForOperation(const std::string& cookies,
     if (!GetStarInfo(cookies))
         return false;
 
-    GetStarGuard();
+    if (!GetStarKugouId(cookies))
+        return false;
+
+    // 年度大奖需求，不需要连接房间
+    //GetStarGuard();
 
     if (!EnterRoom(cookies, userid, usertoken))
         return false;
@@ -63,6 +90,9 @@ bool Room::EnterForOperation(const std::string& cookies,
 
     if (singer_clanid)
         *singer_clanid = clanid_;
+
+    //if (nickname)
+    //    *nickname = nickname_;
 
     return true;
 }
@@ -116,8 +146,12 @@ bool Room::GetGiftList(const std::string& cookies, std::string* content)
 
 // 主播繁星号, 礼物id, 数量, 房间号 _是时间
 // GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
-bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count)
+bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count,
+                    std::string* errormsg)
 {
+    assert(singerid_);
+    assert(roomid_);
+
     std::string url = "http://fanxing.kugou.com/";
     url += "/UServices/GiftService/GiftService/sendGift";
     HttpRequest request;
@@ -161,10 +195,59 @@ bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_coun
     uint32 errorno = GetInt32FromJsonValue(rootdata, "errorno");
     if (status != 1 || errorno!=0 )
     {
-        assert(false && L"送礼物请求失败");
+        *errormsg = rootdata.get("errorcode", "").asString();
         return false;
     }
     
+    return true;
+}
+
+
+bool Room::RealSingLike(const std::string& cookies, uint32 user_kugou_id, 
+    const std::string& user_token,
+    const std::wstring& song_name, std::string* errormsg)
+{
+    assert(singerid_);
+    assert(roomid_);
+
+    std::string url = "http://service.fanxing.com";
+    url += "/singlike/realsinglike/like";
+    HttpRequest request;
+    request.url = url;
+    request.cookies = cookies;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_POST;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid_);
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    std::map<std::string, std::string> postmap;
+    postmap["times"] = GetNowTimeString();
+    postmap["appId"] = "1010";
+    postmap["pid"] = "90";
+    postmap["starKugouId"] = base::UintToString(star_kugou_id_); // kugouid, 不是繁星号
+    postmap["fanKugouId"] = base::UintToString(user_kugou_id); // kugouid, 不是繁星号
+    postmap["token"] = user_token;
+    postmap["callback"] = "postCallback";
+    postmap["songName"] = base::WideToUTF8(song_name);
+    MakePostdata(postmap, &request.postdata);
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+    if (responsedata.find("success") == std::string::npos)
+        return false;
+
     return true;
 }
 
@@ -489,7 +572,7 @@ bool Room::OpenRoom(const std::string& cookies)
 
     for (const auto& it : response.cookies)
     {
-        assert(false && L"这里应该是不会设置cookie的");
+        //assert(false && L"这里应该是不会设置cookie的");
         cookiesHelper_->SetCookies(it);
     }
 
@@ -619,6 +702,47 @@ bool Room::GetStarInfo(const std::string& cookies)
     return true;
 }
 
+bool Room::GetStarKugouId(const std::string& cookies)
+{
+    assert(singerid_);
+    std::string url = "http://fanxing.kugou.com";
+    url += "/index.php";
+    HttpRequest request;
+    request.url = url;
+    request.queries["action"] = "user";
+    request.queries["id"] = base::UintToString(singerid_);;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    std::string _starKugouId = "_starKugouId";
+    auto beginpos = responsedata.find(_starKugouId);
+    beginpos += _starKugouId.size();
+    beginpos = responsedata.find("\"", beginpos);
+    beginpos++;
+    auto endpos = responsedata.find("\"", beginpos);
+
+    std::string str_kugouid = responsedata.substr(beginpos, endpos - beginpos);
+
+    base::StringToUint(str_kugouid, &star_kugou_id_);
+
+    return true;
+}
 // 需要重写
 bool Room::EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken)
 {

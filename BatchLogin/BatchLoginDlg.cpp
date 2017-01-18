@@ -10,8 +10,11 @@
 #include "UserRoomManager.h"
 #include "Network/TcpClientController.h"
 #include "Network/TcpClient.h"
+#include "BlacklistHelper.h"
 #include "afxdialogex.h"
-#
+
+#include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,8 +27,10 @@ namespace{
         L"Cookie",
         L"用户id",
         L"昵称",
-        L"财富等级",
-        L"房间数"
+        L"等级",
+        L"星币",
+        L"大奖票",
+        L"单项票"
     };
 
     const wchar_t* roomcolumnlist[] = {
@@ -63,11 +68,16 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_LIST_USERS, m_ListCtrl_Users);
-    DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
+    //DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
     DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
-    DDX_Control(pDX, IDC_EDIT_MV_COLLECTION_ID, m_mv_collection_id);
-    DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
     DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
+    DDX_Control(pDX, IDC_EDIT_ROOMID, m_roomid);
+    DDX_Control(pDX, IDC_EDIT_GIFT_COUNT, m_gift_count);
+    DDX_Control(pDX, IDC_EDIT_NICKNAME_PRE, m_nickname);
+    DDX_Control(pDX, IDC_EDIT_PIC_PATH, m_logo_path);
+    DDX_Control(pDX, IDC_EDIT_SONG_NAME, m_edit_singlike);
+    DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
+    DDX_Control(pDX, IDC_EDIT_DELTA, m_edit_delta);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -76,14 +86,26 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_IMPORT_USER, &CBatchLoginDlg::OnBnClickedBtnImportUser)
     ON_BN_CLICKED(IDC_BTN_GET_PROXY, &CBatchLoginDlg::OnBnClickedBtnGetProxy)
     ON_BN_CLICKED(IDC_BTN_BATCH_ENTER_ROOM, &CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom)
-    ON_BN_CLICKED(IDC_BTN_IMPORT_ROOM, &CBatchLoginDlg::OnBnClickedBtnImportRoom)
+    //ON_BN_CLICKED(IDC_BTN_IMPORT_ROOM, &CBatchLoginDlg::OnBnClickedBtnImportRoom)
     ON_MESSAGE(WM_USER_NOTIFY_MESSAGE, &CBatchLoginDlg::OnNotifyMessage)
     ON_MESSAGE(WM_USER_USER_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToUserList)
     ON_MESSAGE(WM_USER_ROOM_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToRoomList)
 
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CBatchLoginDlg::OnBnClickedBtnLogin)
-    ON_BN_CLICKED(IDC_BTN_UP_MV_BILLBOARD, &CBatchLoginDlg::OnBnClickedBtnUpMvBillboard)
     ON_BN_CLICKED(IDC_BTN_SAVE_USER_PWD_COOKIE, &CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie)
+    //ON_NOTIFY(NM_CLICK, IDC_LIST_ROOM, &CBatchLoginDlg::OnNMClickListRoom)
+    ON_BN_CLICKED(IDC_BTN_SEND_AWARD, &CBatchLoginDlg::OnBnClickedBtnSendAward)
+    ON_BN_CLICKED(IDC_BTN_LOTTERY, &CBatchLoginDlg::OnBnClickedBtnLottery)
+    ON_BN_CLICKED(IDC_BTN_SEND_SINGLE, &CBatchLoginDlg::OnBnClickedBtnSendSingle)
+    ON_BN_CLICKED(IDC_BTN_BREAK, &CBatchLoginDlg::OnBnClickedBtnBreak)
+    ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CBatchLoginDlg::OnBnClickedBtnSelectAll)
+    ON_BN_CLICKED(IDC_BTN_REVERSE_SELECT, &CBatchLoginDlg::OnBnClickedBtnReverseSelect)
+    ON_BN_CLICKED(IDC_BTN_DELETE, &CBatchLoginDlg::OnBnClickedBtnDelete)
+    ON_BN_CLICKED(IDC_BTN_GET_USERINFO, &CBatchLoginDlg::OnBnClickedBtnGetUserinfo)
+    ON_BN_CLICKED(IDC_BTN_CHANGE_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeNickname)
+    ON_BN_CLICKED(IDC_BTN_CHANGE_LOGO, &CBatchLoginDlg::OnBnClickedBtnChangeLogo)
+    ON_BN_CLICKED(IDC_BTN_SINGELIKE, &CBatchLoginDlg::OnBnClickedBtnSingelike)
+    ON_BN_CLICKED(IDC_BTN_CHANGE_CONFIG_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname)
 END_MESSAGE_MAP()
 
 
@@ -111,17 +133,23 @@ BOOL CBatchLoginDlg::OnInitDialog()
         m_ListCtrl_Users.DeleteColumn(i);
     uint32 index = 0;
     for (const auto& it : usercolumnlist)
-        m_ListCtrl_Users.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
+    {
+        int len = 60;
+        if (index == 0 || index == 1 || index == 4)
+            len = 110;
+
+        m_ListCtrl_Users.InsertColumn(index++, it, LVCFMT_LEFT, len);//插入列
+    }
+        
 
 
-    m_ListCtrl_Rooms.SetExtendedStyle(dwStyle); //设置扩展风格
-    nColumnCount = m_ListCtrl_Rooms.GetHeaderCtrl()->GetItemCount();
-    for (int i = nColumnCount - 1; i >= 0; i--)
-        m_ListCtrl_Rooms.DeleteColumn(i);
-    index = 0;
-    for (const auto& it : roomcolumnlist)
-        m_ListCtrl_Rooms.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
-
+    //m_ListCtrl_Rooms.SetExtendedStyle(dwStyle); //设置扩展风格
+    //nColumnCount = m_ListCtrl_Rooms.GetHeaderCtrl()->GetItemCount();
+    //for (int i = nColumnCount - 1; i >= 0; i--)
+    //    m_ListCtrl_Rooms.DeleteColumn(i);
+    //index = 0;
+    //for (const auto& it : roomcolumnlist)
+    //    m_ListCtrl_Rooms.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
     
     m_list_proxy.SetExtendedStyle(dwStyle); //设置扩展风格
     nColumnCount = m_list_proxy.GetHeaderCtrl()->GetItemCount();
@@ -216,21 +244,26 @@ void CBatchLoginDlg::OnBnClickedBtnImportUser()
 
 void CBatchLoginDlg::OnBnClickedBtnLogin()
 {
+    userRoomManager_->SetBreakRequest(false);
+    bool use_cookie = !!m_chk_use_cookie.GetCheck();
     int itemcount = m_ListCtrl_Users.GetItemCount();
     std::map<std::wstring, std::wstring> accountPassword;
     std::map<std::wstring, std::wstring> accountCookies;
     for (int32 index = 0; index < itemcount; ++index)
     {
         CString account = m_ListCtrl_Users.GetItemText(index, 0);
-        CString password = m_ListCtrl_Users.GetItemText(index, 1);
-        CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
+        if (!!m_ListCtrl_Users.GetCheck(index))
+        {
+            CString account = m_ListCtrl_Users.GetItemText(index, 0);
+            CString password = m_ListCtrl_Users.GetItemText(index, 1);
+            CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
 
-        // 暂时全部走用户名密码登录流程
-        //accountPassword[account.GetBuffer()] = password.GetBuffer();
-        if (cookies.IsEmpty())
-            accountPassword[account.GetBuffer()] = password.GetBuffer();
-        else
-            accountCookies[account.GetBuffer()] = cookies.GetBuffer();
+            // 暂时全部走用户名密码登录流程
+            if (use_cookie)
+                accountCookies[account.GetBuffer()] = cookies.GetBuffer(); 
+            else
+                accountPassword[account.GetBuffer()] = password.GetBuffer();
+        }
     }
     if (!accountCookies.empty())
         userRoomManager_->BatchLogUsersWithCookie(accountCookies);
@@ -241,46 +274,48 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
 
 }
 
-void CBatchLoginDlg::OnBnClickedBtnImportRoom()
-{
-    GridData griddata;
-    uint32 total = 0;
-    if (!userRoomManager_->LoadRoomConfig(&griddata, &total))
-        return;
-
-    assert(griddata.size() == total);
-
-    // 显示数据到界面
-    int itemcount = m_ListCtrl_Rooms.GetItemCount();
-
-    for (uint32 i = 0; i < griddata.size(); ++i)
-    {
-        bool exist = false;
-        // 检测是否存在相同用户id
-        for (int index = 0; index < itemcount; index++)
-        {
-            CString text = m_ListCtrl_Rooms.GetItemText(index, 0);
-            if (griddata[i][0].compare(text.GetBuffer()) == 0) // 相同房间号
-            {
-                exist = true;
-                break;
-            }
-        }
-
-        if (!exist) // 如果不存在，需要插入新数据
-        {
-            int nitem = m_ListCtrl_Rooms.InsertItem(itemcount + i, griddata[i][0].c_str());
-            //m_ListCtrl_UserStatus.SetItemData(nitem, i);
-            for (uint32 j = 0; j < griddata[i].size(); ++j)
-            {
-                m_ListCtrl_Rooms.SetItemText(nitem, j, griddata[i][j].c_str());
-            }
-        }
-    }
-}
+//void CBatchLoginDlg::OnBnClickedBtnImportRoom()
+//{
+//    assert(false && L"年度不需要操作");
+//    GridData griddata;
+//    uint32 total = 0;
+//    if (!userRoomManager_->LoadRoomConfig(&griddata, &total))
+//        return;
+//
+//    assert(griddata.size() == total);
+//
+//    // 显示数据到界面
+//    int itemcount = m_ListCtrl_Rooms.GetItemCount();
+//
+//    for (uint32 i = 0; i < griddata.size(); ++i)
+//    {
+//        bool exist = false;
+//        // 检测是否存在相同用户id
+//        for (int index = 0; index < itemcount; index++)
+//        {
+//            CString text = m_ListCtrl_Rooms.GetItemText(index, 0);
+//            if (griddata[i][0].compare(text.GetBuffer()) == 0) // 相同房间号
+//            {
+//                exist = true;
+//                break;
+//            }
+//        }
+//
+//        if (!exist) // 如果不存在，需要插入新数据
+//        {
+//            int nitem = m_ListCtrl_Rooms.InsertItem(itemcount + i, griddata[i][0].c_str());
+//            //m_ListCtrl_UserStatus.SetItemData(nitem, i);
+//            for (uint32 j = 0; j < griddata[i].size(); ++j)
+//            {
+//                m_ListCtrl_Rooms.SetItemText(nitem, j, griddata[i][j].c_str());
+//            }
+//        }
+//    }
+//}
 
 void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 {
+    assert(false && L"年度不需要操作");
     GridData griddata;
     if (!userRoomManager_->LoadIpProxy(&griddata))
         return;
@@ -315,16 +350,21 @@ void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 
 void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
 {
-    int itemcount = m_ListCtrl_Rooms.GetItemCount();
+    userRoomManager_->SetBreakRequest(false);
+    //int itemcount = m_ListCtrl_Rooms.GetItemCount();
+    //std::vector<std::wstring> roomids;
+    //for (int32 index = 0; index < itemcount; ++index)
+    //{
+    //    if (!!m_ListCtrl_Rooms.GetCheck(index))
+    //    {
+    //        CString roomid = m_ListCtrl_Rooms.GetItemText(index, 0);
+    //        roomids.push_back(roomid.GetBuffer());
+    //    }
+    //}
     std::vector<std::wstring> roomids;
-    for (int32 index = 0; index < itemcount; ++index)
-    {
-        if (!!m_ListCtrl_Rooms.GetCheck(index))
-        {
-            CString roomid = m_ListCtrl_Rooms.GetItemText(index, 0);
-            roomids.push_back(roomid.GetBuffer());
-        }
-    }
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+    roomids.push_back(cs_roomid.GetBuffer());
     userRoomManager_->FillRooms(roomids);
 }
 
@@ -365,6 +405,8 @@ LRESULT CBatchLoginDlg::OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam)
 
 void CBatchLoginDlg::OnBnClickedBtnUpMvBillboard()
 {
+    assert(false && L"年度不需要操作");
+    userRoomManager_->SetBreakRequest(false);
     CString collectionid;
     CString mvid;
     m_mv_collection_id.GetWindowTextW(collectionid);
@@ -375,4 +417,276 @@ void CBatchLoginDlg::OnBnClickedBtnUpMvBillboard()
 void CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie()
 {
     userRoomManager_->SaveUserLoginConfig();
+}
+
+//void CBatchLoginDlg::OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult)
+//{
+//    LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+//    // TODO:  在此添加控件通知处理程序代码
+//    int row_id = m_ListCtrl_Rooms.GetSelectionMark();
+//    
+//    assert(pNMItemActivate->iItem == row_id);
+//
+//    for (int i = 0; i < sizeof(roomcolumnlist) / sizeof(roomcolumnlist[0]);i++)
+//    {
+//        CString text = m_ListCtrl_Rooms.GetItemText(row_id, i);
+//    }
+//    *pResult = 0;
+//}
+
+
+void CBatchLoginDlg::OnBnClickedBtnSendAward()
+{
+    userRoomManager_->SetBreakRequest(false);
+
+    // 869是大奖票
+    uint32 gift_id = 869;// 玫瑰的id是1
+#ifdef _DEBUG
+    gift_id = 1;
+#endif
+    SendGifts(gift_id);
+}
+
+void CBatchLoginDlg::OnBnClickedBtnSendSingle()
+{
+    userRoomManager_->SetBreakRequest(false);
+
+    // 871是单项票
+    uint32 gift_id = 871;
+#ifdef _DEBUG
+    gift_id = 1;// 玫瑰的id是1
+#endif
+    SendGifts(gift_id);
+}
+
+bool CBatchLoginDlg::SendGifts(uint32 gift_id)
+{
+    CString cs_gift_count;
+    m_gift_count.GetWindowTextW(cs_gift_count);
+    uint32 gift_count = 0;
+    base::StringToUint(base::WideToUTF8(cs_gift_count.GetBuffer()), &gift_count);
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    if (users.empty())
+    {
+        Notify(L"没有设置用户的投票任务");
+        return false;
+    }
+
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+
+    userRoomManager_->SendGifts(users,
+        cs_roomid.GetBuffer(), gift_id, gift_count);
+    return true;
+}
+
+void CBatchLoginDlg::OnBnClickedBtnLottery()
+{
+    userRoomManager_->SetBreakRequest(false);
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    // 从界面获取勾选的用户名
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    if (users.empty())
+    {
+        Notify(L"没有设置用户的抽奖任务");
+        return;
+    }
+    if (cs_roomid.IsEmpty())
+    {
+        Notify(L"请输入房间号");
+        return;
+    }
+
+    userRoomManager_->RobVotes(users, cs_roomid.GetBuffer());
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnBreak()
+{
+    userRoomManager_->SetBreakRequest(true);
+}
+
+void CBatchLoginDlg::GetSelectUsers(std::vector<std::wstring>* users)
+{
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    // 从界面获取勾选的用户名
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        CString account = m_ListCtrl_Users.GetItemText(index, 0);
+        if (!!m_ListCtrl_Users.GetCheck(index))
+        {
+            users->push_back(account.GetBuffer());
+        }
+    }
+}
+
+void CBatchLoginDlg::OnBnClickedBtnSelectAll()
+{
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        m_ListCtrl_Users.SetCheck(index, TRUE);
+    }
+}
+
+void CBatchLoginDlg::OnBnClickedBtnReverseSelect()
+{
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        if (m_ListCtrl_Users.GetCheck(index))
+        {
+            m_ListCtrl_Users.SetCheck(index, FALSE);
+        }
+        else
+        {
+            m_ListCtrl_Users.SetCheck(index, TRUE);
+        }
+    }
+}
+
+void CBatchLoginDlg::OnBnClickedBtnDelete()
+{
+    int count = m_ListCtrl_Users.GetItemCount();
+    int delete_count = 0;
+    for (int index = count - 1; index >= 0; --index)
+    {
+        if (m_ListCtrl_Users.GetCheck(index))
+        {
+            m_ListCtrl_Users.DeleteItem(index);
+            delete_count++;
+        }  
+    }
+    std::wstring msg = L"已经删 " + base::IntToString16(delete_count) + L"/" + base::IntToString16(count);
+    Notify(msg);
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnGetUserinfo()
+{
+    userRoomManager_->SetBreakRequest(false);
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    std::vector<UserStorageInfo> user_storage_infos;
+    userRoomManager_->GetUserStorageInfos(users, &user_storage_infos);
+
+
+    int count = m_ListCtrl_Users.GetItemCount();
+    for (int index = count - 1; index >= 0; --index)
+    {
+        if (!m_ListCtrl_Users.GetCheck(index))
+            continue;
+
+        CString cs_username = m_ListCtrl_Users.GetItemText(index, 0);
+        std::string username = base::WideToUTF8(cs_username.GetBuffer());
+        for (const auto& user_storage_info : user_storage_infos)
+        {
+            if (username.compare(user_storage_info.accountname) == 0)
+            {
+                m_ListCtrl_Users.SetItemText(index, 4,
+                    base::UTF8ToWide(user_storage_info.nickname).c_str());
+                m_ListCtrl_Users.SetItemText(index, 5,
+                    base::UintToString16(user_storage_info.rich_level).c_str());
+                m_ListCtrl_Users.SetItemText(index, 6,
+                    base::UintToString16(user_storage_info.coin).c_str());
+                m_ListCtrl_Users.SetItemText(index, 7,
+                    base::UintToString16(user_storage_info.gift_award).c_str());
+                m_ListCtrl_Users.SetItemText(index, 8,
+                    base::UintToString16(user_storage_info.gift_single).c_str());
+                break;
+            }
+        }
+    }
+}
+
+void CBatchLoginDlg::OnBnClickedBtnChangeNickname()
+{
+    CString nickname_pre;
+    m_nickname.GetWindowTextW(nickname_pre);
+    if (nickname_pre.IsEmpty())
+    {
+        Notify(L"改名失败");
+        return;
+    }
+
+    if (nickname_pre.GetLength() > 5)
+    {
+        Notify(L"改名失败,名字前缀不能超过5个字符");
+        return;
+    }
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    userRoomManager_->SetBreakRequest(false);
+    userRoomManager_->BatchChangeNickname(users, nickname_pre.GetBuffer());
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnChangeLogo()
+{
+    userRoomManager_->SetBreakRequest(false);
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    CString cs_logo_path;
+    m_logo_path.GetWindowTextW(cs_logo_path);
+    if (cs_logo_path.IsEmpty())
+    {
+        Notify(L"请输入头像路径");
+        return;
+    }
+
+    userRoomManager_->BatchChangeLogo(users, cs_logo_path.GetBuffer());
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnSingelike()
+{
+    userRoomManager_->SetBreakRequest(false);
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+
+    CString cs_delta;
+    m_edit_delta.GetWindowTextW(cs_delta);
+
+    CString songname;
+    m_edit_singlike.GetWindowTextW(songname);
+    userRoomManager_->RealSingLike(users, cs_roomid.GetBuffer(), songname.GetBuffer(), cs_delta.GetBuffer());
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname()
+{
+    BlacklistHelper blacklist_helper;
+
+    std::map<uint32, BlackInfo> blackInfoMap;
+    blacklist_helper.LoadFromFile(&blackInfoMap);
+
+    std::vector<std::wstring> name_list;
+    for (const auto& black : blackInfoMap)
+    {
+        name_list.push_back(base::UTF8ToWide(black.second.nickname));
+    }
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    userRoomManager_->SetBreakRequest(false);
+    userRoomManager_->BatchChangeNicknameList(users, name_list);
 }

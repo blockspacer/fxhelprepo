@@ -44,11 +44,22 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
     afx_msg void OnBnClickedBtnImportUser();
     afx_msg void OnBnClickedBtnLogin();
+    afx_msg void OnBnClickedBtnGetUserinfo();// 仓库信息，年度盛典使用
     afx_msg void OnBnClickedBtnGetProxy();
     afx_msg void OnBnClickedBtnBatchEnterRoom();
-    afx_msg void OnBnClickedBtnImportRoom();
+    //afx_msg void OnBnClickedBtnImportRoom();
     afx_msg void OnBnClickedBtnUpMvBillboard();
     afx_msg void OnBnClickedBtnSaveUserPwdCookie();
+    afx_msg void OnLvnItemchangedListRoom(NMHDR *pNMHDR, LRESULT *pResult);
+    //afx_msg void OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnBnClickedBtnSendAward();
+    afx_msg void OnBnClickedBtnSendSingle();
+    afx_msg void OnBnClickedBtnLottery();
+    afx_msg void OnBnClickedBtnBreak();
+
+    afx_msg void OnBnClickedBtnSelectAll();
+    afx_msg void OnBnClickedBtnReverseSelect();
+    afx_msg void OnBnClickedBtnDelete();
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -56,11 +67,13 @@ private:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToUserList(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam);
+    bool SendGifts(uint32 gift_id);
+    void GetSelectUsers(std::vector<std::wstring>* users);
 
     std::unique_ptr<UserRoomManager> userRoomManager_;
     std::unique_ptr<TcpClientController> tcpManager_;
     CListCtrl m_ListCtrl_Users;
-    CListCtrl m_ListCtrl_Rooms;
+    //CListCtrl m_ListCtrl_Rooms;
     CListCtrl m_list_proxy;
     CEdit m_mv_collection_id;
     CEdit m_mv_id;
@@ -69,5 +82,18 @@ private:
 
     std::mutex messageMutex_;
     std::vector<std::wstring> messageQueen_;    
-
+    CEdit m_roomid;
+    CEdit m_gift_count;
+public:
+    CEdit m_nickname;
+    afx_msg void OnBnClickedBtnChangeNickname();
+    CEdit m_logo_path;
+    afx_msg void OnBnClickedBtnChangeLogo();
+    afx_msg void OnBnClickedBtnSingelike();
+    CEdit m_edit_singlike;
+private:
+    CButton m_chk_use_cookie;
+    CEdit m_edit_delta;
+public:
+    afx_msg void OnBnClickedBtnChangeConfigNickname();
 };
