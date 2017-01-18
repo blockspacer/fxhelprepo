@@ -308,32 +308,18 @@ bool UserController::FillRoom(uint32 roomid, uint32 count,
         // 年度需求, 需要获取到足够信息，但是不需要连接信息
         std::wstring msg = base::UTF8ToWide(it.first) + L" 进入房间";
         std::string nickname;
-        if (first)
+
+        if (!it.second->EnterRoomFopAlive(roomid,
+            base::Bind(&UserController::ConnectionBreakCallback,
+            base::Unretained(this), it.second->GetUsername(),
+            roomid)))
         {
-            if (!it.second->EnterRoomFopAlive(roomid,
-                base::Bind(&UserController::ConnectionBreakCallback, 
-                base::Unretained(this),it.second->GetUsername(),
-                roomid)))
-            {
-                msg += L" 失败 ";
-            }
-            else
-            {
-                msg += L" 成功 ";
-                it.second->GetRoom(roomid, &shared_room);
-            }
-            first = false;
+            msg += L" 失败 ";
         }
         else
         {
-            if (!it.second->EnterRoomFopHttp(roomid, shared_room))
-            {
-                msg += L" 失败 ";
-            }
-            else
-            {
-                msg += L" 成功 ";
-            }
+            msg += L" 成功 ";
+            it.second->GetRoom(roomid, &shared_room);
         }
 
         msg += base::UTF8ToUTF16(nickname);

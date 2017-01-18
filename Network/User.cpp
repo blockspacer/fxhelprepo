@@ -361,7 +361,6 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
 bool User::EnterRoomFopAlive(uint32 roomid,
     const base::Callback<void()>& conn_break_callback)
 {
-    assert(false);// 年度大奖不要调这个接口
     std::shared_ptr<Room> room(new Room(roomid));
     room->SetTcpManager(tcpManager_);
     room->SetRoomServerIp(serverip_);
