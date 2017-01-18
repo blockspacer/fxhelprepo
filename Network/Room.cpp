@@ -37,10 +37,20 @@ Room::Room(uint32 roomid)
     , messageNotifyManager_(new MessageNotifyManager)
     , cookiesHelper_(new CookiesHelper)
 {
-    messageNotifyManager_->Initialize();
+    
 }
 
 Room::~Room()
+{
+
+}
+
+bool Room::Initialize(const scoped_refptr<base::TaskRunner>& runner)
+{
+    return messageNotifyManager_->Initialize(runner);
+}
+
+void Room::Finalize()
 {
     messageNotifyManager_->Finalize();
 }

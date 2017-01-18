@@ -54,6 +54,9 @@ public:
     //User(const std::string& username, const std::string& password);
     ~User();
 
+    bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
+    void Finalize();
+
     // 设置参数
     void SetUsername(const std::string& username);
     std::string GetUsername() const;
@@ -188,5 +191,7 @@ private:
     // 年度活动需求，记录当前免费的大奖票和单项票数据
     uint32 awards_ticket_count_;
     uint32 single_ticket_count_;
+
+    scoped_refptr<base::TaskRunner> runner_;
 };
 

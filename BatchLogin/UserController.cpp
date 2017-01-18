@@ -24,6 +24,16 @@ UserController::~UserController()
 {
 }
 
+bool UserController::Initialize(const scoped_refptr<base::TaskRunner>& runner)
+{
+    runner_ = runner;
+    return true;
+}
+
+void UserController::Finalize()
+{
+}
+
 bool UserController::AddUser(const std::string& username, 
     const std::string& password, const IpProxy& ipproxy, std::string* errormsg)
 {
@@ -36,6 +46,7 @@ bool UserController::AddUser(const std::string& username,
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         shared_user->SetIpProxy(ipproxy);
     
+    shared_user->Initialize(runner_);
     if (!shared_user->Login(username, password, "", errormsg))
     {
         std::wstring werror = base::UTF8ToWide(*errormsg);
@@ -63,6 +74,7 @@ bool UserController::AddUserWithCookies(const std::string& username,
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         shared_user->SetIpProxy(ipproxy);
 
+    shared_user->Initialize(runner_);
     if (!shared_user->LoginWithCookies(cookies, errormsg))
     {
         std::wstring werror = base::UTF8ToWide(*errormsg);

@@ -384,7 +384,8 @@ MessageNotifyManager::MessageNotifyManager()
     :notify201_(nullptr),
     notify501_(nullptr),
     notify601_(nullptr),
-    baseThread_("NetworkHelperThread" + base::IntToString(threadindex)),
+    //baseThread_("NetworkHelperThread" + base::IntToString(threadindex)),
+    runner_(nullptr),
     tcp_client_controller_(nullptr),
     conn_break_callback_(),
     connected_(false),
@@ -398,11 +399,12 @@ MessageNotifyManager::~MessageNotifyManager()
     
 }
 
-bool MessageNotifyManager::Initialize()
+bool MessageNotifyManager::Initialize(const scoped_refptr<base::TaskRunner>& runner)
 {
     //tcpClient_843_->Initialize();
     //tcpClient_8080_->Initialize();
-    baseThread_.Start();
+    runner_ = runner;
+    //baseThread_.Start();
     return true;
 }
 void MessageNotifyManager::Finalize()
@@ -416,8 +418,8 @@ void MessageNotifyManager::Finalize()
     if (newRepeatingTimer_.IsRunning())
         newRepeatingTimer_.Stop();
 
-    if (baseThread_.IsRunning())
-        baseThread_.Stop();
+    //if (baseThread_.IsRunning())
+    //    baseThread_.Stop();
     
     //tcpClient_843_->Finalize();
     //tcpClient_8080_->Finalize();
@@ -444,33 +446,33 @@ void MessageNotifyManager::SetIpProxy(const IpProxy& ipproxy)
 void MessageNotifyManager::SetNotify201(Notify201 notify201)
 {
     notify201_ = notify201;
-    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoSetNotify201, this, notify201));
 }
 
 void MessageNotifyManager::SetNotify501(Notify501 notify501)
 {
-    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoSetNotify501, this, notify501));
 }
 
 void MessageNotifyManager::SetNotify601(Notify601 notify601)
 {
     notify601_ = notify601;
-    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoSetNotify601, this, notify601));
 }
 
 void MessageNotifyManager::SetNotify620(Notify620 notify_620)
 {
     notify_620_ = notify_620;
-    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoSetNotify620, this, notify_620));
 }
 
 void MessageNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 {
-    baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoSetNormalNotify, this, normalNotify));
 }
 
@@ -807,7 +809,7 @@ void MessageNotifyManager::NewConnect843Callback(std::weak_ptr<MessageNotifyMana
     if (!obj)
         return;
 
-    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    obj->runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewConnect843Callback, 
                    obj.get(), result, handle));
 }
@@ -821,7 +823,7 @@ void MessageNotifyManager::NewConnect8080Callback(std::weak_ptr<MessageNotifyMan
     if (!obj)
         return;
 
-    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    obj->runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewConnect8080Callback,
         obj.get(), roomid, userid, usertoken, result, handle));
 }
@@ -834,7 +836,7 @@ void MessageNotifyManager::NewData843Callback(std::weak_ptr<MessageNotifyManager
     if (!obj)
         return;
 
-    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    obj->runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewData843Callback,
         obj.get(), roomid, userid, usertoken, result, data));
 }
@@ -845,7 +847,7 @@ void MessageNotifyManager::NewData8080Callback(std::weak_ptr<MessageNotifyManage
     if (!obj)
         return;
 
-    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    obj->runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewData8080Callback,
         obj.get(), result, data));
 }
@@ -857,7 +859,7 @@ void MessageNotifyManager::NewSendDataCallback(
     if (!obj)
         return;
 
-    obj->baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    obj->runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewSendDataCallback,
         obj.get(), handle, result));
 }
@@ -1001,7 +1003,7 @@ void MessageNotifyManager::DoNewSendChatMessage(const std::vector<char>& msg)
     // 间隔小于设置的值，重新投递消息
     if (base::Time::Now() - last_chat_time_ <= chat_message_space_)
     {
-        baseThread_.message_loop_proxy()->PostDelayedTask(FROM_HERE,
+        runner_->PostDelayedTask(FROM_HERE,
             base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg), 
             base::Time::Now() - last_chat_time_);
         return;
@@ -1056,7 +1058,7 @@ bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint3
     std::wstring ws_message = base::UTF8ToWide(message);
     LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(ws_message, 936);
 
-    return baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    return runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg));
 }
 
@@ -1079,6 +1081,6 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
     std::wstring message = base::UTF8ToWide(roomChatMessage.chatmessage);
     LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(message, 936);
 
-    return baseThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    return runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg));
 }

@@ -37,6 +37,8 @@ UserRoomManager::~UserRoomManager()
 bool UserRoomManager::Initialize()
 {
     workerThread_.Start();
+    runner_ = workerThread_.message_loop_proxy();
+    userController_->Initialize(runner_);
     return false;
 }
 
@@ -163,7 +165,7 @@ bool UserRoomManager::LoadRoomConfig(GridData* roomgrid, uint32* total) const
 
 bool UserRoomManager::SaveUserLoginConfig()
 {
-    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&UserRoomManager::DoSaveUserLoginConfig, this));
     return true;
 }
@@ -263,7 +265,7 @@ void UserRoomManager::DoSaveUserLoginConfig()
 bool UserRoomManager::BatchLogUsers(
     const std::map<std::wstring, std::wstring>& userAccountPassword)
 {
-    workerThread_.message_loop_proxy()->PostTask(FROM_HERE, 
+    runner_->PostTask(FROM_HERE,
         base::Bind(&UserRoomManager::DoBatchLogUsers, this, userAccountPassword));
     return true;
 }
@@ -311,7 +313,7 @@ void UserRoomManager::DoBatchLogUsers(
 bool UserRoomManager::BatchLogUsersWithCookie(
     const std::map<std::wstring, std::wstring>& accountCookie)
 {
-    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&UserRoomManager::DoBatchLogUsersWithCookie, this, accountCookie));
     return true;
 }
@@ -357,7 +359,7 @@ bool UserRoomManager::FillRooms(const std::vector<std::wstring>& roomids)
         base::StringToUint(utf8roomids, &roomid);
         iroomids.push_back(roomid);
     }
-    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&UserRoomManager::DoFillRooms, this, iroomids));
     return true;
 
@@ -390,7 +392,7 @@ void UserRoomManager::FillSingleRoom(uint32 roomid)
 bool UserRoomManager::UpMVBillboard(const std::wstring& collectionid, 
     const std::wstring& mvid)
 {
-    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&UserRoomManager::DoUpMVBillboard, this, collectionid,
         mvid));
     return true;
@@ -428,7 +430,7 @@ bool UserRoomManager::RealSingLike(const std::vector<std::wstring>& users,
     uint32 times = 1;
     for (const auto& account : accounts)
     {
-        workerThread_.message_loop_proxy()->PostDelayedTask(FROM_HERE,
+        runner_->PostDelayedTask(FROM_HERE,
             base::Bind(&UserRoomManager::DoRealSingLike, this, account,
             roomid, song_name), base::TimeDelta::FromMilliseconds(time_delta*times++));
 
@@ -466,7 +468,7 @@ bool UserRoomManager::SendGifts(const std::vector<std::wstring>& users,
         return false;
 
     assert(i_room_id);
-    workerThread_.message_loop_proxy()->PostTask(FROM_HERE,
+    runner_->PostTask(FROM_HERE,
         base::Bind(&UserRoomManager::DoSendGifts, this, users,
         i_room_id, gift_id, gift_count));
     return true;
@@ -492,7 +494,7 @@ bool UserRoomManager::RobVotes(const std::vector<std::wstring>& users, const std
         return false;
 
     assert(i_room_id);
-    workerThread_.message_loop_proxy()->PostTask(
+    runner_->PostTask(
         FROM_HERE, base::Bind(&UserRoomManager::DoRobVotes, this, users, 
         i_room_id));
 
@@ -530,7 +532,7 @@ bool UserRoomManager::GetUserStorageInfos(const std::vector<std::wstring>& users
 bool UserRoomManager::BatchChangeNickname(const std::vector<std::wstring>& users,
     const std::wstring& nickname_pre)
 {
-    return workerThread_.message_loop_proxy()->PostTask(
+    return runner_->PostTask(
         FROM_HERE, base::Bind(&UserRoomManager::DoBatchChangeNickname,
         base::Unretained(this), users, nickname_pre));
 }
@@ -585,7 +587,7 @@ bool UserRoomManager::BatchChangeNicknameList(const std::vector<std::wstring>& u
 bool UserRoomManager::BatchChangeLogo(const std::vector<std::wstring>& users,
     const std::wstring& logo_path)
 {
-    return workerThread_.message_loop_proxy()->PostTask(
+    return runner_->PostTask(
         FROM_HERE, base::Bind(&UserRoomManager::DoBatchChangeLogo, this, users,
         logo_path));
 }

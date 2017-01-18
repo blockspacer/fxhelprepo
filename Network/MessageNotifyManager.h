@@ -9,6 +9,7 @@
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/timer/timer.h"
 #include "third_party/chromium/base/threading/thread.h"
+#include "third_party/chromium/base/task_runner.h"
 #include "Network/IpProxy.h"
 //#include "Network/TcpClient.h"
 //#include "Network/TcpProxyClient.h"
@@ -83,7 +84,7 @@ public:
     static void AddRef() {}
     static void Release() {}
 
-    bool Initialize();
+    bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
     void Finalize();
     void SetTcpManager(TcpClientController* tcpManager);
     void SetServerIp(const std::string& serverip);
@@ -144,7 +145,8 @@ private:
     void DoNewSendChatMessage(const std::vector<char>& msg); // 发言需要符合间隔时间
     void DoNewSendDataCallback(SocketHandle handle, bool result);
 
-    base::Thread baseThread_;
+    //base::Thread baseThread_;
+    scoped_refptr<base::TaskRunner> runner_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;
     std::string serverip_ = "192.168.0.1";
     IpProxy ipProxy_;

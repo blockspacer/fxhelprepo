@@ -44,6 +44,16 @@ User::~User()
     Logout();
 }
 
+bool User::Initialize(const scoped_refptr<base::TaskRunner>& runner)
+{
+    runner_ = runner;
+    return true;
+}
+
+void User::Finalize()
+{
+}
+
 // …Ë÷√≤Œ ˝
 void User::SetUsername(const std::string& username)
 {
@@ -362,6 +372,7 @@ bool User::EnterRoomFopAlive(uint32 roomid,
     const base::Callback<void()>& conn_break_callback)
 {
     std::shared_ptr<Room> room(new Room(roomid));
+    room->Initialize(runner_);
     room->SetTcpManager(tcpManager_);
     room->SetRoomServerIp(serverip_);
     std::vector<std::string> keys;

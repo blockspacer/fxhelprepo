@@ -15,6 +15,9 @@ public:
     explicit Room(uint32 roomid);
     ~Room();
     
+    bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
+    void Finalize();
+
     void SetIpProxy(const IpProxy& ipproxy);
     void SetRoomServerIp(const std::string& serverip);
     void SetTcpManager(TcpClientController* tcpManager);

@@ -83,6 +83,7 @@ protected:
 
 private:
     base::Thread workerThread_;
+    scoped_refptr<base::TaskRunner> runner_;
     std::function<void(std::wstring)> notify_ = nullptr;
     std::unique_ptr<UserController> userController_ = nullptr;
     std::unique_ptr<RoomController> roomController_ = nullptr;

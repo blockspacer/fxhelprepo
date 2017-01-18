@@ -26,6 +26,9 @@ public:
     UserController(TcpClientController* tcpManager);
     ~UserController();
 
+    bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
+    void Finalize();
+
     // 在已经知道cookie的情况下不需要再做比较费时的登录操作了
     bool AddUserWithCookies(const std::string& username, 
         const std::string& cookies, const IpProxy& ipproxy, 
@@ -79,5 +82,7 @@ private:
     std::unique_ptr<MVBillboard> mvBillboard_;
 
     std::shared_ptr<Room> shared_room;
+
+    scoped_refptr<base::TaskRunner> runner_;
 };
 
