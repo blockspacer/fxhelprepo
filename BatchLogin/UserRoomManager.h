@@ -61,6 +61,9 @@ public:
 
     void SetBreakRequest(bool interrupt);
 
+    bool BatchSendChat(const std::wstring& roomid, const std::vector<std::wstring>& users,
+        const std::wstring& message);
+
 protected:
     void Notify(const std::wstring& msg);
     void DoSaveUserLoginConfig();
@@ -80,6 +83,9 @@ protected:
         const std::wstring& nickname_pre);
     void DoBatchChangeLogo(const std::vector<std::wstring>& users,
         const std::wstring& logo_path);
+
+    void DoBatchSendChat(uint32 roomid, const std::vector<std::string>& users, 
+        const std::string& message);
 
 private:
     base::Thread workerThread_;

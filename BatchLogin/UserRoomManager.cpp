@@ -611,3 +611,32 @@ void UserRoomManager::SetBreakRequest(bool interrupt)
 {
     break_request_ = interrupt;
 }
+
+bool UserRoomManager::BatchSendChat(const std::wstring& roomid, 
+    const std::vector<std::wstring>& users,
+    const std::wstring& message)
+{
+    std::string utf8roomids = base::WideToUTF8(roomid);
+    uint32 room_id = 0;
+    base::StringToUint(utf8roomids, &room_id);
+
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    std::string str_message = base::WideToUTF8(message);
+    return runner_->PostTask(
+        FROM_HERE, base::Bind(&UserRoomManager::DoBatchSendChat, this, 
+        room_id, accounts, str_message));
+}
+
+void UserRoomManager::DoBatchSendChat(uint32 roomid, 
+    const std::vector<std::string>& users, const std::string& message)
+{
+
+    userController_->BatchSendChat(roomid, users, message,
+        std::bind(&UserRoomManager::Notify,
+        this, std::placeholders::_1));
+}

@@ -60,6 +60,13 @@ protected:
     afx_msg void OnBnClickedBtnSelectAll();
     afx_msg void OnBnClickedBtnReverseSelect();
     afx_msg void OnBnClickedBtnDelete();
+
+    afx_msg void OnBnClickedBtnChangeNickname();
+    afx_msg void OnBnClickedBtnChangeLogo();
+    afx_msg void OnBnClickedBtnSingelike();
+    afx_msg void OnBnClickedBtnChangeConfigNickname();
+    afx_msg void OnBnClickedBtnBatchChat();
+
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -84,16 +91,13 @@ private:
     std::vector<std::wstring> messageQueen_;    
     CEdit m_roomid;
     CEdit m_gift_count;
-public:
+
     CEdit m_nickname;
-    afx_msg void OnBnClickedBtnChangeNickname();
     CEdit m_logo_path;
-    afx_msg void OnBnClickedBtnChangeLogo();
-    afx_msg void OnBnClickedBtnSingelike();
     CEdit m_edit_singlike;
-private:
+
     CButton m_chk_use_cookie;
     CEdit m_edit_delta;
-public:
-    afx_msg void OnBnClickedBtnChangeConfigNickname();
+
+    CEdit m_edit_chat_message;
 };

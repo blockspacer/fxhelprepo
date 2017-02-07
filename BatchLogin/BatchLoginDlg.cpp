@@ -72,12 +72,13 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
     DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
     DDX_Control(pDX, IDC_EDIT_ROOMID, m_roomid);
-    DDX_Control(pDX, IDC_EDIT_GIFT_COUNT, m_gift_count);
+    //DDX_Control(pDX, IDC_EDIT_GIFT_COUNT, m_gift_count);
     DDX_Control(pDX, IDC_EDIT_NICKNAME_PRE, m_nickname);
     DDX_Control(pDX, IDC_EDIT_PIC_PATH, m_logo_path);
     DDX_Control(pDX, IDC_EDIT_SONG_NAME, m_edit_singlike);
     DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
     DDX_Control(pDX, IDC_EDIT_DELTA, m_edit_delta);
+    DDX_Control(pDX, IDC_EDIT_CHAT_MESSAGE, m_edit_chat_message);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -106,6 +107,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_CHANGE_LOGO, &CBatchLoginDlg::OnBnClickedBtnChangeLogo)
     ON_BN_CLICKED(IDC_BTN_SINGELIKE, &CBatchLoginDlg::OnBnClickedBtnSingelike)
     ON_BN_CLICKED(IDC_BTN_CHANGE_CONFIG_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname)
+    ON_BN_CLICKED(IDC_BTN_BATCH_CHAT, &CBatchLoginDlg::OnBnClickedBtnBatchChat)
 END_MESSAGE_MAP()
 
 
@@ -689,4 +691,20 @@ void CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname()
 
     userRoomManager_->SetBreakRequest(false);
     userRoomManager_->BatchChangeNicknameList(users, name_list);
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnBatchChat()
+{
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+
+    CString cs_chat_message;
+    m_edit_chat_message.GetWindowTextW(cs_chat_message);
+
+    userRoomManager_->SetBreakRequest(false);
+    userRoomManager_->BatchSendChat(cs_roomid.GetBuffer(), users, cs_chat_message.GetBuffer());
 }

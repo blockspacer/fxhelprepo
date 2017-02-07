@@ -310,6 +310,38 @@ bool UserController::BatchChangeLogo(const std::vector<std::string>& users,
     return true;
 }
 
+bool UserController::BatchSendChat(uint32 roomid,
+    const std::vector<std::string>& users,
+    const std::string& message,
+    const std::function<void(const std::wstring& msg)>& callback)
+{
+    for (const auto& account : users)
+    {
+        auto result = users_.find(account);
+        if (result == users_.end())
+        {
+            callback(L"本地数据错误, 找不到对应用户或用户未登录");
+            continue;
+        }
+
+        std::string errormsg;
+        std::string new_message = account + message;
+        std::wstring msg = base::UTF8ToWide(result->first) + L" 发送聊天消息";
+        if (!result->second->SendChatMessage(roomid, new_message))
+        {
+            msg += L"失败 " + base::UTF8ToWide(errormsg);
+            callback(msg);
+            continue;
+        }
+        else
+        {
+            msg += L"成功 ";
+            callback(msg);
+        }
+    }
+    return true;
+}
+
 bool UserController::FillRoom(uint32 roomid, uint32 count,
     const std::function<void(const std::wstring& msg)>& callback)
 {
