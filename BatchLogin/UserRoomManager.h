@@ -35,7 +35,7 @@ public:
     bool BatchLogUsers(const std::map<std::wstring, std::wstring>& userAccountPassword);
     bool BatchLogUsersWithCookie(const std::map<std::wstring, std::wstring>& accountCookie);
     
-    bool FillRooms(const std::vector<std::wstring>& roomids);
+    bool FillRooms(const std::vector<std::wstring>& users, const std::vector<std::wstring>& roomids);
 
     bool UpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
 
@@ -64,13 +64,16 @@ public:
     bool BatchSendChat(const std::wstring& roomid, const std::vector<std::wstring>& users,
         const std::wstring& message);
 
+    bool BatchSendStar(const std::vector<std::wstring>& users, const std::wstring& roomid,
+        uint32 star_count);
+
 protected:
     void Notify(const std::wstring& msg);
     void DoSaveUserLoginConfig();
     void DoBatchLogUsers(const std::map<std::wstring, std::wstring>& userAccountPassword);
     void DoBatchLogUsersWithCookie(const std::map<std::wstring, std::wstring>& accountCookie);
-    void DoFillRooms(const std::vector<uint32>& roomids);
-    void FillSingleRoom(uint32 roomid);
+    void DoFillRooms(const std::vector<std::string>& users, const std::vector<uint32>& roomids);
+    void FillSingleRoom(const std::vector<std::string>& users, uint32 roomid);
 
     void DoUpMVBillboard(const std::wstring& collectionid, const std::wstring& mvid);
     void DoRealSingLike(const std::string& account,
@@ -86,6 +89,9 @@ protected:
 
     void DoBatchSendChat(uint32 roomid, const std::vector<std::string>& users, 
         const std::string& message);
+
+    void DoBatchSendStar(const std::vector<std::string>& users, 
+        uint32 roomid, uint32 star_count);
 
 private:
     base::Thread workerThread_;

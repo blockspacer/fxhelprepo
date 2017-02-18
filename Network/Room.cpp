@@ -110,6 +110,10 @@ bool Room::EnterForOperation(const std::string& cookies,
 bool Room::EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid,
     const base::Callback<void()>& conn_break_callback)
 {
+
+    if (!OpenRoom(cookies))
+        return false;
+
     if (!ConnectToNotifyServer_(roomid_, userid, usertoken, conn_break_callback))
     {
         return false;
@@ -212,6 +216,67 @@ bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_coun
     return true;
 }
 
+bool Room::SendStar(const std::string& cookies, uint32 roomid, uint32 count,
+    std::string* errormsg)
+{
+    ///UServices/GiftService/StorageService/getStorageByUserId?args=[]&_=1476974477980
+    std::string url = "http://fanxing.kugou.com/NServices/GiftStarService/GiftStarService/send";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://fanxing.kugou.com/" + base::UintToString(roomid);
+    request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    queries["d"] = GetNowTimeString();
+    queries["args"] = UrlEncode("[\"" + base::UintToString(singerid_) + "\"," + 
+        base::UintToString(count) +",\"" + base::UintToString(roomid)+"\"]");
+    queries["_"] = GetNowTimeString();
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"ËÍÐÇÐÇÊ§°Ü");
+        *errormsg = errorcode;
+        return false;
+    }
+
+    Json::Value jvdata(Json::ValueType::arrayValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (!data.isBool())
+    {
+        assert(false);
+        return false;
+    }
+
+    return data.asBool();
+}
 
 bool Room::RealSingLike(const std::string& cookies, uint32 user_kugou_id, 
     const std::string& user_token,

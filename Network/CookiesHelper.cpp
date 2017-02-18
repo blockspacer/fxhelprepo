@@ -62,3 +62,20 @@ std::string CookiesHelper::GetCookies(const std::vector<std::string>& keys) cons
     temp = temp.substr(0, temp.length() - 1);
     return temp;
 }
+
+std::string CookiesHelper::GetAllCookies() const
+{
+    std::string temp;
+    for (const auto& key : cookies_)
+    {
+        temp += key.second;
+        temp += ";";
+    }
+    if (temp.empty())
+    {
+        return temp;
+    }
+
+    temp = temp.substr(0, temp.length() - 1);
+    return temp;
+}

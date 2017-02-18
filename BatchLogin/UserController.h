@@ -70,7 +70,10 @@ public:
         const std::string& message,
         const std::function<void(const std::wstring& msg)>& callback);
 
-    bool FillRoom(uint32 roomid, uint32 count,
+    bool BatchSendStar(const std::vector<std::string>& users,
+        uint32 roomid, uint32 star_count);
+
+    bool FillRoom(uint32 roomid, const std::vector<std::string>& users,
         const std::function<void(const std::wstring& msg)>& callback);
     bool UpMVBillboard(const std::string& collectionid, const std::string& mvid,
                        std::function<void(const std::wstring&message)> callback);

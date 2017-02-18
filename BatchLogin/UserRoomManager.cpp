@@ -349,7 +349,8 @@ void UserRoomManager::DoBatchLogUsersWithCookie(
     }
 }
 
-bool UserRoomManager::FillRooms(const std::vector<std::wstring>& roomids)
+bool UserRoomManager::FillRooms(
+    const std::vector<std::wstring>& users, const std::vector<std::wstring>& roomids)
 {
     std::vector<uint32> iroomids;
     for (auto wstroomid : roomids)
@@ -359,17 +360,26 @@ bool UserRoomManager::FillRooms(const std::vector<std::wstring>& roomids)
         base::StringToUint(utf8roomids, &roomid);
         iroomids.push_back(roomid);
     }
+
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+
     runner_->PostTask(FROM_HERE,
-        base::Bind(&UserRoomManager::DoFillRooms, this, iroomids));
+        base::Bind(&UserRoomManager::DoFillRooms, this, accounts, iroomids));
     return true;
 
 }
 
-void UserRoomManager::DoFillRooms(const std::vector<uint32>& roomids)
+void UserRoomManager::DoFillRooms(const std::vector<std::string>& users, 
+    const std::vector<uint32>& roomids)
 {
     for (const auto& roomid : roomids)
     {
-        FillSingleRoom(roomid);
+        FillSingleRoom(users, roomid);
 
         if (break_request_)
         {
@@ -379,9 +389,9 @@ void UserRoomManager::DoFillRooms(const std::vector<uint32>& roomids)
     }
 }
 
-void UserRoomManager::FillSingleRoom(uint32 roomid)
+void UserRoomManager::FillSingleRoom(const std::vector<std::string>& users, uint32 roomid)
 {
-    bool result = userController_->FillRoom(roomid, roomusercount,
+    bool result = userController_->FillRoom(roomid, users,
         std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
     assert(result && L"进入房间失败");
     std::wstring message = L"Fill Room ";
@@ -639,4 +649,30 @@ void UserRoomManager::DoBatchSendChat(uint32 roomid,
     userController_->BatchSendChat(roomid, users, message,
         std::bind(&UserRoomManager::Notify,
         this, std::placeholders::_1));
+}
+
+bool UserRoomManager::BatchSendStar(const std::vector<std::wstring>& users,
+    const std::wstring& roomid, uint32 star_count)
+{
+    std::string utf8roomids = base::WideToUTF8(roomid);
+    uint32 room_id = 0;
+    base::StringToUint(utf8roomids, &room_id);
+
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+
+    return runner_->PostTask(
+        FROM_HERE, base::Bind(&UserRoomManager::DoBatchSendStar, this,
+        accounts, room_id, star_count));
+
+}
+
+void UserRoomManager::DoBatchSendStar(const std::vector<std::string>& users,
+    uint32 roomid, uint32 star_count)
+{
+    userController_->BatchSendStar(users, roomid, star_count);
 }

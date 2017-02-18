@@ -15,6 +15,8 @@ public:
     bool SetCookies(const std::string& keyvalue);
     std::string GetCookies(const std::vector<std::string>& keys) const;
     std::string GetCookies(const std::string& key) const;
+    std::string GetAllCookies() const;
+
 private:
     std::map<std::string, std::string> cookies_;
 };

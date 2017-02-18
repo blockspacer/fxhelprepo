@@ -556,9 +556,25 @@ bool User::RequestRobot(uint32 senderid, const std::string& request, std::string
     *response = rootdata.get("text", "").asString();
     return true;
 }
-bool User::SendStar(uint32 count)
+bool User::SendStar(uint32 roomid, uint32 count)
 {
-    return false;
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+
+    //std::vector<std::string> keys;
+    //keys.push_back("KuGoo");
+    //keys.push_back("_fx_coin");
+    //keys.push_back("_fxNickName");
+    //keys.push_back("_fxRichLevel");
+    //keys.push_back("FANXING_COIN");
+    //keys.push_back("FANXING");
+    //keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetAllCookies();
+    std::string errormsg;
+    return room->second->SendStar(cookies, roomid, count, &errormsg);
 }
 
 bool User::RetrieveStart()
@@ -866,6 +882,64 @@ bool User::GetStorageGift(UserStorageInfo* user_storage_info, std::string* error
     user_storage_info->nickname = nickname_;
     user_storage_info->rich_level = richlevel_;
     user_storage_info->coin = coin_;
+    return true;
+}
+
+bool User::GetStarCount(uint32 room_id, uint32* star_count)
+{
+    std::string url = "http://fanxing.kugou.com/NServices/GiftStarService/GiftStarService/getInfo";
+    HttpRequest request;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.url = url;
+    request.referer = "http://fanxing.kugou.com/" + base::UintToString(room_id);
+    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    auto& queries = request.queries;
+    queries["args"] = "[]";
+    queries["&_"] = GetNowTimeString();
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"ÇëÇóÐÇÐÇÊý¾ÝÊ§°Ü");
+        return false;
+    }
+
+    Json::Value jvdata(Json::ValueType::arrayValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull() || !data.isObject())
+    {
+        assert(false);
+        return false;
+    }
+
+    *star_count = GetInt32FromJsonValue(data, "starCount");
     return true;
 }
 

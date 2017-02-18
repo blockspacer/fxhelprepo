@@ -100,4 +100,6 @@ private:
     CEdit m_edit_delta;
 
     CEdit m_edit_chat_message;
+public:
+    afx_msg void OnBnClickedBtnSendStar();
 };

@@ -35,6 +35,7 @@ struct UserStorageInfo
     std::string nickname;
     uint32 rich_level;
     uint32 coin = 0;
+    uint32 star_count = 0;
     uint32 gift_award = 0; // ¥ÛΩ±∆±
     uint32 gift_single = 0; // µ•œÓ∆±
 };
@@ -116,7 +117,7 @@ public:
     bool SendPrivateMessageToSinger(uint32 roomid, const std::string& message);
     bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
     bool RequestRobot(uint32 senderid, const std::string& request, std::string* response);
-    bool SendStar(uint32 count);
+    bool SendStar(uint32 roomid, uint32 count);
     bool RetrieveStart();
     bool SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
                   std::string* errormsg);
@@ -138,6 +139,8 @@ public:
     bool RobVotes(uint32 roomid, uint32* award_count, uint32* single_count,
                   std::string* errormsg);
     bool GetStorageGift(UserStorageInfo* user_storage_info, std::string* errormsg);
+
+    bool GetStarCount(uint32 room_id, uint32* star_count);
 
     bool Worship(uint32 roomid, uint32 userid, std::string* errormsg);
     bool ChangeNickname(const std::string& nickname, std::string* errormsg);

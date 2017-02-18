@@ -53,6 +53,9 @@ public:
     bool SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count,
                   std::string* errormsg);
 
+    bool SendStar(const std::string& cookies, uint32 roomid, uint32 count,
+        std::string* errormsg);
+
     bool RealSingLike(const std::string& cookies, 
         uint32 user_kugou_id, const std::string& user_token,
         const std::wstring& song_name, std::string* errormsg);

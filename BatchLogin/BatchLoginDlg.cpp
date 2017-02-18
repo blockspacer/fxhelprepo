@@ -29,6 +29,7 @@ namespace{
         L"昵称",
         L"等级",
         L"星币",
+        L"星星",
         L"大奖票",
         L"单项票"
     };
@@ -108,6 +109,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_SINGELIKE, &CBatchLoginDlg::OnBnClickedBtnSingelike)
     ON_BN_CLICKED(IDC_BTN_CHANGE_CONFIG_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname)
     ON_BN_CLICKED(IDC_BTN_BATCH_CHAT, &CBatchLoginDlg::OnBnClickedBtnBatchChat)
+    ON_BN_CLICKED(IDC_BTN_SEND_STAR, &CBatchLoginDlg::OnBnClickedBtnSendStar)
 END_MESSAGE_MAP()
 
 
@@ -363,11 +365,21 @@ void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
     //        roomids.push_back(roomid.GetBuffer());
     //    }
     //}
+
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    if (users.empty())
+    {
+        Notify(L"没有设置用户的投票任务");
+        return;
+    }
+
     std::vector<std::wstring> roomids;
     CString cs_roomid;
     m_roomid.GetWindowTextW(cs_roomid);
     roomids.push_back(cs_roomid.GetBuffer());
-    userRoomManager_->FillRooms(roomids);
+    userRoomManager_->FillRooms(users, roomids);
 }
 
 void CBatchLoginDlg::Notify(const std::wstring& message)
@@ -602,8 +614,10 @@ void CBatchLoginDlg::OnBnClickedBtnGetUserinfo()
                 m_ListCtrl_Users.SetItemText(index, 6,
                     base::UintToString16(user_storage_info.coin).c_str());
                 m_ListCtrl_Users.SetItemText(index, 7,
-                    base::UintToString16(user_storage_info.gift_award).c_str());
+                    base::UintToString16(user_storage_info.star_count).c_str());
                 m_ListCtrl_Users.SetItemText(index, 8,
+                    base::UintToString16(user_storage_info.gift_award).c_str());
+                m_ListCtrl_Users.SetItemText(index, 9,
                     base::UintToString16(user_storage_info.gift_single).c_str());
                 break;
             }
@@ -707,4 +721,20 @@ void CBatchLoginDlg::OnBnClickedBtnBatchChat()
 
     userRoomManager_->SetBreakRequest(false);
     userRoomManager_->BatchSendChat(cs_roomid.GetBuffer(), users, cs_chat_message.GetBuffer());
+}
+
+
+void CBatchLoginDlg::OnBnClickedBtnSendStar()
+{
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+
+    CString cs_delta;
+    m_edit_delta.GetWindowTextW(cs_delta);
+
+    uint32 count = 1;
+    userRoomManager_->BatchSendStar(users, cs_roomid.GetBuffer(), count);
 }

@@ -218,6 +218,16 @@ bool UserController::GetUserStorageInfos(const std::vector<std::string>& users,
             msg += L"成功 ";
             callback(msg);
         }
+
+        uint32 star_count = 0;
+        uint32 room_id = 1056416;
+        if (!result->second->GetStarCount(room_id, &star_count))
+        {
+            assert(false && L"获取星星失败");
+        }
+        
+        user_storage_info.star_count = star_count;
+
         user_storage_infos->push_back(user_storage_info);
     }
     return true;
@@ -325,7 +335,7 @@ bool UserController::BatchSendChat(uint32 roomid,
         }
 
         std::string errormsg;
-        std::string new_message = account + message;
+        std::string new_message = account.substr(0,2) + message;
         std::wstring msg = base::UTF8ToWide(result->first) + L" 发送聊天消息";
         if (!result->second->SendChatMessage(roomid, new_message))
         {
@@ -342,20 +352,52 @@ bool UserController::BatchSendChat(uint32 roomid,
     return true;
 }
 
-bool UserController::FillRoom(uint32 roomid, uint32 count,
+bool UserController::BatchSendStar(const std::vector<std::string>& users,
+    uint32 roomid, uint32 star_count)
+{
+    for (const auto& account : users)
+    {
+        auto result = users_.find(account);
+        if (result == users_.end())
+        {
+            //callback(L"本地数据错误, 找不到对应用户或用户未登录");
+            continue;
+        }
+
+        std::wstring msg = base::UTF8ToWide(result->first) + L" 送星星";
+        if (!result->second->SendStar(roomid, star_count))
+        {
+            //msg += L"失败 " + base::UTF8ToWide(errormsg);
+            //callback(msg);
+            continue;
+        }
+        else
+        {
+            //msg += L"成功 ";
+            //callback(msg);
+        }
+    }
+    return true;
+}
+
+bool UserController::FillRoom(uint32 roomid, const std::vector<std::string>& users,
     const std::function<void(const std::wstring& msg)>& callback)
 {
     bool first = true;
-    for (const auto& it : users_)
+    for (const auto& it : users)
     {
+        auto user = users_.find(it);
+        if (user == users_.end())
+            continue;
+
         //it.second->EnterRoomFopAlive(roomid);
         // 年度需求, 需要获取到足够信息，但是不需要连接信息
-        std::wstring msg = base::UTF8ToWide(it.first) + L" 进入房间";
+        std::wstring msg = base::UTF8ToWide(user->first) + L" 进入房间";
         std::string nickname;
 
-        if (!it.second->EnterRoomFopAlive(roomid,
+        if (!user->second->EnterRoomFopAlive(roomid,
             base::Bind(&UserController::ConnectionBreakCallback,
-            base::Unretained(this), it.second->GetUsername(),
+            base::Unretained(this), user->second->GetUsername(),
             roomid)))
         {
             msg += L" 失败 ";
@@ -363,7 +405,7 @@ bool UserController::FillRoom(uint32 roomid, uint32 count,
         else
         {
             msg += L" 成功 ";
-            it.second->GetRoom(roomid, &shared_room);
+            user->second->GetRoom(roomid, &shared_room);
         }
 
         msg += base::UTF8ToUTF16(nickname);
