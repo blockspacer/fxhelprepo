@@ -48,7 +48,8 @@ protected:
     afx_msg void OnBnClickedBtnGetProxy();
     afx_msg void OnBnClickedBtnBatchEnterRoom();
     //afx_msg void OnBnClickedBtnImportRoom();
-    afx_msg void OnBnClickedBtnUpMvBillboard();
+    afx_msg void OnBnClickedBtnSendStar();
+    afx_msg void OnBnClickedBtnMvBillboard();
     afx_msg void OnBnClickedBtnSaveUserPwdCookie();
     afx_msg void OnLvnItemchangedListRoom(NMHDR *pNMHDR, LRESULT *pResult);
     //afx_msg void OnNMClickListRoom(NMHDR *pNMHDR, LRESULT *pResult);
@@ -100,6 +101,5 @@ private:
     CEdit m_edit_delta;
 
     CEdit m_edit_chat_message;
-public:
-    afx_msg void OnBnClickedBtnSendStar();
+
 };

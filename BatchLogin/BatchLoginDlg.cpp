@@ -80,6 +80,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
     DDX_Control(pDX, IDC_EDIT_DELTA, m_edit_delta);
     DDX_Control(pDX, IDC_EDIT_CHAT_MESSAGE, m_edit_chat_message);
+    DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -110,6 +111,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_CHANGE_CONFIG_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname)
     ON_BN_CLICKED(IDC_BTN_BATCH_CHAT, &CBatchLoginDlg::OnBnClickedBtnBatchChat)
     ON_BN_CLICKED(IDC_BTN_SEND_STAR, &CBatchLoginDlg::OnBnClickedBtnSendStar)
+    ON_BN_CLICKED(IDC_BTN_MV_Billboard, &CBatchLoginDlg::OnBnClickedBtnMvBillboard)
 END_MESSAGE_MAP()
 
 
@@ -417,14 +419,14 @@ LRESULT CBatchLoginDlg::OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-void CBatchLoginDlg::OnBnClickedBtnUpMvBillboard()
+void CBatchLoginDlg::OnBnClickedBtnMvBillboard()
 {
-    assert(false && L"年度不需要操作");
+    //assert(false && L"年度不需要操作");
     userRoomManager_->SetBreakRequest(false);
     CString collectionid;
     CString mvid;
-    m_mv_collection_id.GetWindowTextW(collectionid);
     m_mv_id.GetWindowTextW(mvid);
+    collectionid = mvid;
     userRoomManager_->UpMVBillboard(collectionid.GetBuffer(), mvid.GetBuffer());
 }
 
