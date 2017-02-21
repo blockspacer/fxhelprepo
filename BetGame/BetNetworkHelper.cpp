@@ -4,8 +4,10 @@
 #include "BetNetworkHelper.h"
 #include "BetGameDatabase.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/files/file_util.h"
+#include "MathHelper.h"
 
 namespace
 {
@@ -18,10 +20,10 @@ BetNetworkHelper::BetNetworkHelper()
     , database_(new BetGameDatabase)
     , retry_break_seconds_(1)
 {
-    result_map_[31] = 8;
-    result_map_[29] = 7;
-    result_map_[27] = 2;
-    result_map_[25] = 1;
+    result_map_[31] = 8; // 验证
+    result_map_[29] = 7; // 验证
+    result_map_[27] = 2; // 验证
+    result_map_[25] = 1; // 验证
     result_map_[30] = 6; // 确认
     result_map_[28] = 5;
     result_map_[26] = 4;
@@ -139,7 +141,7 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
             data.max_distance[i] = 0;// 最大间隔
             data.mid_distance[i] = 0; // 间隔中位数
             data.avg_distance[i] = 0.0; // 平均间隔
-            data.variance_distance[i] = 0.0;// 间隔方差
+            data.standard_deviation[i] = 0.0;// 间隔标准差
             data.frequence[i] = 0.0; // 频率 = 累计期数/开奖期数
         }
         caculation_map_[bet_result] = data;
@@ -164,10 +166,17 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
             new_data.summary[i]++;
             new_data.sum_distance[i] += last_data.distance[i];
             new_data.avg_distance[i] = (new_data.sum_distance[i]*1.0) / (new_data.summary[i]*1.0);
-            // 记录间隔，计算中位数和方差
+            // 记录间隔，计算中位数和间隔标准差
             distance_map_[i].push_back(last_data.distance[i]);
-            new_data.mid_distance[i] = 0;
-            new_data.variance_distance[i] = 0.0;
+            new_data.mid_distance[i] = MathHelper::GetMid(distance_map_[i]);
+            new_data.standard_deviation[i] = MathHelper::GetStandardDeviation(distance_map_[i], new_data.avg_distance[i]);
+
+            if (new_data.distance[i] > new_data.max_distance[i])
+            {
+                LOG(INFO) << L"max_distance" << L"[" << i << L"] update(" << new_data.max_distance[i] << L") ";
+                new_data.max_distance[i] = new_data.distance[i];
+            }
+
             new_data.distance[i] = 0; //当前开奖那个distance为0;
         }
         else
@@ -177,7 +186,7 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
 
         if (new_data.summary[i])// 避免除0错误
         {
-            new_data.frequence[i] = (new_data.summary[i]*1.0)/(new_data.index*1.0);
+            new_data.frequence[i] = (new_data.summary[i] * 100.0) / (new_data.index*1.0);
         }
     }
     //BetResult bet_result;
@@ -188,9 +197,9 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
     //uint32 max_distance[8]; // 最大间隔
     //uint32 mid_distance[8]; // 间隔中位数
     //double avg_distance[8]; // 平均间隔
-    //double variance_distance[8]; // 间隔方差
+    //double standard_deviation[8]; // 间隔标准差
     //double frequence[8]; // 频率 = 累计期数/开奖期数
-    LOG(INFO) << L"index(" << new_data.index << L") "<< L"bet_result = " << bet_result.display_result;
+    LOG(INFO) << L"index(" << new_data.index+1 << L") "<< L"bet_result = " << bet_result.display_result;
     for (int i = 0; i < 8; i++)
     {
         LOG(INFO) << L"result(" << i+1 << L") " << L"summary= " << new_data.summary[i]
@@ -198,9 +207,9 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
             << L" distance= " << new_data.distance[i]
             << L" max_distance= " << new_data.max_distance[i]
             //<< L" mid_distance= " << new_data.mid_distance[i]
-            << L" avg_distance= " << new_data.avg_distance[i]
-            //<< L" variance_distance= " << new_data.variance_distance[i]
-            << L" frequence= " << new_data.frequence[i];
+            << L" avg_distance= " << base::DoubleToString(new_data.avg_distance[i])
+            << L" standard_deviation= " << base::DoubleToString(new_data.standard_deviation[i])
+            << L" frequence= " << base::DoubleToString(new_data.frequence[i]);
     }
     caculation_map_[bet_result] = new_data;
 }
