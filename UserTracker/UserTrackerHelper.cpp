@@ -365,10 +365,10 @@ bool UserTrackerHelper::GetTargetStarRoomInfos(const std::string& url, std::vect
     uint32 unixtime = rootdata.get("servertime", 1461378689).asUInt();
 
     // 暂时只限制2017年1月1号前能使用，防止外泄
-    if (unixtime > 1483203600)
-    {
-        return false;
-    }
+    //if (unixtime > 1483203600)
+    //{
+    //    return false;
+    //}
 
     uint32 status = rootdata.get("status", 0).asUInt();
     if (status != 1)
