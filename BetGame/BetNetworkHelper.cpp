@@ -59,6 +59,7 @@ bool BetNetworkHelper::Login(const std::string& account, const std::string& pass
     CurlWrapper::CurlInit();
     worker_thread_->Start();
     user_.reset(new User);
+    user_->Initialize(worker_thread_->message_loop_proxy());
     if (!tcp_manager_->Initialize())
         return false;
 
