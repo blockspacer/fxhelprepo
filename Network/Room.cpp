@@ -189,6 +189,11 @@ bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_coun
 {
     assert(singerid_);
     assert(roomid_);
+    if (!singerid_) // 在EnterRoomForAlive时没有获取singerid, 这里如果要使用则补充获取
+    {
+        if (!OpenRoom(cookies))
+            return false;
+    }
 
     std::string url = "http://fanxing.kugou.com/";
     url += "/UServices/GiftService/GiftService/sendGift";
@@ -243,6 +248,12 @@ bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_coun
 bool Room::SendStar(const std::string& cookies, uint32 roomid, uint32 count,
     std::string* errormsg)
 {
+    if (!singerid_) // 在EnterRoomForAlive时没有获取singerid, 这里如果要使用则补充获取
+    {
+        if (!OpenRoom(cookies))
+            return false;
+    }
+
     ///UServices/GiftService/StorageService/getStorageByUserId?args=[]&_=1476974477980
     std::string url = "http://fanxing.kugou.com/NServices/GiftStarService/GiftStarService/send";
     HttpRequest request;
