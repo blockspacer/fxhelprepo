@@ -93,7 +93,10 @@ void WorshipHelper::DoLoginUser(const std::string& user_name,
     const base::Callback<void(bool, uint32, const std::string&)>& callback)
 {
     if (!user_)
+    {
         user_.reset(new User);
+        user_->Initialize(worker_thread_->message_loop_proxy());
+    }
 
     std::wstring msg;
     std::string error_msg;
@@ -120,7 +123,7 @@ void WorshipHelper::DoLoginUser(const std::string& user_name,
     //}
 
     //uint64 expiretime = worship_authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
-    uint64 expiretime = 1485882061; // 暂时为了避免外泄而做时间限制20170201日过期
+    uint64 expiretime = 1585882061; // 暂时为了避免外泄而做时间限制20170201日过期
     if (servertime > expiretime)
     {
         msg = authority_msg_ + L"用户授权已到期，请续费!";
@@ -375,7 +378,7 @@ void WorshipHelper::DoEnterRoom(uint32 roomid)
     user_->ExitRooms();
     user_->SetNormalNotify(std::bind(&WorshipHelper::NormalNotify, this,
         std::placeholders::_1));
-    user_->SetRoomServerIp("chat1.fanxing.kugou.com");
+    user_->SetRoomServerIp("114.54.2.204");
     user_->SetTcpManager(tcp_manager_.get());
     roomid_ = roomid;
     uint32 singer_clanid = 0;
