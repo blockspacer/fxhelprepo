@@ -321,6 +321,7 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
     const base::Callback<void()>& conn_break_callback)
 {
     std::shared_ptr<Room> room(new Room(roomid));
+    room->Initialize(runner_);
     room->SetTcpManager(tcpManager_);
     room->SetRoomServerIp(serverip_);
     std::vector<std::string> keys;
