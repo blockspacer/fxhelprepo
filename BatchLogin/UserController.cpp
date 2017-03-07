@@ -37,11 +37,11 @@ void UserController::Finalize()
 bool UserController::AddUser(const std::string& username, 
     const std::string& password, const IpProxy& ipproxy, std::string* errormsg)
 {
-    if (users_.find(username) != users_.end())
-    {
-        *errormsg = "ÖØ¸´µÇÂ¼";
-        return false;
-    }
+    //if (users_.find(username) != users_.end())
+    //{
+    //    *errormsg = "ÖØ¸´µÇÂ¼";
+    //    return false;
+    //}
     std::shared_ptr<User> shared_user(new User);
     if (ipproxy.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         shared_user->SetIpProxy(ipproxy);
