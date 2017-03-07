@@ -19,7 +19,7 @@ class CBetGameDlg : public CDialogEx
 // 构造
 public:
 	CBetGameDlg(CWnd* pParent = NULL);	// 标准构造函数
-
+    virtual ~CBetGameDlg();
 // 对话框数据
 	enum { IDD = IDD_BETGAME_DIALOG };
 
@@ -57,6 +57,8 @@ private:
     LRESULT OnDisplayBetResult(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayBetTime(WPARAM wParam, LPARAM lParam);
 
+    bool DisplayToRichEdit(uint32 display_result);
+
     void CreateFont();
 
     int message_count_;
@@ -70,14 +72,13 @@ private:
     std::unique_ptr<BetNetworkHelper> bet_network_;
     CEdit m_edit_display_result;
 
-    CFont font_bet_basic_;
-    CFont font_bet_count_;
-    CFont font_bet_space_;
-    CFont font_bet_result_red_;
-    CFont font_bet_result_black_;
-    CFont font_bet_result_blue_;
+    CFont font_bet_18_;
+    CFont font_bet_12_;
+    CFont font_bet_26_;
 
     CButtonBasic m_btn_basic[8];
     CStatic m_static_space[8];
     CStatic m_static_count[8];
+
+    CRichEditCtrl m_richedit_display;
 };
