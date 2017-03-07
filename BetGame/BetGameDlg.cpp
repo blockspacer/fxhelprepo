@@ -53,6 +53,31 @@ void CBetGameDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_NAV, m_edit_room_id);
     DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
     DDX_Control(pDX, IDC_LIST_MSG, m_list_msg);
+    DDX_Control(pDX, IDC_BTN_RESULT_1, m_btn_basic[0]);
+    DDX_Control(pDX, IDC_BTN_RESULT_2, m_btn_basic[1]);
+    DDX_Control(pDX, IDC_BTN_RESULT_7, m_btn_basic[6]);
+    DDX_Control(pDX, IDC_BTN_RESULT_8, m_btn_basic[7]);
+    DDX_Control(pDX, IDC_BTN_RESULT_3, m_btn_basic[2]);
+    DDX_Control(pDX, IDC_BTN_RESULT_4, m_btn_basic[3]);
+    DDX_Control(pDX, IDC_BTN_RESULT_5, m_btn_basic[4]);
+    DDX_Control(pDX, IDC_BTN_RESULT_6, m_btn_basic[5]);
+    DDX_Control(pDX, IDC_STATIC_SPACE1, m_static_space[0]);
+    DDX_Control(pDX, IDC_STATIC_SPACE2, m_static_space[1]);
+    DDX_Control(pDX, IDC_STATIC_SPACE3, m_static_space[2]);
+    DDX_Control(pDX, IDC_STATIC_SPACE4, m_static_space[3]);
+    DDX_Control(pDX, IDC_STATIC_SPACE5, m_static_space[4]);
+    DDX_Control(pDX, IDC_STATIC_SPACE6, m_static_space[5]);
+    DDX_Control(pDX, IDC_STATIC_SPACE7, m_static_space[6]);
+    DDX_Control(pDX, IDC_STATIC_SPACE8, m_static_space[7]);
+    DDX_Control(pDX, IDC_STATIC_COUNT1, m_static_count[0]);
+    DDX_Control(pDX, IDC_STATIC_COUNT2, m_static_count[1]);
+    DDX_Control(pDX, IDC_STATIC_COUNT3, m_static_count[2]);
+    DDX_Control(pDX, IDC_STATIC_COUNT4, m_static_count[3]);
+    DDX_Control(pDX, IDC_STATIC_COUNT5, m_static_count[4]);
+    DDX_Control(pDX, IDC_STATIC_COUNT6, m_static_count[5]);
+    DDX_Control(pDX, IDC_STATIC_COUNT7, m_static_count[6]);
+    DDX_Control(pDX, IDC_STATIC_COUNT8, m_static_count[7]);
+    DDX_Control(pDX, IDC_EDIT_DISPLAY, m_edit_display_result);
 }
 
 BEGIN_MESSAGE_MAP(CBetGameDlg, CDialogEx)
@@ -114,6 +139,20 @@ BOOL CBetGameDlg::OnInitDialog()
     m_edit_password.SetWindowTextW(L"1233211234567");
     m_edit_room_id.SetWindowTextW(L"1201793");
 
+    CreateFont();
+
+    COLORREF bk_color = RGB(192, 192, 192);
+    int count = sizeof(m_btn_basic) / sizeof(m_btn_basic[0]);
+    for (int index = 0; index < count; index++)
+    {
+        m_btn_basic[index].SetText(base::IntToString16(index+1).c_str());
+        m_btn_basic[index].SetBkColor(bk_color);
+        m_btn_basic[index].SetFont(&font_bet_basic_, TRUE);
+
+        m_static_space[index].SetWindowTextW(L"0");
+        m_static_count[index].SetWindowTextW(L"0");
+    }
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -152,7 +191,6 @@ HCURSOR CBetGameDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
-
 
 
 void CBetGameDlg::OnBnClickedButtonEnterRoom()
@@ -204,9 +242,9 @@ void CBetGameDlg::TipMessageCallback(const std::wstring& message)
     this->PostMessage(WM_USER_TIPS, 0, (LPARAM)param);
 }
 
-void CBetGameDlg::DisplayBetResultCallback(const BetResult& bet_result)
+void CBetGameDlg::DisplayBetResultCallback(const CaculationData& bet_result)
 {
-    BetResult* param = new BetResult(bet_result);
+    CaculationData* param = new CaculationData(bet_result);
     this->PostMessage(WM_USER_BET_RESULT, 0, (LPARAM)param);
 }
 
@@ -228,7 +266,8 @@ LRESULT CBetGameDlg::OnTipsMessage(WPARAM wParam, LPARAM lParam)
 
 LRESULT CBetGameDlg::OnDisplayBetResult(WPARAM wParam, LPARAM lParam)
 {
-    BetResult* bet_result = (BetResult*)(lParam);
+    CaculationData * caculation_data = (CaculationData*)(lParam);
+    BetResult* bet_result = &caculation_data->bet_result;
     uint32 result = bet_result->display_result;
     uint32 time = bet_result->time;
     base::Time server_time = base::Time::FromDoubleT(time);
@@ -240,8 +279,17 @@ LRESULT CBetGameDlg::OnDisplayBetResult(WPARAM wParam, LPARAM lParam)
     int nitem = 0;
     nitem = m_list_bet_data.InsertItem(itemcount++, str_time.c_str());
     m_list_bet_data.SetItemText(nitem, result, wresult.c_str());
-    delete bet_result;
 
+    int count = sizeof(m_btn_basic) / sizeof(m_btn_basic[0]);
+    for (int index = 0; index < count; index++)
+    {
+        auto distance = caculation_data->distance[index];
+        m_static_space[index].SetWindowTextW(base::UintToString16(distance).c_str());
+        auto summary = caculation_data->summary[index];
+        m_static_count[index].SetWindowTextW(base::UintToString16(summary).c_str());
+    }
+
+    delete caculation_data;
     return 0;
 }
 
@@ -262,4 +310,54 @@ void CBetGameDlg::OnHdnBegintrackListBetdata(NMHDR *pNMHDR, LRESULT *pResult)
     LPNMHEADER phdr = reinterpret_cast<LPNMHEADER>(pNMHDR);
     // 保证列头不能拖动
     *pResult = TRUE;
+}
+
+void CBetGameDlg::CreateFont()
+{
+
+    font_bet_basic_.CreateFont(18,                        // nHeight
+                               0,                         // nWidth
+                               0,                         // nEscapement
+                               0,                         // nOrientation
+                               FW_BOLD,                   // nWeight
+                               FALSE,                     // bItalic
+                               FALSE,                     // bUnderline
+                               0,                         // cStrikeOut
+                               DEFAULT_CHARSET,           // nCharSet
+                               OUT_CHARACTER_PRECIS,        // nOutPrecision
+                               CLIP_DEFAULT_PRECIS,       // nClipPrecision
+                               DEFAULT_QUALITY,           // nQuality
+                               DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+                               TEXT("黑体"));             // lpszFacename
+
+    font_bet_count_.CreateFont(12,                        // nHeight
+                               0,                         // nWidth
+                               0,                         // nEscapement
+                               0,                         // nOrientation
+                               FW_BOLD,                   // nWeight
+                               FALSE,                     // bItalic
+                               FALSE,                     // bUnderline
+                               0,                         // cStrikeOut
+                               DEFAULT_CHARSET,           // nCharSet
+                               OUT_CHARACTER_PRECIS,        // nOutPrecision
+                               CLIP_DEFAULT_PRECIS,       // nClipPrecision
+                               DEFAULT_QUALITY,           // nQuality
+                               DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+                               TEXT("楷体"));             // lpszFacename
+
+    font_bet_space_.CreateFont(12,                        // nHeight
+                               0,                         // nWidth
+                               0,                         // nEscapement
+                               0,                         // nOrientation
+                               FW_BOLD,                   // nWeight
+                               FALSE,                     // bItalic
+                               FALSE,                     // bUnderline
+                               0,                         // cStrikeOut
+                               DEFAULT_CHARSET,           // nCharSet
+                               OUT_CHARACTER_PRECIS,        // nOutPrecision
+                               CLIP_DEFAULT_PRECIS,       // nClipPrecision
+                               DEFAULT_QUALITY,           // nQuality
+                               DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
+                               TEXT("楷体"));             // lpszFacename
+
 }

@@ -113,6 +113,7 @@
     <ClInclude Include="BetGame.h" />
     <ClInclude Include="BetGameDlg.h" />
     <ClInclude Include="BetNetworkHelper.h" />
+    <ClInclude Include="ButtonBasic.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -123,6 +124,7 @@
     <ClCompile Include="BetGame.cpp" />
     <ClCompile Include="BetGameDlg.cpp" />
     <ClCompile Include="BetNetworkHelper.cpp" />
+    <ClCompile Include="ButtonBasic.cpp" />
     <ClCompile Include="MathHelper.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
