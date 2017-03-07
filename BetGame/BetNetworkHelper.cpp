@@ -80,7 +80,7 @@ void BetNetworkHelper::SetTipMessage(const base::Callback<void(const std::wstrin
     tips_callback_ = callback;
 }
 
-void BetNetworkHelper::SetBetResultNotify(const base::Callback<void(const  BetResult&)>& callback)
+void BetNetworkHelper::SetBetResultNotify(const base::Callback<void(const  CaculationData&)>& callback)
 {
     result_callback_ = callback;
 }
@@ -122,12 +122,14 @@ void BetNetworkHelper::OnBetNotify(const BetResult& bet_result)
     BetResult new_result = bet_result;
     new_result.display_result = it->second;
 
-    InsertToCaculationMap(new_result);
-    result_callback_.Run(new_result);
+    CaculationData caculation_data;
+    InsertToCaculationMap(new_result, &caculation_data);
+    result_callback_.Run(caculation_data);
     database_->InsertRecord(new_result);
 }
 
-void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
+void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result,
+                                             CaculationData* caculation_data)
 {
     if (caculation_map_.empty()) // 第一个数据
     {
@@ -146,15 +148,16 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
             data.frequence[i] = 0.0; // 频率 = 累计期数/开奖期数
         }
         caculation_map_[bet_result] = data;
+        *caculation_data = data;
         return;
     }
 
     const uint32& display_result = bet_result.display_result;
-    auto caculate_data = caculation_map_.end();
-    caculate_data--; // 最后一个
+    auto caculate_data = caculation_map_.rbegin();
     const CaculationData& last_data = caculate_data->second;
     CaculationData new_data = last_data;
-    new_data.index++;
+    new_data.bet_result = bet_result;
+    new_data.periods++;
 
     for (int i = 0; i < 8; i++)
     {
@@ -187,7 +190,7 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
 
         if (new_data.summary[i])// 避免除0错误
         {
-            new_data.frequence[i] = (new_data.summary[i] * 100.0) / (new_data.index*1.0);
+            new_data.frequence[i] = (new_data.summary[i] * 100.0) / (new_data.periods*1.0);
         }
     }
     //BetResult bet_result;
@@ -200,7 +203,7 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
     //double avg_distance[8]; // 平均间隔
     //double standard_deviation[8]; // 间隔标准差
     //double frequence[8]; // 频率 = 累计期数/开奖期数
-    LOG(INFO) << L"index(" << new_data.index+1 << L") "<< L"bet_result = " << bet_result.display_result;
+    LOG(INFO) << L"index(" << new_data.periods+1 << L") "<< L"bet_result = " << bet_result.display_result;
     for (int i = 0; i < 8; i++)
     {
         LOG(INFO) << L"result(" << i+1 << L") " << L"summary= " << new_data.summary[i]
@@ -213,6 +216,7 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result)
             << L" frequence= " << base::DoubleToString(new_data.frequence[i]);
     }
     caculation_map_[bet_result] = new_data;
+    *caculation_data = new_data;
 }
 
 void BetNetworkHelper::ConnectionBreakCallback(

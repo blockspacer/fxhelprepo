@@ -9,6 +9,7 @@
 #include "afxwin.h"
 
 #include "BetNetworkHelper.h"
+#include "ButtonBasic.h"
 
 class BetNetworkHelper;
 struct BetResult;
@@ -49,12 +50,14 @@ private:
     afx_msg void OnHdnBegintrackListBetdata(NMHDR *pNMHDR, LRESULT *pResult);
 
     void TipMessageCallback(const std::wstring& message);
-    void DisplayBetResultCallback(const BetResult& bet_result);
+    void DisplayBetResultCallback(const CaculationData& bet_result);
     void DisplayBetTimeCallback(uint32 time);
 
     LRESULT OnTipsMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayBetResult(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayBetTime(WPARAM wParam, LPARAM lParam);
+
+    void CreateFont();
 
     int message_count_;
     CListBox m_list_msg;
@@ -65,4 +68,16 @@ private:
     CButton m_check_remember;
 
     std::unique_ptr<BetNetworkHelper> bet_network_;
+    CEdit m_edit_display_result;
+
+    CFont font_bet_basic_;
+    CFont font_bet_count_;
+    CFont font_bet_space_;
+    CFont font_bet_result_red_;
+    CFont font_bet_result_black_;
+    CFont font_bet_result_blue_;
+
+    CButtonBasic m_btn_basic[8];
+    CStatic m_static_space[8];
+    CStatic m_static_count[8];
 };

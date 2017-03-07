@@ -14,7 +14,7 @@
 struct CaculationData
 {
     BetResult bet_result;
-    uint32 index = 0; // 开奖期数，自定义从0开始
+    uint32 periods = 0; // 开奖期数，自定义从0开始
     uint32 summary[8];// 累计期数
     uint32 sum_distance[8];; // 统计总间隔
     uint32 distance[8]; // 每个数间隔多少期没开
@@ -39,13 +39,14 @@ public:
     void EnterRoom(uint32 room_id);
 
     void SetTipMessage(const base::Callback<void(const std::wstring&)>& callback);
-    void SetBetResultNotify(const base::Callback<void(const  BetResult&)>& callback);
+    void SetBetResultNotify(const base::Callback<void(const  CaculationData&)>& callback);
     void SetBetTimeNotify(const base::Callback<void(uint32 time)>& callback);
 
 private:
     void OnBetNotify(const  BetResult& bet_result);
 
-    void InsertToCaculationMap(const BetResult& bet_result);
+    void InsertToCaculationMap(const BetResult& bet_result,
+                               CaculationData* caculation_data);
 
     // 提供连接状态出错重连的功能
     void ConnectionBreakCallback(uint32 room_id);
@@ -53,7 +54,7 @@ private:
     std::unique_ptr<TcpClientController> tcp_manager_;
     std::unique_ptr<User> user_;
     base::Callback<void(const std::wstring&)> tips_callback_;
-    base::Callback<void(const  BetResult&)> result_callback_;
+    base::Callback<void(const  CaculationData&)> result_callback_;
     base::Callback<void(uint32)> time_callback_;
     scoped_ptr<base::Thread> worker_thread_;
     std::map<uint32, uint32> result_map_;
