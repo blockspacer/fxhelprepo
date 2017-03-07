@@ -41,7 +41,11 @@ CBetGameDlg::CBetGameDlg(CWnd* pParent /*=NULL*/)
     , message_count_(0)
     , bet_network_(nullptr)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+    m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+}
+
+CBetGameDlg::~CBetGameDlg()
+{
 }
 
 void CBetGameDlg::DoDataExchange(CDataExchange* pDX)
@@ -78,6 +82,7 @@ void CBetGameDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_STATIC_COUNT7, m_static_count[6]);
     DDX_Control(pDX, IDC_STATIC_COUNT8, m_static_count[7]);
     DDX_Control(pDX, IDC_EDIT_DISPLAY, m_edit_display_result);
+    DDX_Control(pDX, IDC_RICHEDIT_DISPLAY, m_richedit_display);
 }
 
 BEGIN_MESSAGE_MAP(CBetGameDlg, CDialogEx)
@@ -147,13 +152,16 @@ BOOL CBetGameDlg::OnInitDialog()
     {
         m_btn_basic[index].SetText(base::IntToString16(index+1).c_str());
         m_btn_basic[index].SetBkColor(bk_color);
-        m_btn_basic[index].SetFont(&font_bet_basic_, TRUE);
+        m_btn_basic[index].SetFont(&font_bet_18_, TRUE);
 
         m_static_space[index].SetWindowTextW(L"0");
+        m_static_space[index].SetFont(&font_bet_12_, TRUE);
         m_static_count[index].SetWindowTextW(L"0");
+        m_static_count[index].SetFont(&font_bet_12_, TRUE);
     }
 
-	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+    m_richedit_display.SetFont(&font_bet_26_);
+    return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
 // 如果向对话框添加最小化按钮，则需要下面的代码
@@ -289,8 +297,49 @@ LRESULT CBetGameDlg::OnDisplayBetResult(WPARAM wParam, LPARAM lParam)
         m_static_count[index].SetWindowTextW(base::UintToString16(summary).c_str());
     }
 
+    DisplayToRichEdit(bet_result->display_result);
+
     delete caculation_data;
     return 0;
+}
+
+bool CBetGameDlg::DisplayToRichEdit(uint32 display_result)
+{
+    std::wstring str_result = base::UintToString16(display_result);
+
+    CString logMessage = str_result.c_str();
+    COLORREF display_color = RGB(255, 255, 255);
+    switch (display_result)
+    {
+    case 1:
+    case 2:
+    case 7:
+    case 8:
+        display_color = RGB(0, 0, 0);//black
+        break;
+    case 3:
+        display_color = RGB(255, 0, 255);//red
+        break;
+    case 4:
+    case 5:
+    case 6:
+        display_color = RGB(0, 0, 255);//blue
+        break;
+    default:
+        DCHECK(false && L"数据错误");
+        return false;
+    }
+    CHARFORMAT cf;
+    m_richedit_display.GetDefaultCharFormat(cf);
+    cf.dwEffects = 0;
+    cf.crTextColor = display_color;
+
+    long current_len = m_richedit_display.GetTextLength();
+    m_richedit_display.SetSel(current_len, current_len + logMessage.GetLength());
+
+    m_richedit_display.SetSelectionCharFormat(cf);
+    m_richedit_display.ReplaceSel(logMessage);
+    return true;
 }
 
 LRESULT CBetGameDlg::OnDisplayBetTime(WPARAM wParam, LPARAM lParam)
@@ -315,7 +364,7 @@ void CBetGameDlg::OnHdnBegintrackListBetdata(NMHDR *pNMHDR, LRESULT *pResult)
 void CBetGameDlg::CreateFont()
 {
 
-    font_bet_basic_.CreateFont(18,                        // nHeight
+    font_bet_18_.CreateFont(18,                        // nHeight
                                0,                         // nWidth
                                0,                         // nEscapement
                                0,                         // nOrientation
@@ -330,7 +379,7 @@ void CBetGameDlg::CreateFont()
                                DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
                                TEXT("黑体"));             // lpszFacename
 
-    font_bet_count_.CreateFont(12,                        // nHeight
+    font_bet_12_.CreateFont(12,                        // nHeight
                                0,                         // nWidth
                                0,                         // nEscapement
                                0,                         // nOrientation
@@ -345,7 +394,7 @@ void CBetGameDlg::CreateFont()
                                DEFAULT_PITCH | FF_SWISS,  // nPitchAndFamily
                                TEXT("楷体"));             // lpszFacename
 
-    font_bet_space_.CreateFont(12,                        // nHeight
+    font_bet_26_.CreateFont(26,                        // nHeight
                                0,                         // nWidth
                                0,                         // nEscapement
                                0,                         // nOrientation
