@@ -389,6 +389,7 @@ bool NetworkHelper::Initialize()
     assert(!authority_->serverip.empty());
     user_->SetRoomServerIp(authority_->serverip);
     user_->SetTcpManager(tcp_client_controller_.get());
+    user_->Initialize(workThread_->message_loop_proxy());
     return result;
 }
 
@@ -713,7 +714,7 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
         std::string error_msg;
         for (uint32 count = 0; count < 10; count++)
         {
-            if (!user_->RetrieveHappyFreeCoin(roomid, roomgiftinfo601.token, &error_msg);)
+            if (!user_->RetrieveHappyFreeCoin(roomid, roomgiftinfo601.token, &error_msg))
             {
                 break;
             } 
