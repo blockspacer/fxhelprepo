@@ -710,7 +710,15 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
 
     if (!roomgiftinfo601.token.empty())
     {
-        // 原本是抢币的动作，目前不做这类功能
+        // 原本是抢币的动作
+        std::string error_msg;
+        for (uint32 count = 0; count < 10; count++)
+        {
+            if (!user_->RetrieveHappyFreeCoin(roomid, roomgiftinfo601.token, &error_msg);)
+            {
+                break;
+            } 
+        }
     }
 
     std::wstring chatmsg;
