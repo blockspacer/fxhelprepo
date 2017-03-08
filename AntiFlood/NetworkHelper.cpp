@@ -449,6 +449,11 @@ void NetworkHelper::SetNotify(notifyfn fn)
     notify_ = fn;
 }
 
+void NetworkHelper::SetRetriveGiftCoin(base::Callback<void(uint32)>& callback)
+{
+    retrive_gift_coin_callback_ = callback;
+}
+
 void NetworkHelper::RemoveNotify()
 {
     notify_ = nullptr;
@@ -712,13 +717,18 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
     {
         // 原本是抢币的动作
         std::string error_msg;
+        uint32 coin_count = 0;
         for (uint32 count = 0; count < 10; count++)
         {
-            if (!user_->RetrieveHappyFreeCoin(roomid, roomgiftinfo601.token, &error_msg))
-            {
+            uint32 coin = 0;
+            if (!user_->RetrieveHappyFreeCoin(roomid, roomgiftinfo601.token, &coin, &error_msg))
                 break;
-            } 
+
+            coin_count += coin;
         }
+
+        if (coin_count && !retrive_gift_coin_callback_.is_null())
+            retrive_gift_coin_callback_.Run(coin_count);
     }
 
     std::wstring chatmsg;

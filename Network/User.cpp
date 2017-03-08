@@ -627,7 +627,8 @@ bool User::RealSingLike(uint32 roomid, const std::wstring& song_name,
         kugouid_, usertoken_, song_name, errormsg);
 }
 
-bool User::RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token, std::string* errormsg)
+bool User::RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token, 
+    uint32* coin, std::string* errormsg)
 {
     auto room = rooms_.find(roomid);
     if (room == rooms_.end())
@@ -697,9 +698,9 @@ bool User::RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token, s
         return false;
     }
 
-    uint32 coin = GetInt32FromJsonValue(rootdata, "data");
+    *coin = GetInt32FromJsonValue(rootdata, "data");
 
-    std::wstring message = L"ÇÀ±Ò³É¹¦£¬ÇÀµ½" + base::UintToString16(coin) + L"ÐÇ±Ò";
+    std::wstring message = L"ÇÀ±Ò³É¹¦£¬ÇÀµ½" + base::UintToString16(*coin) + L"ÐÇ±Ò";
     if (normalNotify_)
         normalNotify_(message);
     

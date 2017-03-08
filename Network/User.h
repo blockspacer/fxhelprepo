@@ -125,7 +125,8 @@ public:
         std::string* errormsg);
 
     // ÇÀ±Ò¶¯×÷
-    bool RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token, std::string* errormsg);
+    bool RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token, 
+        uint32* coin, std::string* errormsg);
 
     bool GetGiftList(uint32 roomid, std::string* content);
     bool GetViewerList(uint32 roomid, 

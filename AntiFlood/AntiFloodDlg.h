@@ -29,6 +29,7 @@ public:
         WM_USER_01 = WM_USER + 1,
         WM_USER_ADD_ENTER_ROOM_INFO = WM_USER + 2,
         WM_USER_ADD_TO_BLACK_LIST = WM_USER + 3,
+        WM_USER_ADD_RETRIVE_GIFT_COIN = WM_USER + 4,
     };
 protected:
     virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV Ö§³Ö
@@ -120,11 +121,13 @@ protected:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam);
+    LRESULT OnRetriveGiftCoin(WPARAM wParam, LPARAM lParam);
 
 private:
     void SetHScroll();
     void Notify(const std::wstring& message);
     void NotifyEnterRoom(const RowData& rowdata);
+    void NotifyRetriveGiftCoin(uint32 coin);
     bool LoginByRequest(const std::wstring& username, 
         const std::wstring& password, const std::wstring& verifycode);
     bool RefreshVerifyCode();
@@ -206,4 +209,5 @@ private:
 
     CButton m_btn_welcome_setting;
     CButton m_btn_thanks_setting;
+    CEdit m_edit_retrive_gift_coin;
 };
