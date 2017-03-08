@@ -137,13 +137,27 @@ void BetNetworkHelper::InsertToCaculationMap(const BetResult& bet_result,
         data.bet_result = bet_result;
         for (int i = 0; i < 8; i++)
         {
-            data.avg_distance[i] = 0;
+            if (bet_result.display_result-1 == i)
+            {
+                data.avg_distance[i] = 0;
+                data.summary[i] = 1;// 累计期数
+                data.sum_distance[i] = 0; // 统计总间隔
+                data.distance[i] = 0;// 每个数间隔多少期没开
+                data.max_distance[i] = 0;// 最大间隔
+                data.mid_distance[i] = 0; // 间隔中位数
+                data.avg_distance[i] = 0.0; // 平均间隔
+                data.standard_deviation[i] = 0.0;// 间隔标准差
+                data.frequence[i] = 1.0; // 频率 = 累计期数/开奖期数
+                continue;
+            }
+            
+            data.avg_distance[i] = 1;
             data.summary[i] = 0;// 累计期数
-            data.sum_distance[i] = 0;;; // 统计总间隔
-            data.distance[i] = 0;// 每个数间隔多少期没开
-            data.max_distance[i] = 0;// 最大间隔
+            data.sum_distance[i] = 1;// 统计总间隔
+            data.distance[i] = 1;// 每个数间隔多少期没开
+            data.max_distance[i] = 1;// 最大间隔
             data.mid_distance[i] = 0; // 间隔中位数
-            data.avg_distance[i] = 0.0; // 平均间隔
+            data.avg_distance[i] = 1.0; // 平均间隔
             data.standard_deviation[i] = 0.0;// 间隔标准差
             data.frequence[i] = 0.0; // 频率 = 累计期数/开奖期数
         }
