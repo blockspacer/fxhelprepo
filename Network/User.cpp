@@ -6,6 +6,7 @@
 #include "EncodeHelper.h"
 
 #include "third_party/json/json.h"
+#include "third_party/chromium/base/rand_util.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 
@@ -577,7 +578,7 @@ bool User::SendStar(uint32 roomid, uint32 count)
     return room->second->SendStar(cookies, roomid, count, &errormsg);
 }
 
-bool User::RetrieveStart()
+bool User::RetrieveStar()
 {
     return false;
 }
@@ -623,6 +624,86 @@ bool User::RealSingLike(uint32 roomid, const std::wstring& song_name,
     std::string cookies = cookiesHelper_->GetCookies(keys);
     return room->second->RealSingLike(cookies,
         kugouid_, usertoken_, song_name, errormsg);
+}
+
+bool User::RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token, std::string* errormsg)
+{
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    std::string url = "http://fanxing.kugou.com/Services.php";
+    HttpRequest request;
+    request.url = url;
+    request.cookies = cookies;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.queries["act"] = "GiftService%2EGiftService";
+    request.queries["args"] = std::string("%5B%22")
+        + base::UintToString(roomid) + "%22%2C%22"
+        + gift_token + "%22%5D";
+    request.queries["mtd"] = "tryGetHappyFreeCoin";
+
+    // 生成一个小数，小数16位，方式比较丑陋，实现就好
+    uint32 first = base::RandInt(10000000, 99999999);
+    uint32 second = base::RandInt(10000000, 99999999);
+    std::string ran = "0%2E" + base::UintToString(first) + base::UintToString(second);
+    request.queries["ran"] = ran;
+
+    // FIX ME: 现在不知道version是使用多少
+    request.referer = "http://fanxing.kugou.com/static/swf/award/CommonMoneyGift.swf?version=20140221";
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+        return false;
+
+    if (response.content.empty())
+        return false;
+
+    std::string responsedata(response.content.begin(), response.content.end());
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(responsedata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1476689208).asUInt();
+    uint32 status = rootdata.get("status", 0).asUInt();
+    std::string errorcode = rootdata.get("errorcode", "").asString();
+    if (status != 1)
+    {
+        assert(false && L"抢币失败");
+        std::string utf8_str;
+        UnicodeToUtf8(errorcode, &utf8_str);
+        std::wstring message = L"抢币失败:" + base::UTF8ToWide(utf8_str);
+        if (normalNotify_)
+            normalNotify_(message);
+
+        *errormsg = errorcode;
+        return false;
+    }
+
+    uint32 coin = GetInt32FromJsonValue(rootdata, "data");
+
+    std::wstring message = L"抢币成功，抢到" + base::UintToString16(coin) + L"星币";
+    if (normalNotify_)
+        normalNotify_(message);
+    
+    return true;
 }
 
 bool User::GetGiftList(uint32 roomid, std::string* content)
