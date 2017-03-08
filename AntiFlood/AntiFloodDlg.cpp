@@ -145,6 +145,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_PRIVATE_NOTIFY, m_chk_private_notify);
     DDX_Control(pDX, IDC_BTN_WELCOME_SETTING, m_btn_welcome_setting);
     DDX_Control(pDX, IDC_BTN_THANKS_SETTING, m_btn_thanks_setting);
+    DDX_Control(pDX, IDC_EDIT_RETRIVE_GIFT_COIN, m_edit_retrive_gift_coin);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -161,6 +162,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_MESSAGE(WM_USER_01, &CAntiFloodDlg::OnNotifyMessage)
     ON_MESSAGE(WM_USER_ADD_ENTER_ROOM_INFO, &CAntiFloodDlg::OnDisplayDataToViewerList)
     ON_MESSAGE(WM_USER_ADD_TO_BLACK_LIST, &CAntiFloodDlg::OnDisplayDtatToBlackList)
+    ON_MESSAGE(WM_USER_ADD_RETRIVE_GIFT_COIN, &CAntiFloodDlg::OnRetriveGiftCoin)
     ON_NOTIFY(HDN_ITEMCLICK, 0, &CAntiFloodDlg::OnHdnItemclickListUserStatus)
     ON_BN_CLICKED(IDC_BUTTON_REMOVE, &CAntiFloodDlg::OnBnClickedButtonRemove)
     ON_BN_CLICKED(IDC_BTN_SELECT_ALL, &CAntiFloodDlg::OnBnClickedBtnSelectAll)
@@ -324,6 +326,9 @@ BOOL CAntiFloodDlg::OnInitDialog()
         m_list_user_strategy.SetItemText(nitem, 2, it.second.content.c_str());
         welcomecount++;
     }
+
+    // 抢币数据显示初始化
+    m_edit_retrive_gift_coin.SetWindowTextW(L"0");
 
     std::wstring roomid;
     config.GetRoomid(&roomid);
@@ -503,6 +508,9 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
     network_->SetNotify501(
         std::bind(&CAntiFloodDlg::NotifyEnterRoom, this, std::placeholders::_1));
 
+    network_->SetRetriveGiftCoin(
+        base::Bind(&CAntiFloodDlg::NotifyRetriveGiftCoin, base::Unretained(this)));
+
     bool result = network_->EnterRoom(strRoomid.GetBuffer());
     std::wstring message = std::wstring(L"进入房间 ") + (result ? L"成功" : L"失败");
     Notify(message);
@@ -606,6 +614,12 @@ void CAntiFloodDlg::NotifyEnterRoom(const RowData& rowdata)
     viewerRowdataQueue_.push_back(rowdata);
     viewerRowdataMutex_.unlock();
     this->PostMessage(WM_USER_ADD_ENTER_ROOM_INFO, 0, 0);
+}
+
+// 暂时不做线程切换了，直接处理
+void CAntiFloodDlg::NotifyRetriveGiftCoin(uint32 coin)
+{
+    this->PostMessage(WM_USER_ADD_RETRIVE_GIFT_COIN, 0, coin);
 }
 
 bool CAntiFloodDlg::LoginByRequest(const std::wstring& username, 
@@ -906,6 +920,23 @@ LRESULT CAntiFloodDlg::OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam)
         }
     }
 
+    return 0;
+}
+
+LRESULT CAntiFloodDlg::OnRetriveGiftCoin(WPARAM wParam, LPARAM lParam)
+{
+    uint32 coin = (uint32)lParam;
+    CString cstr_coin;
+    m_edit_retrive_gift_coin.GetWindowTextW(cstr_coin);
+    std::string str_coin = base::WideToUTF8(cstr_coin.GetBuffer());
+
+    uint32 display_coin = 0;
+    base::StringToUint(str_coin, &display_coin);
+    display_coin += coin;
+
+    std::wstring wstr_coin = base::UintToString16(display_coin);
+
+    m_edit_retrive_gift_coin.SetWindowTextW(wstr_coin.c_str());
     return 0;
 }
 

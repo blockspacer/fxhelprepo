@@ -114,6 +114,7 @@ public:
     void SetRoomRepeatChat(bool enable, const std::wstring& seconds, const std::wstring& chatmsg);
 
     void SetNotify(notifyfn fn);
+    void SetRetriveGiftCoin(base::Callback<void(uint32)>& callback);
     void RemoveNotify();
 
     void SetNotify201(notify201 fn);
@@ -181,6 +182,8 @@ private:
     notifyfn notify_;
     notify201 notify201_;
     notify501 notify501_;
+    base::Callback<void(uint32)> retrive_gift_coin_callback_;
+
     bool handleall501_ = false;
     bool robotstate_ = false;
     notify502 notify502_;
