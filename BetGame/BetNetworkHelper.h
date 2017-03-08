@@ -15,7 +15,7 @@ struct CaculationData
 {
     BetResult bet_result;
     uint32 periods = 0; // 开奖期数，自定义从0开始
-    uint32 summary[8];// 累计期数
+    uint32 summary[8];// 累计中奖期数
     uint32 sum_distance[8];; // 统计总间隔
     uint32 distance[8]; // 每个数间隔多少期没开
     uint32 max_distance[8]; // 最大间隔

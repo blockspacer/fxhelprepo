@@ -339,6 +339,7 @@ bool CBetGameDlg::DisplayToRichEdit(uint32 display_result)
 
     m_richedit_display.SetSelectionCharFormat(cf);
     m_richedit_display.ReplaceSel(logMessage);
+    m_richedit_display.SetFocus();
     return true;
 }
 
