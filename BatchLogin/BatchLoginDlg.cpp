@@ -81,6 +81,7 @@ void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_DELTA, m_edit_delta);
     DDX_Control(pDX, IDC_EDIT_CHAT_MESSAGE, m_edit_chat_message);
     DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
+    DDX_Control(pDX, IDC_CHK_AUTO_SING_LIKE, m_chk_auto_sing_like);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -112,6 +113,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_BATCH_CHAT, &CBatchLoginDlg::OnBnClickedBtnBatchChat)
     ON_BN_CLICKED(IDC_BTN_SEND_STAR, &CBatchLoginDlg::OnBnClickedBtnSendStar)
     ON_BN_CLICKED(IDC_BTN_MV_Billboard, &CBatchLoginDlg::OnBnClickedBtnMvBillboard)
+    ON_BN_CLICKED(IDC_CHK_AUTO_SING_LIKE, &CBatchLoginDlg::OnBnClickedChkAutoSingLike)
 END_MESSAGE_MAP()
 
 
@@ -248,9 +250,29 @@ void CBatchLoginDlg::OnBnClickedBtnImportUser()
     }
 }
 
+void CBatchLoginDlg::RealSingNotify(const std::wstring& user_name,
+    const RealSingInfo& real_sing_info)
+{
+    std::vector<std::wstring> users;
+    GetSelectUsers(&users);
+    CString cs_roomid;
+    m_roomid.GetWindowTextW(cs_roomid);
+
+    CString cs_delta;
+    m_edit_delta.GetWindowTextW(cs_delta);
+
+    userRoomManager_->NewRealSingLike(users,
+        cs_roomid.GetBuffer(), real_sing_info.star_kugou_id,
+        base::UTF8ToWide(real_sing_info.song_name), cs_delta.GetBuffer());
+}
+
 void CBatchLoginDlg::OnBnClickedBtnLogin()
 {
     userRoomManager_->SetBreakRequest(false);
+    userRoomManager_->SetRealSingNotify(
+        std::bind(&CBatchLoginDlg::RealSingNotify,this,
+        std::placeholders::_1, std::placeholders::_2));
+
     bool use_cookie = !!m_chk_use_cookie.GetCheck();
     int itemcount = m_ListCtrl_Users.GetItemCount();
     std::map<std::wstring, std::wstring> accountPassword;
@@ -276,7 +298,6 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
 
     if (!accountPassword.empty())
         userRoomManager_->BatchLogUsers(accountPassword);
-
 
 }
 
@@ -357,16 +378,6 @@ void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
 {
     userRoomManager_->SetBreakRequest(false);
-    //int itemcount = m_ListCtrl_Rooms.GetItemCount();
-    //std::vector<std::wstring> roomids;
-    //for (int32 index = 0; index < itemcount; ++index)
-    //{
-    //    if (!!m_ListCtrl_Rooms.GetCheck(index))
-    //    {
-    //        CString roomid = m_ListCtrl_Rooms.GetItemText(index, 0);
-    //        roomids.push_back(roomid.GetBuffer());
-    //    }
-    //}
 
     std::vector<std::wstring> users;
     GetSelectUsers(&users);
@@ -739,4 +750,10 @@ void CBatchLoginDlg::OnBnClickedBtnSendStar()
 
     uint32 count = 1;
     userRoomManager_->BatchSendStar(users, cs_roomid.GetBuffer(), count);
+}
+
+
+void CBatchLoginDlg::OnBnClickedChkAutoSingLike()
+{
+    bool auto_sing_like = !!m_chk_auto_sing_like.GetCheck();
 }

@@ -148,6 +148,11 @@ void User::SetNotify620(Notify620 notify_620)
     notify_620_ = notify_620;
 }
 
+void User::SetNotify1603(Notify1603 notify_1603)
+{
+    notify_1603_ = notify_1603;
+}
+
 bool User::Login()
 {
     std::string msg;
@@ -410,6 +415,10 @@ bool User::EnterRoomFopAlive(uint32 roomid,
         room->SetNotify620(notify_620_);
     }
 
+    if (notify_1603_)
+    {
+        room->SetNotify1603(notify_1603_);
+    }
     // 如果存在重复的房间，先断掉旧的
     this->ExitRoom(roomid);
 
@@ -655,6 +664,60 @@ bool User::RealSingLike(uint32 roomid, const std::wstring& song_name,
     std::string cookies = cookiesHelper_->GetCookies(keys);
     return room->second->RealSingLike(cookies,
         kugouid_, usertoken_, song_name, errormsg);
+}
+
+bool User::NewRealSingLike(uint32 roomid, uint32 star_kugou_id,
+    const std::wstring& song_name, std::string* errormsg)
+{
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    std::string url = "http://service.fanxing.com";
+    url += "/singlike/realsinglike/like";
+    HttpRequest request;
+    request.url = url;
+    request.cookies = cookies;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_POST;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid);
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    std::map<std::string, std::string> postmap;
+    postmap["times"] = GetNowTimeString();
+    postmap["appId"] = "1010";
+    postmap["pid"] = "90";
+    postmap["starKugouId"] = base::UintToString(star_kugou_id); // kugouid, 不是繁星号
+    postmap["fanKugouId"] = base::UintToString(kugouid_); // kugouid, 不是繁星号
+    postmap["token"] = usertoken_;
+    postmap["callback"] = "postCallback";
+    postmap["songName"] = base::WideToUTF8(song_name);
+    MakePostdata(postmap, &request.postdata);
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    if (response.content.empty())
+    {
+        assert(false);
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+    if (responsedata.find("success") == std::string::npos)
+        return false;
+
+    return true;
 }
 
 bool User::RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token, 

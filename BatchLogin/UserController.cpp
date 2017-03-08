@@ -56,9 +56,23 @@ bool UserController::AddUser(const std::string& username,
    
     shared_user->SetTcpManager(tcpManager_);
     shared_user->SetRoomServerIp(serverip);
+    if (users_.empty())
+    {
+        shared_user->SetNotify1603(
+            std::bind(&UserController::InnerRealSingCallback,
+            this, username, std::placeholders::_1));
+    }
+
     users_[username] = shared_user;
 
     return true;
+}
+
+void UserController::SetNotify1603(
+    std::function<void(const std::wstring&, 
+    const RealSingInfo&)> real_sing_notify)
+{
+    real_sing_notify_ = real_sing_notify;
 }
 
 bool UserController::AddUserWithCookies(const std::string& username,
@@ -84,6 +98,14 @@ bool UserController::AddUserWithCookies(const std::string& username,
 
     shared_user->SetTcpManager(tcpManager_);
     shared_user->SetRoomServerIp(serverip);
+
+    if (users_.empty())
+    {
+        shared_user->SetNotify1603(
+            std::bind(&UserController::InnerRealSingCallback,
+            this, username, std::placeholders::_1));
+    }
+
     users_[username] = shared_user;
 
     return true;
@@ -150,6 +172,33 @@ bool UserController::RealSingLike(const std::string& account,
         msg += L"失败";
         callback(msg);
         callback(base::UTF8ToWide(errormsg));
+    }
+    else
+    {
+        msg += L"成功";
+        callback(msg);
+    }
+
+    return true;
+}
+
+bool UserController::NewRealSingLike(const std::string& account,
+    uint32 roomid, uint32 star_kugou_id, const std::wstring& song_name,
+    const std::function<void(const std::wstring& msg)>& callback)
+{
+    auto result = users_.find(account);
+    if (result == users_.end())
+    {
+        assert(false && L"找不到对应用户");
+        return false;
+    }
+    std::wstring msg = base::UTF8ToWide(result->first) + L" 点赞";
+    std::string errormsg;
+    if (!result->second->NewRealSingLike(roomid, star_kugou_id, song_name, &errormsg))
+    {
+        msg += L"失败";
+        callback(msg);
+        //callback(base::UTF8ToWide(errormsg));
     }
     else
     {
@@ -451,4 +500,14 @@ void UserController::ConnectionBreakCallback(const std::string& user_name,
     uint32 room_id)
 {
 
+}
+
+void UserController::InnerRealSingCallback(const std::string& account,
+    const RealSingInfo& real_sing_info)
+{
+    if (!real_sing_notify_)
+        return;
+
+    std::wstring wstr_username = base::UTF8ToWide(account);
+    real_sing_notify_(wstr_username, real_sing_info);
 }

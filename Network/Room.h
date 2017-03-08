@@ -54,6 +54,8 @@ public:
     void SetNotify601(Notify601 notify601);
 
     void SetNotify620(Notify620 notify_620);
+    void SetNotify1603(Notify1603 notify_1603);
+
     // 中断接收数据的连接
     bool Exit();
 

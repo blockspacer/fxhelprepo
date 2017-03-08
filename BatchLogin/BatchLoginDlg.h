@@ -10,6 +10,7 @@
 #include "afxcmn.h"
 
 #include "Network/EncodeHelper.h"
+#include "Network/MessageNotifyManager.h" // 暂时未做优化
 #include "afxwin.h"
 
 class UserRoomManager;
@@ -67,10 +68,12 @@ protected:
     afx_msg void OnBnClickedBtnSingelike();
     afx_msg void OnBnClickedBtnChangeConfigNickname();
     afx_msg void OnBnClickedBtnBatchChat();
+    afx_msg void OnBnClickedChkAutoSingLike();
 
 	DECLARE_MESSAGE_MAP()
 
 private:
+    void RealSingNotify(const std::wstring& user_name, const RealSingInfo& real_sing_info);
     void Notify(const std::wstring& message);
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToUserList(WPARAM wParam, LPARAM lParam);
@@ -101,5 +104,7 @@ private:
     CEdit m_edit_delta;
 
     CEdit m_edit_chat_message;
+
+    CButton m_chk_auto_sing_like;
 
 };

@@ -81,6 +81,7 @@ public:
     void SetNotify501(Notify501 notify501);
     void SetNotify601(Notify601 notify601);
     void SetNotify620(Notify620 notify620);
+    void SetNotify1603(Notify1603 notify_1603);
 
     // 操作行为
     bool Login();
@@ -127,6 +128,10 @@ public:
                   std::string* errormsg);
     bool RealSingLike(uint32 roomid, const std::wstring& song_name,
         std::string* errormsg);
+
+    // 不使用进入房间的流程，只需要其中有一个连接是收到消息通知，知道房间内信息
+    bool NewRealSingLike(uint32 roomid, uint32 star_kugou_id,
+        const std::wstring& song_name, std::string* errormsg);
 
     // 抢币动作
     bool RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token, 
@@ -197,6 +202,7 @@ private:
     Notify501 notify501_;
     Notify601 notify601_;
     Notify620 notify_620_;
+    Notify1603 notify_1603_;
 
     // 年度活动需求，记录当前免费的大奖票和单项票数据
     uint32 awards_ticket_count_;

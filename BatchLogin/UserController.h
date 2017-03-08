@@ -37,6 +37,8 @@ public:
     bool AddUser(const std::string& username, const std::string& password, 
         const IpProxy& ipproxy, std::string* errormsg);
 
+    void SetNotify1603(std::function< void(const std::wstring&, const RealSingInfo&)> real_sing_notify);
+
     bool GetUserLoginInfo(std::vector<UserLoginInfo>* userlogininfo);
     bool SendGifts(const std::vector<std::string>& accounts,
         uint32 roomid, uint32 gift_id, uint32 gift_count,
@@ -44,6 +46,10 @@ public:
 
     bool RealSingLike(const std::string& account,
         uint32 roomid, const std::wstring& song_name,
+        const std::function<void(const std::wstring& msg)>& callback);
+
+    bool NewRealSingLike(const std::string& account,
+        uint32 roomid, uint32 star_kugou_id, const std::wstring& song_name,
         const std::function<void(const std::wstring& msg)>& callback);
 
     bool RobVotes(const std::vector<std::string>& users, uint32 room_id,
@@ -84,7 +90,8 @@ public:
 private:
     // 提供连接状态出错重连的功能
     void ConnectionBreakCallback(const std::string& user_name, uint32 room_id);
-
+    void InnerRealSingCallback(const std::string& account,
+        const RealSingInfo& real_sing_info);
     TcpClientController* tcpManager_;
     std::map<std::string, std::shared_ptr<User> > users_;
     std::unique_ptr<MVBillboard> mvBillboard_;
@@ -92,5 +99,8 @@ private:
     std::shared_ptr<Room> shared_room;
 
     scoped_refptr<base::TaskRunner> runner_;
+
+    std::function < void(const std::wstring&,
+        const RealSingInfo&) > real_sing_notify_;
 };
 

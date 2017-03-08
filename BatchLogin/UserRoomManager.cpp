@@ -55,6 +55,12 @@ void UserRoomManager::SetNotify(std::function<void(std::wstring)> notify)
     notify_ = notify;
 }
 
+void UserRoomManager::SetRealSingNotify(std::function < void(const std::wstring&,
+    const RealSingInfo&) > real_sing_notify)
+{
+    real_sing_notify_ = real_sing_notify;
+}
+
 bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total) const
 {
     // 读文件
@@ -377,6 +383,10 @@ bool UserRoomManager::FillRooms(
 void UserRoomManager::DoFillRooms(const std::vector<std::string>& users, 
     const std::vector<uint32>& roomids)
 {
+    userController_->SetNotify1603(
+        std::bind(&UserRoomManager::RealSingCallback,
+        this, std::placeholders::_1, std::placeholders::_2));
+
     for (const auto& roomid : roomids)
     {
         FillSingleRoom(users, roomid);
@@ -453,6 +463,38 @@ bool UserRoomManager::RealSingLike(const std::vector<std::wstring>& users,
     return true;
 }
 
+bool UserRoomManager::NewRealSingLike(const std::vector<std::wstring>& users,
+    const std::wstring& room_id, uint32 star_kugou_id, const std::wstring& song_name,
+    const std::wstring& delta)
+{
+    std::vector<std::string> accounts;
+    for (const auto& user : users)
+    {
+        std::string account = base::WideToUTF8(user);
+        accounts.push_back(account);
+    }
+    uint32 roomid = 0;
+    base::StringToUint(base::WideToUTF8(room_id), &roomid);
+
+    uint32 time_delta = 0;
+    base::StringToUint(base::WideToUTF8(delta), &time_delta);
+
+    uint32 times = 1;
+    for (const auto& account : accounts)
+    {
+        runner_->PostDelayedTask(FROM_HERE,
+            base::Bind(&UserRoomManager::DoNewRealSingLike, this, account,
+            roomid, star_kugou_id, song_name), base::TimeDelta::FromMilliseconds(time_delta*times++));
+
+        if (break_request_)
+        {
+            Notify(L"用户中止操作，点赞过程中断");
+            break;
+        }
+    }
+    return true;
+}
+
 void UserRoomManager::DoRealSingLike(const std::string& account,
     uint32 room_id, const std::wstring& song_name)
 {
@@ -462,12 +504,28 @@ void UserRoomManager::DoRealSingLike(const std::string& account,
         return;
     }
 
-//#ifdef _DEBUG
-//    Notify(L"用户测试点赞成功");
-//#else
     userController_->RealSingLike(account, room_id, song_name,
         std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
-//#endif // _DEBUG
+}
+
+void UserRoomManager::RealSingCallback(
+    const std::wstring& account, const RealSingInfo& real_sing_info)
+{
+    if (real_sing_notify_)
+        real_sing_notify_(account, real_sing_info);
+}
+
+void UserRoomManager::DoNewRealSingLike(const std::string& account,
+    uint32 room_id, uint32 star_kugou_id, const std::wstring& song_name)
+{
+    if (break_request_)
+    {
+        Notify(L"用户中止操作，点赞过程中断");
+        return;
+    }
+
+    userController_->NewRealSingLike(account, room_id, star_kugou_id, song_name,
+        std::bind(&UserRoomManager::Notify, this, std::placeholders::_1));
 }
 
 bool UserRoomManager::SendGifts(const std::vector<std::wstring>& users,

@@ -377,6 +377,45 @@ bool CommandHandle_620(const Json::Value& jvalue,
     return true;
 }
 
+bool CommandHandle_1901(const Json::Value& jvalue, RealSingInfo* real_sing_info)
+{
+    std::string errmsg;
+    Json::Value jv_default(Json::ValueType::objectValue);
+    uint32 time = GetInt32FromJsonValue(jvalue, "time");
+    uint32 action_id = GetInt32FromJsonValue(jvalue, "actionId");
+    uint32 room_id = GetInt32FromJsonValue(jvalue, "roomid");
+
+    if (action_id != 1803)
+    {
+        // 只处理1803的唱歌完成通知
+        return false;
+    }
+    Json::Value  content = jvalue.get("content", jv_default);
+    if (content.isNull())
+    {
+        assert(false);
+        return false;
+    }
+
+    Json::Value  song = content.get("song", jv_default);
+    if (song.isNull())
+    {
+        assert(false);
+        return false;
+    }
+
+    Json::Value jvString("");
+    uint32 starKugouId = GetInt32FromJsonValue(song, "kugouId");
+    uint32 star_fanxing_id = GetInt32FromJsonValue(song, "userId");
+    std::string songName = song.get("songName", "").asString();
+
+    real_sing_info->time = time;
+    real_sing_info->star_fanxing_id = star_fanxing_id;
+    real_sing_info->room_id = room_id;
+    real_sing_info->song_name = songName;
+    real_sing_info->star_kugou_id = starKugouId;
+    return true;
+}
 };
 MessageNotifyManager::MessageNotifyManager()
     //:tcpClient_843_(new TcpClient),
@@ -470,6 +509,12 @@ void MessageNotifyManager::SetNotify620(Notify620 notify_620)
         base::Bind(&MessageNotifyManager::DoSetNotify620, this, notify_620));
 }
 
+void MessageNotifyManager::SetNotify1603(Notify1603 notify_1603)
+{
+    runner_->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSetNotify1603, this, notify_1603));
+}
+
 void MessageNotifyManager::SetNormalNotify(NormalNotify normalNotify)
 {
     runner_->PostTask(FROM_HERE,
@@ -494,6 +539,11 @@ void MessageNotifyManager::DoSetNotify601(Notify601 notify601)
 void MessageNotifyManager::DoSetNotify620(Notify620 notify620)
 {
     notify_620_ = notify620;
+}
+
+void MessageNotifyManager::DoSetNotify1603(Notify1603 notify_1603)
+{
+    notify_1901_ = notify_1603;
 }
 
 void MessageNotifyManager::DoSetNormalNotify(NormalNotify normalNotify)
@@ -687,6 +737,18 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
                     notify_620_(bet_result);
                 }
             }
+        }
+        else if (cmd == 1901)
+        {
+            RealSingInfo real_sing_info;
+
+            if (!notify_1901_)
+                return;
+
+            if (!CommandHandle_1901(rootdata, &real_sing_info))
+                return;
+
+            notify_1901_(real_sing_info);
         }
 
 		EnterRoomUserInfo enterRoomUserInfo;

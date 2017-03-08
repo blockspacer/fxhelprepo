@@ -135,7 +135,6 @@ bool Room::EnterForOperation(const std::string& cookies,
 bool Room::EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid,
     const base::Callback<void()>& conn_break_callback)
 {
-
     if (!OpenRoom(cookies))
         return false;
 
@@ -737,6 +736,11 @@ void Room::SetNotify601(Notify601 notify601)
 void Room::SetNotify620(Notify620 notify_620)
 {
     messageNotifyManager_->SetNotify620(notify_620);
+}
+
+void Room::SetNotify1603(Notify1603 notify_1603)
+{
+    messageNotifyManager_->SetNotify1603(notify_1603);
 }
 
 bool Room::OpenRoom(const std::string& cookies)

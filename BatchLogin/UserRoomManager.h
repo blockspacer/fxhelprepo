@@ -25,6 +25,8 @@ public:
     bool Finalize();
 
     void SetNotify(std::function<void(std::wstring)> notify);
+    void SetRealSingNotify(std::function<void(const std::wstring&,
+        const RealSingInfo&)> real_sing_notify);
 
     bool LoadUserConfig(GridData* userpwd, uint32* total) const;
     bool LoadRoomConfig(GridData* roomgrid, uint32* total) const;
@@ -41,6 +43,10 @@ public:
 
     bool RealSingLike(const std::vector<std::wstring>& users, const std::wstring& room_id,
         const std::wstring& song_name, const std::wstring& delta);
+
+    bool NewRealSingLike(const std::vector<std::wstring>& users,
+        const std::wstring& room_id, uint32 star_kugou_id, const std::wstring& song_name,
+        const std::wstring& delta);
 
     bool SendGifts(const std::vector<std::wstring>& users, const std::wstring& room_id,
         uint32 gift_id, uint32 gift_count);
@@ -79,6 +85,10 @@ protected:
     void DoRealSingLike(const std::string& account,
         uint32 room_id, const std::wstring& song_name);
 
+    void RealSingCallback(const std::wstring& account, const RealSingInfo& real_sing_info);
+    void DoNewRealSingLike(const std::string& account,
+        uint32 room_id, uint32 star_kugou_id, const std::wstring& song_name);
+
     void DoSendGifts(const std::vector<std::wstring>& users,
         uint32 roomid, uint32 gift_id, uint32 gift_count);
     void DoRobVotes(const std::vector<std::wstring>& users, uint32 roomid);
@@ -101,5 +111,7 @@ private:
     std::unique_ptr<RoomController> roomController_ = nullptr;
     std::map<std::string, IpProxy> ipProxys_;
     bool break_request_ = false;
+
+    std::function < void(const std::wstring&, const RealSingInfo&)> real_sing_notify_;
 };
 

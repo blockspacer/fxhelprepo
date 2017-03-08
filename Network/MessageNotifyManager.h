@@ -65,6 +65,15 @@ struct RoomGiftInfo601
     std::string token;
 };
 
+struct RealSingInfo
+{
+    uint32 time; // 不需要用
+    uint32 star_fanxing_id; //主播繁星id
+    uint32 room_id;         // 点赞要用
+    std::string song_name;// 点赞要用
+    uint32 star_kugou_id; // 点赞要用
+};
+
 typedef std::function<void(const RoomGiftInfo601& roomgiftinfo)> Notify601;
 typedef std::function<void(const BetResult& bet_result)> Notify620;
 typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify201;
@@ -72,6 +81,8 @@ typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo,
     const RoomChatMessage& roomChatMessage)> Notify501;
 
 typedef std::function<void(MessageLevel, const std::wstring&)> NormalNotify;
+typedef std::function<void(const RealSingInfo& real_sing_info)> Notify1603; //  可以有点赞的通知
+
 class MessageNotifyManager 
     : public std::enable_shared_from_this <MessageNotifyManager>
 {
@@ -93,6 +104,7 @@ public:
     void SetNotify501(Notify501 notify201);
     void SetNotify601(Notify601 notify601);
     void SetNotify620(Notify620 notify_620);
+    void SetNotify1603(Notify1603 notify_1603);
     void SetNormalNotify(NormalNotify normalNotify);
 
     // 使用新的高效的多路tcp请求分发模式
@@ -111,6 +123,7 @@ private:
     void DoSetNotify501(Notify501 notify201);
     void DoSetNotify601(Notify601 notify601);
     void DoSetNotify620(Notify620 notify_620);
+    void DoSetNotify1603(Notify1603 notify_1603);
     void DoSetNormalNotify(NormalNotify normalNotify);
 
     void Notify(const std::vector<char>& data);
@@ -161,6 +174,7 @@ private:
     Notify501 notify501_;
     Notify601 notify601_;
     Notify620 notify_620_;
+    Notify1603 notify_1901_;
 
     NormalNotify normalNotify_;
 
