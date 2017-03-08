@@ -324,6 +324,7 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
     room->Initialize(runner_);
     room->SetTcpManager(tcpManager_);
     room->SetRoomServerIp(serverip_);
+    room->Initialize(runner_);
     std::vector<std::string> keys;
     keys.push_back("_fx_coin");
     keys.push_back("_fx_user");
@@ -696,7 +697,6 @@ bool User::RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token, s
     std::string errorcode = rootdata.get("errorcode", "").asString();
     if (status != 1)
     {
-        assert(false && L"«¿±“ ß∞‹");
         std::string utf8_str;
         UnicodeToUtf8(errorcode, &utf8_str);
         std::wstring message = L"«¿±“ ß∞‹:" + base::UTF8ToWide(utf8_str);
