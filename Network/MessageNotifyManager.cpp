@@ -544,6 +544,7 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
         uint32 senderid = GetInt32FromJsonValue(rootdata, "senderid");
             
         uint32 time = GetInt32FromJsonValue(rootdata, "time");
+        std::string str_display_time = MakeFormatTimeStringFromUnixTime(time);
         if (cmd == 601)
         {
             Json::Value jvContent(Json::ValueType::objectValue);
@@ -715,9 +716,11 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
             break;
         case 602:
             CommandHandle_602(rootdata, &outmsg);
-            if (normalNotify_)
-                normalNotify_(L"房间状态正常");
-
+            {
+                std::wstring wstr_display_time = base::UTF8ToUTF16(str_display_time);
+                if (normalNotify_)
+                    normalNotify_(MessageLevel::MESSAGE_LEVEL_ONCE, wstr_display_time + L" 房间状态正常");
+            }
             break;
         case 606:
             CommandHandle_606(rootdata, &outmsg);
@@ -733,11 +736,11 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
         {
             // 处理数据包,转换成输出界面信息
             std::wstring wstr = base::UTF8ToWide(package);
-            normalNotify_(wstr);
+            normalNotify_(MessageLevel::MESSAGE_LEVEL_DEBUG, wstr);
             if (!outmsg.empty())
             {
                 wstr = base::UTF8ToWide(outmsg);
-                normalNotify_(wstr);
+                normalNotify_(MessageLevel::MESSAGE_LEVEL_DEBUG, wstr);
             }
         }
 #endif
@@ -1035,7 +1038,7 @@ void MessageNotifyManager::DoNewSendDataCallback(SocketHandle handle, bool resul
     }
 
     if (normalNotify_)
-        normalNotify_(state);
+        normalNotify_(MessageLevel::MESSAGE_LEVEL_ONCE, state);
 }
 
 bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint32 richlevel,

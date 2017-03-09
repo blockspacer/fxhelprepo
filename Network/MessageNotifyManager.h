@@ -11,10 +11,8 @@
 #include "third_party/chromium/base/threading/thread.h"
 #include "third_party/chromium/base/task_runner.h"
 #include "Network/IpProxy.h"
-//#include "Network/TcpClient.h"
-//#include "Network/TcpProxyClient.h"
+#include "Network/common.h"
 #include "Network/TcpDefines.h"
-//#include "Network/SingleTcpClient.h"
 #include "Network/BetData.h"
 
 //class TcpClient;
@@ -73,7 +71,7 @@ typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo)> Notify20
 typedef std::function<void(const EnterRoomUserInfo& enterRoomUserInfo,
     const RoomChatMessage& roomChatMessage)> Notify501;
 
-typedef std::function<void(const std::wstring& data)> NormalNotify;
+typedef std::function<void(MessageLevel, const std::wstring&)> NormalNotify;
 class MessageNotifyManager 
     : public std::enable_shared_from_this <MessageNotifyManager>
 {

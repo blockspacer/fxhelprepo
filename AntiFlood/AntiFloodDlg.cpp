@@ -146,6 +146,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_BTN_WELCOME_SETTING, m_btn_welcome_setting);
     DDX_Control(pDX, IDC_BTN_THANKS_SETTING, m_btn_thanks_setting);
     DDX_Control(pDX, IDC_EDIT_RETRIVE_GIFT_COIN, m_edit_retrive_gift_coin);
+    DDX_Control(pDX, IDC_EDIT_ONCE_MESSAGE, m_edit_once_message);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -483,7 +484,7 @@ void CAntiFloodDlg::OnBnClickedButtonLogin()
         config.SaveUserInfo(username.GetBuffer(), password.GetBuffer(), remember);
     }
     
-    Notify(message);
+    Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, message);
 }
 
 //跳转页面功能
@@ -500,7 +501,7 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
     base::StringToUint(strRoomid.GetBuffer(), &roomid_);
 
     network_->SetNotify(
-        std::bind(&CAntiFloodDlg::Notify, this, std::placeholders::_1));
+        std::bind(&CAntiFloodDlg::Notify, this, std::placeholders::_1, std::placeholders::_2));
 
     network_->SetNotify201(
         std::bind(&CAntiFloodDlg::NotifyEnterRoom, this, std::placeholders::_1));
@@ -513,7 +514,7 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
 
     bool result = network_->EnterRoom(strRoomid.GetBuffer());
     std::wstring message = std::wstring(L"进入房间 ") + (result ? L"成功" : L"失败");
-    Notify(message);
+    Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, message);
     if (!result)
         return;
 
@@ -523,7 +524,7 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
-        Notify(NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
         return;
     }
 
@@ -598,13 +599,12 @@ void CAntiFloodDlg::SetHScroll()
     ReleaseDC(dc);
 }
 
-void CAntiFloodDlg::Notify(const std::wstring& message)
+void CAntiFloodDlg::Notify(MessageLevel level, const std::wstring& message)
 {
     // 发送数据给窗口
-    messageMutex_.lock();
-    messageQueen_.push_back(message);
-    messageMutex_.unlock();
-    this->PostMessage(WM_USER_01, 0, 0);
+    std::wstring* p_msg(new std::wstring(message));
+    uint32 wParam = static_cast<uint32>(level);
+    this->PostMessage(WM_USER_01, wParam, (LPARAM)p_msg);
 }
 
 void CAntiFloodDlg::NotifyEnterRoom(const RowData& rowdata)
@@ -638,7 +638,8 @@ bool CAntiFloodDlg::LoginByRequest(const std::wstring& username,
         network_->SetGiftStrategy(giftStrategy_);
         network_->SetEnterRoomStrategy(enterRoomStrategy_);
         network_->SetNotify(
-            std::bind(&CAntiFloodDlg::Notify, this, std::placeholders::_1));
+            std::bind(&CAntiFloodDlg::Notify, this, std::placeholders::_1,
+            std::placeholders::_2));
         username_ = username;
     }
   
@@ -654,7 +655,7 @@ bool CAntiFloodDlg::LoginByRequest(const std::wstring& username,
     {
         message += L"成功!";
     }
-    Notify(message);
+    Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, message);
 
     if (base::UTF8ToWide(errormsg).find(L"验证码")!=std::string::npos)
     {
@@ -765,7 +766,7 @@ bool CAntiFloodDlg::KickOut_(
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id                
             msg += L"被踢出";
         }
-        Notify(msg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg);
     }
 
     return true;
@@ -789,7 +790,7 @@ bool CAntiFloodDlg::BanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUser
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id                
             msg += L"被禁言五分钟";
         }
-        Notify(msg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg);
     }
     return true;
 }
@@ -812,7 +813,7 @@ bool CAntiFloodDlg::UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUs
             // 把要删除的消息发到日志记录列表上, id = 2 是用户id                
             msg += L"被恢复发言";
         }
-        Notify(msg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg);
     }
     return true;
 }
@@ -942,18 +943,32 @@ LRESULT CAntiFloodDlg::OnRetriveGiftCoin(WPARAM wParam, LPARAM lParam)
 
 LRESULT CAntiFloodDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
 {
-    std::vector<std::wstring> messages;
-    messageMutex_.lock();
-    messages.swap(messageQueen_);
-    messageMutex_.unlock();
+    std::wstring* messages = reinterpret_cast<std::wstring*>(lParam);
+    MessageLevel level = static_cast<MessageLevel>(wParam);
 
-    for (auto str : messages)
+    switch (level)
     {
-        InfoList_.InsertString(infoListCount_++, str.c_str());
+    case MessageLevel::MESSAGE_LEVEL_DEBUG:
+#ifdef _DEBUG
+        InfoList_.InsertString(infoListCount_++, messages->c_str());
+
+        InfoList_.SetCurSel(infoListCount_ - 1);
+        SetHScroll();
+#endif // _DEBUG
+        break;
+    case MessageLevel::MESSAGE_LEVEL_ONCE:
+        m_edit_once_message.SetWindowTextW(messages->c_str());
+        break;
+    case MessageLevel::MESSAGE_LEVEL_DISPLAY:
+        InfoList_.InsertString(infoListCount_++, messages->c_str());
+        InfoList_.SetCurSel(infoListCount_ - 1);
+        SetHScroll();
+        break;
+    default:
+        break;
     }
-    
-    InfoList_.SetCurSel(infoListCount_-1);
-    SetHScroll();
+
+    delete messages;
     return 0;
 }
 
@@ -1003,7 +1018,7 @@ void CAntiFloodDlg::OnBnClickedButtonRemove()
             // 把要删除的消息发到日志记录列表上
             CString itemtext = m_ListCtrl_Viewers.GetItemText(i, 2);
             itemtext + L"被从列表中删除";
-            Notify(itemtext.GetBuffer());
+            Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, itemtext.GetBuffer());
 
             // 删除已经勾选的记录
             m_ListCtrl_Viewers.DeleteItem(i);
@@ -1047,7 +1062,7 @@ void CAntiFloodDlg::OnBnClickedBtnKickoutMonth()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     { 
-        Notify(NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -1064,8 +1079,8 @@ void CAntiFloodDlg::OnBnClickedBtnKickoutHour()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -1082,8 +1097,8 @@ void CAntiFloodDlg::OnBnClickedBtnSilent()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -1099,8 +1114,8 @@ void CAntiFloodDlg::OnBnClickedBtnUnsilent()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -1118,7 +1133,7 @@ void CAntiFloodDlg::OnBnClickedBtnClear()
     }
 
     CString itemtext = L"清空列表";
-    Notify(itemtext.GetBuffer());
+    Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, itemtext.GetBuffer());
 }
 
 
@@ -1151,8 +1166,8 @@ void CAntiFloodDlg::OnBnClickedBtnKickoutMonthBlack()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -1169,8 +1184,8 @@ void CAntiFloodDlg::OnBnClickedBtnKickoutHourBlack()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -1187,8 +1202,8 @@ void CAntiFloodDlg::OnBnClickedBtnSilentBlack()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -1204,8 +1219,8 @@ void CAntiFloodDlg::OnBnClickedBtnUnsilentBlack()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
@@ -1253,7 +1268,7 @@ void CAntiFloodDlg::OnBnClickedBtnRemoveBlack()
             // 把要删除的消息发到日志记录列表上
             CString itemtext = m_ListCtrl_Blacks.GetItemText(i, 2);
             itemtext + L"被从黑名单列表中删除";
-            Notify(itemtext.GetBuffer());
+            Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, itemtext.GetBuffer());
 
             // 删除已经勾选的记录
             m_ListCtrl_Blacks.DeleteItem(i);
@@ -1267,7 +1282,7 @@ void CAntiFloodDlg::OnBnClickedBtnLoadBlack()
     if (!blacklistHelper_->LoadBlackList(&rowdatas))
     {
         CString itemtext = L"读取黑名单失败";
-        Notify(itemtext.GetBuffer());
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, itemtext.GetBuffer());
         return;
     }
     
@@ -1360,7 +1375,7 @@ void CAntiFloodDlg::OnBnClickedBtnSensitive()
         int nitem = m_list_vest.InsertItem(itemcount + 1, L"敏感词");
         m_list_vest.SetItemText(nitem, 2, sensitive);
         CString msg = sensitive + L"敏感词被加入到自动处理列表中";
-        Notify(msg.GetBuffer());
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg.GetBuffer());
     }
 }
 
@@ -1390,7 +1405,7 @@ void CAntiFloodDlg::OnBnClickedBtnAddVest()
         int nitem = m_list_vest.InsertItem(itemcount + 1, L"马甲");
         m_list_vest.SetItemText(nitem, 1, vestname);
         CString msg = vestname + L"马甲被加入到自动处理列表中";
-        Notify(msg.GetBuffer());
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg.GetBuffer());
     }
 }
 
@@ -1416,7 +1431,7 @@ void CAntiFloodDlg::OnBnClickedBtnRemoveVest()
             // 删除已经勾选的记录
             m_list_vest.DeleteItem(i);
             CString msg = itemtext + L"被从自动处理列表中删除";
-            Notify(msg.GetBuffer());
+            Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg.GetBuffer());
         }
     }
 }
@@ -1471,8 +1486,8 @@ void CAntiFloodDlg::OnBnClickedChkHandleAll()
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         m_chk_handle_all.SetCheck(FALSE);
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
 
@@ -1500,8 +1515,8 @@ void CAntiFloodDlg::UpdateRobotSetting()
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
         m_chk_robot.SetCheck(FALSE);
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
 
@@ -1509,7 +1524,7 @@ void CAntiFloodDlg::UpdateRobotSetting()
     m_edit_api_key.GetWindowTextW(apiKey);
     if (apiKey.GetLength() != 32)
     {
-        Notify(L"机器人Key不正确,无法启用机器人");
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, L"机器人Key不正确,无法启用机器人");
         m_chk_robot.SetCheck(FALSE);
         return;
     }
@@ -1538,8 +1553,8 @@ void CAntiFloodDlg::UpdateThanksSetting()
         m_chk_thanks.SetCheck(FALSE);
         m_combo_thanks.EnableWindow(TRUE);
         giftStrategy_->SetThanksFlag(false);
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
 
@@ -1574,8 +1589,8 @@ void CAntiFloodDlg::UpdateWelcomeSetting()
         m_chk_welcome.SetCheck(FALSE);
         m_combo_welcome.EnableWindow(TRUE);
         enterRoomStrategy_->SetWelcomeFlag(false);
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
 
@@ -1615,8 +1630,8 @@ void CAntiFloodDlg::UpdateRepeatChatSetting()
         m_combo_seconds.EnableWindow(TRUE);
         m_edit_auto_chat.EnableWindow(TRUE);
 
-        Notify(NOPRIVILEGE_NOTICE);
-        Notify(privilegeMsg);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
         return;
     }
 
@@ -1626,7 +1641,7 @@ void CAntiFloodDlg::UpdateRepeatChatSetting()
     if (enable && (chatmsg.IsEmpty() || chatmsg.GetLength() >= 50))
     {
         m_chk_repeat_chat.SetCheck(FALSE);
-        Notify(L"发言内容长度错误,请不要超过50个字符");
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, L"发言内容长度错误,请不要超过50个字符");
         return;
     }
 
@@ -1648,7 +1663,7 @@ void CAntiFloodDlg::OnBnClickedBtnPhoneCityRank()
     std::wstring privilegeMsg;
     if (!network_->GetActionPrivilege(&privilegeMsg))
     {
-        Notify(NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
         return;
     }
 

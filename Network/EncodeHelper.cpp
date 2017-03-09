@@ -240,6 +240,13 @@ bool UnicodeToUtf8(const std::string& unicode, std::string* utf8)
     return true;
 }
 
+std::string MakeFormatTimeStringFromUnixTime(uint32 unix_time)
+{
+    base::Time local_time = base::Time::FromDoubleT(unix_time);
+    std::string str_display_time = MakeFormatTimeString(local_time);
+    return str_display_time;
+}
+
 std::string MakeFormatTimeString(const base::Time time)
 {
     base::Time::Exploded exploded;
