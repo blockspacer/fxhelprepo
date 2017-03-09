@@ -602,6 +602,9 @@ void CAntiFloodDlg::SetHScroll()
 void CAntiFloodDlg::Notify(MessageLevel level, const std::wstring& message)
 {
     // 发送数据给窗口
+    if (message.empty())
+        return;
+    
     std::wstring* p_msg(new std::wstring(message));
     uint32 wParam = static_cast<uint32>(level);
     this->PostMessage(WM_USER_01, wParam, (LPARAM)p_msg);
