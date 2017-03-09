@@ -40,6 +40,8 @@ std::string MakeMd5FromString(const std::string& text);
 //UnicodeToUtf8(str, &result);
 bool UnicodeToUtf8(const std::string& unicode, std::string* utf8);
 
+std::string MakeFormatTimeStringFromUnixTime(uint32 unix_time);
+
 std::string MakeFormatTimeString(const base::Time time);
 
 std::string MakeFormatDateString(const base::Time time);

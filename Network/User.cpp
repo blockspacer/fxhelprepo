@@ -692,7 +692,7 @@ bool User::RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token,
         UnicodeToUtf8(errorcode, &utf8_str);
         std::wstring message = L"«¿±“ ß∞‹:" + base::UTF8ToWide(utf8_str);
         if (normalNotify_)
-            normalNotify_(message);
+            normalNotify_(MessageLevel::MESSAGE_LEVEL_DISPLAY, message);
 
         *errormsg = errorcode;
         return false;
@@ -702,7 +702,7 @@ bool User::RetrieveHappyFreeCoin(uint32 roomid, const std::string& gift_token,
 
     std::wstring message = L"«¿±“≥…π¶£¨«¿µΩ" + base::UintToString16(*coin) + L"–«±“";
     if (normalNotify_)
-        normalNotify_(message);
+        normalNotify_(MessageLevel::MESSAGE_LEVEL_DISPLAY, message);
     
     return true;
 }

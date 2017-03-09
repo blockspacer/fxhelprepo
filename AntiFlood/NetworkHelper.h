@@ -10,6 +10,7 @@
 #include "Network/MessageNotifyManager.h"
 #include "EnterRoomStrategy.h"
 #include "Network/CurlWrapper.h"
+#include "Network/common.h"
 #include "AuthorityHelper.h"
 
 class CurlWrapper;
@@ -19,7 +20,7 @@ class GiftInfo;
 class User;
 class TcpClientController;
 
-typedef std::function<void(const std::wstring&)> notifyfn;
+typedef std::function<void(MessageLevel, const std::wstring&)> notifyfn;
 
 typedef std::vector<std::wstring> RowData;
 typedef std::vector<RowData> GridData;
@@ -158,7 +159,7 @@ public:
     void GetCityRankInfos(uint32 roomid);
 
 private:
-    void NotifyCallback(const std::wstring& message);
+    void NotifyCallback(MessageLevel level, const std::wstring& message);
     void NotifyCallback601(uint32 roomid, const RoomGiftInfo601& roomgiftinfo);
     void NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo);
     void NotifyCallback501(const EnterRoomUserInfo& enterRoomUserInfo,

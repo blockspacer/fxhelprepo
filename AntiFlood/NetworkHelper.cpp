@@ -435,7 +435,7 @@ void NetworkHelper::SetRoomRepeatChat(bool enable, const std::wstring& seconds,
 
     if (sec < 30)
     {
-        NotifyCallback(L"设置重复说话时间要超过30秒");
+        NotifyCallback(MessageLevel::MESSAGE_LEVEL_DISPLAY, L"设置重复说话时间要超过30秒");
         return;
     }
     
@@ -557,7 +557,7 @@ bool NetworkHelper::EnterRoom(uint32 roomid)
         this, roomid, std::placeholders::_1));
 
     user_->SetNormalNotify(std::bind(&NetworkHelper::NotifyCallback, this,
-        std::placeholders::_1));
+        std::placeholders::_1, std::placeholders::_2));
     roomid_ = roomid;
 
     return user_->EnterRoomFopOperation(roomid, &singer_clanid_,
@@ -584,13 +584,13 @@ bool NetworkHelper::GetGiftList(uint32 roomid, std::string* content)
 }
 
 // messageNotifyManager_ 线程回调
-void NetworkHelper::NotifyCallback(const std::wstring& message)
+void NetworkHelper::NotifyCallback(MessageLevel level, const std::wstring& message)
 {
     // 解析数据包
     LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(message, 936);
     if (notify_)
     {
-        notify_(message);
+        notify_(level, message);
     }
 }
 
@@ -644,7 +644,8 @@ void NetworkHelper::DoGetCityRankInfos(uint32 roomid)
     std::wstring display_msg;
     phone_rank.GetCityRankInfos(roomid,
         base::Bind(&NetworkHelper::NotifyCallback,
-        base::Unretained(this)), &display_msg);
+        base::Unretained(this),
+        MessageLevel::MESSAGE_LEVEL_DISPLAY), &display_msg);
 
     if (display_msg.empty())
         return;
@@ -738,7 +739,7 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
     }
     if (notify_)
     {
-        notify_(chatmsg);
+        notify_(MessageLevel::MESSAGE_LEVEL_DISPLAY, chatmsg);
     }
 }
 
@@ -774,7 +775,7 @@ void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo
 
     if (notify_)
     {
-        notify_(chatmsg);
+        notify_(MessageLevel::MESSAGE_LEVEL_DISPLAY, chatmsg);
     }
 }
 

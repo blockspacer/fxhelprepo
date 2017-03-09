@@ -125,7 +125,7 @@ protected:
 
 private:
     void SetHScroll();
-    void Notify(const std::wstring& message);
+    void Notify(MessageLevel level, const std::wstring& message);
     void NotifyEnterRoom(const RowData& rowdata);
     void NotifyRetriveGiftCoin(uint32 coin);
     bool LoginByRequest(const std::wstring& username, 
@@ -146,9 +146,6 @@ private:
     std::shared_ptr<AntiStrategy> antiStrategy_;
     std::shared_ptr<GiftStrategy> giftStrategy_;
     std::shared_ptr<EnterRoomStrategy> enterRoomStrategy_;
-
-    std::mutex messageMutex_;
-    std::vector<std::wstring> messageQueen_;
 
     std::mutex viewerRowdataMutex_;
     std::vector<RowData> viewerRowdataQueue_;
@@ -210,4 +207,5 @@ private:
     CButton m_btn_welcome_setting;
     CButton m_btn_thanks_setting;
     CEdit m_edit_retrive_gift_coin;
+    CEdit m_edit_once_message;
 };
