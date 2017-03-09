@@ -734,14 +734,13 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
     }
 
     std::wstring chatmsg;
-    if (giftStrategy_->GetGiftThanks(roomgiftinfo601, &chatmsg))
-    {
-        user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
-    }
+    if (!giftStrategy_->GetGiftThanks(roomgiftinfo601, &chatmsg))
+        return;
+
+    user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
+
     if (notify_)
-    {
         notify_(MessageLevel::MESSAGE_LEVEL_DISPLAY, chatmsg);
-    }
 }
 
 void NetworkHelper::NotifyCallback201(const EnterRoomUserInfo& enterRoomUserInfo)
