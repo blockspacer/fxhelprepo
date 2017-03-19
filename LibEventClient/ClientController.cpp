@@ -9,16 +9,6 @@
 
 namespace
 {   
-std::string data = R"(GET /9AoX9ROWdLBGpj3Uk2T1_Q==/1380986614829967.jpg?param=138y138 HTTP/1.1
-Host: p1.music.126.net
-Connection: keep-alive
-Accept: image/webp,image/*,*/*;q=0.8
-User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36
-Accept-Encoding: gzip, deflate
-Accept-Language: en-US,en;q=0.8
-
-)";
-
     struct echo_context
     {
         struct event_base *base;
@@ -90,7 +80,9 @@ bool ClientController::Send(TCPHANDLE handle, const std::vector<uint8>& data,
     if (result == tcp_client_map_.end())
         return false;
 
-    return result->second->Send(data);
+    bool send_result =  result->second->Send(data);
+    callback(send_result);
+    return send_result;
 }
 
 void ClientController::signal_cb(evutil_socket_t sock, short flags, void * args)

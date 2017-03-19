@@ -36,12 +36,15 @@ void CLibEventClientDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_CLIENT_COUNT, m_edit_target_count);
     DDX_Control(pDX, IDC_LIST_MESSAGE, m_list_message);
     DDX_Control(pDX, IDC_LIST_STATUS, m_listctrl_ip_target_status);
+    DDX_Control(pDX, IDC_EDIT_MESSAGE_SEND, m_edit_message_send);
 }
 
 BEGIN_MESSAGE_MAP(CLibEventClientDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BTN_BEGIN, &CLibEventClientDlg::OnBnClickedBtnBegin)
+    ON_MESSAGE(WM_USER_DISPLAY_MESSAGE, &CLibEventClientDlg::OnNotifyMessage)
+    ON_BN_CLICKED(IDC_BTN_SEND_MSG, &CLibEventClientDlg::OnBnClickedBtnSendMsg)
 END_MESSAGE_MAP()
 
 
@@ -58,8 +61,8 @@ BOOL CLibEventClientDlg::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化代码
     client_controller_.Initialize();
-    m_edit_ip.SetWindowTextW(L"58.63.236.248");
-    m_edit_port.SetWindowTextW(L"80");
+    m_edit_ip.SetWindowTextW(L"127.0.0.1");
+    m_edit_port.SetWindowTextW(L"9999");
     m_edit_target_count.SetWindowTextW(L"3");
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
@@ -101,6 +104,39 @@ HCURSOR CLibEventClientDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+LRESULT CLibEventClientDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
+{
+    std::wstring* wstr = reinterpret_cast<std::wstring*>(wParam);
+    if (!wstr)
+        return 0;
+
+    m_list_message.InsertString(message_index_++, wstr->c_str());
+    delete wstr;
+    m_list_message.SetCurSel(message_index_ - 1);
+    SetHScroll();
+    return 0;
+}
+
+void CLibEventClientDlg::SetHScroll()
+{
+    CDC* dc = GetDC();
+
+    CString str;
+    int index = m_list_message.GetCount() - 1;
+    if (index >= 0)
+    {
+        m_list_message.GetText(index, str);
+        SIZE s = dc->GetTextExtent(str);
+        long temp = (long)SendDlgItemMessage(IDC_LIST_MESSAGE, LB_GETHORIZONTALEXTENT, 0, 0); //temp得到滚动条的宽度
+        if (s.cx > temp)
+        {
+            SendDlgItemMessage(IDC_LIST_MESSAGE, LB_SETHORIZONTALEXTENT, (WPARAM)s.cx, 0);
+        }
+    }
+
+    ReleaseDC(dc);
+}
+
 void CLibEventClientDlg::OnBnClickedBtnBegin()
 {
     CString cs_ip;
@@ -125,21 +161,55 @@ void CLibEventClientDlg::OnBnClickedBtnBegin()
     {
         client_controller_.AddClient(ip, port,
                                      std::bind(&CLibEventClientDlg::ConnectNotify,
-                                     this, std::placeholders::_1),
+                                     this, ip, utf8_port, std::placeholders::_1,
+                                     std::placeholders::_2),
                                      std::bind(&CLibEventClientDlg::DataReceiveNotify, 
-                                     this, std::placeholders::_1, std::placeholders::_2)
+                                     this, ip, utf8_port, 
+                                     std::placeholders::_1, std::placeholders::_2)
                                      );
     }
 }
 
-void CLibEventClientDlg::ConnectNotify(bool result)
+void CLibEventClientDlg::ConnectNotify(
+    const std::string& ip, const std::string& port, bool result, TCPHANDLE handle)
 {
-
+    handles_[handle] = std::make_pair(ip, port);
+    std::wstring* wstr = new std::wstring();
+    *wstr = base::UTF8ToWide(ip + ":" + port) + std::wstring(L"连接") + (result ? L"成功" : L"失败");
+    this->PostMessage(WM_USER_DISPLAY_MESSAGE, (WPARAM)(wstr), 0);
 }
 
-void CLibEventClientDlg::DataReceiveNotify(bool result, std::vector<uint8>& data)
+void CLibEventClientDlg::DataReceiveNotify(
+    const std::string& ip, const std::string& port, bool result, std::vector<uint8>& data)
 {
-
+    std::wstring* wstr = new std::wstring();
+    *wstr = base::UTF8ToWide(ip + ":" + port) +std::wstring(L"接收数据") + (result ? L"成功" : L"失败");
+    this->PostMessage(WM_USER_DISPLAY_MESSAGE, (WPARAM)(wstr), 0);
 }
 
+void CLibEventClientDlg::SendCallback(const std::string& ip, const std::string& port,
+                                      bool result)
+{
+    std::wstring* wstr = new std::wstring();
+    *wstr = base::UTF8ToWide(ip + ":" + port) + std::wstring(L"发送数据") + (result ? L"成功" : L"失败");
+    this->PostMessage(WM_USER_DISPLAY_MESSAGE, (WPARAM)(wstr), 0);
+}
 
+void CLibEventClientDlg::OnBnClickedBtnSendMsg()
+{
+    // TODO:  在此添加控件通知处理程序代码
+    CString cs_message_send;
+    m_edit_message_send.GetWindowTextW(cs_message_send);
+    if (!cs_message_send.GetLength())
+        return;
+    
+    std::string str_msg = base::WideToUTF8(cs_message_send.GetBuffer());
+    std::vector<uint8> data(str_msg.begin(), str_msg.end());
+    for (const auto& handle : handles_)
+    {
+        client_controller_.Send(handle.first, data,
+                                std::bind(&CLibEventClientDlg::SendCallback,
+                                this, handle.second.first, handle.second.second,
+                                std::placeholders::_1));
+    }
+}
