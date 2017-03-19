@@ -103,6 +103,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AuthorityClientBussiness.h" />
     <ClInclude Include="AuthorityController.h" />
     <ClInclude Include="AuthorityNetwork.h" />
     <ClInclude Include="AuthorityServer.h" />
@@ -112,6 +113,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AuthorityClientBussiness.cpp" />
     <ClCompile Include="AuthorityController.cpp" />
     <ClCompile Include="AuthorityNetwork.cpp" />
     <ClCompile Include="AuthorityServer.cpp" />

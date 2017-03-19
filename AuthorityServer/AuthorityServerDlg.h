@@ -5,10 +5,12 @@
 #pragma once
 #include <memory>
 #include "AuthorityNetwork.h"
+#include "AuthorityController.h"
 
 #include "afxwin.h"
 
 class AuthorityNetwork;
+class AuthorityController;
 
 // CAuthorityServerDlg ¶Ô»°¿ò
 class CAuthorityServerDlg : public CDialogEx
@@ -56,4 +58,6 @@ private:
     CEdit m_edit_query;
 
     std::unique_ptr<AuthorityNetwork> authority_network_;
+
+    std::unique_ptr<AuthorityController> authority_controller_;
 };

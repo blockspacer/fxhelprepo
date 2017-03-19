@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "AuthorityNetwork.h"
+#include "AuthorityController.h"
 #include "third_party/chromium/base/bind.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 
@@ -23,12 +24,17 @@ AuthorityNetwork::~AuthorityNetwork()
 {
 }
 
-bool AuthorityNetwork::Initialize()
+bool AuthorityNetwork::Initialize(AuthorityController* controller)
 {
     WORD wVersionRequested;
     WSADATA wsaData;
     wVersionRequested = MAKEWORD(2, 2);
     (void)WSAStartup(wVersionRequested, &wsaData);
+
+    authority_controller_ = controller;
+    authority_controller_->SetSendDataFunction(
+        base::Bind(&AuthorityNetwork::SendDataToClient,
+        base::Unretained(this)));
 
     network_thread_.reset(new base::Thread("network_thread"));
     return true;
@@ -97,6 +103,14 @@ void AuthorityNetwork::DispatchFunction()
     return ;
 }
 
+bool AuthorityNetwork::SendDataToClient(
+    bufferevent *bev, const std::vector<uint8>& data)
+{
+    char reply[] = "I has read your data";
+    bufferevent_write(bev, reply, strlen(reply));
+    return true;
+}
+
 //一个新客户端连接上服务器了  
 //当此函数被调用时，libevent已经帮我们accept了这个客户端。该客户端的
 //文件描述符为fd
@@ -108,22 +122,22 @@ struct sockaddr *sock, int socklen, void *arg)
     AuthorityNetwork* network = reinterpret_cast<AuthorityNetwork*>(arg);
     event_base *base = network->event_base_;
     auto notify_callback = network->notify_callback_;
-
     std::wstring wstr = L"accept a client";
     notify_callback(wstr);
 
-    // 记录连接端的信息
 
     //为这个客户端分配一个bufferevent  
     bufferevent *bev = bufferevent_socket_new(base, fd,
                                               BEV_OPT_CLOSE_ON_FREE);
     
     // 后续要加上对write_cb的处理
-    bufferevent_setcb(bev, AuthorityNetwork::socket_read_cb, NULL, 
+    bufferevent_setcb(bev, AuthorityNetwork::socket_read_cb, socket_write_cb,
                       AuthorityNetwork::socket_event_cb, (void*)(network));
     bufferevent_enable(bev, EV_READ | EV_PERSIST);
-}
 
+    // 记录连接端的信息
+    network->authority_controller_->AddClient(bev, *sock);
+}
 
 void AuthorityNetwork::socket_read_cb(bufferevent *bev, void *arg)
 {
@@ -131,23 +145,33 @@ void AuthorityNetwork::socket_read_cb(bufferevent *bev, void *arg)
     event_base *base = network->event_base_;
     auto notify_callback = network->notify_callback_;
 
-
-    char msg[4096];
+    //char msg[4096];
+    char msg[8];
+    std::vector<uint8> data;
 
     size_t len = bufferevent_read(bev, msg, sizeof(msg) - 1);
+    while (len)
+    {
+        data.insert(data.end(), msg, msg + len);
+        len = bufferevent_read(bev, msg, sizeof(msg) - 1);
+    }
 
-    msg[len] = '\0';
-    printf("server read the data %s\n", msg);
+    std::string str(data.begin(), data.end());
     std::wstring wstr = L"server read the data:";
-    wstr += base::UTF8ToWide(msg);
+    wstr += base::UTF8ToWide(str);
     notify_callback(wstr);
 
     // 扔给业务线程去处理客户发送过来的数据
+    network->authority_controller_->HandleMessage(bev, data);
+}
 
+void AuthorityNetwork::socket_write_cb(bufferevent *bev, void *arg)
+{
+    AuthorityNetwork* network = reinterpret_cast<AuthorityNetwork*>(arg);
+    event_base *base = network->event_base_;
+    auto notify_callback = network->notify_callback_;
 
-    char reply[] = "I has read your data";
-    bufferevent_write(bev, reply, strlen(reply));
-    wstr = L"I has read your data";
+    std::wstring wstr = L"I has write your data";
     notify_callback(wstr);
 }
 
@@ -157,18 +181,20 @@ void AuthorityNetwork::socket_event_cb(bufferevent *bev, short events, void *arg
     AuthorityNetwork* network = reinterpret_cast<AuthorityNetwork*>(arg);
     event_base *base = network->event_base_;
     auto notify_callback = network->notify_callback_;
+    auto authority_controller = network->authority_controller_;
 
     if (events & BEV_EVENT_EOF)
     {
         printf("connection closed\n");
         notify_callback(L"connection closed");
     }
-        
     else if (events & BEV_EVENT_ERROR)
     {
         printf("some other error\n");
         notify_callback(L"some other error");
     }
+
+    authority_controller->RemoveClient(bev);
 
     //这将自动close套接字和free读写缓冲区  
     bufferevent_free(bev);

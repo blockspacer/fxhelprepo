@@ -6,6 +6,8 @@
 #include "AuthorityServer.h"
 #include "AuthorityServerDlg.h"
 
+#include "AuthorityController.h"
+
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -20,6 +22,7 @@
 CAuthorityServerDlg::CAuthorityServerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CAuthorityServerDlg::IDD, pParent)
     , authority_network_(new AuthorityNetwork)
+    , authority_controller_(new AuthorityController)
 {
     m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -53,8 +56,9 @@ BOOL CAuthorityServerDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
-	// TODO:  在此添加额外的初始化代码
-    authority_network_->Initialize();
+
+    authority_controller_->Initialize();
+    authority_network_->Initialize(authority_controller_.get());
     authority_network_->SetNotify(
         std::bind(&CAuthorityServerDlg::NotifyMessage, this,
         std::placeholders::_1));
@@ -133,6 +137,7 @@ void CAuthorityServerDlg::OnPaint()
 void CAuthorityServerDlg::OnClose()
 {
     authority_network_->Finalize();
+    authority_controller_->Finalize();
     CDialogEx::OnClose();
 }
 
