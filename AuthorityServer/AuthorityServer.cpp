@@ -6,6 +6,11 @@
 #include "AuthorityServer.h"
 #include "AuthorityServerDlg.h"
 
+#include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_util.h"
+#include "third_party/chromium/base/command_line.h"
+#include "third_party/chromium/base/at_exit.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -21,12 +26,16 @@ END_MESSAGE_MAP()
 // CAuthorityServerApp 构造
 
 CAuthorityServerApp::CAuthorityServerApp()
+    :at_exit_manager_(nullptr)
 {
 	// 支持重新启动管理器
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
 
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
+    at_exit_manager_.reset(new base::AtExitManager);
+    InitAppLog();
+    LOG(INFO) << __FUNCTION__;
 }
 
 
@@ -100,3 +109,22 @@ BOOL CAuthorityServerApp::InitInstance()
 	return FALSE;
 }
 
+void CAuthorityServerApp::InitAppLog()
+{
+    CommandLine::Init(0, NULL);
+    base::FilePath path;
+    PathService::Get(base::DIR_APP_DATA, &path);
+    path = path.Append(L"FanXingHelper").Append(L"fanxinghelper.log");
+    logging::LoggingSettings setting;
+#ifdef DEBUG
+    setting.logging_dest = logging::LOG_TO_ALL;
+    setting.lock_log = logging::LOCK_LOG_FILE;
+#else
+    setting.logging_dest = logging::LOG_NONE;
+    setting.lock_log = logging::DONT_LOCK_LOG_FILE;
+#endif
+    setting.log_file = path.value().c_str();
+    setting.delete_old = logging::APPEND_TO_OLD_LOG_FILE;
+    logging::InitLogging(setting);
+    logging::SetLogItems(false, true, true, true);
+}

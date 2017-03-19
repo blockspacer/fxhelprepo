@@ -9,6 +9,12 @@
 #endif
 
 #include "resource.h"		// Ö÷·ûºÅ
+#include "third_party/chromium/base/memory/scoped_ptr.h"
+
+namespace base
+{
+    class AtExitManager;
+}
 
 
 // CAuthorityServerApp: 
@@ -27,6 +33,8 @@ public:
 // ÊµÏÖ
 
 	DECLARE_MESSAGE_MAP()
+    void InitAppLog();
+    scoped_ptr<base::AtExitManager> at_exit_manager_;
 };
 
 extern CAuthorityServerApp theApp;

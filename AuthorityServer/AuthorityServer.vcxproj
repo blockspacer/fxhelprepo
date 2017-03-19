@@ -21,7 +21,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -53,10 +53,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)third_party\libevent\include;$(SolutionDir)third_party\libevent\WIN32-Code;$(SolutionDir)third_party\libevent\compat;$(SolutionDir)third_party/chromium;$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libevent.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;dbghelp.lib;psapi.lib;Version.lib;Wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -77,6 +80,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)third_party\libevent\include;$(SolutionDir)third_party\libevent\WIN32-Code;$(SolutionDir)third_party\libevent\compat;$(SolutionDir)third_party/chromium;$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -99,6 +103,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AuthorityController.h" />
+    <ClInclude Include="AuthorityNetwork.h" />
     <ClInclude Include="AuthorityServer.h" />
     <ClInclude Include="AuthorityServerDlg.h" />
     <ClInclude Include="Resource.h" />
@@ -106,6 +112,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AuthorityController.cpp" />
+    <ClCompile Include="AuthorityNetwork.cpp" />
     <ClCompile Include="AuthorityServer.cpp" />
     <ClCompile Include="AuthorityServerDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -121,6 +129,20 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\AuthorityServer.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
+      <Project>{ed99d404-f6b3-517a-4ea7-604a10269355}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\chromium\base\base_static.vcxproj">
+      <Project>{ff406463-e0ef-c1b2-c0b8-072e8ee1c97f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\libevent\libevent.vcxproj">
+      <Project>{122d9e2c-1eb4-488c-ad38-463f7b1bc447}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\libeay32\libeay32.vcxproj">
+      <Project>{ac33ff8e-59e7-4e1e-8111-f446e9fb0231}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

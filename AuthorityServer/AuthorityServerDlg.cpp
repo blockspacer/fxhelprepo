@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "AuthorityServer.h"
 #include "AuthorityServerDlg.h"
+
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -18,19 +19,24 @@
 
 CAuthorityServerDlg::CAuthorityServerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CAuthorityServerDlg::IDD, pParent)
+    , authority_network_(new AuthorityNetwork)
 {
-	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+    m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 void CAuthorityServerDlg::DoDataExchange(CDataExchange* pDX)
 {
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_LIST_MSG, m_list_msg);
+    DDX_Control(pDX, IDC_EDIT_QUERY, m_edit_query);
 }
 
 BEGIN_MESSAGE_MAP(CAuthorityServerDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+    ON_BN_CLICKED(IDC_BTN_RUN_SERVICE, &CAuthorityServerDlg::OnBnClickedBtnRunService)
+    ON_BN_CLICKED(IDC_BTN_STOP_SERVICE, &CAuthorityServerDlg::OnBnClickedBtnStopService)
+    ON_BN_CLICKED(IDC_BTN_QUERY, &CAuthorityServerDlg::OnBnClickedBtnQuery)
 END_MESSAGE_MAP()
 
 
@@ -46,6 +52,7 @@ BOOL CAuthorityServerDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO:  在此添加额外的初始化代码
+    authority_network_->Initialize();
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -86,3 +93,23 @@ HCURSOR CAuthorityServerDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CAuthorityServerDlg::OnBnClickedBtnRunService()
+{
+    // TODO:  在此添加控件通知处理程序代码
+    authority_network_->Start();
+}
+
+
+void CAuthorityServerDlg::OnBnClickedBtnStopService()
+{
+    // TODO:  在此添加控件通知处理程序代码
+    authority_network_->Stop();
+}
+
+
+void CAuthorityServerDlg::OnBnClickedBtnQuery()
+{
+    // TODO:  在此添加控件通知处理程序代码
+}
