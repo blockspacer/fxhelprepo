@@ -32,11 +32,13 @@ void CAuthorityServerDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAuthorityServerDlg, CDialogEx)
-	ON_WM_PAINT()
-	ON_WM_QUERYDRAGICON()
+    ON_WM_PAINT()
+    ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BTN_RUN_SERVICE, &CAuthorityServerDlg::OnBnClickedBtnRunService)
     ON_BN_CLICKED(IDC_BTN_STOP_SERVICE, &CAuthorityServerDlg::OnBnClickedBtnStopService)
     ON_BN_CLICKED(IDC_BTN_QUERY, &CAuthorityServerDlg::OnBnClickedBtnQuery)
+    ON_MESSAGE(WM_USER_DISPLAY_MESSAGE, &CAuthorityServerDlg::OnNotifyMessage)
+    ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 
@@ -53,8 +55,50 @@ BOOL CAuthorityServerDlg::OnInitDialog()
 
 	// TODO:  在此添加额外的初始化代码
     authority_network_->Initialize();
+    authority_network_->SetNotify(
+        std::bind(&CAuthorityServerDlg::NotifyMessage, this,
+        std::placeholders::_1));
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+}
+
+void CAuthorityServerDlg::NotifyMessage(const std::wstring& msg)
+{
+    std::wstring* wstr(new std::wstring(msg));
+    this->PostMessage(WM_USER_DISPLAY_MESSAGE, (WPARAM)(wstr), 0);
+}
+
+
+void CAuthorityServerDlg::SetHScroll()
+{
+    CDC* dc = GetDC();
+
+    CString str;
+    int index = m_list_msg.GetCount() - 1;
+    if (index >= 0)
+    {
+        m_list_msg.GetText(index, str);
+        SIZE s = dc->GetTextExtent(str);
+        long temp = (long)SendDlgItemMessage(IDC_LIST_MSG, LB_GETHORIZONTALEXTENT, 0, 0); //temp得到滚动条的宽度
+        if (s.cx > temp)
+        {
+            SendDlgItemMessage(IDC_LIST_MSG, LB_SETHORIZONTALEXTENT, (WPARAM)s.cx, 0);
+        }
+    }
+
+    ReleaseDC(dc);
+}
+
+LRESULT CAuthorityServerDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
+{
+    scoped_ptr<std::wstring> wstr(reinterpret_cast<std::wstring*>(wParam));
+    if (!wstr)
+        return 0;
+
+    m_list_msg.InsertString(msg_index_++, wstr->c_str());
+    m_list_msg.SetCurSel(msg_index_ - 1);
+    SetHScroll();
+    return 0;
 }
 
 // 如果向对话框添加最小化按钮，则需要下面的代码
@@ -86,14 +130,18 @@ void CAuthorityServerDlg::OnPaint()
 	}
 }
 
+void CAuthorityServerDlg::OnClose()
+{
+    authority_network_->Finalize();
+    CDialogEx::OnClose();
+}
+
 //当用户拖动最小化窗口时系统调用此函数取得光标
 //显示。
 HCURSOR CAuthorityServerDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
 }
-
-
 
 void CAuthorityServerDlg::OnBnClickedBtnRunService()
 {

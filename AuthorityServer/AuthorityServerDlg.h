@@ -20,14 +20,15 @@ public:
 // 对话框数据
 	enum { IDD = IDD_AUTHORITYSERVER_DIALOG };
 
+    enum
+    {
+        WM_USER_DISPLAY_MESSAGE = WM_USER + 1,
+    };
+
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
 
-    afx_msg void OnPaint();
-    afx_msg HCURSOR OnQueryDragIcon();
-    afx_msg void OnBnClickedBtnRunService();
-    afx_msg void OnBnClickedBtnStopService();
-    afx_msg void OnBnClickedBtnQuery();
+
 
 // 实现
 protected:
@@ -36,9 +37,21 @@ protected:
     // 生成的消息映射函数
     virtual BOOL OnInitDialog();
 
+    afx_msg void OnPaint();
+    afx_msg HCURSOR OnQueryDragIcon();
+    afx_msg void OnBnClickedBtnRunService();
+    afx_msg void OnBnClickedBtnStopService();
+    afx_msg void OnBnClickedBtnQuery();
+    afx_msg void OnClose();
+
     DECLARE_MESSAGE_MAP()
 
-public:
+    void SetHScroll();
+    LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
+
+private:
+    void NotifyMessage(const std::wstring& msg);
+    int msg_index_ = 0;
     CListBox m_list_msg;
     CEdit m_edit_query;
 
