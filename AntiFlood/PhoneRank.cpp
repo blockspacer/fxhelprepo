@@ -12,7 +12,7 @@
 namespace
 {
 
-//baiduCode = 257 & cityName = 广州市&page = 1 & pageSize = 80 & platform = 5 & version = 6582$_fan_xing_$
+//baiduCode = 257 & cityName = 广州市&page = 1 & pageSize = 80 & platform = 5 & version = 3302$_fan_xing_$
 //
 //计算sing的方案
 //cityName使用中文编码，不要转换成urlencode
@@ -71,6 +71,8 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid,
     
     std::string city_name = star_card.location;
     std::wstring w_city_name = base::UTF8ToWide(city_name);
+    if (w_city_name.size()>2)
+        w_city_name = w_city_name.substr(0, 2);
 
     CityInfo city_info;
     bool found = false;
@@ -78,7 +80,10 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid,
     {
         for (const auto& it : province.second)
         {
-            if (it.city_name.compare(city_name) == 0)
+            std::wstring temp = base::UTF8ToWide(it.city_name);
+            if (temp.size() > 2)
+                temp = temp.substr(0, 2);
+            if (temp.compare(w_city_name)==0)
             {
                 city_info = it;
                 found = true;
@@ -286,7 +291,7 @@ bool PhoneRank::GetCityInfos(std::map<std::string, std::vector<CityInfo>>* provi
 {
     std::map<std::string, std::string> param_map;
     param_map["platform"] = base::UintToString(5);
-    param_map["version"] = base::UintToString(6582);
+    param_map["version"] = base::UintToString(3302);
     std::string sign = GetSignFromMap(param_map);
 
     HttpRequest request;
@@ -374,14 +379,14 @@ bool PhoneRank::GetRankSingerListByCity(const CityInfo& city_info,
     //query_city_rank_param.city_name = base::WideToUTF8(L"广州市");
     //query_city_rank_param.page_size = 80;
     //query_city_rank_param.platform = 5; //6是ios,5是android
-    //query_city_rank_param.version = 6582; // ios使用版本号是3059, android使用版本号是6582;
+    //query_city_rank_param.version = 3302; // ios使用版本号是3059, android使用版本号是3302;
 
     QueryCityRankParam query_city_rank_param;
     query_city_rank_param.baidu_code = city_info.city_code;
     query_city_rank_param.city_name = city_info.city_name;
     query_city_rank_param.page_size = 80;
     query_city_rank_param.platform = 6; //6是ios,5是android
-    query_city_rank_param.version = 3059; // ios使用版本号是3059, android使用版本号是6582;
+    query_city_rank_param.version = 3302; // 更新ios使用版本号是3302, android使用版本号是3302;
 
     std::vector<RankSingerInfo> rank_singer_infos_part;
     bool has_next_page = true;
@@ -419,8 +424,8 @@ bool PhoneRank::GetEnterRoomInfoByRoomId(uint32 roomid,
     NormalRoomInfo* normal_room_info) const
 {
     std::map<std::string, std::string> param_map;
-    param_map["platform"] = base::UintToString(5);
-    param_map["version"] = base::UintToString(6582);
+    param_map["platform"] = base::UintToString(6);
+    param_map["version"] = base::UintToString(3302);
     param_map["roomId"] = base::UintToString(roomid);
     param_map["roomType"] = "0";// 未明确这个值的意义
     std::string sign = GetSignFromMap(param_map);
@@ -487,8 +492,8 @@ bool PhoneRank::GetStarCardByKugouId(uint32 kugouid,
     StarCard* star_card) const
 {
     std::map<std::string, std::string> param_map;
-    param_map["platform"] = base::UintToString(5);
-    param_map["version"] = base::UintToString(6582);
+    param_map["platform"] = base::UintToString(6);
+    param_map["version"] = base::UintToString(3302);
     param_map["kugouId"] = base::UintToString(kugouid);
     std::string sign = GetSignFromMap(param_map);
 
