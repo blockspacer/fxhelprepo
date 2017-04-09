@@ -36,6 +36,9 @@ public:
     bool GetUserLocationByUserId(const std::vector<uint32> user_ids,
         std::map<uint32, uint32>* user_room_map);
 
+    // 强制更新全站主播房间用户消费数据
+    bool UpdataAllStarRoomComsumerMap();
+
 private:
 
     bool GetAllStarRoomInfos(std::vector<uint32>* roomids); // 从全站获取所有正在直播的主播直播粗略信息，为下一步获取房间用户列表做准备
@@ -45,6 +48,10 @@ private:
     bool GetAllRoomViewers(const std::vector<uint32>& roomids,
         std::map<uint32, std::map<uint32, EnterRoomUserInfo>>* roomid_user_map);
 
+    // 强制更新房间消费信息，roomid_consumer_map返回所有30天消费用户信息
+    bool GetAllRoomConsumers(const std::vector<uint32>& roomids,
+        std::map<uint32, std::map<uint32, ConsumerInfo>>* roomid_consumer_map);
+
     // 边找用户边更新房间用户信息，只要找完用户，就不更新了，roomid_user_map只返回查找过的房间在线用户信息
     bool FindUsersWhenRoomViewerList(const std::vector<uint32>& roomids,
         std::map<uint32, std::map<uint32, EnterRoomUserInfo>>* roomid_user_map,
@@ -53,6 +60,7 @@ private:
 
     bool GetRoomViewerList(uint32 roomid, std::map<uint32, EnterRoomUserInfo>* user_map); // 从指定房间获取用户列表，追踪用户
     
+    bool GetConsumerList(uint32 roomid, std::map<uint32, ConsumerInfo>* consumer_map);
 
     //GET /UServices/UserService/UserExtService/getFollowList?args=[1,10,0,%22%22,0,3]&_=1478426799924
     //Referer: http://fanxing.kugou.com/index.php?action=userFollowList
@@ -66,5 +74,7 @@ private:
     std::unique_ptr<CurlWrapper> curl_wrapper_;
 
     std::map<uint32, std::map<uint32, EnterRoomUserInfo>> roomid_userid_map_;
+
+    std::map<uint32, std::map<uint32, ConsumerInfo>> roomid_consumer_map_;
 };
 

@@ -6,6 +6,16 @@
 #include "CurlWrapper.h"
 #include "MessageNotifyManager.h"
 
+
+struct ConsumerInfo 
+{
+    uint32 fanxing_id;
+    uint32 room_id;
+    uint32 coin;
+    std::string nickname;
+    uint32 rich_level;
+};
+
 class CurlWrapper;
 class MessageNotifyManager;
 class CookiesHelper;
@@ -68,6 +78,14 @@ public:
 
     bool GetViewerList(const std::string& cookies,
         std::vector<EnterRoomUserInfo>* enterRoomUserInfoList);
+
+    // 这个函数是为了不建立房间连接而获取房间里30天消费数据，是为了追踪指定用户
+    bool OpenRoomAndGetConsumerList(const std::string& cookies,
+        std::vector<ConsumerInfo>* consumer_infos);
+
+    bool GetConsumerList(const std::string& cookies,
+        std::vector<ConsumerInfo>* consumer_infos);
+
 	bool KickOutUser(KICK_TYPE kicktype, const std::string& cookies,
         const EnterRoomUserInfo& enterRoomUserInfo);
 

@@ -30,6 +30,31 @@ namespace
         postdata->assign(temp.begin(), temp.end());
         return true;
     }
+
+
+    //计算sing的方案
+    //cityName使用中文编码，不要转换成urlencode
+    //1. 所有参数以key - value方式放进map中
+    //2. 按key升序排列出key1 = value1&key2 = value2的格式的字符串str1
+    //3. 在str1后面紧跟$_fan_xing_$串，然后计算md5值
+    //4. 取md5的第8位到24位，一共是16位数据。
+
+    std::string GetSignFromMap(const std::map<std::string, std::string>& param_map)
+    {
+        if (param_map.empty())
+            return std::string("");
+
+        std::string target;
+        for (const auto& it : param_map)
+        {
+            target += it.first + "=" + it.second + "&";
+        }
+        target = target.substr(0, target.length() - 1);
+        target += "$_fan_xing_$";
+        std::string md5 = MakeMd5FromString(target);
+
+        return md5.substr(8, 16);
+    }
 }
 Room::Room(uint32 roomid)
     :roomid_(roomid)
@@ -413,6 +438,95 @@ bool Room::GetViewerList(const std::string& cookies,
 		enterRoomUserInfo.roomid = roomid_;
         enterRoomUserInfoList->push_back(enterRoomUserInfo);
     }
+
+    return true;
+}
+
+bool Room::OpenRoomAndGetConsumerList(const std::string& cookies,
+    std::vector<ConsumerInfo>* consumer_infos)
+{
+    if (!OpenRoom(cookies))
+    {
+        return false;
+    }
+
+    if (!GetConsumerList(cookies, consumer_infos))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool Room::GetConsumerList(const std::string& cookies,
+    std::vector<ConsumerInfo>* consumer_infos)
+{
+    std::string url = "http://service.fanxing.kugou.com/fx-rank-service/rank/getThirtyDayRank.json";
+    std::map<std::string, std::string> param_map;
+    param_map["kugouId"] = base::UintToString(star_kugou_id_);
+    param_map["_p"] = base::UintToString(6);
+    param_map["_v"] = "3.3.0.2platform=6";
+    param_map["version"] = "3302";// 未明确这个值的意义
+    std::string sign = GetSignFromMap(param_map);
+    param_map["sign"] = sign;
+
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.queries = param_map;
+    request.headers["User-Agent"] = "酷狗直播 3.3.0 rv:3.3.0.2 (iPhone; iPhone OS 8.4; zh_CN)";
+
+    HttpResponse reponse;
+    if (!curlWrapper_->Execute(request, &reponse))
+    {
+        return false;
+    }
+
+    std::string json(reponse.content.begin(), reponse.content.end());
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(json, rootdata, false))
+    {
+        return false;
+    }
+
+    uint32 code = GetInt32FromJsonValue(rootdata, "code");
+
+    Json::Value defaultval(Json::objectValue);
+    Json::Value data = rootdata.get("data", defaultval);
+    Json::Value rank_vo_list = data.get("rankVOList", defaultval);
+    if (!rank_vo_list.isArray())
+        return false;
+
+    for (const auto& user : rank_vo_list)
+    {
+        auto members = user.getMemberNames();
+        ConsumerInfo consumer;
+        consumer.room_id = roomid_;
+        for (const auto& member : members)
+        {
+            if (member.compare("userId")==0)
+            {
+                consumer.fanxing_id = user.get(member, 0).asUInt();
+            }
+            else if (member.compare("coin") == 0)
+            {
+                consumer.coin = user.get(member, 0).asUInt();
+            }
+            else if (member.compare("richLevel") == 0)
+            {
+                consumer.rich_level = user.get(member, 0).asUInt();
+            }
+            else if (member.compare("nichName") == 0)
+            {
+                consumer.nickname = user.get(member, "").asString();
+            }
+        }
+
+        if (consumer.fanxing_id)
+            consumer_infos->push_back(consumer);
+    }
+
 
     return true;
 }
