@@ -235,7 +235,10 @@ bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
         curl_easy_setopt(curl, CURLOPT_PROXYPORT, proxyport);
     }
 
-    curl_easy_setopt(curl, CURLOPT_TIMEOUT, 12L);
+    //curl_easy_setopt(curl, CURLOPT_TIMEOUT, 12L);
+
+    curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 1);
+    curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, 120);
 
     res = curl_easy_perform(curl);
 
