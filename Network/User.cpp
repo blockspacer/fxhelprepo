@@ -443,6 +443,26 @@ bool User::OpenRoomAndGetViewerList(uint32 roomid,
     return true;
 }
 
+bool User::OpenRoomAndGetConsumerList(uint32 roomid,
+    std::vector<ConsumerInfo>* consumer_infos)
+{
+    std::shared_ptr<Room> room(new Room(roomid));
+    std::vector<std::string> keys;
+    keys.push_back("_fx_coin");
+    keys.push_back("_fx_user");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    keys.push_back("KuGoo");
+    std::string cookie = cookiesHelper_->GetCookies(keys);
+    if (!room->OpenRoomAndGetConsumerList(cookie, consumer_infos))
+        return false;
+
+    return true;
+}
+
 bool User::EnterRoomFopHttp(uint32 roomid, std::shared_ptr<Room> room)
 {
     rooms_[roomid] = room;

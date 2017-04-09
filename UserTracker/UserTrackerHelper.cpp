@@ -517,6 +517,21 @@ bool UserTrackerHelper::GetRoomViewerList(uint32 roomid, std::map<uint32, EnterR
     return true;
 }
 
+bool UserTrackerHelper::GetRoomConsumerList(uint32 roomid, std::map<uint32, ConsumerInfo>* consumers_map)
+{
+    std::vector<ConsumerInfo> consumer_infos;
+    if (!user_->OpenRoomAndGetConsumerList(roomid, &consumer_infos))
+    {
+        return false;
+    }
+
+    for (auto user_info : consumer_infos)
+    {
+        (*consumers_map)[user_info.fanxing_id] = user_info;
+    }
+    return true;
+}
+
 //GET /UServices/UserService/UserExtService/getFollowList?args=[1,10,0,%22%22,0,3]&_=1478426799924
 //Referer: http://fanxing.kugou.com/index.php?action=userFollowList
 bool UserTrackerHelper::GetMyConcernList(std::vector<FollowUserInfo>* follow_user_infos)

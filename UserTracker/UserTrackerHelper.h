@@ -9,6 +9,7 @@
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/threading/thread.h"
 #include "Network/MessageNotifyManager.h"
+#include "Network/Room.h"
 
 
 class User;
@@ -105,6 +106,9 @@ private:
 
     // 从指定房间获取用户列表，追踪用户
     bool GetRoomViewerList(uint32 roomid, std::map<uint32, EnterRoomUserInfo>* user_map);
+
+    // 从指定房间获取30天消费用户列表，用于追踪消费用户。通过手机协议，不需要cookie
+    bool GetRoomConsumerList(uint32 roomid, std::map<uint32, ConsumerInfo>* consumers_map);
     
     //GET /UServices/UserService/UserExtService/getFollowList?args=[1,10,0,%22%22,0,3]&_=1478426799924
     //Referer: http://fanxing.kugou.com/index.php?action=userFollowList

@@ -101,6 +101,24 @@ bool UserTracker::GetUserLocationByUserId(const std::vector<uint32> user_ids,
     return true;
 }
 
+bool UserTracker::UpdataAllStarRoomComsumerMap()
+{
+    std::vector<uint32> roomids;
+    if (!GetAllStarRoomInfos(&roomids))
+    {
+        return false;
+    }
+
+    std::map<uint32, std::map<uint32, ConsumerInfo>> roomid_consumer_map;
+    if (!GetAllRoomConsumers(roomids, &roomid_consumer_map))
+    {
+        return false;
+    }
+
+    roomid_consumer_map_ = roomid_consumer_map;
+    return true;
+}
+
 
 bool UserTracker::GetAllStarRoomInfos(std::vector<uint32>* roomids)
 {
@@ -177,7 +195,6 @@ bool UserTracker::GetTargetStarRoomInfos(const std::string& url, std::vector<uin
     return true;
 }
 
-
 bool UserTracker::GetAllRoomViewers(
     const std::vector<uint32>& roomids,
     std::map<uint32, std::map<uint32, EnterRoomUserInfo>>* roomid_user_map)
@@ -197,6 +214,26 @@ bool UserTracker::GetAllRoomViewers(
     }
 
     return !roomid_user_map->empty();
+}
+
+bool UserTracker::GetAllRoomConsumers(const std::vector<uint32>& roomids,
+    std::map<uint32, std::map<uint32, ConsumerInfo>>* roomid_consumer_map)
+{
+    if (!roomid_consumer_map)
+        return false;
+
+    for (auto roomid : roomids)
+    {
+        std::map<uint32, ConsumerInfo> roomid_consumers;
+        if (!GetConsumerList(roomid, &roomid_consumers))
+        {
+            //assert(false); 可能在pk房，也会出现进房和获取房间成员失败
+            continue;
+        }
+        (*roomid_consumer_map)[roomid] = roomid_consumers;
+    }
+
+    return !roomid_consumer_map->empty();
 }
 
 bool UserTracker::FindUsersWhenRoomViewerList(const std::vector<uint32>& roomids,
@@ -246,6 +283,22 @@ bool UserTracker::GetRoomViewerList(uint32 roomid, std::map<uint32, EnterRoomUse
     for (auto user_info : enterRoomUserInfoList)
     {
         (*user_map)[user_info.userid] = user_info;
+    }
+    return true;
+}
+
+bool UserTracker::GetConsumerList(uint32 roomid,
+    std::map<uint32, ConsumerInfo>* consumer_map)
+{
+    std::vector<ConsumerInfo> consumer_info;
+    if (!user_->OpenRoomAndGetConsumerList(roomid, &consumer_info))
+    {
+        return false;
+    }
+
+    for (auto user : consumer_info)
+    {
+        (*consumer_map)[user.fanxing_id] = user;
     }
     return true;
 }
