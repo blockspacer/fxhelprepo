@@ -149,4 +149,5 @@ void SingleTcpClient::OnReceive(evutil_socket_t sock, short flags)
     printf("recv:%s\n", buf);
     data.assign(buf, buf+ret);
     data_receive_callback_(true, data);
+    event_add(ev_read_, 0);
 }

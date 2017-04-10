@@ -19,8 +19,22 @@ void AuthorityClientBussiness::SetSendDataFunction(
 
 bool AuthorityClientBussiness::HandleMessage(const std::vector<uint8>& data)
 {
+    DCHECK(CalledOnValidThread());
     std::vector<uint8> new_data = data;
     new_data.insert(new_data.end(), data.begin(), data.end());
     send_data_callback_.Run(new_data);
-    return true;
+
+    bool result = buffer_parser_.HandleBuffer(data);
+    DCHECK(result);
+
+    std::vector<std::vector<uint8>> repsonses;
+    if (buffer_parser_.GetResponses(&repsonses))
+    {
+        for (const auto response : repsonses)
+        {
+            send_data_callback_.Run(response);
+        }
+    }
+
+    return result;
 }

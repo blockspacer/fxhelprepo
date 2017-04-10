@@ -3,6 +3,7 @@
 
 
 AuthorityController::AuthorityController()
+    :control_thread_(nullptr)
 {
 }
 
@@ -13,11 +14,14 @@ AuthorityController::~AuthorityController()
 
 bool AuthorityController::Initialize()
 {
+    control_thread_.reset(new base::Thread("controller_thread"));
+    control_thread_->Start();
+    runner_ = control_thread_->message_loop_proxy();
     return true;
 }
 void AuthorityController::Finalize()
 {
-
+    control_thread_->Stop();
 }
 
 void AuthorityController::SetSendDataFunction(
@@ -36,11 +40,17 @@ void AuthorityController::Stop()
 
 }
 
-bool AuthorityController::AddClient(bufferevent *bev, struct sockaddr& sock)
+bool AuthorityController::AddClient(bufferevent *bev, const struct sockaddr& sock)
+{
+    return runner_->PostTask(FROM_HERE, base::Bind(&AuthorityController::DoAddClient, 
+                      base::Unretained(this), bev, sock));
+}
+
+void AuthorityController::DoAddClient(bufferevent *bev, const struct sockaddr& sock)
 {
     auto find_result = client_map_.find(bev);
     if (find_result != client_map_.end())
-        return false;
+        return;
 
     scoped_ptr<AuthorityClientBussiness> client(new AuthorityClientBussiness());
     client->SetSendDataFunction(
@@ -51,7 +61,15 @@ bool AuthorityController::AddClient(bufferevent *bev, struct sockaddr& sock)
 
 bool AuthorityController::RemoveClient(bufferevent *bev)
 {
+    runner_->PostTask(FROM_HERE, base::Bind(&AuthorityController::DoRemoveClient,
+        base::Unretained(this), bev));
+
     return false;
+}
+
+void AuthorityController::DoRemoveClient(bufferevent *bev)
+{
+
 }
 
 bool AuthorityController::HandleMessage(
@@ -60,17 +78,26 @@ bool AuthorityController::HandleMessage(
     if (send_data_callback_.is_null())
         return false;
 
-    auto find_result = client_map_.find(bev);
-
-    if (find_result == client_map_.end())
-        return false;
-
-    // 组包后，处理数据
-    if (!find_result->second->HandleMessage(data))
-        return false;
+    runner_->PostTask(FROM_HERE, base::Bind(&AuthorityController::DoHandleMessage,
+        base::Unretained(this), bev, data));
 
     return true;
 }
+
+void AuthorityController::DoHandleMessage(
+    bufferevent *bev, const std::vector<uint8>& data)
+{
+    auto find_result = client_map_.find(bev);
+
+    if (find_result == client_map_.end())
+        return;
+
+    if (!find_result->second->HandleMessage(data))
+    {
+        // 无法处理消息，要终结这条连接
+    }
+}
+
 
 bool AuthorityController::SendDataToClient(bufferevent* bev, 
                                            const std::vector<uint8>& data)

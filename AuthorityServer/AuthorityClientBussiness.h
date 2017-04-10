@@ -6,8 +6,10 @@
 #include <vector>
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/bind.h"
+#include "third_party/chromium/base/threading/non_thread_safe.h"
+#include "AuthorityCommand.h"
 
-class AuthorityClientBussiness
+class AuthorityClientBussiness : public base::NonThreadSafe
 {
 public:
     AuthorityClientBussiness();
@@ -20,5 +22,7 @@ public:
 
 private:
     base::Callback<bool(const std::vector<uint8>& data)> send_data_callback_;
+
+    BufferParser buffer_parser_;;
 };
 

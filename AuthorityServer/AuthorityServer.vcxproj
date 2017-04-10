@@ -104,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AuthorityClientBussiness.h" />
+    <ClInclude Include="AuthorityCommand.h" />
     <ClInclude Include="AuthorityController.h" />
     <ClInclude Include="AuthorityNetwork.h" />
     <ClInclude Include="AuthorityServer.h" />
@@ -114,6 +115,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthorityClientBussiness.cpp" />
+    <ClCompile Include="AuthorityCommand.cpp" />
     <ClCompile Include="AuthorityController.cpp" />
     <ClCompile Include="AuthorityNetwork.cpp" />
     <ClCompile Include="AuthorityServer.cpp" />
