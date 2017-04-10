@@ -17,9 +17,6 @@
 
 namespace
 {
-    const char* fanxingurl = "http://fanxing.kugou.com";
-    
-    const char* kugouurl = "http://kugou.com";
     const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
     const char* acceptencode = "gzip";//目前都不应该接收压缩数据，免得解压麻烦
 

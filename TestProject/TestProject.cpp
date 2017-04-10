@@ -10,18 +10,16 @@
 #include "Network/CurlWrapper.h"
 #include "Network/EncodeHelper.h"
 #include "Network/Network.h"
-#include "Network/TcpClientController.h"
 #include "third_party/chromium/base/at_exit.h"
 #include "third_party/chromium/base/run_loop.h"
 #include "third_party/zlib/zlib.h"
 #include "third_party/chromium/base/path_service.h"
-#include "UserTracker.h"
 #include "third_party/chromium/base/files/file_util.h"
 #include "third_party/chromium/base/command_line.h"
 #include "third_party/chromium/base/at_exit.h"
 #include "HousingRequest.h"
 
-extern void SingleUserSingleRoomTest(TcpClientController* tcp_manager);
+
 void InitAppLog();
 
 void HousingTest()

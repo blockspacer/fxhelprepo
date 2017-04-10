@@ -24,12 +24,6 @@
     <ClInclude Include="targetver.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RobotTest.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="UserTracker.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="HousingRequest.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -39,18 +33,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TestProject.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RSATest.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="BatchLoginTest.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="RobotTest.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="UserTracker.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="HousingRequest.cpp">

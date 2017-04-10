@@ -1,6 +1,5 @@
 #include "HousingRequest.h"
 
-#include "Network/easy_http_impl.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 
 namespace

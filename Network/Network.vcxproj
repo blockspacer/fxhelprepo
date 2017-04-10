@@ -86,23 +86,13 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BetData.h" />
-    <ClInclude Include="common.h" />
-    <ClInclude Include="TcpClientController.h" />
     <ClInclude Include="CookiesHelper.h" />
     <ClInclude Include="CurlWrapper.h" />
-    <ClInclude Include="easy_http_impl.h" />
     <ClInclude Include="EncodeHelper.h" />
     <ClInclude Include="IpProxy.h" />
-    <ClInclude Include="MessageNotifyManager.h" />
     <ClInclude Include="Network.h" />
-    <ClInclude Include="Room.h" />
-    <ClInclude Include="SingleTcpClient.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="TcpDefines.h" />
-    <ClInclude Include="TcpProxyClient.h" />
-    <ClInclude Include="User.h" />
     <ClInclude Include="utf_help.h" />
   </ItemGroup>
   <ItemGroup>
@@ -116,20 +106,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="easy_http_impl.cpp" />
     <ClCompile Include="EncodeHelper.cpp" />
     <ClCompile Include="IpProxy.cpp" />
-    <ClCompile Include="MessageNotifyManager.cpp" />
     <ClCompile Include="Network.cpp" />
-    <ClCompile Include="Room.cpp" />
-    <ClCompile Include="SingleTcpClient.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TcpClientController.cpp" />
-    <ClCompile Include="TcpProxyClient.cpp" />
-    <ClCompile Include="User.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
