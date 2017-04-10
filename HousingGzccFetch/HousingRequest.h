@@ -6,19 +6,6 @@
 #include "Network/CurlWrapper.h"
 #include "Network/CookiesHelper.h"
 
-struct HouseRecord
-{
-    std::string house_source_index;
-    std::string house_area;
-    std::string house_addr;
-    std::string house_price;
-    std::string house_style; // 室厅
-    std::string house_acreage; // 面积
-    std::string house_state; // 放盘
-    std::string house_intermediary; // 中介商
-    std::string house_date; // 放盘时间
-};
-
 class HousingRequest
 {
 public:

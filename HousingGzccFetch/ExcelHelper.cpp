@@ -104,7 +104,6 @@ bool ExcelHelper::Open(const std::wstring& filepath)
 
     OpenSheet(L"housing_data", &sheet_);
     return true;
-
 }
 
 bool ExcelHelper::Close()
