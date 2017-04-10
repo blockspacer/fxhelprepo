@@ -148,6 +148,12 @@
     <ProjectReference Include="..\third_party\chromium\base\base_static.vcxproj">
       <Project>{ff406463-e0ef-c1b2-c0b8-072e8ee1c97f}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\libeay32\libeay32.vcxproj">
+      <Project>{ac33ff8e-59e7-4e1e-8111-f446e9fb0231}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\openssl\ssleay32\ssleay32.vcxproj">
+      <Project>{057ea5b8-8c47-4519-b5fc-9b28191d6843}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
