@@ -63,6 +63,8 @@ BOOL CHousingGzccFetchDlg::OnInitDialog()
     PathService::Get(base::DIR_EXE, &path);
     exePath_ = path;
 
+    LOG(INFO) << __FUNCTION__;
+
     DWORD dwStyle = m_list_display.GetExtendedStyle();
     dwStyle |= LVS_REPORT;
     dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
@@ -151,7 +153,6 @@ void CHousingGzccFetchDlg::OnBnClickedBtnFetchData()
 
 void CHousingGzccFetchDlg::OnBnClickedBtnExport()
 {
-    // TODO:  在此添加控件通知处理程序代码
     ExportToExcel();
 }
 
@@ -203,7 +204,7 @@ bool CHousingGzccFetchDlg::ExportToExcel()
     base::FilePath templatepath = exePath_.Append(L"template.xlsx");
     uint64 time64 = base::Time::Now().ToInternalValue();
     std::wstring timestr = base::Uint64ToString16(time64);
-    std::wstring filename = timestr + L".xlsx";
+    std::wstring filename = L"数据_" + timestr + L".xlsx";
     base::FilePath excelpath = exePath_.Append(filename);
 
     ExcelHelper excelHelper;

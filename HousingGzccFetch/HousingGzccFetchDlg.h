@@ -7,7 +7,6 @@
 #undef max // 因为微软这个二比在某些头文件定义了max宏
 #undef min // 因为微软这个二比在某些头文件定义了min宏
 #include "third_party/chromium/base/files/file_path.h"
-#include "third_party/chromium/base/at_exit.h"
 
 #include "afxwin.h"
 #include "afxcmn.h"
@@ -51,11 +50,9 @@ private:
 
     bool ExportToExcel();
 
-
     CEdit m_edit_max_pages;
     CListCtrl m_list_display;
 
-    base::AtExitManager atExitManager_;
     GridData m_griddata;
     base::FilePath exePath_;
 };

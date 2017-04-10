@@ -107,7 +107,7 @@ void CurlWrapper::CurlCleanup()
 
 bool CurlWrapper::Execute(const HttpRequest& request, HttpResponse* response)
 {
-    LOG(INFO) << __FUNCTION__;
+    LOG(INFO) << __FUNCTION__ <<" url = "<< request.url;
 
     CURL *curl;
     CURLcode res;

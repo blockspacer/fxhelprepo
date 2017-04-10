@@ -6,6 +6,11 @@
 #include "HousingGzccFetch.h"
 #include "HousingGzccFetchDlg.h"
 
+#include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_util.h"
+#include "third_party/chromium/base/command_line.h"
+#include "third_party/chromium/base/at_exit.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -70,6 +75,8 @@ BOOL CHousingGzccFetchApp::InitInstance()
 	// 例如修改为公司或组织名
 	SetRegistryKey(_T("应用程序向导生成的本地应用程序"));
 
+    InitAppLog();
+
 	CHousingGzccFetchDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
@@ -98,5 +105,25 @@ BOOL CHousingGzccFetchApp::InitInstance()
 	// 由于对话框已关闭，所以将返回 FALSE 以便退出应用程序，
 	//  而不是启动应用程序的消息泵。
 	return FALSE;
+}
+
+void CHousingGzccFetchApp::InitAppLog()
+{
+    CommandLine::Init(0, NULL);
+    base::FilePath path;
+    PathService::Get(base::DIR_EXE, &path);
+    path = path.Append(L"DataCollection").Append(L"HousingGzcc.log");
+    logging::LoggingSettings setting;
+#ifdef _DEBUG
+    setting.logging_dest = logging::LOG_TO_ALL;
+    setting.lock_log = logging::LOCK_LOG_FILE;
+#else
+    setting.logging_dest = logging::LOG_NONE;
+    setting.lock_log = logging::DONT_LOCK_LOG_FILE;
+#endif
+    setting.log_file = path.value().c_str();
+    setting.delete_old = logging::APPEND_TO_OLD_LOG_FILE;
+    logging::InitLogging(setting);
+    logging::SetLogItems(false, true, true, true);
 }
 
