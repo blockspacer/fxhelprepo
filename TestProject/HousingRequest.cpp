@@ -1,6 +1,7 @@
 #include "HousingRequest.h"
 
 #include "Network/easy_http_impl.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
 
 namespace
 {
@@ -15,6 +16,8 @@ static const char* mark_td_begin = "<td ";
 static const char* mark_td_end = "</td>";
 static const char* mark_a_begin = "<a ";
 static const char* mark_a_end = "</a>";
+static const char* mark_th_begin = "<th";
+static const char* mark_th_end = "</th>";
 
 bool GetMarkData(const std::string& pagedata, size_t beginpos,
     const std::string& beginmark,
@@ -85,6 +88,12 @@ bool GetTdData(const std::string& pagedata, size_t beginpos, size_t* tdendpos, s
     return GetMarkData(pagedata, beginpos, mark_td_begin, mark_td_end, tddata, tdendpos);
 }
 
+bool GetThData(const std::string& pagedata, size_t beginpos,
+    size_t* thendpos, std::string* thdata)
+{
+    return GetMarkData(pagedata, beginpos, mark_th_begin, mark_th_end, thdata, thendpos);
+}
+
 bool GetAData(const std::string& pagedata, size_t beginpos,
     std::string* trdata, size_t* trendpos)
 {
@@ -97,43 +106,52 @@ HousingRequest::HousingRequest()
     curl_.Initialize();
 }
 
-
 HousingRequest::~HousingRequest()
 {
     curl_.Finalize();
 }
 
-
-bool HousingRequest::GetClfSearch()
+bool HousingRequest::GetYszResult(std::vector<std::string>* headers,
+    std::list<std::vector<std::string>>* record_list)
 {
-    HttpRequest request;
-    request.url = "http://housing.gzcc.gov.cn/search/clf/clfSearch.jsp";
-    //request.url = "http://housing.gzcc.gov.cn//search/clf/clf_detail.jsp?pyID=26426274";
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
-    request.headers["Accept-Language"] = "zh-CN,zh;q=0.8,en;q=0.6";
-
-    HttpResponse response;
-    if (!curl_.Execute(request, &response))
-    {
+    std::string first_page_content;
+    if (!GetFirstPageContent(&first_page_content))
         return false;
-    }
-
-    std::string content(response.content.begin(),response.content.end());
-
-    std::list<std::vector<std::string>> record_list;
-    if (!ParseClfSearch(content, &record_list))
-    {
+    
+    uint32 page_count = 0;
+    if (!ParsePageCount(first_page_content, &page_count))
         return false;
+
+    std::vector<std::string> temp_header;
+    std::list<std::vector<std::string>> temp_record_list;
+    if (!ParseYszResult(first_page_content, &temp_header, &temp_record_list))
+        return false;
+    
+    headers->assign(temp_header.begin(), temp_header.end());
+    record_list->insert(record_list->end(), temp_record_list.begin(), temp_record_list.end());
+    for (uint32 page_no = 1; page_no < page_count; page_no++)
+    {
+        std::string page_number = base::UintToString(page_no);
+        std::string content;
+        if (!GetPageContentByNumber(page_number, &content))
+            continue;
+
+        std::list<std::vector<std::string>> page_record_list;
+        if (!ParseYszResult(content, nullptr, &page_record_list))
+            continue;
+
+        record_list->insert(record_list->end(), page_record_list.begin(), page_record_list.end());
     }
     
     return true;
 }
 
-bool HousingRequest::ParseClfSearch(const std::string& data,
+bool HousingRequest::ParseYszResult(const std::string& data,
+    std::vector<std::string>* headers,
     std::list<std::vector<std::string>>* record_list) const
 {
-    auto pos = data.find("/images/title_info_list_clf.jpg");
+    // 各个页面都用这个格式的title图片
+    auto pos = data.find("/images/title_info_list_");
     if (pos== std::string::npos)
         return false;
 
@@ -143,28 +161,25 @@ bool HousingRequest::ParseClfSearch(const std::string& data,
     if (!GetTableData(contain_table, &table_data))
         return false;
 
-    // 从表格获取列头
-    //std::string thead_data;
-    //if (!GetTheadData(table_data, &thead_data))
-    //    return false;
-
     std::string header_tr_data;
     size_t tr_end;
     if (!GetTrData(table_data, 0, &tr_end, &header_tr_data))
         return false;
 
+    if (!headers)
+        ParseHeader(header_tr_data, headers);
+
     // 从表格获取数据，目前方案是每页15条，多页未处理。
     std::string tr_data;
-    for (uint32 index = 0; index < 15; index++)
+    while (true)
     {
         if (!GetTrData(table_data, tr_end + 1, &tr_end, &tr_data))
-            return false;
+            break;
 
         std::vector<std::string> record;
         ParseOneRecode(tr_data, &record);
         record_list->push_back(record);
     }
-
 
     return true;
 }
@@ -172,19 +187,93 @@ bool HousingRequest::ParseClfSearch(const std::string& data,
 bool HousingRequest::Test()
 {
     std::string temp = R"(
-        <td align="center" class="box_tab_style02_td">1</td>
-        <td align="center" class="box_tab_style02_td"><a href="/search/clf/clf_detail.jsp?pyID=26426274" target="_blank">0170150853</a></td>
-        <td align="center" class="box_tab_style02_td padding_left10px"><a href="/search/clf/clf_detail.jsp?pyID=26426274" target="_blank">番禺区</a></td>
-        <td align="left" class="box_tab_style02_td"><a href="/search/clf/clf_detail.jsp?pyID=26426274" target="_blank">广州市番禺区钟村街祈福新村海晴居1街9B号1楼</a></td>
-        <td align="center" class="box_tab_style02_td padding_left10px"><a href="/search/clf/clf_detail.jsp?pyID=26426274" target="_blank">280.00</a></td>
-       <td align="center" class="box_tab_style02_td padding_left10px"><a href="/search/clf/clf_detail.jsp?pyID=26426274" target="_blank">室厅</a></td>
-		<td align="center" class="box_tab_style02_td"><a href="/search/clf/clf_detail.jsp?pyID=26426274" target="_blank">89.94</a></td>
-		<td align="center" class="box_tab_style02_td"><a href="/search/clf/clf_detail.jsp?pyID=26426274" target="_blank">放盘</a></td>
-		<td align="center" class="box_tab_style02_td"><a href="/search/clf/clf_detail.jsp?pyID=26426274" target="_blank">广州旺一达房地产咨询服务有限公司</a></td>
-		<td align="center" class="box_tab_style02_td"><a href="/search/clf/clf_detail.jsp?pyID=26426274" target="_blank">2017-04-09</a></td>)";
+	  <td align="center" class="box_tab_style02_td">1</td>
+	    <td align="center" class="box_tab_style02_td"><a href="/search/project/project_detail.jsp?changeproInfoTag=1&changeSellFormtag=1&pjID=47140&name=fdcxmxx" target="_blank">中海金沙馨园（自编A4-A7栋）</a></td>
+	    <td align="center" class="box_tab_style02_td"><a href="/search/project/project_detail.jsp?changeproInfoTag=1&changeSellFormtag=1&pjID=47140&name=fdcxmxx" target="_blank">广州中海地产有限公司</a></td>
+	    <td align="left" class="box_tab_style02_td padding_left10px"><a href="/search/project/project_detail.jsp?changeproInfoTag=1&changeSellFormtag=1&pjID=47140&name=fdcxmxx" target="_blank"><img src="/images/eeb60828ae.gif" width="11" height="12" /><img src="/images/cea7249519.gif" width="11" height="12" /><img src="/images/cea7249519.gif" width="11" height="12" /><img src="/images/853f634d1e.gif" width="11" height="12" /><img src="/images/cea7249519.gif" width="11" height="12" /><img src="/images/6a1d935323.gif" width="11" height="12" /><img src="/images/d759e0da63.gif" width="11" height="12" /><img src="/images/bfea3b40f6.gif" width="11" height="12" /><br></a></td>
+	    <td align="center" class="box_tab_style02_td"><a href="/search/project/project_detail.jsp?changeproInfoTag=1&changeSellFormtag=1&pjID=47140&name=fdcxmxx" target="_blank">七里香街1、3、5、9、11号（金沙洲B3735F01地块）</a></td>
+	    <td align="left" class="box_tab_style02_td padding_left10px"><a href="/search/project/project_detail.jsp?changeproInfoTag=1&changeSellFormtag=1&pjID=47140&name=fdcxmxx" target="_blank"><img src="/images/bfea3b40f6.gif" width="11" height="12" /><img src="/images/ccfcfc3238.gif" width="11" height="12" /><img src="/images/bea57ddbff.gif" width="11" height="12" /><br></a></td>
+	    <td align="left" class="box_tab_style02_td padding_left10px"><a href="/search/project/project_detail.jsp?changeproInfoTag=1&changeSellFormtag=1&pjID=47140&name=fdcxmxx" target="_blank"><br></a></td>
+)";
 
     std::vector<std::string> record;
     ParseOneRecode(temp, &record);
+
+    std::string header_data = R"(
+    	<thead><tr>
+	<th width="5%" align="center" class="box_tab_style02_th"><strong>序号</strong></th>
+    <th width="25%" align="center" class="box_tab_style02_th"><strong><a href="#" onclick="doOrderBy('PROJECT_NAME','desc');return false;">项目名称</a>
+    </strong></th>
+    <th width="25%" align="center" class="box_tab_style02_th"><strong><a href="#" onclick="doOrderBy('DEVELOPER','desc');return false;">开发商</a>
+    </strong></th>
+    <th width="14%" align="center" class="box_tab_style02_th"><strong><a href="#" onclick="doOrderBy('PRESELL_NO','desc');return false;">预售证</a>
+    </strong></th>
+    <th width="15%" align="center" class="box_tab_style02_th"><strong><a href="#" onclick="doOrderBy('PROJECT_ADDRESS','desc');return false;">项目地址</a></strong></th>
+    <th width="8%" align="center" class="box_tab_style02_th"><strong><a href="#" onclick="doOrderBy('HOUSE_SOLD_NUM','desc');return false;">住宅已售套数</a>
+    </strong></th>
+    <th width="8%" align="center" class="box_tab_style02_th"><strong><a href="#" onclick="doOrderBy('HOUSE_UNSALE_NUM','desc');return false;">住宅未售套数</a>
+    </strong></th>
+    </tr>
+    </thead>
+    )";
+    std::vector<std::string> header;
+    ParseHeader(header_data, &header);
+
+    return true;
+}
+
+bool HousingRequest::GetFirstPageContent(std::string* content)
+{
+    HttpRequest request;
+    request.url = "http://housing.gzcc.gov.cn/fyxx/ysz/";
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+    request.headers["Accept-Language"] = "zh-CN,zh;q=0.8,en;q=0.6";
+
+    HttpResponse response;
+    if (!curl_.Execute(request, &response))
+        return false;
+
+    content->assign(response.content.begin(), response.content.end());
+    return true;
+}
+
+bool HousingRequest::GetPageContentByNumber(const std::string& page_number, std::string* content)
+{
+    HttpRequest request;
+    request.url = "http://housing.gzcc.gov.cn/fyxx/ysz/index_" + page_number + ".shtml";
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+    request.headers["Accept-Language"] = "zh-CN,zh;q=0.8,en;q=0.6";
+
+    HttpResponse response;
+    if (!curl_.Execute(request, &response))
+        return false;
+
+    content->assign(response.content.begin(), response.content.end());
+    return true;
+}
+
+bool HousingRequest::ParsePageCount(const std::string& data, uint32* page_count) const
+{
+    auto pos = data.find("createPageHTML");
+    if (pos == std::string::npos)
+        return false;
+
+    auto begin_pos = data.find("(", pos);
+    if (begin_pos == std::string::npos)
+        return false;
+
+    begin_pos++;
+    auto end_pos = data.find(",", begin_pos);
+    if (end_pos == std::string::npos)
+        return false;
+
+    std::string temp_data = data.substr(begin_pos, end_pos - begin_pos);
+
+    if (!base::StringToUint(temp_data, page_count))
+        return false;
+
     return true;
 }
 
@@ -193,38 +282,69 @@ bool HousingRequest::ParseOneRecode(
 {
     std::vector<std::string> record_data;
     std::string temp_data = data;
-    std::string tr_data;
-    size_t last_tr_end = 0;
-    size_t current_tr_end;
-    if (!GetTdData(temp_data, last_tr_end, &current_tr_end, &tr_data))
+    std::string td_data;
+    size_t last_td_end = 0;
+    size_t current_td_end;
+    if (!GetTdData(temp_data, last_td_end, &current_td_end, &td_data))
         return false;
 
-    last_tr_end = current_tr_end;
-    record_data.push_back(tr_data);
+    last_td_end = current_td_end;
+    record_data.push_back(td_data);
 
-    for (int i = 0; i < 9; i++)
+    while (true)
     {
         std::string tr_data;
-        if (!GetTdData(temp_data, last_tr_end, &current_tr_end, &tr_data))
-            return false;
+        if (!GetTdData(temp_data, last_td_end, &current_td_end, &tr_data))
+            break;
 
-        last_tr_end = current_tr_end;
+        last_td_end = current_td_end;
         size_t a_end;
         std::string a_data;
         if (!GetAData(tr_data, 0, &a_data, &a_end))
-            return false;
+            break;
 
         record_data.push_back(a_data);
     }
+    *house_record = record_data;
+    return true;
 }
 
-bool HousingRequest::GetCountCookie()
+bool HousingRequest::ParseHeader(const std::string& data,
+    std::vector<std::string>* house_header) const
 {
-    return false;
-}
+    std::string temp_data = data;
+    size_t current_th_end = 0;
+    size_t last_th_end = 0;
+    std::vector<std::string> record_data;
 
-bool HousingRequest::GetVerifyCode()
-{
-    return false;
-}
+    std::string th_data;
+    if (!GetThData(temp_data, last_th_end, &current_th_end, &th_data))
+        return false;
 
+    size_t current_strong_end;
+    std::string serial_number;
+    if (!GetMarkData(th_data,
+        last_th_end, "<strong>", "</strong>", &serial_number,
+        &current_strong_end))
+        return false;
+
+    record_data.push_back(serial_number);
+
+    last_th_end = current_th_end;
+    while (true)
+    {
+        std::string th_data;
+        if (!GetThData(temp_data, last_th_end, &current_th_end, &th_data))
+            break;
+
+        last_th_end = current_th_end;
+        size_t a_end;
+        std::string a_data;
+        if (!GetAData(th_data, 0, &a_data, &a_end))
+            break;
+
+        record_data.push_back(a_data);
+    }
+    *house_header = record_data;
+    return true;
+}

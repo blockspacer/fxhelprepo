@@ -27,7 +27,10 @@ void InitAppLog();
 void HousingTest()
 {
     HousingRequest house_request;
-    house_request.GetClfSearch();
+
+    std::vector<std::string> headers;
+    std::list<std::vector<std::string>> record_list;
+    house_request.GetYszResult(&headers, &record_list);
     //house_request.Test();
 }
 
