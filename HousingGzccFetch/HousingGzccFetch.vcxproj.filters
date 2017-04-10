@@ -33,6 +33,27 @@
     <ClInclude Include="Resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ExcelHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Range.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Workbook.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Workbooks.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Worksheet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Worksheets.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HousingGzccFetch.cpp">
@@ -42,6 +63,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ExcelHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

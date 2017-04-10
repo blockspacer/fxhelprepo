@@ -105,13 +105,21 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="ExcelHelper.h" />
     <ClInclude Include="HousingGzccFetch.h" />
     <ClInclude Include="HousingGzccFetchDlg.h" />
+    <ClInclude Include="Range.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Workbook.h" />
+    <ClInclude Include="Workbooks.h" />
+    <ClInclude Include="Worksheet.h" />
+    <ClInclude Include="Worksheets.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ExcelHelper.cpp" />
     <ClCompile Include="HousingGzccFetch.cpp" />
     <ClCompile Include="HousingGzccFetchDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -127,6 +135,17 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\HousingGzccFetch.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Network\Network.vcxproj">
+      <Project>{2147cb51-23f6-4022-8e4a-291b70570cb7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
+      <Project>{ed99d404-f6b3-517a-4ea7-604a10269355}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\chromium\base\base_static.vcxproj">
+      <Project>{ff406463-e0ef-c1b2-c0b8-072e8ee1c97f}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
