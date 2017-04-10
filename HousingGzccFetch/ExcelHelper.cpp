@@ -79,7 +79,7 @@ bool ExcelHelper::Create(const std::wstring& filepath)
 
     book_.ReleaseDispatch();
     books_.ReleaseDispatch();
-    return false;
+    return true;
 }
 
 bool ExcelHelper::Open(const std::wstring& filepath)
@@ -134,7 +134,7 @@ bool ExcelHelper::Export(std::vector<std::vector<std::wstring>> data)
         }
     }
 
-    return false;
+    return true;
 }
 
 bool ExcelHelper::OpenSheet(const std::wstring& sheetname, CWorksheet* sheet)
@@ -174,5 +174,5 @@ bool ExcelHelper::SetString(uint32 rowid, uint32 columnid,
     range.put_HorizontalAlignment(COleVariant((long)-4108));
     range.ReleaseDispatch();
 
-    return false;
+    return true;
 }

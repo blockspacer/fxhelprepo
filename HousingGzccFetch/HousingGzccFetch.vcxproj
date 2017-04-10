@@ -29,7 +29,7 @@
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -109,6 +109,7 @@
     <ClInclude Include="ExcelHelper.h" />
     <ClInclude Include="HousingGzccFetch.h" />
     <ClInclude Include="HousingGzccFetchDlg.h" />
+    <ClInclude Include="HousingRequest.h" />
     <ClInclude Include="Range.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -122,6 +123,7 @@
     <ClCompile Include="ExcelHelper.cpp" />
     <ClCompile Include="HousingGzccFetch.cpp" />
     <ClCompile Include="HousingGzccFetchDlg.cpp" />
+    <ClCompile Include="HousingRequest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -150,4 +152,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="HousingGzccFetch.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
