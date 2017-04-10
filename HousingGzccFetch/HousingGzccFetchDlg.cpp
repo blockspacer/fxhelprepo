@@ -130,13 +130,18 @@ void CHousingGzccFetchDlg::OnBnClickedBtnFetchData()
     std::vector<std::string> headers;
     std::list<std::vector<std::string>> record_list;
     if (!house_request.GetYszResult(&headers, &record_list, max_pages))
+    {
+        LOG(ERROR) << L"GetYszResult failed!";
         return;
+    }
+        
     
     std::vector<std::wstring> columnlist;
     for (const auto& header : headers)
     {
         columnlist.push_back(GBKToWide(header));
     }
+    LOG(INFO) << L"header count = " << columnlist.size();
 
     GridData grid_data;
     for (const auto& record : record_list)

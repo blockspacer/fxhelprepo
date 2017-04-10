@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "third_party/chromium/base/logging.h"
 #include "ExcelHelper.h"
 #include <iterator>
 #include <assert.h>
@@ -50,6 +51,7 @@ bool ExcelHelper::Init(const std::wstring& filepath)
     templatepath_ = filepath;
     if (!app_.CreateDispatch(L"Excel.Application"))
     {
+        LOG(ERROR) << L"app_.CreateDispatch error";
         return false;
     }
     app_.put_Visible(FALSE);
@@ -69,6 +71,7 @@ bool ExcelHelper::Create(const std::wstring& filepath)
     if (!lpDisp)
     {
         AfxMessageBox(_T("无法打开模板文件"));
+        LOG(ERROR) << L"books_.Open error";
         return false;
     }
     
@@ -94,6 +97,7 @@ bool ExcelHelper::Open(const std::wstring& filepath)
 
     if (!lpdisp)
     {
+        LOG(ERROR) << L"books_.Open error";
         return false;
     }
     //get workbook  

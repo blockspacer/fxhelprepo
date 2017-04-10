@@ -116,18 +116,28 @@ HousingRequest::~HousingRequest()
 bool HousingRequest::GetYszResult(std::vector<std::string>* headers,
     std::list<std::vector<std::string>>* record_list, uint32 max_pages)
 {
+    LOG(INFO) << __FUNCTION__ << L" Begin max_pages = " << max_pages;
     std::string first_page_content;
     if (!GetFirstPageContent(&first_page_content))
+    {
+        LOG(ERROR) << L"GetFirstPageContent failed!";
         return false;
-    
+    }
+
     uint32 page_count = 0;
     if (!ParsePageCount(first_page_content, &page_count))
+    {
+        LOG(ERROR) << L"ParsePageCount failed!";
         return false;
+    }
 
     std::vector<std::string> temp_header;
     std::list<std::vector<std::string>> temp_record_list;
     if (!ParseYszResult(first_page_content, &temp_header, &temp_record_list))
+    {
+        LOG(ERROR) << L"ParseYszResult failed!";
         return false;
+    }
     
     headers->assign(temp_header.begin(), temp_header.end());
     record_list->insert(record_list->end(), temp_record_list.begin(), temp_record_list.end());
@@ -153,6 +163,8 @@ bool HousingRequest::ParseYszResult(const std::string& data,
     std::vector<std::string>* headers,
     std::list<std::vector<std::string>>* record_list) const
 {
+    LOG(INFO) << __FUNCTION__ << L" Begin data.size() = " << data.size();
+
     // 各个页面都用这个格式的title图片
     auto pos = data.find("/images/title_info_list_");
     if (pos== std::string::npos)
@@ -162,12 +174,18 @@ bool HousingRequest::ParseYszResult(const std::string& data,
 
     std::string table_data;
     if (!GetTableData(contain_table, &table_data))
+    {
+        LOG(ERROR) << L"GetTableData failed!";
         return false;
+    }
 
     std::string header_tr_data;
     size_t tr_end;
     if (!GetTrData(table_data, 0, &tr_end, &header_tr_data))
+    {
+        LOG(ERROR) << L"GetTrData failed!";
         return false;
+    }
 
     if (headers)
         ParseHeader(header_tr_data, headers);
@@ -177,7 +195,10 @@ bool HousingRequest::ParseYszResult(const std::string& data,
     while (true)
     {
         if (!GetTrData(table_data, tr_end + 1, &tr_end, &tr_data))
+        {
+            LOG(ERROR) << L"GetTrData failed!";
             break;
+        }
 
         std::vector<std::string> record;
         ParseOneRecode(tr_data, &record);
@@ -227,6 +248,7 @@ bool HousingRequest::Test()
 
 bool HousingRequest::GetFirstPageContent(std::string* content)
 {
+    LOG(INFO) << __FUNCTION__ << L" Begin";
     HttpRequest request;
     request.url = "http://housing.gzcc.gov.cn/fyxx/ysz/";
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
@@ -235,7 +257,10 @@ bool HousingRequest::GetFirstPageContent(std::string* content)
 
     HttpResponse response;
     if (!curl_.Execute(request, &response))
+    {
+        LOG(ERROR) << L"curl_.Execute failed!";
         return false;
+    }
 
     content->assign(response.content.begin(), response.content.end());
     return true;
@@ -243,6 +268,7 @@ bool HousingRequest::GetFirstPageContent(std::string* content)
 
 bool HousingRequest::GetPageContentByNumber(const std::string& page_number, std::string* content)
 {
+    LOG(INFO) << __FUNCTION__ << L" Begin page_number = " << page_number;
     HttpRequest request;
     request.url = "http://housing.gzcc.gov.cn/fyxx/ysz/index_" + page_number + ".shtml";
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
@@ -251,7 +277,10 @@ bool HousingRequest::GetPageContentByNumber(const std::string& page_number, std:
 
     HttpResponse response;
     if (!curl_.Execute(request, &response))
+    {
+        LOG(ERROR) << L"curl_.Execute failed!";
         return false;
+    }
 
     content->assign(response.content.begin(), response.content.end());
     return true;
@@ -283,13 +312,18 @@ bool HousingRequest::ParsePageCount(const std::string& data, uint32* page_count)
 bool HousingRequest::ParseOneRecode(
     const std::string& data, std::vector<std::string>* house_record) const
 {
+    LOG(INFO) << __FUNCTION__ << L" Begin data.size = " << data.size();
+
     std::vector<std::string> record_data;
     std::string temp_data = data;
     std::string td_data;
     size_t last_td_end = 0;
     size_t current_td_end;
     if (!GetTdData(temp_data, last_td_end, &current_td_end, &td_data))
+    {
+        LOG(ERROR) << L"GetTdData failed!";
         return false;
+    }
 
     last_td_end = current_td_end;
     record_data.push_back(td_data);
@@ -315,6 +349,8 @@ bool HousingRequest::ParseOneRecode(
 bool HousingRequest::ParseHeader(const std::string& data,
     std::vector<std::string>* house_header) const
 {
+    LOG(INFO) << __FUNCTION__ << L" Begin data.size = " << data.size();
+
     std::string temp_data = data;
     size_t current_th_end = 0;
     size_t last_th_end = 0;
@@ -322,14 +358,20 @@ bool HousingRequest::ParseHeader(const std::string& data,
 
     std::string th_data;
     if (!GetThData(temp_data, last_th_end, &current_th_end, &th_data))
+    {
+        LOG(ERROR) << L"GetThData failed!";
         return false;
+    }
 
     size_t current_strong_end;
     std::string serial_number;
     if (!GetMarkData(th_data,
         last_th_end, "<strong>", "</strong>", &serial_number,
         &current_strong_end))
+    {
+        LOG(ERROR) << L"GetMarkData failed!";
         return false;
+    }
 
     record_data.push_back(serial_number);
 
@@ -338,13 +380,19 @@ bool HousingRequest::ParseHeader(const std::string& data,
     {
         std::string th_data;
         if (!GetThData(temp_data, last_th_end, &current_th_end, &th_data))
+        {
+            LOG(ERROR) << L"GetThData failed!";
             break;
+        }
 
         last_th_end = current_th_end;
         size_t a_end;
         std::string a_data;
         if (!GetAData(th_data, 0, &a_data, &a_end))
+        {
+            LOG(ERROR) << L"GetAData failed!";
             break;
+        }
 
         record_data.push_back(a_data);
     }
