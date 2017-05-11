@@ -226,7 +226,7 @@ BOOL CAntiFloodDlg::OnInitDialog()
     // 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
     //  执行此操作
 
-    SetWindowText(L"房间管理工具5.8_支持pk房");
+    SetWindowText(L"房间管理工具6.2_支持pk房(修正验证码错误) 购买请联系QQ:269236969");
 
     SetIcon(m_hIcon, TRUE);            // 设置大图标
     SetIcon(m_hIcon, FALSE);        // 设置小图标

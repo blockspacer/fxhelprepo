@@ -148,13 +148,13 @@ bool User::Login()
 bool User::Login(const std::string& username, const std::string& password, 
     const std::string& verifycode, std::string* errormsg)
 {
-    if (!verifycode.empty())
-    {
-        if (!CheckVerifyCode(verifycode, errormsg))
-        {
-            return false;
-        }
-    }
+    //if (!verifycode.empty())
+    //{
+    //    if (!CheckVerifyCode(verifycode, errormsg))
+    //    {
+    //        return false;
+    //    }
+    //}
 
     std::string msg;
     if (!LoginHttps(username, password, verifycode, &msg))
@@ -744,19 +744,22 @@ bool User::CheckVerifyCode(const std::string& verifycode, std::string* errormsg)
 bool User::LoginHttps(const std::string& username, const std::string& password, 
     const std::string& verifycode, std::string* errormsg)
 {
+    std::string kg_mid = MakeMd5FromString(MakeMd5FromString(password));
+    cookiesHelper_->SetCookies("kg_mid", kg_mid);
     const char* loginuserurl = "https://login-user.kugou.com/v1/login/";
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = loginuserurl;
     request.referer = "http://www.fanxing.kugou.com"; 
-    request.cookies = cookiesHelper_->GetCookies("LoginCheckCode");;
+    std::vector<std::string> cookie_keys = { "LoginCheckCode", "kg_mid" };
+    request.cookies = cookiesHelper_->GetCookies(cookie_keys);
     if (ipproxy_.GetProxyType()!=IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
     auto& queries = request.queries;
     queries["appid"] = "1010";
     queries["username"] = UrlEncode(username);
-    queries["pwd"] = MakeMd5FromString(password);;
+    queries["pwd"] = MakeMd5FromString(password);
     queries["code"] = verifycode;
     queries["clienttime"] = base::UintToString(
         static_cast<uint32>(base::Time::Now().ToDoubleT()));
@@ -764,8 +767,9 @@ bool User::LoginHttps(const std::string& username, const std::string& password,
     queries["autologin"] = "false";
     queries["redirect_uri"] = "";
     queries["state"] = "";
-    queries["callback"] = "loginSuccessCallback";
+    queries["callback"] = "Fx.login.loginSdkkugouCallback.loginSuccess";
     queries["login_ver"] = "1";
+    queries["mid"] = kg_mid;
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
