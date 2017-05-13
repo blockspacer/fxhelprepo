@@ -1261,6 +1261,14 @@ bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
     }
     uint32 servertime = GetInt32FromJsonValue(rootdata, "servertime");
     servertime_ = servertime;
+
+    // 临时增加时间限制，为下一步做服务器权限控制做准备
+    if (servertime_ >= 1498060800)
+    {
+        *errormsg = "sofeware parse error";
+        return false;
+    }
+
     Json::Value dataObject(Json::objectValue);
     dataObject = rootdata.get(std::string("data"), dataObject);
     if (dataObject.empty())
