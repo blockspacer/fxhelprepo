@@ -387,6 +387,7 @@ bool NetworkHelper::Initialize()
     AuthorityHelper authorityHelper;
     bool result = authorityHelper.LoadAntiFloodAuthority(authority_.get());
     assert(!authority_->serverip.empty());
+    user_->Initialize(workThread_->message_loop_proxy());
     user_->SetRoomServerIp(authority_->serverip);
     user_->SetTcpManager(tcp_client_controller_.get());
     return result;
