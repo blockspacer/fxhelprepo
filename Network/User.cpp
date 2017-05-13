@@ -11,6 +11,7 @@
 
 namespace
 {
+    const char* login_callback_string = "Fx.login.loginSdkkugouCallback.loginSuccess";
     bool MakePostdata(const std::map<std::string, std::string>& postmap,
         std::vector<uint8>* postdata)
     {
@@ -92,9 +93,7 @@ void User::SetCookies(const std::string& cookies)
 
 std::string User::GetCookies() const
 {
-    std::vector<std::string> keys;
-    keys.push_back("KuGoo");
-    std::string cookie = cookiesHelper_->GetCookies(keys);
+    std::string cookie = cookiesHelper_->GetNormalCookies();
     return cookie;
 }
 
@@ -158,12 +157,11 @@ bool User::Login()
 bool User::Login(const std::string& username, const std::string& password, 
     const std::string& verifycode, std::string* errormsg)
 {
-    if (!verifycode.empty())
+    if (kg_mid_.empty())
     {
-        if (!CheckVerifyCode(verifycode, errormsg))
-        {
-            return false;
-        }
+        kg_mid_ = MakeMd5FromString(username + base::UintToString(
+            static_cast<uint32>(base::Time::Now().ToDoubleT())));
+        cookiesHelper_->SetCookies("kg_mid", "kg_mid=" + kg_mid_);
     }
 
     std::string msg;
@@ -266,6 +264,7 @@ bool User::LoginGetVerifyCode(std::vector<uint8>* picture)
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = url;
     request.referer = "http://fanxing.kugou.com/";
+    request.cookies = cookiesHelper_->GetCookies("kg_mid");
     request.queries["type"] = "LoginCheckCode";
     request.queries["appid"] = "1010";
     request.queries["codetype"] = "0";
@@ -332,6 +331,8 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
     keys.push_back("KuGoo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookie = cookiesHelper_->GetCookies(keys);
     if (normalNotify_)
     {
@@ -384,6 +385,8 @@ bool User::EnterRoomFopAlive(uint32 roomid,
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
     keys.push_back("KuGoo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookie = cookiesHelper_->GetCookies(keys);
     if (normalNotify_)
     {
@@ -434,6 +437,8 @@ bool User::OpenRoomAndGetViewerList(uint32 roomid,
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
     keys.push_back("KuGoo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookie = cookiesHelper_->GetCookies(keys);
     if (!room->OpenRoomAndGetViewerList(cookie, enterRoomUserInfoList))
         return false;
@@ -599,6 +604,8 @@ bool User::SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
     return room->second->SendGift(cookies, gift_id, gift_count, errormsg);
 }
@@ -620,6 +627,8 @@ bool User::RealSingLike(uint32 roomid, const std::wstring& song_name,
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
     return room->second->RealSingLike(cookies,
         kugouid_, usertoken_, song_name, errormsg);
@@ -640,6 +649,8 @@ bool User::GetGiftList(uint32 roomid, std::string* content)
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
     bool result = room->second->GetGiftList(cookies, content);
     return result;
@@ -661,6 +672,8 @@ bool User::GetViewerList(uint32 roomid,
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
     bool result = room->second->GetViewerList(cookies, enterRoomUserInfo);
     return result;
@@ -683,6 +696,8 @@ bool User::KickoutUser(KICK_TYPE kicktype, uint32 roomid,
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
     return room->second->KickOutUser(kicktype, cookies,enterRoomUserInfo);
@@ -703,6 +718,8 @@ bool User::BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
     return room->second->BanChat(cookies, enterRoomUserInfo);
@@ -722,6 +739,8 @@ bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
     keys.push_back("FANXING_COIN");
     keys.push_back("FANXING");
     keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
     return room->second->UnbanChat(cookies, enterRoomUserInfo);
@@ -746,8 +765,8 @@ bool User::RobVotes(uint32 roomid, uint32* award_count, uint32* single_count,
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = url;
-    request.referer = "http://www.fanxing.kugou.com/" + base::UintToString(roomid);
-    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    request.referer = "http://fanxing.kugou.com/" + base::UintToString(roomid);
+    request.cookies = cookiesHelper_->GetNormalCookies();
     if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
@@ -807,7 +826,7 @@ bool User::GetStorageGift(UserStorageInfo* user_storage_info, std::string* error
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = url;
     request.referer = "http://fanxing.kugou.com/index.php?action=userStorage";
-    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    request.cookies = cookiesHelper_->GetNormalCookies();
     if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
@@ -892,7 +911,7 @@ bool User::GetStarCount(uint32 room_id, uint32* star_count)
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = url;
     request.referer = "http://fanxing.kugou.com/" + base::UintToString(room_id);
-    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    request.cookies = cookiesHelper_->GetNormalCookies();
     if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
@@ -951,7 +970,7 @@ bool User::ChangeNickname(const std::string& nickname, std::string* errormsg)
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = url;
     request.referer = "http://fanxing.kugou.com";
-    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    request.cookies = cookiesHelper_->GetNormalCookies();
     if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
@@ -1000,7 +1019,7 @@ bool User::ChangeLogo(const std::string& logo_path, std::string* errormsg)
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = url;
     request.referer = "http://fanxing.kugou.com/index.php?action=userChangeLogo";
-    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    request.cookies = cookiesHelper_->GetNormalCookies();
     if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
@@ -1047,6 +1066,8 @@ bool User::ChangeLogo(const std::string& logo_path, std::string* errormsg)
 bool User::Worship(uint32 roomid, uint32 userid, std::string* errormsg)
 {
     std::vector<std::string> keys;
+    keys.push_back("kg_mid");
+    keys.push_back("LoginCheckCode");
     keys.push_back("KuGoo");
     keys.push_back("_fx_coin");
     keys.push_back("_fxNickName");
@@ -1112,59 +1133,6 @@ bool User::Worship_(const std::string& cookies, uint32 roomid, uint32 userid,
     return true;
 }
 
-bool User::CheckVerifyCode(const std::string& verifycode, std::string* errormsg)
-{
-    HttpRequest request;
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.url = "http://verifycode.service.kugou.com/v1/check_img_code/";
-    request.referer = "http://www.fanxing.kugou.com/";
-    request.cookies = cookiesHelper_->GetCookies("LoginCheckCode");;
-    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
-        request.ipproxy = ipproxy_;
-
-    auto& queries = request.queries;
-    queries["appid"] = "1010";;
-    queries["code"] = verifycode;
-    queries["ct"] = base::UintToString(
-        static_cast<uint32>(base::Time::Now().ToDoubleT()));
-    queries["type"] = "LoginCheckCode";
-    queries["callback"] = "checkCodeForLoginCallback";
-
-    HttpResponse response;
-    if (!curlWrapper_->Execute(request, &response))
-    {
-        *errormsg = "http request error";
-        return false;
-    }
-
-    std::string responsedata;
-    responsedata.assign(response.content.begin(), response.content.end());
-    if (responsedata.empty())
-    {
-        *errormsg = "http response data empty";
-        return  false;
-    }
-
-
-    std::string jsondata = PickJson(responsedata);
-    Json::Reader reader;
-    Json::Value logindata(Json::objectValue);
-    if (!reader.parse(jsondata, logindata, false))
-    {
-        *errormsg = "json parse error";
-        return false;
-    }
-
-    *errormsg = logindata.get("errorMsg", "").asString();
-    if (!errormsg->empty())
-    {
-        std::wstring werrorMsg = base::UTF8ToWide(*errormsg);
-        return false;
-    }
-
-    return true;
-}
-
 bool User::LoginHttps(const std::string& username, const std::string& password, 
     const std::string& verifycode, std::string* errormsg)
 {
@@ -1172,8 +1140,9 @@ bool User::LoginHttps(const std::string& username, const std::string& password,
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = loginuserurl;
-    request.referer = "http://www.fanxing.kugou.com"; 
-    request.cookies = cookiesHelper_->GetCookies("LoginCheckCode");;
+    request.referer = "http://fanxing.kugou.com";
+    std::vector<std::string> keys = { "LoginCheckCode", "kg_mid" };
+    request.cookies = cookiesHelper_->GetCookies(keys);
     if (ipproxy_.GetProxyType()!=IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
@@ -1188,8 +1157,9 @@ bool User::LoginHttps(const std::string& username, const std::string& password,
     queries["autologin"] = "false";
     queries["redirect_uri"] = "";
     queries["state"] = "";
-    queries["callback"] = "loginSuccessCallback";
+    queries["callback"] = login_callback_string;
     queries["login_ver"] = "1";
+    queries["mid"] = kg_mid_;
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
@@ -1208,7 +1178,7 @@ bool User::LoginHttps(const std::string& username, const std::string& password,
     responsedata.assign(response.content.begin(), response.content.end());
     if (responsedata.empty())
         return  false;
-    std::string header = "loginSuccessCallback(";
+    std::string header = std::string(login_callback_string)+ "(";
     std::string jsondata = PickJson(responsedata);
     //std::string beginmark = R"("token":")";
     //auto beginpos = responsedata.find(beginmark);
@@ -1251,8 +1221,8 @@ bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = GetMyUserDataInfoUrl;
-    request.referer = "http://www.fanxing.kugou.com";
-    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    request.referer = "http://fanxing.kugou.com";
+    request.cookies = cookiesHelper_->GetNormalCookies();
     if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
@@ -1339,8 +1309,8 @@ bool User::LoginIndexServiceGetUserCenter(std::string* errormsg)
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = GetMyUserDataInfoUrl;
-    request.referer = "http://www.fanxing.kugou.com";
-    request.cookies = cookiesHelper_->GetCookies("KuGoo");
+    request.referer = "http://fanxing.kugou.com";
+    request.cookies = cookiesHelper_->GetNormalCookies();
     if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
