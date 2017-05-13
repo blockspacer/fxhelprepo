@@ -32,6 +32,12 @@ bool CookiesHelper::SetCookies(const std::string& keyvalue)
     return SetCookies(key, keyvalue);
 }
 
+std::string CookiesHelper::GetNormalCookies() const
+{
+    std::vector<std::string> keys = { "KuGoo", "kg_mid", "LoginCheckCode" };
+    return GetCookies(keys);
+}
+
 std::string CookiesHelper::GetCookies(const std::string& key) const
 {
     std::map<std::string,std::string>::const_iterator result = 
