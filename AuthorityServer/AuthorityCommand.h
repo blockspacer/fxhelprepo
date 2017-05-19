@@ -3,6 +3,7 @@
 #include "third_party/chromium/base/basictypes.h"
 #include <string>
 #include <vector>
+#include <list>
 
 enum class CommandId
 {
@@ -21,7 +22,7 @@ enum class CommandId
 };
 
 template<typename ValueType>
-ValueType ReadValue(char** data, unsigned int* left)
+ValueType ReadValue(uint8** data, uint32* left)
 {
     ValueType value;
     value = *(decltype(value)*)(*data);
@@ -38,8 +39,10 @@ struct Header
     uint32 total_length;  // 单位：字节
     uint32 sequence_number; // 单个session中使用的序列号
     uint32 ack_number; // 回复中使用的序列号
+    uint32 timestamp; // 发送时间戳
+    uint32 header_crc32; // 暂时不检查
 
-    bool Read(char** data, unsigned int* left)
+    bool Read(uint8** data, uint32* left)
     {
         if (*left < sizeof(Header))
             return false;
@@ -49,10 +52,29 @@ struct Header
         total_length = ReadValue<uint32>(data, left);
         sequence_number = ReadValue<uint32>(data, left);
         ack_number = ReadValue<uint32>(data, left);
+        timestamp = ReadValue<uint32>(data, left);
+        header_crc32 = ReadValue<uint32>(data, left);
         return true;
     }
 };
 #pragma pack(pop)
+
+class Package
+{
+public:
+    void SetHeader(const Header& header)
+    {
+        header_ = header;
+    }
+    void SetData(const std::string& data)
+    {
+        data_ = data;
+    }
+
+private:
+    Header header_;
+    std::string data_;
+};
 
 interface CommandParserInterface
 {
@@ -76,18 +98,42 @@ public:
         case BufferParser::ParseStatus::INIT:
             buffer_.insert(buffer_.end(), data.begin(), data.end());
             if (buffer_.size() < sizeof(Header))
-                continue;
+                return true;
 
-            uint32 left = buffer_.size();
-            header_.Read(&buffer_.at(0), &left);
+            status_ = BufferParser::ParseStatus::HEADER;
+            // 不跳出switch,是故意的
 
-            break;
         case BufferParser::ParseStatus::HEADER:
+        {
+            uint32 left = buffer_.size();
+            uint8* buffer_begin = &buffer_[0];
+            if (!header_.Read(&buffer_begin, &left))
+                return false;
+
+            status_ = BufferParser::ParseStatus::DATA;
             break;
+        }
+
         case BufferParser::ParseStatus::DATA:
+        {
+            if (buffer_.size() <= header_.total_length - header_.header_length)
+                break;
+
+            Package package;
+            package.SetHeader(header_);
+            std::string data;
+            data.assign(buffer_.begin() + header_.header_length,
+                buffer_.begin() + header_.total_length);
+
+            package.SetData(data);
+            package_list_.push_back(package);
+
+            buffer_.erase(buffer_.begin(), buffer_.begin() + header_.total_length);
             break;
+        }
+
         default:
-            DCHECK(false);
+            //DCHECK(false);
             return false;
             break;
         }
@@ -96,7 +142,10 @@ public:
         return true;
     };
 
-    bool GetResponses(std::vector<std::vector<uint8>>* responses);
+    bool GetResponses(std::vector<std::vector<uint8>>* responses)
+    {
+        return false;
+    };
 
 private:
     enum class ParseStatus
@@ -117,6 +166,7 @@ private:
     ParseStatus status_;
     Header header_;
     
+    std::list<Package> package_list_;
     // 处理完以后可能有多条回复数据, 已经用数据头包装起来
     std::vector<std::vector<uint8>> responses_;
 };
