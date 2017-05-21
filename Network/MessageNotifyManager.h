@@ -18,6 +18,15 @@
 //class TcpClient;
 class TcpClientController;
 
+struct ConsumerInfo
+{
+    uint32 fanxing_id;
+    uint32 room_id;
+    uint32 coin;
+    std::string nickname;
+    uint32 rich_level;
+};
+
 //typedef int SocketHandle;
 // 201消息回来解析后出去的数据包
 struct EnterRoomUserInfo 

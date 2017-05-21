@@ -150,7 +150,7 @@ private:
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const HttpResponse& response);
 
-    void NormalNotify(const std::wstring& message);
+    void NormalNotify(MessageLevel level, const std::wstring& message);
 
     scoped_ptr<base::Thread> worker_thread_;
     std::unique_ptr<User> user_;

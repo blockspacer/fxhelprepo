@@ -377,7 +377,7 @@ void WorshipHelper::DoEnterRoom(uint32 roomid)
 {
     user_->ExitRooms();
     user_->SetNormalNotify(std::bind(&WorshipHelper::NormalNotify, this,
-        std::placeholders::_1));
+        std::placeholders::_1, std::placeholders::_2));
     user_->SetRoomServerIp("114.54.2.204");
     user_->SetTcpManager(tcp_manager_.get());
     roomid_ = roomid;
@@ -825,7 +825,7 @@ void WorshipHelper::GetRoomViewerListCallback(uint32 roomid,
     progress_callback.Run(++current_room_count_, all_room_count_);
 }
 
-void WorshipHelper::NormalNotify(const std::wstring& message)
+void WorshipHelper::NormalNotify(MessageLevel level, const std::wstring& message)
 {
     if (message_callback_.is_null())
         return;

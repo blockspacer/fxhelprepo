@@ -6,16 +6,6 @@
 #include "CurlWrapper.h"
 #include "MessageNotifyManager.h"
 
-
-struct ConsumerInfo 
-{
-    uint32 fanxing_id;
-    uint32 room_id;
-    uint32 coin;
-    std::string nickname;
-    uint32 rich_level;
-};
-
 class CurlWrapper;
 class MessageNotifyManager;
 class CookiesHelper;
