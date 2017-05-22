@@ -7,7 +7,7 @@
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/bind.h"
 #include "third_party/chromium/base/threading/non_thread_safe.h"
-#include "AuthorityCommand.h"
+#include "BufferParser.h"
 
 class AuthorityClientBussiness : public base::NonThreadSafe
 {

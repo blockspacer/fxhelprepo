@@ -45,6 +45,15 @@
     <ClInclude Include="AuthorityCommand.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MessageDefine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MessagePackage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="BufferParser.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthorityServer.cpp">
@@ -66,6 +75,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="AuthorityCommand.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MessagePackage.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="BufferParser.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

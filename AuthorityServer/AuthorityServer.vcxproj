@@ -109,6 +109,9 @@
     <ClInclude Include="AuthorityNetwork.h" />
     <ClInclude Include="AuthorityServer.h" />
     <ClInclude Include="AuthorityServerDlg.h" />
+    <ClInclude Include="BufferParser.h" />
+    <ClInclude Include="MessageDefine.h" />
+    <ClInclude Include="MessagePackage.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -120,6 +123,8 @@
     <ClCompile Include="AuthorityNetwork.cpp" />
     <ClCompile Include="AuthorityServer.cpp" />
     <ClCompile Include="AuthorityServerDlg.cpp" />
+    <ClCompile Include="BufferParser.cpp" />
+    <ClCompile Include="MessagePackage.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -135,11 +140,17 @@
     <Image Include="res\AuthorityServer.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Network\Network.vcxproj">
+      <Project>{2147cb51-23f6-4022-8e4a-291b70570cb7}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
       <Project>{ed99d404-f6b3-517a-4ea7-604a10269355}</Project>
     </ProjectReference>
     <ProjectReference Include="..\third_party\chromium\base\base_static.vcxproj">
       <Project>{ff406463-e0ef-c1b2-c0b8-072e8ee1c97f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\json\json.vcxproj">
+      <Project>{0deca417-fd94-4652-9881-53f935d89245}</Project>
     </ProjectReference>
     <ProjectReference Include="..\third_party\libevent\libevent.vcxproj">
       <Project>{122d9e2c-1eb4-488c-ad38-463f7b1bc447}</Project>
