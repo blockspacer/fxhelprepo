@@ -39,6 +39,15 @@
     <ClInclude Include="SingleTcpClient.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="AuthorityCommand.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageDefine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MessagePackage.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LibEventClient.cpp">
@@ -54,6 +63,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SingleTcpClient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MessagePackage.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

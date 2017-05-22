@@ -105,9 +105,12 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AuthorityCommand.h" />
     <ClInclude Include="ClientController.h" />
     <ClInclude Include="LibEventClient.h" />
     <ClInclude Include="LibEventClientDlg.h" />
+    <ClInclude Include="MessageDefine.h" />
+    <ClInclude Include="MessagePackage.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SingleTcpClient.h" />
     <ClInclude Include="stdafx.h" />
@@ -117,6 +120,7 @@
     <ClCompile Include="ClientController.cpp" />
     <ClCompile Include="LibEventClient.cpp" />
     <ClCompile Include="LibEventClientDlg.cpp" />
+    <ClCompile Include="MessagePackage.cpp" />
     <ClCompile Include="SingleTcpClient.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -133,8 +137,14 @@
     <Image Include="res\LibEventClient.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Network\Network.vcxproj">
+      <Project>{2147cb51-23f6-4022-8e4a-291b70570cb7}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
       <Project>{ed99d404-f6b3-517a-4ea7-604a10269355}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\json\json.vcxproj">
+      <Project>{0deca417-fd94-4652-9881-53f935d89245}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

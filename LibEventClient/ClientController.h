@@ -6,6 +6,7 @@
 #include <memory>
 #include "third_party/chromium/base/basictypes.h"
 #include "SingleTcpClient.h"
+#include "third_party/chromium/base/atomic_sequence_num.h"
 
 #define ECHO_PORT   80
 #define ECHO_SERVER "58.63.236.248"
@@ -36,5 +37,6 @@ private:
     struct event* hup_event_ = 0;
 
     std::map<TCPHANDLE, SingleTcpClient*> tcp_client_map_;
+    base::AtomicSequenceNumber sequencce_number_;
 };
 

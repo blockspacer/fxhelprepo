@@ -50,7 +50,7 @@ bool Package::HandlePackage(std::vector<uint8>* response_package)
     EndPointInfoComputer endpoint;
     std::string response_data;
     Header response_header;
-    if (!endpoint.HandleBussiness(request_data_, &response_data))
+    if (endpoint.HandleBussiness(request_data_, &response_data))
         return false;
 
     response_header = request_header_;
@@ -59,13 +59,11 @@ bool Package::HandlePackage(std::vector<uint8>* response_package)
     response_header.timestamp = static_cast<uint32>(base::Time::Now().ToDoubleT());
 
     uint8* header_stream = new uint8[sizeof(Header)];
-    uint8* temp_ptr = header_stream;
-    if (!response_header.Write(&temp_ptr, sizeof(Header)))
+    if (!response_header.Write(&header_stream, sizeof(Header)))
         return false;
 
     response_package->assign(header_stream, header_stream + sizeof(Header));
     response_package->insert(response_package->end(), response_data.begin(), response_data.end());
-    delete[] header_stream;
 
     return true;
 }

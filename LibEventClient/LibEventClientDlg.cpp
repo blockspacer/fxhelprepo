@@ -185,6 +185,11 @@ void CLibEventClientDlg::DataReceiveNotify(
     std::wstring* wstr = new std::wstring();
     *wstr = base::UTF8ToWide(ip + ":" + port) +std::wstring(L"接收数据") + (result ? L"成功" : L"失败");
     this->PostMessage(WM_USER_DISPLAY_MESSAGE, (WPARAM)(wstr), 0);
+
+    std::string display_result(data.begin() + 24, data.end());
+    std::wstring* wstr_result = new std::wstring();
+    *wstr_result = base::UTF8ToWide(display_result);
+    this->PostMessage(WM_USER_DISPLAY_MESSAGE, (WPARAM)(wstr_result), 0);
 }
 
 void CLibEventClientDlg::SendCallback(const std::string& ip, const std::string& port,
