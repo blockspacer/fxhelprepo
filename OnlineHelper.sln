@@ -85,6 +85,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibEventClient", "LibEventC
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DataProtocol", "DataProtocol\DataProtocol.vcxproj", "{9BCFF577-E848-46A9-9E81-10ABC6E3B4B3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsicsProtocolLib", "AsicsProtocolLib\AsicsProtocolLib.vcxproj", "{00FCD03D-583D-4916-A7D8-219298BCF05D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -265,6 +267,12 @@ Global
 		{9BCFF577-E848-46A9-9E81-10ABC6E3B4B3}.Release|Win32.ActiveCfg = Release|Win32
 		{9BCFF577-E848-46A9-9E81-10ABC6E3B4B3}.Release|Win32.Build.0 = Release|Win32
 		{9BCFF577-E848-46A9-9E81-10ABC6E3B4B3}.Release|x64.ActiveCfg = Release|Win32
+		{00FCD03D-583D-4916-A7D8-219298BCF05D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{00FCD03D-583D-4916-A7D8-219298BCF05D}.Debug|Win32.Build.0 = Debug|Win32
+		{00FCD03D-583D-4916-A7D8-219298BCF05D}.Debug|x64.ActiveCfg = Debug|Win32
+		{00FCD03D-583D-4916-A7D8-219298BCF05D}.Release|Win32.ActiveCfg = Release|Win32
+		{00FCD03D-583D-4916-A7D8-219298BCF05D}.Release|Win32.Build.0 = Release|Win32
+		{00FCD03D-583D-4916-A7D8-219298BCF05D}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
