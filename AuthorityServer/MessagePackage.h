@@ -18,6 +18,8 @@ public:
     bool GetPackage(std::vector<uint8>* request_package);
 
 private:
+    bool IsValidCmd(uint32 cmd) const;
+
     uint32 sequence_number_;
     Header request_header_;
     std::string request_data_;

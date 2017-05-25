@@ -2,7 +2,7 @@
 
 #include "third_party/chromium/base/basictypes.h"
 
-enum class CommandId
+enum CommandId
 {
     CMD_UNDEFINE = 0,
 
@@ -48,7 +48,7 @@ public:
         return true;
     }
 
-    bool Write(uint8** data, uint32 len)
+    bool Write(uint8** data, uint32 len) const
     {
         uint32 left = len;
         left = WriteValue(data, protocol_version, left);
@@ -63,7 +63,7 @@ public:
 
 private:
     template<typename ValueType>
-    ValueType ReadValue(uint8** data, uint32* left)
+    ValueType ReadValue(uint8** data, uint32* left) const
     {
         ValueType value;
         value = *(decltype(value)*)(*data);
@@ -73,7 +73,7 @@ private:
     };
 
     template<typename ValueType>
-    uint32 WriteValue(uint8** data, ValueType value, uint32 left)
+    uint32 WriteValue(uint8** data, ValueType value, uint32 left) const
     {
         *(decltype(value)*)(*data) = value;
         *data += sizeof(decltype(value));
