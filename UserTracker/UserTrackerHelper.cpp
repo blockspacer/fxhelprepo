@@ -156,14 +156,30 @@ void UserTrackerHelper::DoUpdataAllStarRoomUserMap(
     }
     msg = L"获取房间列表成功";
     message_callback_.Run(msg);
-    if (!GetAllRoomViewers(roomids, &roomid_userid_map_, callback))
+    //if (!GetAllRoomViewers(roomids, &roomid_userid_map_, callback))
+    //{
+    //    msg = L"获取所有房间观众列表失败";
+    //    message_callback_.Run(msg);
+    //    return ;
+    //}
+    //msg = L"获取所有房间观众列表成功";
+    //message_callback_.Run(msg);
+
+    std::map<uint32, std::map<uint32, ConsumerInfo>> consumer_infos_map;
+    for (auto roomid : roomids)
     {
-        msg = L"获取所有房间观众列表失败";
-        message_callback_.Run(msg);
-        return ;
+        std::map<uint32, ConsumerInfo> consumer_infos;
+        if (!GetRoomConsumerList(roomid, &consumer_infos))
+            continue;
+
+        consumer_infos_map[roomid] = consumer_infos;
     }
-    msg = L"获取所有房间观众列表成功";
-    message_callback_.Run(msg);
+
+    for (auto consumer_infos : consumer_infos_map)
+    {
+        LOG(INFO) <<"======="<< base::UintToString(consumer_infos.first);
+    }
+
     return ;
 }
 
@@ -296,7 +312,8 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
     std::vector<uint32> roomid3;
     std::vector<uint32> roomid4;
 
-    const std::string& host = tracker_authority_->tracker_host;
+    //const std::string& host = tracker_authority_->tracker_host;
+    const std::string host = "visitor.fanxing.kugou.com";
     std::string url = "http://" + host + "/VServices/IndexService.IndexService.getLiveList";
     if (check_star_)
     {
@@ -388,6 +405,7 @@ bool UserTrackerHelper::GetTargetStarRoomInfos(const std::string& url, std::vect
     for (auto roominfo : data)
     {
         uint32 roomId = GetInt32FromJsonValue(roominfo, "roomId");
+        uint32 startId = GetInt32FromJsonValue(roominfo, "userId");
         roomids->push_back(roomId);
     }
     return true;

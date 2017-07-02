@@ -72,11 +72,11 @@ void CLoginDlg::OnBnClickedBtnLogin()
 
     std::string account = base::WideToUTF8(cs_account.GetBuffer());
     std::string password = base::WideToUTF8(cs_password.GetBuffer());
-    std::string verifycode = base::WideToUTF8(cs_password.GetBuffer());
+    std::string verifycode = base::WideToUTF8(cs_verifycode.GetBuffer());
     std::string errormsg;
     auto callback = base::Bind(&CLoginDlg::LoginResult,
         base::Unretained(this));
-    if (!tracker_helper_->LoginUser(account, password, errormsg, callback))
+    if (!tracker_helper_->LoginUser(account, password, verifycode, callback))
     {
         AfxMessageBox(L"µÇÂ¼Ê§°Ü");
         return;

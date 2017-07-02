@@ -446,14 +446,16 @@ bool Room::OpenRoomAndGetConsumerList(const std::string& cookies,
     std::vector<ConsumerInfo>* consumer_infos)
 {
     if (!OpenRoom(cookies))
-    {
         return false;
-    }
+
+    if (!GetStarInfo(cookies))
+        return false;
+    
+    if (clanid_) // 因为挖主播的特殊需要，不要找有公会的主播
+        return false;
 
     if (!GetConsumerList(cookies, consumer_infos))
-    {
         return false;
-    }
 
     return true;
 }
