@@ -109,6 +109,7 @@ void UserTrackerHelper::DoLoginUser(const std::string& user_name,
     msg = L"登录成功";
     message_callback_.Run(msg);
 
+#ifndef _DEBUG
     if (tracker_authority_->user_id != user_->GetFanxingId())
     {
         msg = authority_msg_ + L". 当前用户未授权";
@@ -126,7 +127,7 @@ void UserTrackerHelper::DoLoginUser(const std::string& user_name,
         callback.Run(false, servertime, base::WideToUTF8(msg));
         return;
     }
-       
+#endif    
     callback.Run(true, servertime, error_msg);
     return;
 }
