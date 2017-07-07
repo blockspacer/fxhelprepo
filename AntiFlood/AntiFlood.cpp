@@ -16,6 +16,7 @@
 #include "AntiFloodDlg.h"
 #include "NetworkHelper.h"
 #include "Network/EncodeHelper.h"
+#include "Advertisement/AdvertisementDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

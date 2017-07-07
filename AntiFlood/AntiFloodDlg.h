@@ -8,6 +8,7 @@
 
 #include "NetworkHelper.h"
 #include "BlacklistHelper.h"
+#include "Advertisement/explorer_web.h"
 
 #include "afxwin.h"
 #include "afxcmn.h"
@@ -206,4 +207,6 @@ private:
 
     CButton m_btn_welcome_setting;
     CButton m_btn_thanks_setting;
+
+    CExplorer1 explorer_web_;
 };
