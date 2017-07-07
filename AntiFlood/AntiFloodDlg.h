@@ -211,4 +211,7 @@ private:
     CExplorer1 explorer_web_;
     CEdit m_edit_retrive_gift_coin;
     CEdit m_edit_once_message;
+public:
+    DECLARE_EVENTSINK_MAP()
+    void NewWindow2Explorer1(LPDISPATCH* ppDisp, BOOL* Cancel);
 };

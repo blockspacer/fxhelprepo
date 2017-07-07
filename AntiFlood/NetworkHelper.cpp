@@ -661,17 +661,21 @@ void NetworkHelper::SetHandleChatUsers(bool handleall501)
 
 bool NetworkHelper::GetActionPrivilege(std::wstring* message)
 {
+    uint32 server_time = user_->GetServerTime();
+    if (server_time <= 1501520461)
+        return true;
+    
     // 三个值都是0，不正确
     if (!authority_->roomid && !authority_->userid && !authority_->clanid)
     {
-        *message = L"授权信息错误!";
+        *message = L"授权信息错误! Expired open time";
         return false;
     }
 
     // 如果指定了繁星号，则要判断用户权限
     if (authority_->userid && (user_->GetFanxingId() != authority_->userid))
     {
-        *message = L"当前用户未授权!";
+        *message = L"当前用户未授权!  Expired open time";
         return false;
     }
 
@@ -680,25 +684,25 @@ bool NetworkHelper::GetActionPrivilege(std::wstring* message)
     expiretime /= 1000000;
     if (servertime > expiretime)
     {
-        *message = L"当前用户授权已过期!";
+        *message = L"当前用户授权已过期!  Expired open time";
         return false;
     }
 
     if (authority_->clanid && user_->GetClanId() != authority_->clanid)
     {
-        *message = L"当前授权仅限指定公会成员使用!";
+        *message = L"当前授权仅限指定公会成员使用!  Expired open time";
         return false;
     }
 
     if (authority_->clanid && singer_clanid_ != authority_->clanid)
     {
-        *message = L"当前授权仅限在指定公会的主播房间中使用!";
+        *message = L"当前授权仅限在指定公会的主播房间中使用!  Expired open time";
         return false;
     }
 
     if (authority_->roomid && (roomid_ != authority_->roomid))
     {
-        *message = L"当前授权仅限指定房间使用!";
+        *message = L"当前授权仅限指定房间使用!  Expired open time";
         return false;
     }
 

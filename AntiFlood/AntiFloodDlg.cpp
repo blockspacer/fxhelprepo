@@ -1793,3 +1793,12 @@ void CAntiFloodDlg::OnBnClickedBtnWelcomeSetting()
     std::wstring new_welcome = dlg.GetNormalWelcome();
     enterRoomStrategy_->SetNormalWelcomeContent(new_welcome);
 }
+BEGIN_EVENTSINK_MAP(CAntiFloodDlg, CDialogEx)
+    ON_EVENT(CAntiFloodDlg, IDC_EXPLORER1, 251, CAntiFloodDlg::NewWindow2Explorer1, VTS_PDISPATCH VTS_PBOOL)
+END_EVENTSINK_MAP()
+
+
+void CAntiFloodDlg::NewWindow2Explorer1(LPDISPATCH* ppDisp, BOOL* Cancel)
+{
+    // TODO:  在此处添加消息处理程序代码
+}
