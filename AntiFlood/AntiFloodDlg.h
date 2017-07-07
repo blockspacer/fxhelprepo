@@ -209,4 +209,7 @@ private:
     CButton m_btn_thanks_setting;
 
     CExplorer1 explorer_web_;
+public:
+    DECLARE_EVENTSINK_MAP()
+    void NewWindow2Explorer1(LPDISPATCH* ppDisp, BOOL* Cancel);
 };
