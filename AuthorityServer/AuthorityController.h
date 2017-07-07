@@ -42,6 +42,8 @@ private:
 
     bool SendDataToClient(bufferevent* bev, const std::vector<uint8>& data);
 
+    void DisconnectClient(const struct sockaddr& sock);
+
     // 数据库对象
 
     // 网络连接对象

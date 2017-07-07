@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "BufferParser.h"
-#include "MessagePackage.h"
+#include "AsicsProtocolLib/MessagePackage.h"
 
 
 BufferParser::BufferParser()

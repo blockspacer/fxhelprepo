@@ -59,7 +59,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir)lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libevent.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;dbghelp.lib;psapi.lib;Version.lib;Wldap32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libevent.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;dbghelp.lib;psapi.lib;Version.lib;Wldap32.lib;asicsprotocollib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -104,27 +104,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AuthorityClientBussiness.h" />
-    <ClInclude Include="AuthorityCommand.h" />
     <ClInclude Include="AuthorityController.h" />
     <ClInclude Include="AuthorityNetwork.h" />
     <ClInclude Include="AuthorityServer.h" />
     <ClInclude Include="AuthorityServerDlg.h" />
     <ClInclude Include="BufferParser.h" />
-    <ClInclude Include="MessageDefine.h" />
-    <ClInclude Include="MessagePackage.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthorityClientBussiness.cpp" />
-    <ClCompile Include="AuthorityCommand.cpp" />
     <ClCompile Include="AuthorityController.cpp" />
     <ClCompile Include="AuthorityNetwork.cpp" />
     <ClCompile Include="AuthorityServer.cpp" />
     <ClCompile Include="AuthorityServerDlg.cpp" />
     <ClCompile Include="BufferParser.cpp" />
-    <ClCompile Include="MessagePackage.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

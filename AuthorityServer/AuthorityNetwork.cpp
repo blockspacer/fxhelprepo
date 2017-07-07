@@ -106,8 +106,16 @@ void AuthorityNetwork::DispatchFunction()
 bool AuthorityNetwork::SendDataToClient(
     bufferevent *bev, const std::vector<uint8>& data)
 {
-    //char reply[] = "I has read your data";
-    bufferevent_write(bev, (const void*)(&data[0]), data.size());
+    if (!data.empty())
+    {
+        bufferevent_write(bev, (const void*)(&data[0]), data.size());
+    }
+    else
+    {
+        char reply[] = "I has read your data";
+        bufferevent_write(bev, (const void*)(&reply[0]), sizeof(reply)/sizeof(char));
+    }
+
     return true;
 }
 

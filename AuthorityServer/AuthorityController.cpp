@@ -69,7 +69,13 @@ bool AuthorityController::RemoveClient(bufferevent *bev)
 
 void AuthorityController::DoRemoveClient(bufferevent *bev)
 {
+    auto find_result = client_map_.find(bev);
+    if (find_result == client_map_.end())
+        return;
 
+    scoped_ptr<AuthorityClientBussiness> client = find_result->second.Pass();
+    client.reset(nullptr);
+    client_map_.erase(find_result);
 }
 
 bool AuthorityController::HandleMessage(
@@ -95,14 +101,20 @@ void AuthorityController::DoHandleMessage(
     if (!find_result->second->HandleMessage(data))
     {
         // 无法处理消息，要终结这条连接
+        evutil_socket_t fd = bufferevent_getfd(bev);
+        evutil_closesocket(fd);
     }
 }
-
 
 bool AuthorityController::SendDataToClient(bufferevent* bev, 
                                            const std::vector<uint8>& data)
 {
     return send_data_callback_.Run(bev, data);
+}
+
+void AuthorityController::DisconnectClient(const struct sockaddr& sock)
+{
+
 }
 
 //bool AuthorityController::AddUser();
