@@ -145,6 +145,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_PRIVATE_NOTIFY, m_chk_private_notify);
     DDX_Control(pDX, IDC_BTN_WELCOME_SETTING, m_btn_welcome_setting);
     DDX_Control(pDX, IDC_BTN_THANKS_SETTING, m_btn_thanks_setting);
+    DDX_Control(pDX, IDC_EXPLORER1, explorer_web_);
     DDX_Control(pDX, IDC_EDIT_RETRIVE_GIFT_COIN, m_edit_retrive_gift_coin);
     DDX_Control(pDX, IDC_EDIT_ONCE_MESSAGE, m_edit_once_message);
 }
@@ -380,6 +381,9 @@ BOOL CAntiFloodDlg::OnInitDialog()
     m_chk_welcome.SetCheck(enable_welcome);
     m_combo_welcome.SetWindowTextW(base::UintToString16(level).c_str());
     m_combo_welcome.EnableWindow(!enable_welcome);
+
+    explorer_web_.put_Silent(FALSE);// 禁止弹出360升级浏览器提示
+    explorer_web_.Navigate(L"https://www.2345.com/?37815", NULL, NULL, NULL, NULL);
 
     return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }

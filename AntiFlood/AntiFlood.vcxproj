@@ -112,6 +112,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AdvertisementDlg.h" />
+    <ClInclude Include="Advertisement\explorer_web.h" />
     <ClInclude Include="AuthorityHelper.h" />
     <ClInclude Include="BlacklistHelper.h" />
     <ClInclude Include="Config.h" />
@@ -128,6 +130,8 @@
     <ClInclude Include="WelcomeSettingDlg.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Advertisement\AdvertisementDlg.cpp" />
+    <ClCompile Include="Advertisement\explorer_web.cpp" />
     <ClCompile Include="AuthorityHelper.cpp" />
     <ClCompile Include="BlacklistHelper.cpp" />
     <ClCompile Include="Config.cpp" />
