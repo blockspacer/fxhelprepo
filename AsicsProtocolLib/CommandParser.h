@@ -22,7 +22,13 @@ public:
         *response = "{\"result\":0}";
         return false;
     };
-private:
+
+    virtual bool Make(std::string* json_data)
+    {
+        return false;
+    };
+
+protected:
     uint32 session_id_;
 };
 

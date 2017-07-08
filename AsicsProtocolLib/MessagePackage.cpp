@@ -37,6 +37,9 @@ bool Package::HandlePackage(std::vector<uint8>* response_package)
         return false;
     }
 
+    if (rootdata.isNull())
+        return false;
+    
     // 暂时没有必要检测status的值
     uint32 cmd = GetInt32FromJsonValue(rootdata, "cmd");
     uint32 sessionid = GetInt32FromJsonValue(rootdata, "sessionid");

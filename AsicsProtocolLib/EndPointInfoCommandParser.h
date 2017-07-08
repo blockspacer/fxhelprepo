@@ -9,6 +9,8 @@ public:
     ~EndPointInfoCommandParser();
 
     virtual bool HandleBussiness(const std::string& request, std::string* response);
+    // 发送方组包, 包括命令号，不包括协议头
+    virtual bool Make(std::string* json_data);
 
     void SetClientVersion(const std::string& client_version);
     std::string GetClientVersion() const;
@@ -19,11 +21,9 @@ public:
     void SetOsVersion(const std::string& os_version);
     std::string GetOsVersion() const;
 
-    // 发送方组包, 包括命令号，不包括协议头
-    bool Make(std::string* json_data);
+
 
 private:
-    uint32 session_id_;
     std::string client_version_;
     std::string client_hash_;
     std::string os_version_;

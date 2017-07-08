@@ -82,6 +82,7 @@
     <ClInclude Include="CommandParser.h" />
     <ClInclude Include="CommandParserFactory.h" />
     <ClInclude Include="EndPointInfoCommandParser.h" />
+    <ClInclude Include="LoginSuccessCommandParser.h" />
     <ClInclude Include="MessageDefine.h" />
     <ClInclude Include="MessagePackage.h" />
     <ClInclude Include="stdafx.h" />
@@ -91,6 +92,7 @@
   <ItemGroup>
     <ClCompile Include="CommandParser.cpp" />
     <ClCompile Include="EndPointInfoCommandParser.cpp" />
+    <ClCompile Include="LoginSuccessCommandParser.cpp" />
     <ClCompile Include="MessagePackage.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
