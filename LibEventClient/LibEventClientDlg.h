@@ -67,4 +67,6 @@ private:
                       bool result);
 
     std::map<TCPHANDLE, std::pair<std::string, std::string>> handles_;
+public:
+    afx_msg void OnBnClickedBtnEndpointInfo();
 };

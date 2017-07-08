@@ -79,3 +79,33 @@ bool EndPointInfoCommandParser::Make(std::string* json_data)
 }
 
 
+void EndPointInfoCommandParser::SetClientVersion(const std::string& client_version)
+{
+    client_version_ = client_version;
+}
+std::string EndPointInfoCommandParser::GetClientVersion() const
+{
+    return client_version_;
+}
+
+void EndPointInfoCommandParser::SetClientHash(const std::string& client_hash)
+{
+    client_hash_ = client_hash;
+}
+
+std::string EndPointInfoCommandParser::GetClientHash() const
+{
+    return client_hash_;
+}
+
+void EndPointInfoCommandParser::SetOsVersion(const std::string& os_version)
+{
+    os_version_ = os_version;
+}
+
+std::string EndPointInfoCommandParser::GetOsVersion() const
+{
+    return os_version_;
+}
+
+
