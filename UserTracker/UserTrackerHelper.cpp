@@ -10,6 +10,25 @@
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/bind.h"
 
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/files/file.h"
+#include "third_party/chromium/base/files/file_path.h"
+#include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_enumerator.h"
+
+namespace
+{
+    bool GetOutputFileName(base::FilePath* outpath)
+    {
+        base::FilePath path;
+        PathService::Get(base::DIR_EXE, &path);
+
+        path = path.Append(L"搜索官方主播结果.txt");
+        *outpath = path;
+        return true;
+    }
+}
+
 UserTrackerHelper::UserTrackerHelper()
     :curl_wrapper_(new CurlWrapper)
     , easy_http_impl_(new EasyHttpImpl)
@@ -143,6 +162,7 @@ bool UserTrackerHelper::UpdataAllStarRoomUserMap(
         base::Unretained(this), callback));
     return true;
 }
+
 void UserTrackerHelper::DoUpdataAllStarRoomUserMap(
     const base::Callback<void(uint32, uint32)>& callback)
 {
@@ -152,35 +172,79 @@ void UserTrackerHelper::DoUpdataAllStarRoomUserMap(
     {
         msg = L"获取房间列表失败";
         message_callback_.Run(msg);
-        return ;
+        return;
     }
     msg = L"获取房间列表成功";
     message_callback_.Run(msg);
-    //if (!GetAllRoomViewers(roomids, &roomid_userid_map_, callback))
-    //{
-    //    msg = L"获取所有房间观众列表失败";
-    //    message_callback_.Run(msg);
-    //    return ;
-    //}
-    //msg = L"获取所有房间观众列表成功";
-    //message_callback_.Run(msg);
+    if (!GetAllRoomViewers(roomids, &roomid_userid_map_, callback))
+    {
+        msg = L"获取所有房间观众列表失败";
+        message_callback_.Run(msg);
+        return;
+    }
+    msg = L"获取所有房间观众列表成功";
+    message_callback_.Run(msg);
+    return;
+}
 
+bool UserTrackerHelper::UpdataAllStarRoomForNoClan(
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    if (!user_)
+        return false;
+
+    worker_thread_->message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserTrackerHelper::DoUpdataAllStarRoomForNoClan,
+        base::Unretained(this), progress_callback, result_callback));
+    return true;
+}
+
+void UserTrackerHelper::DoUpdataAllStarRoomForNoClan(
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    std::vector<uint32> roomids;
+    std::wstring msg;
+    if (!GetAllStarRoomInfos(&roomids))
+    {
+        msg = L"获取房间列表失败";
+        message_callback_.Run(msg);
+        return;
+    }
+    msg = L"获取房间列表成功";
+    message_callback_.Run(msg);
+
+    uint32 count = 0;
     std::map<uint32, std::map<uint32, ConsumerInfo>> consumer_infos_map;
     for (auto roomid : roomids)
     {
         std::map<uint32, ConsumerInfo> consumer_infos;
+        progress_callback.Run(++count, roomids.size());
         if (!GetRoomConsumerList(roomid, &consumer_infos))
             continue;
 
         consumer_infos_map[roomid] = consumer_infos;
     }
 
+    base::FilePath path;
+    if (!GetOutputFileName(&path))
+        return;
+
+    base::File file;
+    file.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
     for (auto consumer_infos : consumer_infos_map)
     {
-        LOG(INFO) <<"======="<< base::UintToString(consumer_infos.first);
+        std::string roomid = base::UintToString(consumer_infos.first);
+        LOG(INFO) << "=======" << roomid;
+        file.WriteAtCurrentPos(roomid.c_str(), roomid.size());
+        file.WriteAtCurrentPos("\r\n", 2);
+        result_callback.Run(0, consumer_infos.first);
     }
-
-    return ;
+    file.Close();
+    msg = L"获取主播成功";
+    message_callback_.Run(msg);
+    return;
 }
 
 bool UserTrackerHelper::UpdateForFindUser(

@@ -55,6 +55,9 @@ public:
     // 强制更新全站主播房间用户列表数据
     bool UpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& progress_callback);
 
+    bool UpdataAllStarRoomForNoClan(const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
+
     // 不使用缓存数据，边更新缓存边查找用户，只要找到就停止，不继续往后面找
     bool UpdateForFindUser(const std::vector<uint32> user_ids,
         const base::Callback<void(uint32, uint32)>& progress_callback,
@@ -75,6 +78,9 @@ private:
 
     // 强制更新全站主播房间用户列表数据
     void DoUpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& progress_callback);
+
+    void DoUpdataAllStarRoomForNoClan(const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
 
     // 不使用缓存数据，边更新缓存边查找用户，只要找到就停止，不继续往后面找
     void DoUpdateForFindUser(const std::vector<uint32> user_ids,

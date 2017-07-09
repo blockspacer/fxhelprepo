@@ -454,8 +454,9 @@ bool Room::OpenRoomAndGetConsumerList(const std::string& cookies,
     if (clanid_) // 因为挖主播的特殊需要，不要找有公会的主播
         return false;
 
-    if (!GetConsumerList(cookies, consumer_infos))
-        return false;
+    // 因为挖主播的特殊需要，不要找观众列表，这里是省代码，乱写的
+    //if (!GetConsumerList(cookies, consumer_infos))
+    //    return false;
 
     return true;
 }

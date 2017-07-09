@@ -11,6 +11,7 @@
 #include "third_party/chromium/base/bind.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include <shellapi.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -196,8 +197,9 @@ void CUserTrackerDlg::OnBnClickedBtnGetAllRoomData()
         !!m_check_1_3_crown.GetCheck(),
         !!m_check_4_crown_up.GetCheck());
 
-    if (!tracker_helper_->UpdataAllStarRoomUserMap(
-        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this))))
+    if (!tracker_helper_->UpdataAllStarRoomForNoClan(
+        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
+        base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this))))
     {
         NotifyMessage(L"²Ù×÷Ê§°Ü, ÇëÏÈµÇÂ¼");
     } 
@@ -350,6 +352,9 @@ void CUserTrackerDlg::OnNMClickListResult(NMHDR *pNMHDR, LRESULT *pResult)
     {
         CString cs_item = m_list_result.GetItemText(
             pNMListView->iItem, pNMListView->iSubItem);
+        std::wstring url = L"http://fanxing.kugou.com/";
+        url += cs_item.GetBuffer();
+        ShellExecute(NULL, _T("open"), url.c_str(), NULL, NULL, SW_SHOWNORMAL);
         m_edit_roomid.SetWindowTextW(cs_item);
     }
 
