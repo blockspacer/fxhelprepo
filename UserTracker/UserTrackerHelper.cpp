@@ -129,23 +129,23 @@ void UserTrackerHelper::DoLoginUser(const std::string& user_name,
     message_callback_.Run(msg);
 
 #ifndef _DEBUG
-    if (tracker_authority_->user_id != user_->GetFanxingId())
-    {
-        msg = authority_msg_ + L". 当前用户未授权";
-        message_callback_.Run(msg);
-        callback.Run(false, servertime, base::WideToUTF8(msg));
-        return;
-    }
+    //if (tracker_authority_->user_id != user_->GetFanxingId())
+    //{
+    //    msg = authority_msg_ + L". 当前用户未授权";
+    //    message_callback_.Run(msg);
+    //    callback.Run(false, servertime, base::WideToUTF8(msg));
+    //    return;
+    //}
 
-    uint64 expiretime = tracker_authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
-    expiretime /= 1000000;
-    if (servertime > expiretime)
-    {
-        msg = authority_msg_ + L"用户授权已到期，请续费!";
-        message_callback_.Run(msg);
-        callback.Run(false, servertime, base::WideToUTF8(msg));
-        return;
-    }
+    //uint64 expiretime = tracker_authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
+    //expiretime /= 1000000;
+    //if (servertime > expiretime)
+    //{
+    //    msg = authority_msg_ + L"用户授权已到期，请续费!";
+    //    message_callback_.Run(msg);
+    //    callback.Run(false, servertime, base::WideToUTF8(msg));
+    //    return;
+    //}
 #endif    
     callback.Run(true, servertime, error_msg);
     return;
