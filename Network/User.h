@@ -112,7 +112,7 @@ public:
     bool OpenRoomAndGetConsumerList(uint32 roomid,
         std::vector<ConsumerInfo>* consumer_infos);
 
-    bool EnterRoomFopHttp(uint32 roomid, std::shared_ptr<Room> room);
+    bool EnterRoomForHttp(uint32 roomid, std::shared_ptr<Room> room);
 
     bool ExitRoom(uint32 roomid);
     bool ExitRooms();

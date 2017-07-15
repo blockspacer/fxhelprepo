@@ -478,7 +478,7 @@ bool User::OpenRoomAndGetConsumerList(uint32 roomid,
     return true;
 }
 
-bool User::EnterRoomFopHttp(uint32 roomid, std::shared_ptr<Room> room)
+bool User::EnterRoomForHttp(uint32 roomid, std::shared_ptr<Room> room)
 {
     rooms_[roomid] = room;
     return true;
