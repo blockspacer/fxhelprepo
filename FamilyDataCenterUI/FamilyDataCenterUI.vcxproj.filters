@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\family_background">
+      <UniqueIdentifier>{1d0ce464-5c6f-46eb-a7c5-75b073205d04}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FamilyDataCenterUI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FamilyDataCenterUIDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Workbook.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Worksheet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Range.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Workbooks.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Worksheets.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FamilyDataModle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="FamilyDataController.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="family_background\FamilyBackground.h">
+      <Filter>源文件\family_background</Filter>
+    </ClInclude>
+    <ClInclude Include="family_background\FamilyDaily.h">
+      <Filter>源文件\family_background</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="FamilyDataCenterUI.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FamilyDataCenterUIDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FamilyDataModle.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="FamilyDataController.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Config.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="family_background\FamilyBackground.cpp">
+      <Filter>源文件\family_background</Filter>
+    </ClCompile>
+    <ClCompile Include="family_background\FamilyDaily.cpp">
+      <Filter>源文件\family_background</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="FamilyDataCenterUI.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\FamilyDataCenterUI.rc2">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\FamilyDataCenterUI.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

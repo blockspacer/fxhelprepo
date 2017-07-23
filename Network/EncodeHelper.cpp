@@ -292,7 +292,7 @@ std::string MakeFormatDateString(const base::Time time)
     }
 
     //std::string millisecond = base::IntToString(exploded.millisecond);
-    std::string datestring = year + "_" + month + "_" + day;
+    std::string datestring = year + "-" + month + "-" + day;
 
     return std::move(datestring);
 }
