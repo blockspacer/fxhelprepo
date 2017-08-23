@@ -164,10 +164,14 @@ private:
     bool LoginHttps(const std::string& username, const std::string& password, 
         const std::string& verifycode, std::string* errormsg);
 
+public: 
+    // 开放这两个接口为public，为了在LoginWithCookies的使用中，
+    //批量登录不获取用户数据，而正式登录操作是要执行以下两个操作
     bool LoginUServiceGetMyUserDataInfo(std::string* errormsg);
 
     bool LoginIndexServiceGetUserCenter(std::string* errormsg);
 
+private:
     void ConnectionBreakCallback(uint32 room_id);
 
     bool Worship_(const std::string& cookies, uint32 roomid, uint32 userid,

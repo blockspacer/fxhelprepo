@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <string>
+#include <memory>
 #include <map>
 #include "Config.h"
 #include "third_party/chromium/base/files/file_path.h"
@@ -31,6 +32,7 @@ namespace{
         for (const auto& it : cipher)
         {
             wchar_t c = it - 1;
+            //wchar_t c = it ;
             plain.push_back(c);
         }
         return plain;
@@ -62,6 +64,7 @@ bool Config::GetUserName(std::wstring* username) const
     *username = Decrypt(tempstr);
     return true;
 }
+
 bool Config::GetPassword(std::wstring* password) const
 {
     wchar_t temp[128] = { 0 };
@@ -74,6 +77,21 @@ bool Config::GetPassword(std::wstring* password) const
     std::wstring tempstr;
     tempstr.assign(temp, temp + count);
     *password = Decrypt(tempstr);
+    return true;
+}
+
+bool Config::GetCookies(std::wstring* cookies) const
+{
+    int32 count = 4096;
+    std::unique_ptr<wchar_t[]> buffer(new wchar_t[4096]);
+    int ret = GetPrivateProfileString(L"UserInfo", L"Cookies", L"",
+        buffer.get(), count, filepath_.c_str());
+
+    DCHECK(count > ret);
+
+    std::wstring tempstr;
+    tempstr.assign(buffer.get(), buffer.get() + count);
+    *cookies = Decrypt(tempstr);
     return true;
 }
 
@@ -100,11 +118,14 @@ bool Config::GetRemember() const
 }
 
 bool Config::SaveUserInfo(const std::wstring& username,
-    const std::wstring& password, bool remember) const
+    const std::wstring& password, const std::wstring& cookies, bool remember) const
 {  
     WritePrivateProfileString(L"UserInfo", L"UserName", Encrypt(username).c_str(),
         filepath_.c_str());
     WritePrivateProfileString(L"UserInfo", L"Password", Encrypt(password).c_str(),
+        filepath_.c_str());
+
+    WritePrivateProfileString(L"UserInfo", L"Cookies", Encrypt(cookies).c_str(),
         filepath_.c_str());
 
     std::wstring str = remember ? L"1" : L"0";

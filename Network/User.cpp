@@ -1429,11 +1429,11 @@ bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
     servertime_ = servertime;
 
     // 临时增加时间限制，为下一步做服务器权限控制做准备
-    if (servertime_ >= 1501516800) // 20170801
-    {
-        *errormsg = "software parse error";
-        return false;
-    }
+    //if (servertime_ >= 1501516800) // 20170801
+    //{
+    //    *errormsg = "software parse error";
+    //    return false;
+    //}
 
     Json::Value dataObject(Json::objectValue);
     dataObject = rootdata.get(std::string("data"), dataObject);

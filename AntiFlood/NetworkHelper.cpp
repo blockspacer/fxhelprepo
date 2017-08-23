@@ -18,6 +18,7 @@
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/files/file.h"
 #include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_util.h"
 
 namespace
 {
@@ -34,6 +35,67 @@ namespace
         rowdata.push_back(time);
         rowdata.push_back(base::UintToString16(enterRoomUserInfo.roomid));
         return rowdata;
+    }
+
+
+    bool LoadUserConfig(GridData* userpwd, uint32* total)
+    {
+        // 读文件
+        base::FilePath path;
+        PathService::Get(base::DIR_EXE, &path);
+        path = path.Append(L"BatchLogin.User.cfg");
+        base::File userfile(path, base::File::FLAG_OPEN | base::File::FLAG_READ);
+        if (!userfile.IsValid())
+        {
+            assert(false && L"读取配置文件失败");
+            LOG(ERROR) << L"读取配置文件BatchLogin.User.cfg失败";
+            return false;
+        }
+
+        const uint32 memlen = 1024;
+        std::string data;
+        char str[memlen] = { 0 };
+        userfile.Seek(base::File::FROM_BEGIN, 0);
+        int read = userfile.ReadAtCurrentPos(str, memlen);
+        DWORD err = GetLastError();
+        while (read > 0)
+        {
+            data.insert(data.end(), str, str + read);
+            if (read < memlen)//读完了
+                break;
+            read = userfile.ReadAtCurrentPos(str, memlen);
+        }
+
+        assert(!data.empty());
+
+        std::vector<std::string> userinfos = SplitString(data, "\n");
+
+        *total = userinfos.size();
+        for (const auto& it : userinfos)
+        {
+            std::vector<std::string> userinfo = SplitString(it, "\t");
+            if (userinfo.size() < 2) // 用户名和密码, 还有可能有cookie
+            {
+                assert(false && L"account info error!");
+                continue;
+            }
+            std::string username = userinfo[0];
+            std::string password = userinfo[1];
+            std::string cookies = "";
+            if (userinfo.size() > 2)
+            {
+                cookies = userinfo[2];
+            }
+            RemoveSpace(&username);
+            RemoveSpace(&password);
+            RowData row;
+            row.push_back(base::UTF8ToWide(username));
+            row.push_back(base::UTF8ToWide(password));
+            row.push_back(base::UTF8ToWide(cookies));
+            userpwd->push_back(row);
+        }
+
+        return true;
     }
 };
 
@@ -500,6 +562,22 @@ void NetworkHelper::RemoveNotify601()
     notify601_ = nullptr;
 }
 
+bool NetworkHelper::LoginWithCookies(
+    const std::wstring& username, const std::wstring& cookies, std::string* errormsg)
+{
+    std::string strcookies = base::WideToUTF8(cookies);
+    if (!user_->LoginWithCookies(strcookies, errormsg))
+        return false;
+
+    if (!user_->LoginUServiceGetMyUserDataInfo(errormsg))
+        return false;
+
+    if (!user_->LoginIndexServiceGetUserCenter(errormsg))
+        return false; 
+
+    return true;
+}
+
 bool NetworkHelper::Login(const std::wstring& username, 
     const std::wstring& password, const std::wstring& verifycode,
     std::string* errormsg)
@@ -513,6 +591,11 @@ bool NetworkHelper::Login(const std::wstring& username,
 bool NetworkHelper::LoginGetVerifyCode(std::vector<uint8>* picture)
 {
     return user_->LoginGetVerifyCode(picture);
+}
+
+std::string NetworkHelper::GetLoginSuccessCookie() const
+{
+    return user_->GetCookies();
 }
 
 bool NetworkHelper::GetCurrentUserDisplay(std::wstring* display)
@@ -928,4 +1011,3 @@ void NetworkHelper::DoChatRepeat(const std::wstring& chatmsg)
 {
     user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
 }
-

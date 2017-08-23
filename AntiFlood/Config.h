@@ -7,9 +7,12 @@ public:
     ~Config();
     bool GetUserName(std::wstring* username) const;
     bool GetPassword(std::wstring* password) const;
+    bool GetCookies(std::wstring* cookies) const;
     bool GetRoomid(std::wstring* roomid) const;
 
-    bool SaveUserInfo(const std::wstring& username, const std::wstring& password,
+    bool SaveUserInfo(const std::wstring& username, 
+        const std::wstring& password,
+        const std::wstring& cookies,
         bool remember) const;
     bool SaveRoomId(const std::wstring& roomid) const;
     bool GetRemember() const;

@@ -130,7 +130,9 @@ private:
     void NotifyEnterRoom(const RowData& rowdata);
     void NotifyRetriveGiftCoin(uint32 coin);
     bool LoginByRequest(const std::wstring& username, 
-        const std::wstring& password, const std::wstring& verifycode);
+        const std::wstring& password, 
+        const std::wstring& cookies,
+        const std::wstring& verifycode);
     bool RefreshVerifyCode();
     bool GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
     bool GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);

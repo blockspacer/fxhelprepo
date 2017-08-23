@@ -474,8 +474,23 @@ void CAntiFloodDlg::OnBnClickedButtonLogin()
     m_edit_verifycode.GetWindowTextW(verifycode);
     bool remember = !!m_check_remember.GetCheck();
 
+    Config config;
+    std::wstring cfg_username, cfg_password, cfg_cookies;
+    config.GetUserName(&cfg_username);
+    config.GetPassword(&cfg_password);
+    config.GetCookies(&cfg_cookies);
+
+    std::wstring use_cookies;
+    if (cfg_username.compare(username.GetBuffer())==0
+        && cfg_password.compare(password.GetBuffer()) == 0
+        && !cfg_cookies.empty())
+    {
+        use_cookies = cfg_cookies;
+    }
+
     // 测试通过的curl登录方式
     bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer(),
+        use_cookies,
         verifycode.GetBuffer());
     std::wstring message = std::wstring(L"登录 ") + (result ? L"成功" : L"失败");
     if (result)
@@ -484,8 +499,10 @@ void CAntiFloodDlg::OnBnClickedButtonLogin()
         network_->GetCurrentUserDisplay(&displayinfo);
         m_static_login_info.SetWindowTextW(displayinfo.c_str());
 
-        Config config;
-        config.SaveUserInfo(username.GetBuffer(), password.GetBuffer(), remember);
+        std::string cookies = network_->GetLoginSuccessCookie();
+        std::wstring wcookies = base::UTF8ToWide(cookies);
+        DCHECK(!cookies.empty());
+        config.SaveUserInfo(username.GetBuffer(), password.GetBuffer(), wcookies, remember);
     }
     
     Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, message);
@@ -630,7 +647,8 @@ void CAntiFloodDlg::NotifyRetriveGiftCoin(uint32 coin)
 }
 
 bool CAntiFloodDlg::LoginByRequest(const std::wstring& username, 
-    const std::wstring& password, const std::wstring& verifycode)
+    const std::wstring& password, const std::wstring& cookies, 
+    const std::wstring& verifycode)
 {
     if (username_ != username)
     {
@@ -651,7 +669,17 @@ bool CAntiFloodDlg::LoginByRequest(const std::wstring& username,
     }
   
     std::string errormsg;
-    bool result = network_->Login(username, password, verifycode, &errormsg);
+    bool result = false;
+
+    if (cookies.empty())
+    {
+        result = network_->Login(username, password, verifycode, &errormsg);
+    }
+    else
+    {
+        result = network_->LoginWithCookies(username, cookies, &errormsg);
+    }
+    
 
     std::wstring message = username + L" 登录";
     if (!result)
