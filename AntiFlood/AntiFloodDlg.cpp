@@ -238,7 +238,7 @@ BOOL CAntiFloodDlg::OnInitDialog()
     // 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
     //  执行此操作
 
-    SetWindowText(L"房间管理工具6.2_支持pk房(修正验证码错误) 购买请联系QQ:269236969");
+    SetWindowText(L"房间管理工具8.1_支持pk房(修正验证码错误) 购买请联系QQ:269236969");
 
     SetIcon(m_hIcon, TRUE);            // 设置大图标
     SetIcon(m_hIcon, FALSE);        // 设置小图标
@@ -503,6 +503,10 @@ void CAntiFloodDlg::OnBnClickedButtonLogin()
         std::wstring wcookies = base::UTF8ToWide(cookies);
         DCHECK(!cookies.empty());
         config.SaveUserInfo(username.GetBuffer(), password.GetBuffer(), wcookies, remember);
+    }
+    else
+    {
+        explorer_web_.Navigate(L"http://fanxing.kugou.com", NULL, NULL, NULL, NULL);
     }
     
     Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, message);

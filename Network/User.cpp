@@ -272,7 +272,7 @@ bool User::LoginGetVerifyCode(std::vector<uint8>* picture)
     request.referer = "http://fanxing.kugou.com/";
     request.cookies = cookiesHelper_->GetCookies("kg_mid");
     request.queries["type"] = "LoginCheckCode";
-    request.queries["appid"] = "1010";
+    request.queries["appid"] = "1000";
     request.queries["codetype"] = "0";
     request.queries["t"] = GetNowTimeString();
     if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
@@ -1313,7 +1313,7 @@ bool User::LoginHttps(const std::string& username, const std::string& password,
         request.ipproxy = ipproxy_;
 
     auto& queries = request.queries;
-    queries["appid"] = "1010";
+    queries["appid"] = "1000";
     queries["username"] = UrlEncode(username);
     queries["pwd"] = MakeMd5FromString(password);;
     queries["code"] = verifycode;
