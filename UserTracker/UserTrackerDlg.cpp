@@ -75,6 +75,7 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_NOTIFY(HDN_BEGINTRACK, 0, &CUserTrackerDlg::OnHdnBegintrackListResult)
     ON_BN_CLICKED(IDC_BTN_CLEAR_LIST, &CUserTrackerDlg::OnBnClickedBtnClearList)
     ON_BN_CLICKED(IDC_BTN_CLEAR_CACHE, &CUserTrackerDlg::OnBnClickedBtnClearCache)
+    ON_BN_CLICKED(IDC_BTN_TAGS_BEAUTY, &CUserTrackerDlg::OnBnClickedBtnTagsBeauty)
 END_MESSAGE_MAP()
 
 
@@ -327,16 +328,29 @@ LRESULT CUserTrackerDlg::OnFoundResult(WPARAM wParam, LPARAM lParam)
 
 void CUserTrackerDlg::OnBnClickedBtnLogin()
 {
-    //CString cs_account;
-    //CString cs_password;
-    //m_edit_account.GetWindowText(cs_account);
-    //m_edit_password.GetWindowText(cs_password);
+    CString cs_account;
+    CString cs_password;
+    m_edit_account.GetWindowText(cs_account);
+    m_edit_password.GetWindowText(cs_password);
 
-    //std::string account = base::WideToUTF8(cs_account.GetBuffer());
-    //std::string password = base::WideToUTF8(cs_password.GetBuffer());
-    //tracker_helper_->LoginUser(account, password);
+    std::string account = base::WideToUTF8(cs_account.GetBuffer());
+    std::string password = base::WideToUTF8(cs_password.GetBuffer());
+    std::string verifycode = "";
+
+    auto callback = base::Bind(&CUserTrackerDlg::LoginResult,
+        base::Unretained(this));
+    if (!tracker_helper_->LoginUser(account, password, verifycode, callback))
+    {
+        AfxMessageBox(L"登录失败");
+        return;
+    }
 }
 
+void CUserTrackerDlg::LoginResult(bool result, uint32 server_time, const std::string& errormsg)
+{
+    if (!result)
+        AfxMessageBox(L"登录失败");
+}
 
 void CUserTrackerDlg::OnBnClickedBtnCancel()
 {
@@ -377,4 +391,9 @@ void CUserTrackerDlg::OnBnClickedBtnClearList()
         m_list_result.DeleteItem(index);
         result_index_--;
     }
+}
+
+void CUserTrackerDlg::OnBnClickedBtnTagsBeauty()
+{
+    // TODO:  在此添加控件通知处理程序代码
 }

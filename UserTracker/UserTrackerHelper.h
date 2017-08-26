@@ -70,6 +70,9 @@ public:
 
     bool ClearCache();
 
+    bool GetAllBeautyStarForNoClan(const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
+
 private:
 
     void DoLoginUser(const std::string& user_name, 

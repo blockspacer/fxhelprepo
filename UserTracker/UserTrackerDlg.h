@@ -73,7 +73,7 @@ private:
     void NotifyMessage(const std::wstring& message);
     void RoomProgress(uint32 current, uint32 all);
     void FoundResult(uint32 user_id, uint32 room_id);
-
+    void LoginResult(bool result, uint32 server_time, const std::string& errormsg);
 
     UserTrackerHelper* tracker_helper_;
     std::mutex message_mutex_;
@@ -95,4 +95,6 @@ private:
     CButton m_check_diamon;
     CButton m_check_1_3_crown;
     CButton m_check_4_crown_up;
+public:
+    afx_msg void OnBnClickedBtnTagsBeauty();
 };

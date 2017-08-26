@@ -33,7 +33,7 @@ UserTrackerHelper::UserTrackerHelper()
     :curl_wrapper_(new CurlWrapper)
     , easy_http_impl_(new EasyHttpImpl)
     , worker_thread_(new base::Thread("UserTrackerHelper"))
-    , user_(nullptr) //必须先登录再让操作
+    , user_(new User()) //必须先登录再让操作
 {
 }
 
@@ -366,6 +366,13 @@ bool UserTrackerHelper::ClearCache()
 void UserTrackerHelper::DoClearCache()
 {
     roomid_userid_map_.clear();
+}
+
+bool UserTrackerHelper::GetAllBeautyStarForNoClan(
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    return false;
 }
 
 bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
