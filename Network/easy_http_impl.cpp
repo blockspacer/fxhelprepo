@@ -15,7 +15,7 @@ namespace
 {
 const char* useragent = "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko";
 const char* acceptencode = "gzip";//目前都不应该接收压缩数据，免得解压麻烦
-const uint32 max_parallel = 3;
+const uint32 max_parallel = 10;
 
 }
 EasyHandle::EasyHandle(const HttpRequest& httpParams)
