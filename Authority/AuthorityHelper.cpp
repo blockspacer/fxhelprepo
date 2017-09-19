@@ -105,6 +105,7 @@ bool AuthorityHelper::SaveAntiFloodAuthority(const AntiFloodAuthority& authority
     root["antiadvance"] = authority.antiadvance;
     root["expiretime"] = base::Uint64ToString(authority.expiretime);
     root["serverip"] = authority.serverip;
+    root["trackerhost"] = "visitor.fanxing.kugou.com"; // 临时工具使用
 
     std::string writestring = writer.write(root);
 

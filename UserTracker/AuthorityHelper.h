@@ -31,5 +31,7 @@ public:
     bool LoadUserTrackerAuthority(UserTrackerAuthority* authority);
     bool GetTrackerAuthorityDisplayInfo(const UserTrackerAuthority& authority, 
         std::wstring* display);
+    // 修改授权文件使其无法正常读取
+    bool DestoryTrackAuthority();
 };
 

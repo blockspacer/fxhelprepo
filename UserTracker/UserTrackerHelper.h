@@ -164,5 +164,6 @@ private:
 
     uint32 all_room_count_ = 0;
     uint32 current_room_count_ = 0;
+    bool is_expired = false; // 内部控制是否过期，如果过期，把配置文件写坏，以后也不让访问
 };
 

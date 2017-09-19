@@ -47,7 +47,11 @@ bool UserTrackerHelper::Initialize()
     CurlWrapper::CurlInit();
     tracker_authority_.reset(new UserTrackerAuthority);
     AuthorityHelper authority_helper;
-    authority_helper.LoadUserTrackerAuthority(tracker_authority_.get());
+    if (!authority_helper.LoadUserTrackerAuthority(tracker_authority_.get()))
+    {
+        return false;
+    }
+    
     authority_helper.GetTrackerAuthorityDisplayInfo(
         *tracker_authority_.get(), &authority_msg_);
 
@@ -231,17 +235,25 @@ void UserTrackerHelper::DoUpdataAllStarRoomForNoClan(
     if (!GetOutputFileName(&path))
         return;
 
-    base::File file;
-    file.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    // 特殊处理，11111111是放出去的测试用户，不导出房间号
+    if (tracker_authority_->user_id != 11111111)
+    {
+        base::File file;
+        file.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+        for (auto consumer_infos : consumer_infos_map)
+        {
+            std::string roomid = base::UintToString(consumer_infos.first);
+            LOG(INFO) << "=======" << roomid;
+            file.WriteAtCurrentPos(roomid.c_str(), roomid.size());
+            file.WriteAtCurrentPos("\r\n", 2);
+            result_callback.Run(0, consumer_infos.first);
+        }
+        file.Close();
+    }
     for (auto consumer_infos : consumer_infos_map)
     {
-        std::string roomid = base::UintToString(consumer_infos.first);
-        LOG(INFO) << "=======" << roomid;
-        file.WriteAtCurrentPos(roomid.c_str(), roomid.size());
-        file.WriteAtCurrentPos("\r\n", 2);
         result_callback.Run(0, consumer_infos.first);
     }
-    file.Close();
     msg = L"获取主播成功";
     message_callback_.Run(msg);
     return;
@@ -377,14 +389,16 @@ bool UserTrackerHelper::GetAllBeautyStarForNoClan(
 
 bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
 {
-    
+    if (is_expired)
+        return false;
+
     std::vector<uint32> roomid1;
     std::vector<uint32> roomid2;
     std::vector<uint32> roomid3;
     std::vector<uint32> roomid4;
 
-    //const std::string& host = tracker_authority_->tracker_host;
-    const std::string host = "visitor.fanxing.kugou.com";
+    const std::string& host = tracker_authority_->tracker_host;
+    //const std::string host = "visitor.fanxing.kugou.com";
     std::string url = "http://" + host + "/VServices/IndexService.IndexService.getLiveList";
     if (check_star_)
     {
@@ -427,6 +441,9 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
 
 bool UserTrackerHelper::GetTargetStarRoomInfos(const std::string& url, std::vector<uint32>* roomids)
 {
+    if (is_expired)
+        return false;
+
     // /VServices/IndexService.IndexService.getLiveList/1-3-1/
     HttpRequest request;
     request.url = url;
@@ -451,13 +468,22 @@ bool UserTrackerHelper::GetTargetStarRoomInfos(const std::string& url, std::vect
         return false;
     }
 
-    uint32 unixtime = rootdata.get("servertime", 1461378689).asUInt();
+    uint32 unixtime = rootdata.get("servertime", 1506009600).asUInt();
 
-    // 暂时只限制2017年1月1号前能使用，防止外泄
-    //if (unixtime > 1483203600)
-    //{
-    //    return false;
-    //}
+    uint64 expiretime = tracker_authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
+    expiretime /= 1000000;
+
+    if (unixtime > expiretime)
+    {
+        is_expired = true;
+        AuthorityHelper authority_helper;
+        if (!authority_helper.DestoryTrackAuthority())
+        {
+            return false;
+        }
+
+        return false;
+    }
 
     uint32 status = rootdata.get("status", 0).asUInt();
     if (status != 1)

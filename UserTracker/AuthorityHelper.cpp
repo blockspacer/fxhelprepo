@@ -86,7 +86,35 @@ bool AuthorityHelper::LoadUserTrackerAuthority(UserTrackerAuthority* authority)
 
     return true;
 }
+bool AuthorityHelper::DestoryTrackAuthority()
+{
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    base::FilePath filepath;
+    if (!GetEncrptyFileName(tracker_pre, &filepath))
+        return false;
 
+    std::fstream ovrifs;
+    ovrifs.open(filepath.value());
+    if (!ovrifs)
+        return false;
+
+    std::stringstream ss;
+    ss << ovrifs.rdbuf();
+    if (ss.str().empty())
+        return false;
+
+    std::string ciphertext = ss.str();
+    std::stringbuf buf(std::string(privatekey).c_str());
+    std::iostream iss(&buf);
+
+    ciphertext.append("0");
+    ovrifs.clear();
+    ovrifs << ciphertext;
+    ovrifs.flush();
+    ovrifs.close();
+    return true;
+}
 bool AuthorityHelper::GetTrackerAuthorityDisplayInfo(
     const UserTrackerAuthority& authority, std::wstring* display)
 {
