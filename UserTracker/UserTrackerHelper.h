@@ -52,6 +52,9 @@ public:
         const std::string& verifycode, 
         const base::Callback<void(bool,uint32, const std::string&)>& callback);
 
+    bool UpdatePhoneForNoClan(const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
+
     // 强制更新全站主播房间用户列表数据
     bool UpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& progress_callback);
 
@@ -79,6 +82,10 @@ private:
         const std::string& password, const std::string& verifycode,
         const base::Callback<void(bool, uint32, const std::string&)>& progress_callback);
 
+    void DoUpdatePhoneForNoClan(
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
+
     // 强制更新全站主播房间用户列表数据
     void DoUpdataAllStarRoomUserMap(const base::Callback<void(uint32, uint32)>& progress_callback);
 
@@ -96,6 +103,9 @@ private:
         const base::Callback<void(uint32, uint32)>& result_callback);
 
     void DoClearCache();
+
+    bool GetDanceRoomInfos(std::vector<uint32>* roomids);
+    bool GetPhoneRoomInfos(std::vector<uint32>* roomids);
 
     bool GetAllStarRoomInfos(std::vector<uint32>* roomids); // 从全站获取所有正在直播的主播直播粗略信息，为下一步获取房间用户列表做准备
     bool GetTargetStarRoomInfos(const std::string& url, std::vector<uint32>* roomids);

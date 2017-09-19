@@ -155,6 +155,66 @@ void UserTrackerHelper::DoLoginUser(const std::string& user_name,
     return;
 }
 
+bool UserTrackerHelper::UpdatePhoneForNoClan(
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    if (!user_)
+        return false;
+
+    worker_thread_->message_loop_proxy()->PostTask(FROM_HERE,
+        base::Bind(&UserTrackerHelper::DoUpdatePhoneForNoClan,
+        base::Unretained(this), progress_callback, result_callback));
+    return true;
+}
+
+void UserTrackerHelper::DoUpdatePhoneForNoClan(
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    std::vector<uint32> roomids;
+    std::wstring msg;
+    if (!GetPhoneRoomInfos(&roomids))
+    {
+        msg = L"获取房间列表失败";
+        message_callback_.Run(msg);
+        return;
+    }
+    msg = L"获取房间列表成功";
+    message_callback_.Run(msg);
+
+    uint32 count = 0;
+    std::map<uint32, std::map<uint32, ConsumerInfo>> consumer_infos_map;
+    for (auto roomid : roomids)
+    {
+        std::map<uint32, ConsumerInfo> consumer_infos;
+        progress_callback.Run(++count, roomids.size());
+        if (!GetRoomConsumerList(roomid, &consumer_infos))
+            continue;
+
+        consumer_infos_map[roomid] = consumer_infos;
+        result_callback.Run(0, roomid);
+    }
+
+    base::FilePath path;
+    if (!GetOutputFileName(&path))
+        return;
+
+    base::File file;
+    file.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    for (auto consumer_infos : consumer_infos_map)
+    {
+        std::string roomid = base::UintToString(consumer_infos.first);
+        LOG(INFO) << "=======" << roomid;
+        file.WriteAtCurrentPos(roomid.c_str(), roomid.size());
+        file.WriteAtCurrentPos("\r\n", 2);
+    }
+    file.Close();
+    msg = L"获取主播成功";
+    message_callback_.Run(msg);
+    return;
+}
+
 bool UserTrackerHelper::UpdataAllStarRoomUserMap(
     const base::Callback<void(uint32, uint32)>& callback)
 {
@@ -229,6 +289,7 @@ void UserTrackerHelper::DoUpdataAllStarRoomForNoClan(
             continue;
 
         consumer_infos_map[roomid] = consumer_infos;
+        result_callback.Run(0, roomid);
     }
 
     base::FilePath path;
@@ -246,13 +307,8 @@ void UserTrackerHelper::DoUpdataAllStarRoomForNoClan(
             LOG(INFO) << "=======" << roomid;
             file.WriteAtCurrentPos(roomid.c_str(), roomid.size());
             file.WriteAtCurrentPos("\r\n", 2);
-            result_callback.Run(0, consumer_infos.first);
         }
         file.Close();
-    }
-    for (auto consumer_infos : consumer_infos_map)
-    {
-        result_callback.Run(0, consumer_infos.first);
     }
     msg = L"获取主播成功";
     message_callback_.Run(msg);
@@ -386,6 +442,24 @@ bool UserTrackerHelper::GetAllBeautyStarForNoClan(
 {
     return false;
 }
+bool UserTrackerHelper::GetDanceRoomInfos(std::vector<uint32>* roomids)
+{
+    // 暂时不实现，没实际利用价值
+    return false;
+}
+bool UserTrackerHelper::GetPhoneRoomInfos(std::vector<uint32>* roomids)
+{
+    std::vector<uint32> roomid1;
+
+    const std::string host = "fx.service.kugou.com";
+    std::string url = "http://" + host + "/mps-web/cdn/mobileLive/roomList_v2?pid=85&version=1234&pageNum=1&pageSize=20&jsonpcallback=jsonpcallback_httpsfxservicekugoucommpswebcdnmobileLiveroomList_v2pid85version1234pageNum1pageSize20";
+    std::wstring msg = L"正在获取星级主播房间列表 ...";
+    message_callback_.Run(msg);
+    GetTargetStarRoomInfos(url, &roomid1);
+    roomids->insert(roomids->end(), roomid1.begin(), roomid1.end());
+
+    return true;
+}
 
 bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
 {
@@ -503,6 +577,10 @@ bool UserTrackerHelper::GetTargetStarRoomInfos(const std::string& url, std::vect
     {
         uint32 roomId = GetInt32FromJsonValue(roominfo, "roomId");
         uint32 startId = GetInt32FromJsonValue(roominfo, "userId");
+        uint32 status = GetInt32FromJsonValue(roominfo, "status");
+        if (status == 0)
+            continue;
+
         roomids->push_back(roomId);
     }
     return true;
