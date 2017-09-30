@@ -221,7 +221,9 @@ bool FamilyDataController::GetFamilyOpenDayCountSummary(const base::Time& begint
         summary_data.singerid = singerid;
         for (auto daily : singerDailyData)
         {
-            if (daily.effectivecount)
+            //if (daily.effectivecount)
+            //    summary_data.effectivedays++;
+            if (daily.onlineminute>60)
                 summary_data.effectivedays++;
         }
         singer_summary.push_back(summary_data);

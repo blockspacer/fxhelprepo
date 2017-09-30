@@ -732,14 +732,22 @@ bool FamilyDaily::ParseSingerDailyData(const std::string& pagedata,
             assert(false);
             continue;
         }
+        uint32 onlinecount = 0;
+        if (!base::StringToUint(tddata, &onlinecount))
+        {
+            assert(false);
+            return false;
+        }
+        singerdailydata.onlinecount = onlinecount;
 
-        // 累计直播时长（分钟），不处理
+        // 累计直播时长（分钟
         beginpos = endpos;
         if (!GetTdData(trdata, beginpos, &endpos, &tddata))
         {
             assert(false);
             continue;
         }
+        singerdailydata.onlineminute = OnlineTimeToMinutes(tddata);
 
         // PC有效直播时长 不处理
         beginpos = endpos;
@@ -748,6 +756,7 @@ bool FamilyDaily::ParseSingerDailyData(const std::string& pagedata,
             assert(false);
             continue;
         }
+        singerdailydata.pc_minute = OnlineTimeToMinutes(tddata);
 
         // 手机有效直播时长 不处理
         beginpos = endpos;
@@ -756,6 +765,7 @@ bool FamilyDaily::ParseSingerDailyData(const std::string& pagedata,
             assert(false);
             continue;
         }
+        singerdailydata.phone_minute = OnlineTimeToMinutes(tddata);
 
         // 有效直播次数（大于1个小时），重点数据
         beginpos = endpos;
@@ -770,6 +780,7 @@ bool FamilyDaily::ParseSingerDailyData(const std::string& pagedata,
             assert(false);
             return false;
         }
+        // 这个值不准确，不能做为参考
         singerdailydata.effectivecount = effectivecount;
 
         // 直播间最高人气，不处理
@@ -883,6 +894,11 @@ bool FamilyDaily::ParseSingerListData(const std::string& pagedata,
             assert(false);
             continue;
         }
+
+        // 最近开播时间,不处理
+        beginpos = endpos;
+        result = GetTdData(trdata, beginpos, &endpos, &tddata);
+        singerSummaryData.last_online = tddata;
 
         // 主播等级,不处理
         beginpos = endpos;

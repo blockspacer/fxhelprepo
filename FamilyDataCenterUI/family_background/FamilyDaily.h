@@ -15,8 +15,8 @@ struct SingerDailyData
     std::string date;
     uint32 onlinecount = 0;         //开播次数
     uint32 onlineminute = 0;        //累计直播时长（分钟）
-    std::string pc_hours;
-    std::string phone_hours;
+    uint32 pc_minute;
+    uint32 phone_minute;
     uint32 effectivecount = 0;      //有效直播次数（大于1个小时）
     uint32 maxusers = 0;            //直播间最高人气
     double revenue = 0.0;             // 星豆收入
@@ -30,6 +30,7 @@ public:
     uint32 roomid = 0;
     std::string nickname;
     std::string singerlevel;    //主播等级
+    std::string last_online;    //最近开播时间
     uint32 onlinecount = 0;         //开播次数
     uint32 onlineminute = 0;        //累计直播时长（分钟）
     std::string total_hours;    // 累计直播时长(小时)

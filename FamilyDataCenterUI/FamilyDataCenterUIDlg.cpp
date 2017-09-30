@@ -37,6 +37,16 @@ namespace
         L"星豆收入"
     };
 
+    std::vector<std::wstring> singer_columnlist = {
+        L"日期",
+        L"开播次数",
+        L"开播时长",
+        L"有效直播次数",
+        L"直播间最高人气",
+        L"星豆收入",
+        L"周期累计扣分"
+    };
+
     bool OleDateTimeToBaseTime(const COleDateTime& oletime, base::Time* basetime)
     {
         if (!basetime)
@@ -408,7 +418,7 @@ void CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerData()
     }
     DisplayMessage(L" GetDailyDataBySingerId success!");
 
-    DisplayDataToGrid(family_columnlist, griddata);
+    DisplayDataToGrid(singer_columnlist, griddata);
 }
 
 
