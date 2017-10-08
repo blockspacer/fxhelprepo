@@ -52,4 +52,5 @@ private:
     CEdit m_edit_serverip;
 public:
     afx_msg void OnBnClickedBtnTrackAuthority();
+    afx_msg void OnBnClickedBtnBackgroupAuthority();
 };

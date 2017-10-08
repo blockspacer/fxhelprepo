@@ -10,6 +10,7 @@
 #include "third_party/chromium/base/files/file_enumerator.h"
 #include "third_party/json/json.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 namespace
 {
@@ -196,6 +197,40 @@ bool AuthorityHelper::SaveUserTrackerAuthority(const UserTrackerAuthority& autho
 
     std::wstring Authorityfilename = L"Tracker_";
     Authorityfilename += base::UintToString16(authority.user_id);
+
+    Authorityfilename += L".key";
+    std::ofstream ofs(dirPath.Append(Authorityfilename).value(), std::ios_base::out);
+    if (!ofs)
+        return false;
+
+    ofs << ciphertext;
+    ofs.flush();
+    ofs.close();
+    return true;
+}
+
+bool AuthorityHelper::SaveFamilyDataAuthority(const FamilyDataAuthority& authority)
+{
+    Json::FastWriter writer;
+    Json::Value root(Json::objectValue);
+    root["username"] = authority.username;
+    root["expiretime"] = base::Uint64ToString(authority.expiretime);
+    root["familyhost"] = authority.family_data_host;
+
+    std::string writestring = writer.write(root);
+
+    base::FilePath dirPath;
+    bool result = PathService::Get(base::DIR_EXE, &dirPath);
+    std::wstring publickeyfilename = L"publickey.txt";
+    base::FilePath pathname = dirPath.Append(publickeyfilename);
+    std::ifstream ifs(pathname.value());
+    if (ifs.bad())
+        return false;
+
+    std::string ciphertext = RSAEncryptString(&ifs, writestring);
+
+    std::wstring Authorityfilename = L"FamilyData_";
+    Authorityfilename += base::UTF8ToUTF16(authority.username);
 
     Authorityfilename += L".key";
     std::ofstream ofs(dirPath.Append(Authorityfilename).value(), std::ios_base::out);

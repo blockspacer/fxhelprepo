@@ -101,6 +101,7 @@ BEGIN_MESSAGE_MAP(CAuthorityDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_6_MON, &CAuthorityDlg::OnBnClickedBtn6Mon)
     ON_BN_CLICKED(IDC_BTN_PACKAGE, &CAuthorityDlg::OnBnClickedBtnPackage)
     ON_BN_CLICKED(IDC_BTN_TRACK_AUTHORITY, &CAuthorityDlg::OnBnClickedBtnTrackAuthority)
+    ON_BN_CLICKED(IDC_BTN_BACKGROUP_AUTHORITY, &CAuthorityDlg::OnBnClickedBtnBackgroupAuthority)
 END_MESSAGE_MAP()
 
 
@@ -298,5 +299,26 @@ void CAuthorityDlg::OnBnClickedBtnTrackAuthority()
     authority.tracker_host = "visitor.fanxing.kugou.com";
 
     if (!authorityHelper.SaveUserTrackerAuthority(authority))
+        return;
+}
+
+
+void CAuthorityDlg::OnBnClickedBtnBackgroupAuthority()
+{
+    UpdateData(TRUE);
+    base::Time endTime;
+    OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
+    uint64 expiretime = endTime.ToInternalValue();
+
+    CString csUserName = L"";
+    m_edit_userid.GetWindowTextW(csUserName);
+
+    AuthorityHelper authorityHelper;
+    FamilyDataAuthority authority;
+    authority.username = base::WideToUTF8(csUserName.GetBuffer());
+    authority.expiretime = expiretime;
+    authority.family_data_host = "family.fanxing.kugou.com";
+
+    if (!authorityHelper.SaveFamilyDataAuthority(authority))
         return;
 }

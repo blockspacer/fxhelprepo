@@ -21,6 +21,13 @@ struct UserTrackerAuthority
     std::string tracker_host = "";// 保证未授权的情况没有配置使用目标服务器
 };
 
+struct FamilyDataAuthority
+{
+    std::string username;
+    uint64 expiretime = 0;
+    std::string family_data_host = "";// 保证未授权的情况没有配置使用目标服务器
+};
+
 // 提供授权文件明文格式读写功能
 class AuthorityHelper
 {
@@ -33,5 +40,8 @@ public:
 
     bool LoadUserTrackerAuthority(UserTrackerAuthority* authority);
     bool SaveUserTrackerAuthority(const UserTrackerAuthority& authority);
+
+    bool LoadFailyaDataAuthority(FamilyDataAuthority* authority);
+    bool SaveFamilyDataAuthority(const FamilyDataAuthority& authority);
 };
 

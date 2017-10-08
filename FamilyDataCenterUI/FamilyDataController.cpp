@@ -2,6 +2,7 @@
 
 #include <shellapi.h>
 
+#include "Network/EncodeHelper.h"
 #include "FamilyDataCenterUI/FamilyDataController.h"
 #include "FamilyDataCenterUI/FamilyDataModle.h"
 
@@ -120,7 +121,7 @@ bool FamilyDataController::LoadAuthority(std::wstring* diaplay_message)
     return authority_helper.GetFailyaDataAuthorityDisplayInfo(*authority_.get(), diaplay_message);
 }
 
-bool FamilyDataController::Login(const std::string& username, 
+bool FamilyDataController::InnerLogin(const std::string& username,
     const std::string& password)
 {
     if (!familyBackground_)
@@ -141,6 +142,10 @@ bool FamilyDataController::Login(const std::string& username,
     if (!familyBackground_->GetServerTime(&server_time))
         return false;
 
+    std::string test_expired = MakeFormatDateString(expired_time);
+
+    std::string test_server = MakeFormatDateString(server_time);
+
     // 用户授权已过期
     if (server_time > expired_time)
         return false;
@@ -155,18 +160,8 @@ bool FamilyDataController::Login(const std::wstring& wusername,
     std::string password;
     base::WideToUTF8(wusername.c_str(), wusername.length(), &username);
     base::WideToUTF8(wpassword.c_str(), wpassword.length(), &password);
-    if (!familyBackground_)
-        return false;
-    //if (!familyBackground_->Init(authority_->family_data_host))
-    if (!familyBackground_->Init("family.fanxing.kugou.com"))
-    {
-        return false;
-    }
-    if (!familyBackground_->Login(username, password))
-    {
-        return false;
-    }
-    return true;
+
+    return InnerLogin(username, password);
 }
 
 bool FamilyDataController::GetSingerFamilyData(

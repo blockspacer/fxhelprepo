@@ -22,7 +22,6 @@ public:
 
     bool LoadAuthority(std::wstring* diaplay_message);
 
-    bool Login(const std::string& username, const std::string& password);
     bool Login(const std::wstring& wusername, const std::wstring& wpassword);
     bool GetSingerFamilyData(const base::Time& begintime,
                              const base::Time& endtime,
@@ -39,7 +38,7 @@ public:
 
     bool ExportToTxt();
 private:
-
+    bool InnerLogin(const std::string& username, const std::string& password);
     bool GetNormalSingerIds(std::vector<uint32>* singers);
     base::FilePath exePath_;
     std::unique_ptr<FamilyBackground> familyBackground_;

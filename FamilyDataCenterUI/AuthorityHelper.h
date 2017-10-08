@@ -24,7 +24,7 @@ struct UserTrackerAuthority
 
 struct FamilyDataAuthority
 {
-    std::string username = 0;
+    std::string username;
     uint64 expiretime = 0;
     std::string family_data_host = "";// 保证未授权的情况没有配置使用目标服务器
 };
