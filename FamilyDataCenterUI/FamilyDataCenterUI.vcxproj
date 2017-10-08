@@ -110,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
+    <ClInclude Include="AuthorityHelper.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="FamilyDataCenterUI.h" />
     <ClInclude Include="FamilyDataCenterUIDlg.h" />
@@ -127,6 +128,7 @@
     <ClInclude Include="Worksheets.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AuthorityHelper.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="FamilyDataCenterUI.cpp" />
     <ClCompile Include="FamilyDataCenterUIDlg.cpp" />

@@ -52,9 +52,11 @@ public:
     static void CurlCleanup();
 
     // 打开主页面,获取对应的cookie;
-    bool Init();
+    bool Init(const std::string& family_host);
 
     bool Login(const std::string& username, const std::string& password);
+
+    bool GetServerTime(base::Time* server_time) const;
 
     bool GetDailyDataBySingerId(uint32 singerid,
                                 const base::Time& begintime, 
@@ -97,4 +99,5 @@ private:
 
     std::string currentResponseData_;
     std::string currentResponseHeader_;
+    std::string family_url_;
 };

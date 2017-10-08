@@ -18,7 +18,9 @@
 
 
 namespace{
-    const char* familyurl = "http://family.fanxing.kugou.com";
+
+    // 改为授权以后，都使用从授权文件传进来，这个参数只为测试方便是使用
+    const char* family_url = "http://family.fanxing.kugou.com";
 
     // cookies 
     const char* header_connection = "Connection:Keep-Alive";
@@ -202,10 +204,14 @@ bool FamilyDaily::WriteResponseHeaderCallback(const std::string& data)
 //User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.130 Safari/537.36
 //Accept-Encoding: gzip, deflate, sdch
 //Accept-Language: zh-CN,zh;q=0.8
-bool FamilyDaily::Init()
+bool FamilyDaily::Init(const std::string& family_host)
 {
+    if (family_host.empty())
+        return false;
+
+    family_url_ = std::string("http://") + family_host;
     HttpRequest request;
-    request.url = std::string(familyurl) + "/admin?act=login";
+    request.url = std::string(family_url_) + "/admin?act=login";
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     CurlWrapper curl_wrapper;
     HttpResponse response;
@@ -237,7 +243,7 @@ bool FamilyDaily::Init()
 bool FamilyDaily::Login(const std::string& username, const std::string& password)
 {
     HttpRequest request;
-    request.url = std::string(familyurl) + "/admin?act=login";
+    request.url = std::string(family_url_) + "/admin?act=login";
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_POST;
     request.referer = request.url;
     request.cookies = cookies_helper_.GetAllCookies();
@@ -259,6 +265,20 @@ bool FamilyDaily::Login(const std::string& username, const std::string& password
         cookies_helper_.SetCookies(cookie);
     }
 
+    return true;
+}
+
+bool FamilyDaily::GetServerTime(base::Time* server_time) const
+{
+    std::string expires = cookies_helper_.GetCookies("expires");
+    if (expires.empty())
+        return false;
+
+    base::Time expires_time = base::Time::Now();
+    base::Time::FromUTCString(expires.c_str(), &expires_time);
+
+    std::string test_time = MakeFormatDateString(expires_time);
+    *server_time = expires_time;
     return true;
 }
 
@@ -419,7 +439,7 @@ bool FamilyDaily::GetSummaryDataByPage(const base::Time& begintime,
 {
     std::string beginstring = MakeFormatDateString(begintime);
     std::string endstring = MakeFormatDateString(endtime);
-    std::string requesturl = std::string(familyurl) +
+    std::string requesturl = std::string(family_url_) +
         "/admin?act=sumStarDataList&startDay=" +
         beginstring + "&endDay=" + endstring;
     // 第一页数据不需要加页码
@@ -455,7 +475,7 @@ bool FamilyDaily::GetDailyDataBySingerIdAndPage(uint32 singerid,
 {
     std::string beginstring = MakeFormatDateString(begintime);
     std::string endstring = MakeFormatDateString(endtime);
-    std::string requesturl = std::string(familyurl) +
+    std::string requesturl = std::string(family_url_) +
         "/admin?act=dayStarDataList&startDay=" +
         beginstring + "&endDay=" + endstring + "&starId="
         + base::UintToString(singerid);
@@ -488,7 +508,7 @@ bool FamilyDaily::GetDailyDataBySingerIdAndPage(uint32 singerid,
 
 bool FamilyDaily::GetSingerListByPage(uint32 pagenumber, std::string* pagedata)
 {
-    std::string requesturl = std::string(familyurl) + "/admin?act=starList";
+    std::string requesturl = std::string(family_url_) + "/admin?act=starList";
     // 第一页数据不需要加页码
     if (pagenumber > 1)
         requesturl += "&page=" + base::IntToString(pagenumber);

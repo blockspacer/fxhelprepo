@@ -207,6 +207,13 @@ BOOL CFamilyDataCenterUIDlg::OnInitDialog()
     m_ListCtrl_SummaryData.SetExtendedStyle(dwStyle); //设置扩展风格
 
     familyDataController_.reset(new FamilyDataController);
+    std::wstring display_msg;
+    familyDataController_->LoadAuthority(&display_msg);
+    if (!display_msg.empty())
+    {
+        SetWindowText(display_msg.c_str());
+    }
+
     familyDataModle_.reset(new FamilyDataModle);
 
     std::wstring username;

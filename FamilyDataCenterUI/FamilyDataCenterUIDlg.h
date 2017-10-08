@@ -30,20 +30,22 @@ public:
     afx_msg void OnBnClickedBtnExportToExcel();
     afx_msg void OnBnClickedBtnLogin();
     afx_msg void OnLvnGetdispinfoListSummaryData(NMHDR *pNMHDR, LRESULT *pResult);
+    afx_msg void OnBnClickedBtnGetSingerData();
+    afx_msg void OnBnClickedBtnGetNewSinger();
 
 // 实现
 protected:
-	HICON m_hIcon;
+    HICON m_hIcon;
 
-	// 生成的消息映射函数
-	virtual BOOL OnInitDialog();
-	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
-	afx_msg void OnPaint();
-	afx_msg HCURSOR OnQueryDragIcon();
-	DECLARE_MESSAGE_MAP()
+    // 生成的消息映射函数
+    virtual BOOL OnInitDialog();
+    afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+    afx_msg void OnPaint();
+    afx_msg HCURSOR OnQueryDragIcon();
+  
+    DECLARE_MESSAGE_MAP()
 
 private:
-
     void DisplayDataToGrid(const std::vector<std::wstring> columnlist, 
         const GridData& griddata);
     void DisplayMessage(const std::wstring& message);
@@ -59,12 +61,10 @@ private:
     std::unique_ptr<FamilyDataController> familyDataController_;
     std::unique_ptr<FamilyDataModle> familyDataModle_;
     uint32 index_;
-public:
+
     BOOL m_remember;
     int m_singer_id;
     double m_total_income;
     double m_total_hours;
     int m_new_count;
-    afx_msg void OnBnClickedBtnGetSingerData();
-    afx_msg void OnBnClickedBtnGetNewSinger();
 };

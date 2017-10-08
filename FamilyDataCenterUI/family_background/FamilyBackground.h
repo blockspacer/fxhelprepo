@@ -21,8 +21,9 @@ public:
     ~FamilyBackground();
 
     void Test();
-    bool Init();
+    bool Init(const std::string& family_host);
     bool Login(const std::string& username, const std::string& password);
+    bool GetServerTime(base::Time* server_time) const;
     bool GetSummaryData(const base::Time& begintime, const base::Time& endtime, 
         std::vector<SingerSummaryData>* summary);
     bool GetDailyDataBySingerId(uint32 singerid, const base::Time& begintime,

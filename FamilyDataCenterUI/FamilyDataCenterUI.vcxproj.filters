@@ -69,6 +69,9 @@
     <ClInclude Include="family_background\FamilyDaily.h">
       <Filter>源文件\family_background</Filter>
     </ClInclude>
+    <ClInclude Include="AuthorityHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FamilyDataCenterUI.cpp">
@@ -94,6 +97,9 @@
     </ClCompile>
     <ClCompile Include="family_background\FamilyDaily.cpp">
       <Filter>源文件\family_background</Filter>
+    </ClCompile>
+    <ClCompile Include="AuthorityHelper.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

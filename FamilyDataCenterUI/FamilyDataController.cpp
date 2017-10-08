@@ -6,6 +6,7 @@
 #include "FamilyDataCenterUI/FamilyDataModle.h"
 
 #include "FamilyDataCenterUI/family_background/FamilyBackground.h"
+#include "FamilyDataCenterUI/AuthorityHelper.h"
 
 #include "third_party/chromium/base/path_service.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
@@ -94,15 +95,29 @@ namespace{
 }
 
 FamilyDataController::FamilyDataController()
+    :authority_(new FamilyDataAuthority)
 {
     base::FilePath path;
     PathService::Get(base::DIR_EXE, &path);
     exePath_ = path;
     familyBackground_.reset(new FamilyBackground);
+
+
 }
 
 FamilyDataController::~FamilyDataController()
 {
+}
+
+bool FamilyDataController::LoadAuthority(std::wstring* diaplay_message)
+{
+    AuthorityHelper authority_helper;
+    if (!authority_helper.LoadFailyaDataAuthority(authority_.get()))
+    {
+        MessageBoxW(NULL, L"软件未授权", L"错误", 0);
+    }
+
+    return authority_helper.GetFailyaDataAuthorityDisplayInfo(*authority_.get(), diaplay_message);
 }
 
 bool FamilyDataController::Login(const std::string& username, 
@@ -110,10 +125,24 @@ bool FamilyDataController::Login(const std::string& username,
 {
     if (!familyBackground_)
         return false;
-    if (!familyBackground_->Init())
+
+    // 用户没授权
+    if (username != authority_->username)
+        return false;
+
+    if (!familyBackground_->Init(authority_->family_data_host))
         return false;
 
     if (!familyBackground_->Login(username, password))
+        return false;
+
+    base::Time expired_time = base::Time::FromInternalValue(authority_->expiretime);
+    base::Time server_time = base::Time::Now();
+    if (!familyBackground_->GetServerTime(&server_time))
+        return false;
+
+    // 用户授权已过期
+    if (server_time > expired_time)
         return false;
 
     return true;
@@ -128,7 +157,8 @@ bool FamilyDataController::Login(const std::wstring& wusername,
     base::WideToUTF8(wpassword.c_str(), wpassword.length(), &password);
     if (!familyBackground_)
         return false;
-    if (!familyBackground_->Init())
+    //if (!familyBackground_->Init(authority_->family_data_host))
+    if (!familyBackground_->Init("family.fanxing.kugou.com"))
     {
         return false;
     }

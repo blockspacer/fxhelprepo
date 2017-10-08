@@ -12,11 +12,15 @@ typedef std::vector<std::wstring> RowData;
 typedef std::vector<RowData> GridData;
 class FamilyBackground;
 class SingerSummaryData;
+class FamilyDataAuthority;
+
 class FamilyDataController
 {
 public:
     FamilyDataController();
     virtual ~FamilyDataController();
+
+    bool LoadAuthority(std::wstring* diaplay_message);
 
     bool Login(const std::string& username, const std::string& password);
     bool Login(const std::wstring& wusername, const std::wstring& wpassword);
@@ -40,6 +44,7 @@ private:
     base::FilePath exePath_;
     std::unique_ptr<FamilyBackground> familyBackground_;
     std::map<uint32, SingerSummaryData> singer_summary_map_;
+    std::unique_ptr<FamilyDataAuthority> authority_;
 
     GridData display_griddata_;
 };

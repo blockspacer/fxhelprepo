@@ -19,8 +19,8 @@ FamilyBackground::~FamilyBackground()
 
 void FamilyBackground::Test()
 {
-    bool result = Init();
-    result = Login("globalstar001", "123!");
+    bool result = Init("family.fanxing.kugou.com");
+    result = Login("111", "123!");
 
     base::Time nowtime = base::Time::Now();
     base::Time::Exploded exploded;
@@ -39,11 +39,11 @@ void FamilyBackground::Test()
     //result = GetSummaryData(begintime, endtime, &summary);
 }
 
-bool FamilyBackground::Init()
+bool FamilyBackground::Init(const std::string& family_host)
 {
     FamilyDaily::CurlInit();
     familyDaily_.reset(new FamilyDaily);
-    bool result = familyDaily_->Init();
+    bool result = familyDaily_->Init(family_host);
     return result;
 }
 
@@ -52,6 +52,11 @@ bool FamilyBackground::Login(const std::string& username,
 {
     bool result = familyDaily_->Login(username, password);
     return result;
+}
+
+bool FamilyBackground::GetServerTime(base::Time* server_time) const
+{
+    return familyDaily_->GetServerTime(server_time);
 }
 
 bool FamilyBackground::GetSummaryData(const base::Time& begintime, 
