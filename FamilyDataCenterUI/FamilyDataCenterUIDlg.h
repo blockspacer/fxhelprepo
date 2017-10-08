@@ -31,7 +31,7 @@ public:
     afx_msg void OnBnClickedBtnLogin();
     afx_msg void OnLvnGetdispinfoListSummaryData(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnBnClickedBtnGetSingerData();
-    afx_msg void OnBnClickedBtnGetNewSinger();
+    afx_msg void OnBnClickedBtnGetSingerEffectiveDays();
 
 // й╣ож
 protected:

@@ -9,6 +9,8 @@
 #include "FamilyDataCenterUI/FamilyDataController.h"
 #include "FamilyDataCenterUI/FamilyDataModle.h"
 #include "FamilyDataCenterUI/Config.h"
+#include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/utf_string_conversions.h"
 
 
 #ifdef _DEBUG
@@ -162,7 +164,7 @@ BEGIN_MESSAGE_MAP(CFamilyDataCenterUIDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CFamilyDataCenterUIDlg::OnBnClickedBtnLogin)
     ON_NOTIFY(LVN_GETDISPINFO, IDC_LIST_SUMMARY_DATA, &CFamilyDataCenterUIDlg::OnLvnGetdispinfoListSummaryData)
     ON_BN_CLICKED(IDC_BTN_GET_SINGER_DATA, &CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerData)
-    ON_BN_CLICKED(IDC_BTN_GET_NEW_SINGER, &CFamilyDataCenterUIDlg::OnBnClickedBtnGetNewSinger)
+    ON_BN_CLICKED(IDC_BTN_GET_NEW_SINGER, &CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerEffectiveDays)
 END_MESSAGE_MAP()
 
 
@@ -415,8 +417,12 @@ void CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerData()
     GridData griddata;
     DisplayMessage(L" GetDailyDataBySingerId Begin!");
 
-    bool result = familyDataController_->GetDailyDataBySingerId(m_singer_id, beginTime, 
-        endTime, &griddata);
+    uint32 effect_day = 0;
+    uint32 onlineminute = 0;
+    double revenue = 0.0;
+    bool result = familyDataController_->GetDailyDataBySingerId(
+        m_singer_id, beginTime, 
+        endTime, &griddata, &onlineminute, &effect_day, & revenue);
 
     if (!result)
     {
@@ -425,11 +431,15 @@ void CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerData()
     }
     DisplayMessage(L" GetDailyDataBySingerId success!");
 
+    std::wstring weffect_day = base::UintToString16(effect_day);
+    SetDlgItemTextW(IDC_EDIT_EFFECT_DAYS, weffect_day.c_str());
+    SetDlgItemTextW(IDC_EDIT_TOTAL_INCOME, base::UTF8ToUTF16(base::DoubleToString(revenue)).c_str());
+    SetDlgItemInt(IDC_EDIT_TOTAL_HOURS, onlineminute);
     DisplayDataToGrid(singer_columnlist, griddata);
 }
 
 
-void CFamilyDataCenterUIDlg::OnBnClickedBtnGetNewSinger()
+void CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerEffectiveDays()
 {
     UpdateData(TRUE);
     base::Time beginTime;
@@ -438,7 +448,11 @@ void CFamilyDataCenterUIDlg::OnBnClickedBtnGetNewSinger()
     OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
     GridData griddata;
 
-    familyDataController_->GetFamilyOpenDayCountSummary(beginTime, endTime, &griddata);
+    uint32 effect_count = 0;
+    familyDataController_->GetFamilyEffectiveDayCountSummary(
+        beginTime, endTime, &griddata, &effect_count);
 
+    std::wstring weffect_count = base::UintToString16(effect_count);
+    SetDlgItemTextW(IDC_EDIT_EFFECT_SINGER_COUNT, weffect_count.c_str());
     DisplayDataToGrid(family_columnlist, griddata);
 }

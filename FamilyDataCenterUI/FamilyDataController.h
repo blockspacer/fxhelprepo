@@ -28,11 +28,12 @@ public:
                              GridData* griddata);
 
     bool GetDailyDataBySingerId(uint32 singerid, const base::Time& begintime,
-        const base::Time& endtime, GridData* griddata);
+        const base::Time& endtime, GridData* griddata, uint32* onlineminute,
+        uint32* effect_day, double* revenue);
 
     // 获取所有主播有效开播汇总数据，通过分别查每个正式主播的日数据去做汇总
-    bool GetFamilyOpenDayCountSummary(const base::Time& begintime,
-        const base::Time& endtime, GridData* griddata);
+    bool GetFamilyEffectiveDayCountSummary(const base::Time& begintime,
+        const base::Time& endtime, GridData* griddata, uint32* effect_count);
 
     bool ExportToExcel();
 

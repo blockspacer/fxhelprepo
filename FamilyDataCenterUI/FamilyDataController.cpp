@@ -206,13 +206,23 @@ bool FamilyDataController::GetSingerFamilyData(
 
 bool FamilyDataController::GetDailyDataBySingerId(uint32 singerid,
     const base::Time& begintime,
-    const base::Time& endtime, GridData* griddata)
+    const base::Time& endtime, GridData* griddata, uint32* onlineminute,
+    uint32* effect_day, double* revenue)
 {
     std::vector<SingerDailyData> singerDailyData;
     if (!familyBackground_->GetDailyDataBySingerId(singerid, begintime, endtime,
         &singerDailyData))
     {
         return false;
+    }
+
+    for (const auto& daily : singerDailyData)
+    {
+        if (daily.onlineminute > 60)
+            (*effect_day)++;
+
+        (*revenue) += daily.revenue;
+        (*onlineminute) += daily.onlineminute;
     }
 
     if (!SingerDailyDataToGridData(singerDailyData, griddata))
@@ -223,8 +233,9 @@ bool FamilyDataController::GetDailyDataBySingerId(uint32 singerid,
     return true;
 }
 
-bool FamilyDataController::GetFamilyOpenDayCountSummary(const base::Time& begintime,
-    const base::Time& endtime, GridData* griddata)
+bool FamilyDataController::GetFamilyEffectiveDayCountSummary(
+    const base::Time& begintime, const base::Time& endtime, 
+    GridData* griddata, uint32* effect_count)
 {
     std::vector<uint32> singerids;
     if (!familyBackground_->GetNormalSingerIds(&singerids))
@@ -254,13 +265,15 @@ bool FamilyDataController::GetFamilyOpenDayCountSummary(const base::Time& begint
         singer_summary.push_back(summary_data);
     }
 
-
     for (auto singer : singer_summary)
     {
         auto find_result = singer_summary_map_.find(singer.singerid);
         if (find_result != singer_summary_map_.end())
         {
             uint32 effectivedays = singer.effectivedays;
+            if (effectivedays >= 20)
+                (*effect_count)++;
+
             singer_summary_map_[singer.singerid].effectivedays = effectivedays;
         }
     }

@@ -839,6 +839,7 @@ bool FamilyDaily::ParseSingerDailyData(const std::string& pagedata,
             assert(false);
             return false;
         }
+        singerdailydata.revenue = revenue;
 
         // 周期累计扣分，不处理
         beginpos = endpos;
