@@ -70,10 +70,19 @@ namespace{
         base::SplitStringUsingSubstr(w_online_time, L"时", &hours_minutes);
         uint32 online_minutes = 0;
         bool result = false;
-        if (hours_minutes.size() == 1) // 只有分钟
+        if (hours_minutes.size() == 1)
         {
-            result = base::StringToUint(base::WideToUTF8(w_online_time), &online_minutes);
-            //assert(result);
+            if (w_online_time.find(L"时")!=std::wstring::npos)// 只有小时
+            {
+                uint32 online_hours = 0;
+                result = base::StringToUint(base::WideToUTF8(w_online_time), &online_hours);
+                online_minutes = online_hours * 60;
+            }
+            else // 只有分钟
+            {
+                result = base::StringToUint(base::WideToUTF8(w_online_time), &online_minutes);
+                //assert(result);
+            }
         }
         else if (hours_minutes.size() == 2)
         {
