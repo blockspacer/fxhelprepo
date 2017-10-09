@@ -29,7 +29,8 @@ public:
     bool GetDailyDataBySingerId(uint32 singerid, const base::Time& begintime,
         const base::Time& endtime, std::vector<SingerDailyData>* singerdata);
 
-    bool GetNormalSingerIds(std::vector<uint32>* singerids);
+    bool GetNormalSingerIds(std::vector<uint32>* singerids,
+        const base::Callback<bool(const std::string&)>& assign_check_func);
 
 private:
     std::unique_ptr<FamilyDaily> familyDaily_;

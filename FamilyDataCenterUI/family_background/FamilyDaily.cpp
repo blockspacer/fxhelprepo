@@ -408,7 +408,8 @@ bool FamilyDaily::GetSummaryData(const base::Time& begintime, const base::Time& 
     return result;
 }
 
-bool FamilyDaily::GetNormalSingerList(std::vector<uint32>* singerids)
+bool FamilyDaily::GetNormalSingerList(std::vector<uint32>* singerids,
+    const base::Callback<bool(const std::string&)>& assign_check_func)
 {
     std::string pagedata;
 
@@ -419,26 +420,29 @@ bool FamilyDaily::GetNormalSingerList(std::vector<uint32>* singerids)
     if (!ParsePageCount(pagedata, &pagecount))
         return false;
 
-    std::vector<uint32> temp_singerids;
-    if (!ParseSingerListData(pagedata, &temp_singerids))
+    std::vector<SingerSummaryData> singer_summary_data;
+    if (!ParseSingerListData(pagedata, &singer_summary_data))
         return false;
 
-    singerids->insert(singerids->end(),
-        temp_singerids.begin(), temp_singerids.end());
+    for (const auto& it : singer_summary_data)
+    {
+        if (assign_check_func.Run(it.assign_date_time))
+            singerids->push_back(it.singerid);
+    }
 
     for (uint32 page = 2; page <= pagecount; page++)
     {
         if (!GetSingerListByPage(page, &pagedata))
             continue;
 
-        temp_singerids.clear();
-        if (!ParseSingerListData(pagedata, &temp_singerids))
+        singer_summary_data.clear();
+        if (!ParseSingerListData(pagedata, &singer_summary_data))
             return false;
 
-        if (!temp_singerids.empty())
+        for (const auto& it : singer_summary_data)
         {
-            singerids->insert(singerids->end(),
-                temp_singerids.begin(), temp_singerids.end());
+            if (assign_check_func.Run(it.assign_date_time))
+                singerids->push_back(it.singerid);
         }
     }
 
@@ -865,7 +869,7 @@ bool FamilyDaily::ParseSingerDailyData(const std::string& pagedata,
 }
 
 bool FamilyDaily::ParseSingerListData(const std::string& pagedata,
-    std::vector<uint32>* singerids) const
+    std::vector<SingerSummaryData>* singer_summary_data) const
 {
     bool result = false;
     std::string tabledata;
@@ -911,6 +915,7 @@ bool FamilyDaily::ParseSingerListData(const std::string& pagedata,
             assert(false);
             continue;
         }
+        singerSummaryData.singerid = singerid;
 
         // 直播主播昵称
         beginpos = endpos;
@@ -920,13 +925,14 @@ bool FamilyDaily::ParseSingerListData(const std::string& pagedata,
             continue;
         }
 
-        // 签约时间,不处理
+        // 签约时间, 2016-06-03 13:16:32 要用来判断是否当月签约
         beginpos = endpos;
         if (!GetTdData(trdata, beginpos, &endpos, &tddata))
         {
             assert(false);
             continue;
         }
+        singerSummaryData.assign_date_time = tddata;
 
         // 最近开播时间,不处理
         beginpos = endpos;
@@ -948,7 +954,7 @@ bool FamilyDaily::ParseSingerListData(const std::string& pagedata,
         std::wstring singer_role = base::UTF8ToWide(tddata);
         if (singer_role == L"正式艺人")
         {
-            singerids->push_back(singerid);
+            singer_summary_data->push_back(singerSummaryData);
         }
 
         // 结算密码,不处理

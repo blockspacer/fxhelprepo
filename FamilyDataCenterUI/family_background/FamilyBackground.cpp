@@ -83,9 +83,10 @@ bool FamilyBackground::GetDailyDataBySingerId(uint32 singerid,
     return result;
 }
 
-bool FamilyBackground::GetNormalSingerIds(std::vector<uint32>* singerids)
+bool FamilyBackground::GetNormalSingerIds(std::vector<uint32>* singerids,
+    const base::Callback<bool(const std::string&)>& assign_check_func)
 {
-    bool result = familyDaily_->GetNormalSingerList(singerids);
+    bool result = familyDaily_->GetNormalSingerList(singerids,assign_check_func);
     return true;
 }
 

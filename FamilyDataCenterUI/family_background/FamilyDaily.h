@@ -9,6 +9,7 @@
 #include "Network/CookiesHelper.h"
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/time/time.h"
+#include "third_party/chromium/base/callback.h"
 
 struct SingerDailyData
 {
@@ -30,6 +31,7 @@ public:
     uint32 roomid = 0;
     std::string nickname;
     std::string singerlevel;    //主播等级
+    std::string assign_date_time; // 签约日期
     std::string last_online;    //最近开播时间
     uint32 onlinecount = 0;         //开播次数
     uint32 onlineminute = 0;        //累计直播时长（分钟）
@@ -66,7 +68,8 @@ public:
     bool GetSummaryData(const base::Time& begintime, const base::Time& endtime,
                         std::vector<SingerSummaryData>* summerydata);
 
-    bool GetNormalSingerList(std::vector<uint32>* singerids);
+    bool GetNormalSingerList(std::vector<uint32>* singerids,
+        const base::Callback<bool(const std::string&)>& assign_check_func);
 
     bool WriteResponseDataCallback(const std::string& data);
     bool WriteResponseHeaderCallback(const std::string& data);
@@ -91,7 +94,7 @@ private:
         std::vector<SingerDailyData>* singerdailydata) const;
 
     bool ParseSingerListData(const std::string& pagedata, 
-        std::vector<uint32>* singerids) const;
+        std::vector<SingerSummaryData>* singer_summary_data) const;
 
     bool ParsePageCount(const std::string& pagedata, uint32* pagenumber) const;
 

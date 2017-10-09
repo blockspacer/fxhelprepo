@@ -9,6 +9,7 @@
 #include "third_party/chromium/base/md5.h"
 #include "third_party/chromium/base/strings/string_piece.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
+#include "third_party/chromium/base/strings/string_split.h"
 
 #include "third_party/cryptopp/cryptlib.h"
 #include "third_party/cryptopp/rsa.h"
@@ -469,3 +470,38 @@ std::string RSAEncryptString(std::istream* pubFilename, const std::string& messa
     }
     return ciphertext;
 }
+
+bool DateTimeStringToBaseTime(const std::string& datetime, base::Time* time)
+{
+    // 2016-06-03 13:16:32
+    std::vector<std::string> date_time_vec;
+    base::SplitStringUsingSubstr(datetime, " ", &date_time_vec);
+    if (date_time_vec.size() != 2)
+        return false;
+
+    base::Time::Exploded exploded;
+    std::vector<std::string> year_month_day;
+    base::SplitStringUsingSubstr(date_time_vec.at(0), "-", &year_month_day);
+    if (year_month_day.size() != 3)
+        return false;
+
+    base::StringToInt(year_month_day.at(0), &exploded.year);
+    base::StringToInt(year_month_day.at(1), &exploded.month);
+    base::StringToInt(year_month_day.at(2), &exploded.day_of_month);
+    exploded.day_of_week = 0;
+
+    std::vector<std::string> hour_min_sec;;
+    base::SplitStringUsingSubstr(date_time_vec.at(1), ":", &hour_min_sec);
+    if (hour_min_sec.size() != 3)
+        return false;
+
+    base::StringToInt(hour_min_sec.at(0), &exploded.hour);
+    base::StringToInt(hour_min_sec.at(1), &exploded.minute);
+    base::StringToInt(hour_min_sec.at(2), &exploded.second);
+    exploded.millisecond = 0;
+
+    *time = base::Time::FromLocalExploded(exploded);
+
+    return true;
+}
+

@@ -13,6 +13,8 @@
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/files/file.h"
+#include "third_party/chromium/base/callback.h"
+#include "third_party/chromium/base/bind.h"
 
 //class SingerSummaryData
 //{
@@ -34,6 +36,16 @@
 namespace{
     const wchar_t* patternName = L"pattern.xlsx";
     
+    bool SignedTimeCheck(const base::Time& begintime, const std::string& assing_time)
+    {
+        base::Time time = base::Time::Now();
+        if (!DateTimeStringToBaseTime(assing_time, &time))
+            return false;
+
+        // 因为上月转入艺人，会显示在下月1号的00:00:01秒签约，这里要当有效艺人处理。
+        return time < (begintime + base::TimeDelta::FromSeconds(10));
+    }
+
 
     bool SingerSummaryDataToGridData(
         const std::map<uint32, SingerSummaryData>& singerSummaryData,
@@ -238,7 +250,8 @@ bool FamilyDataController::GetFamilyEffectiveDayCountSummary(
     GridData* griddata, uint32* effect_count)
 {
     std::vector<uint32> singerids;
-    if (!familyBackground_->GetNormalSingerIds(&singerids))
+    auto callback = base::Bind(&SignedTimeCheck, begintime);
+    if (!familyBackground_->GetNormalSingerIds(&singerids, callback))
         return false;
 
     std::vector<SingerSummaryData> singer_summary;
@@ -257,8 +270,6 @@ bool FamilyDataController::GetFamilyEffectiveDayCountSummary(
         summary_data.singerid = singerid;
         for (auto daily : singerDailyData)
         {
-            //if (daily.effectivecount)
-            //    summary_data.effectivedays++;
             if (daily.onlineminute>60)
                 summary_data.effectivedays++;
         }
@@ -331,9 +342,4 @@ bool FamilyDataController::ExportToTxt()
     std::wstring openPath = txtpath.value();
     ShellExecuteW(0, L"open", L"NOTEPAD.EXE", openPath.c_str(), L"", SW_SHOWNORMAL);
     return true;
-}
-
-bool FamilyDataController::GetNormalSingerIds(std::vector<uint32>* singers)
-{
-    return false;
 }

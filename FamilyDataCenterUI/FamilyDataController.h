@@ -40,7 +40,6 @@ public:
     bool ExportToTxt();
 private:
     bool InnerLogin(const std::string& username, const std::string& password);
-    bool GetNormalSingerIds(std::vector<uint32>* singers);
     base::FilePath exePath_;
     std::unique_ptr<FamilyBackground> familyBackground_;
     std::map<uint32, SingerSummaryData> singer_summary_map_;
