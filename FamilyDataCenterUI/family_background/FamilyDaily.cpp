@@ -65,23 +65,26 @@ namespace{
     {
         assert(online_time.size());
         std::wstring w_online_time = base::UTF8ToWide(online_time);
-        w_online_time = w_online_time.substr(0, w_online_time.size() - 1);
         std::vector<std::wstring> hours_minutes;
         base::SplitStringUsingSubstr(w_online_time, L"时", &hours_minutes);
         uint32 online_minutes = 0;
         bool result = false;
         if (hours_minutes.size() == 1)
         {
-            if (w_online_time.find(L"时")!=std::wstring::npos)// 只有小时
+            if (w_online_time.find(L"秒") != std::wstring::npos)// 只有秒
             {
-                uint32 online_hours = 0;
-                result = base::StringToUint(base::WideToUTF8(w_online_time), &online_hours);
-                online_minutes = online_hours * 60;
+                online_minutes = 0;
             }
-            else // 只有分钟
+            else if (w_online_time.find(L"分")!=std::wstring::npos)// 只有分
             {
                 result = base::StringToUint(base::WideToUTF8(w_online_time), &online_minutes);
                 //assert(result);
+            }
+            else // 只有小时
+            {               
+                uint32 online_hours = 0;
+                result = base::StringToUint(base::WideToUTF8(w_online_time), &online_hours);
+                online_minutes = online_hours * 60;
             }
         }
         else if (hours_minutes.size() == 2)
@@ -90,7 +93,7 @@ namespace{
             result = base::StringToUint(base::WideToUTF8(hours_minutes.at(0)), &online_hours);
             assert(result);
             result = base::StringToUint(base::WideToUTF8(hours_minutes.at(1)), &online_minutes);
-            assert(result);
+            assert(result==false);// 因为有"分"为中文，转换失败，但是前面的数字转出来是对的
             online_minutes += online_hours * 60;
         }
         else
