@@ -61,12 +61,14 @@ bool FamilyBackground::GetServerTime(base::Time* server_time) const
 
 bool FamilyBackground::GetSummaryData(const base::Time& begintime, 
     const base::Time& endtime,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
     std::vector<SingerSummaryData>* summary)
 {
     if (!summary)
         return false;
 
-    bool result = familyDaily_->GetSummaryData(begintime, endtime, summary);
+    bool result = familyDaily_->GetSummaryData(begintime, endtime, 
+        progress_callback, summary);
     return result;
 }
 

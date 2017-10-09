@@ -19,9 +19,18 @@ class CFamilyDataCenterUIDlg : public CDialogEx
 // 构造
 public:
 	CFamilyDataCenterUIDlg(CWnd* pParent = NULL);	// 标准构造函数
+    ~CFamilyDataCenterUIDlg();
 
 // 对话框数据
 	enum { IDD = IDD_FAMILYDATACENTERUI_DIALOG };
+
+    enum
+    {
+        WM_USER_MSG = WM_USER + 1,
+        WM_USER_PROGRESS = WM_USER + 2,
+        WM_USER_UPDATE_RESULT = WM_USER + 3,
+        WM_USER_UPDATE_EFFECT_SINGER = WM_USER + 4,
+    };
 
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
@@ -42,13 +51,23 @@ protected:
     afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
     afx_msg void OnPaint();
     afx_msg HCURSOR OnQueryDragIcon();
-  
+
+    LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
+    LRESULT OnUpdateProgress(WPARAM wParam, LPARAM lParam);
+    LRESULT OnUpdateResult(WPARAM wParam, LPARAM lParam);
+    LRESULT OnUpdateEffectSingers(WPARAM wParam, LPARAM lParam);
     DECLARE_MESSAGE_MAP()
 
 private:
     void DisplayDataToGrid(const std::vector<std::wstring> columnlist, 
         const GridData& griddata);
     void DisplayMessage(const std::wstring& message);
+
+    // 异步回调函数，要通过消息机制切换线程后显示在界面上
+    void NotifyMessageCallback(const std::wstring& message);
+    void NotifyUpdateProgress(uint32 current, uint32 all);
+    void NotifyUpdateResult(const GridData& grid_data);
+    void NotifyUpdateEffectSingers(uint32 count);
 
     CListCtrl m_ListCtrl_SummaryData;
     CListBox m_list_message;
@@ -67,4 +86,6 @@ private:
     double m_total_income;
     double m_total_hours;
     int m_new_count;
+    CProgressCtrl m_progress1;
+    CStatic m_static_room_progress;
 };

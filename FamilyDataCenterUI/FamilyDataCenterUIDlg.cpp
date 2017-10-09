@@ -11,6 +11,8 @@
 #include "FamilyDataCenterUI/Config.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/bind.h"
+#include "third_party/chromium/base/callback.h"
 
 
 #ifdef _DEBUG
@@ -25,17 +27,17 @@
 namespace
 {
     std::vector<std::wstring> family_columnlist = {
-        L"主播",
         L"主播id",
+        L"主播昵称",
         L"主播等级",
         L"开播次数",
         L"累计直播",
         L"直播时长",
-        L"PC直播时长",
-        L"手机直播时长",
+        L"PC时长",
+        L"手机时长",
         L"直播次数",
-        L"直播有效天",
-        L"直播间最高人气",
+        L"有效天",
+        L"最高人气",
         L"星豆收入"
     };
 
@@ -44,7 +46,7 @@ namespace
         L"开播次数",
         L"开播时长",
         L"有效直播次数",
-        L"直播间最高人气",
+        L"最高人气",
         L"星豆收入",
         L"周期累计扣分"
     };
@@ -137,6 +139,18 @@ CFamilyDataCenterUIDlg::CFamilyDataCenterUIDlg(CWnd* pParent /*=NULL*/)
     , m_new_count(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+    int day_of_month = 1;
+    int month = m_oleDateTime_Begin.GetMonth();
+    int year = m_oleDateTime_Begin.GetYear();
+    m_oleDateTime_Begin.SetDate(year, month, day_of_month);
+}
+
+CFamilyDataCenterUIDlg::~CFamilyDataCenterUIDlg()
+{
+    if (familyDataController_)
+    {
+        familyDataController_->Finalize();
+    }
 }
 
 void CFamilyDataCenterUIDlg::DoDataExchange(CDataExchange* pDX)
@@ -153,6 +167,8 @@ void CFamilyDataCenterUIDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_EDIT_TOTAL_INCOME, m_total_income);
     DDX_Text(pDX, IDC_EDIT_TOTAL_HOURS, m_total_hours);
     DDX_Text(pDX, IDC_EDIT_NEW_COUNT, m_new_count);
+    DDX_Control(pDX, IDC_PROGRESS1, m_progress1);
+    DDX_Control(pDX, IDC_STATIC_PROGRESS, m_static_room_progress);
 }
 
 BEGIN_MESSAGE_MAP(CFamilyDataCenterUIDlg, CDialogEx)
@@ -165,6 +181,10 @@ BEGIN_MESSAGE_MAP(CFamilyDataCenterUIDlg, CDialogEx)
     ON_NOTIFY(LVN_GETDISPINFO, IDC_LIST_SUMMARY_DATA, &CFamilyDataCenterUIDlg::OnLvnGetdispinfoListSummaryData)
     ON_BN_CLICKED(IDC_BTN_GET_SINGER_DATA, &CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerData)
     ON_BN_CLICKED(IDC_BTN_GET_NEW_SINGER, &CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerEffectiveDays)
+    ON_MESSAGE(WM_USER_MSG, &CFamilyDataCenterUIDlg::OnNotifyMessage)
+    ON_MESSAGE(WM_USER_PROGRESS, &CFamilyDataCenterUIDlg::OnUpdateProgress)
+    ON_MESSAGE(WM_USER_UPDATE_RESULT, &CFamilyDataCenterUIDlg::OnUpdateResult)
+    ON_MESSAGE(WM_USER_UPDATE_EFFECT_SINGER, &CFamilyDataCenterUIDlg::OnUpdateEffectSingers)
 END_MESSAGE_MAP()
 
 
@@ -209,6 +229,7 @@ BOOL CFamilyDataCenterUIDlg::OnInitDialog()
     m_ListCtrl_SummaryData.SetExtendedStyle(dwStyle); //设置扩展风格
 
     familyDataController_.reset(new FamilyDataController);
+    familyDataController_->Initialize();
     std::wstring display_msg;
     familyDataController_->LoadAuthority(&display_msg);
     if (!display_msg.empty())
@@ -290,7 +311,10 @@ void CFamilyDataCenterUIDlg::OnBnClickedGetFamilyData()
     OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
     GridData griddata;
     DisplayMessage(L" GetFamilyData Begin!");
-    bool result = familyDataController_->GetSingerFamilyData(beginTime, endTime, &griddata);
+    bool result = familyDataController_->GetSingerFamilyData(beginTime, endTime, 
+        base::Bind(&CFamilyDataCenterUIDlg::NotifyUpdateProgress, base::Unretained(this)),
+        base::Bind(&CFamilyDataCenterUIDlg::NotifyUpdateResult, base::Unretained(this)));
+
     if (!result)
     {
         DisplayMessage(L" GetFamilyData failed!");
@@ -322,7 +346,7 @@ void CFamilyDataCenterUIDlg::DisplayDataToGrid(
     uint32 i = 0;
     for (const auto& it : columnlist)
     {
-        m_ListCtrl_SummaryData.InsertColumn(i++, it.c_str(), LVCFMT_LEFT, 100);//插入列
+        m_ListCtrl_SummaryData.InsertColumn(i++, it.c_str(), LVCFMT_LEFT, 60);//插入列
     }
 
     //生成新的数据缓冲区
@@ -335,6 +359,31 @@ void CFamilyDataCenterUIDlg::DisplayMessage(const std::wstring& message)
 {
     m_list_message.InsertString(index_++, message.c_str());
     UpdateData(FALSE);
+}
+
+void CFamilyDataCenterUIDlg::NotifyMessageCallback(const std::wstring& message)
+{
+    if (message.empty())
+        return;
+
+    std::wstring* p_msg(new std::wstring(message));
+    this->PostMessage(WM_USER_MSG, 0, (LPARAM)p_msg);
+}
+
+void CFamilyDataCenterUIDlg::NotifyUpdateProgress(uint32 current, uint32 all)
+{
+    this->PostMessage(WM_USER_PROGRESS, current, all);
+}
+
+void CFamilyDataCenterUIDlg::NotifyUpdateResult(const GridData& grid_data)
+{
+    GridData* p_grid_data = new GridData(grid_data);
+    this->PostMessage(WM_USER_UPDATE_RESULT, 0, (LPARAM)(p_grid_data));
+}
+
+void CFamilyDataCenterUIDlg::NotifyUpdateEffectSingers(uint32 count)
+{
+    this->PostMessageW(WM_USER_UPDATE_EFFECT_SINGER, 0, (LPARAM)(count));
 }
 
 void CFamilyDataCenterUIDlg::OnBnClickedBtnExportToExcel()
@@ -446,13 +495,48 @@ void CFamilyDataCenterUIDlg::OnBnClickedBtnGetSingerEffectiveDays()
     base::Time endTime;
     OleDateTimeToBaseTime(m_oleDateTime_Begin, &beginTime);
     OleDateTimeToBaseTime(m_oleDateTime_End, &endTime);
-    GridData griddata;
 
     uint32 effect_count = 0;
     familyDataController_->GetFamilyEffectiveDayCountSummary(
-        beginTime, endTime, &griddata, &effect_count);
+        beginTime, endTime, 
+        base::Bind(&CFamilyDataCenterUIDlg::NotifyUpdateProgress, base::Unretained(this)),
+        base::Bind(&CFamilyDataCenterUIDlg::NotifyUpdateResult, base::Unretained(this)),
+        base::Bind(&CFamilyDataCenterUIDlg::NotifyUpdateEffectSingers, base::Unretained(this)));
+}
 
-    std::wstring weffect_count = base::UintToString16(effect_count);
-    SetDlgItemTextW(IDC_EDIT_EFFECT_SINGER_COUNT, weffect_count.c_str());
-    DisplayDataToGrid(family_columnlist, griddata);
+LRESULT CFamilyDataCenterUIDlg::OnNotifyMessage(WPARAM wParam, LPARAM lParam)
+{
+    std::wstring* message = reinterpret_cast<std::wstring*>(lParam);
+    DisplayMessage(*message);
+    delete message;
+    return 0;
+}
+
+LRESULT CFamilyDataCenterUIDlg::OnUpdateProgress(WPARAM wParam, LPARAM lParam)
+{
+    uint32 current = (uint32)(wParam);
+    uint32 all = (uint32)(lParam);
+
+    int pos = static_cast<int>(current*100.0 / all);
+    std::wstring show_msg = base::UintToString16(current) +
+        L" / " + base::UintToString16(all);
+
+    m_progress1.SetPos(pos);
+    m_static_room_progress.SetWindowTextW(show_msg.c_str());
+    return 0;
+}
+
+LRESULT CFamilyDataCenterUIDlg::OnUpdateResult(WPARAM wParam, LPARAM lParam)
+{
+    GridData* griddata = (GridData*)(lParam);
+    DisplayDataToGrid(family_columnlist, *griddata);
+    delete griddata;
+    return 0;
+}
+
+LRESULT CFamilyDataCenterUIDlg::OnUpdateEffectSingers(WPARAM wParam, LPARAM lParam)
+{
+    std::wstring effect_count = base::UintToString16(lParam);
+    SetDlgItemTextW(IDC_EDIT_EFFECT_SINGER_COUNT, effect_count.c_str());
+    return 0;
 }

@@ -109,6 +109,8 @@ namespace{
 
 FamilyDataController::FamilyDataController()
     :authority_(new FamilyDataAuthority)
+    , thread_(new base::Thread("FamilyDataController"))
+    , runner_()
 {
     base::FilePath path;
     PathService::Get(base::DIR_EXE, &path);
@@ -120,6 +122,25 @@ FamilyDataController::FamilyDataController()
 
 FamilyDataController::~FamilyDataController()
 {
+}
+
+bool FamilyDataController::Initialize()
+{
+    thread_->Start();
+    runner_ = thread_->message_loop_proxy();
+    return true;
+}
+
+void FamilyDataController::Finalize()
+{
+    runner_->PostTask(FROM_HERE, 
+        base::Bind(&FamilyDataController::DoStop, base::Unretained(this)));
+    thread_->Stop();
+}
+
+void FamilyDataController::DoStop()
+{
+
 }
 
 bool FamilyDataController::LoadAuthority(std::wstring* diaplay_message)
@@ -179,16 +200,28 @@ bool FamilyDataController::Login(const std::wstring& wusername,
 bool FamilyDataController::GetSingerFamilyData(
     const base::Time& begintime,
     const base::Time& endtime,
-    GridData* griddata)
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(const GridData&)>& result_callback)
 {
+    runner_->PostTask(FROM_HERE,
+        base::Bind(&FamilyDataController::DoGetSingerFamilyData,
+        base::Unretained(this), begintime, endtime, progress_callback, result_callback));
+    return true;
+}
+
+void FamilyDataController::DoGetSingerFamilyData(
+    const base::Time& begintime,
+    const base::Time& endtime,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(const GridData&)>& result_callback)
+{
+    GridData griddata;
     if (!familyBackground_)
-        return false;
+        return result_callback.Run(griddata);
 
     std::vector<SingerSummaryData> singer_summary;
-    if (!familyBackground_->GetSummaryData(begintime, endtime, &singer_summary))
-    {
-        return false;
-    }
+    if (!familyBackground_->GetSummaryData(begintime, endtime, progress_callback, &singer_summary))
+        return result_callback.Run(griddata);
 
     for (auto singer : singer_summary)
     {
@@ -205,16 +238,10 @@ bool FamilyDataController::GetSingerFamilyData(
         }
     }
     
-    if (!SingerSummaryDataToGridData(singer_summary_map_, griddata))
-    {
-        return false;
-    }
-
-    display_griddata_ = *griddata;
-
-    return true;
+    SingerSummaryDataToGridData(singer_summary_map_, &griddata);
+    display_griddata_ = griddata;
+    result_callback.Run(griddata);
 }
-
 
 bool FamilyDataController::GetDailyDataBySingerId(uint32 singerid,
     const base::Time& begintime,
@@ -246,16 +273,36 @@ bool FamilyDataController::GetDailyDataBySingerId(uint32 singerid,
 }
 
 bool FamilyDataController::GetFamilyEffectiveDayCountSummary(
-    const base::Time& begintime, const base::Time& endtime, 
-    GridData* griddata, uint32* effect_count)
+    const base::Time& begintime,
+    const base::Time& endtime,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(const GridData&)>& result_callback,
+    const base::Callback<void(uint32)>& effective_count_callback)
 {
+    return runner_->PostTask(FROM_HERE,
+        base::Bind(&FamilyDataController::DoGetFamilyEffectiveDayCountSummary,
+        base::Unretained(this),
+        begintime, endtime, progress_callback, result_callback, effective_count_callback));
+}
+
+void FamilyDataController::DoGetFamilyEffectiveDayCountSummary(
+    const base::Time& begintime,
+    const base::Time& endtime,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(const GridData&)>& result_callback,
+    const base::Callback<void(uint32)>& effective_count_callback)
+{
+    GridData griddata;
     std::vector<uint32> singerids;
     auto callback = base::Bind(&SignedTimeCheck, begintime);
     if (!familyBackground_->GetNormalSingerIds(&singerids, callback))
-        return false;
+        return result_callback.Run(griddata);
 
     std::vector<SingerSummaryData> singer_summary;
     uint32 failed_count = 0;
+    uint32 all_count = singerids.size();
+    uint32 handle_count = 0;
+    progress_callback.Run(0, all_count);
     for (auto singerid : singerids)
     {
         std::vector<SingerDailyData> singerDailyData;
@@ -273,9 +320,11 @@ bool FamilyDataController::GetFamilyEffectiveDayCountSummary(
             if (daily.onlineminute>60)
                 summary_data.effectivedays++;
         }
+        progress_callback.Run(++handle_count, all_count);
         singer_summary.push_back(summary_data);
     }
 
+    uint32 effect_count = 0;
     for (auto singer : singer_summary)
     {
         auto find_result = singer_summary_map_.find(singer.singerid);
@@ -283,17 +332,17 @@ bool FamilyDataController::GetFamilyEffectiveDayCountSummary(
         {
             uint32 effectivedays = singer.effectivedays;
             if (effectivedays >= 20)
-                (*effect_count)++;
+                effect_count++;
 
             singer_summary_map_[singer.singerid].effectivedays = effectivedays;
         }
     }
 
-    SingerSummaryDataToGridData(singer_summary_map_, griddata);
+    effective_count_callback.Run(effect_count);
 
-    display_griddata_ = *griddata;
-
-    return true;
+    SingerSummaryDataToGridData(singer_summary_map_, &griddata);
+    display_griddata_ = griddata;
+    result_callback.Run(griddata);
 }
 
 

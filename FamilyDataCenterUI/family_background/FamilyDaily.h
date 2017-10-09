@@ -66,7 +66,8 @@ public:
                                 std::vector<SingerDailyData>* dailydata);
 
     bool GetSummaryData(const base::Time& begintime, const base::Time& endtime,
-                        std::vector<SingerSummaryData>* summerydata);
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        std::vector<SingerSummaryData>* summerydata);
 
     bool GetNormalSingerList(std::vector<uint32>* singerids,
         const base::Callback<bool(const std::string&)>& assign_check_func);

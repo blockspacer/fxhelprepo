@@ -362,7 +362,9 @@ bool FamilyDaily::GetDailyDataBySingerId(uint32 singerid,
 //Accept-Language: zh-CN,zh;q=0.8
 //Cookie: PHPSESSID=3dfg2i875s2p7hcousceilmag3; f_p=f_56a0f5ea31c3f7.88052429
 
-bool FamilyDaily::GetSummaryData(const base::Time& begintime, const base::Time& endtime,
+bool FamilyDaily::GetSummaryData(const base::Time& begintime, 
+    const base::Time& endtime,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
     std::vector<SingerSummaryData>* summerydata)
 {
     std::string pagedata;
@@ -385,6 +387,10 @@ bool FamilyDaily::GetSummaryData(const base::Time& begintime, const base::Time& 
 
     assert(pagecount);
     assert(!pagesummary.empty());
+    if (pagecount <= 1)
+        progress_callback.Run(1, 1);
+    else
+        progress_callback.Run(1, pagecount);
 
     summerydata->assign(pagesummary.begin(), pagesummary.end());
 
@@ -404,6 +410,7 @@ bool FamilyDaily::GetSummaryData(const base::Time& begintime, const base::Time& 
         assert(!pagesummary.empty());
         summerydata->insert(summerydata->end(), 
             pagesummary.begin(), pagesummary.end());
+        progress_callback.Run(page, pagecount);
     }
     return result;
 }

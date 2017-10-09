@@ -25,6 +25,7 @@ public:
     bool Login(const std::string& username, const std::string& password);
     bool GetServerTime(base::Time* server_time) const;
     bool GetSummaryData(const base::Time& begintime, const base::Time& endtime, 
+        const base::Callback<void(uint32, uint32)>& progress_callback,
         std::vector<SingerSummaryData>* summary);
     bool GetDailyDataBySingerId(uint32 singerid, const base::Time& begintime,
         const base::Time& endtime, std::vector<SingerDailyData>* singerdata);
