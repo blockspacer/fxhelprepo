@@ -7,6 +7,8 @@
 #include <string>
 #include <iostream>
 #include <assert.h>
+#include "UserTracker.h"
+#include "SingerLocation.h"
 #include "Network/CurlWrapper.h"
 #include "Network/EncodeHelper.h"
 #include "Network/Network.h"
@@ -15,7 +17,6 @@
 #include "third_party/chromium/base/run_loop.h"
 #include "third_party/zlib/zlib.h"
 #include "third_party/chromium/base/path_service.h"
-#include "UserTracker.h"
 #include "third_party/chromium/base/files/file_util.h"
 #include "third_party/chromium/base/command_line.h"
 #include "third_party/chromium/base/at_exit.h"
@@ -68,13 +69,16 @@ int _tmain(int argc, _TCHAR* argv[])
     InitAppLog();
     NetworkInitialize();
 
-    std::unique_ptr<TcpClientController> tcp_manager(new TcpClientController);
-    tcp_manager->Initialize();
-    SingleUserSingleRoomTest(tcp_manager.get());
-    tcp_manager->Finalize();
-    ZLibTest();
-    UserTracker tracker;
-    tracker.Test();
+    //std::unique_ptr<TcpClientController> tcp_manager(new TcpClientController);
+    //tcp_manager->Initialize();
+    //SingleUserSingleRoomTest(tcp_manager.get());
+    //tcp_manager->Finalize();
+    //ZLibTest();
+    //UserTracker tracker;
+    //tracker.Test();
+
+    SingerLocation location;
+    location.Test();
 
     NetworkFainalize();
 	return 0;
