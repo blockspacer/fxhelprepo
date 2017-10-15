@@ -62,6 +62,7 @@ protected:
     afx_msg void OnHdnBegintrackListResult(NMHDR *pNMHDR, LRESULT *pResult);
     afx_msg void OnBnClickedBtnClearList();
     afx_msg void OnBnClickedBtnClearCache();
+    afx_msg void OnBnClickedBtnTagsBeauty();
 
 protected:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
@@ -95,6 +96,5 @@ private:
     CButton m_check_diamon;
     CButton m_check_1_3_crown;
     CButton m_check_4_crown_up;
-public:
-    afx_msg void OnBnClickedBtnTagsBeauty();
+    CEdit m_edit_last_online_min;
 };

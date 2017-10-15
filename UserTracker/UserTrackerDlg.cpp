@@ -57,6 +57,7 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_DIAMON, m_check_diamon);
     DDX_Control(pDX, IDC_CHK_1_4_CROWN, m_check_1_3_crown);
     DDX_Control(pDX, IDC_CHK_5_CROWN, m_check_4_crown_up);
+    DDX_Control(pDX, IDC_EDIT_LAST_ONLINE, m_edit_last_online_min);
 }
 
 BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
@@ -395,5 +396,10 @@ void CUserTrackerDlg::OnBnClickedBtnClearList()
 
 void CUserTrackerDlg::OnBnClickedBtnTagsBeauty()
 {
-    // TODO:  在此添加控件通知处理程序代码
+    CString cs_last_online_min;
+    m_edit_account.GetWindowText(cs_last_online_min);
+
+    tracker_helper_->GetAllBeautyStarForNoClan(
+        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
+        base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this)));
 }

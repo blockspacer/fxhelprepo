@@ -26,6 +26,15 @@ struct FollowUserInfo
     std::string last_login;
 };
 
+struct DisplayRoomInfo
+{
+    uint32 roomid;
+    uint32 starid;
+    uint32 star_level;
+    uint32 status;
+    uint32 last_online;
+};
+
 class UserTrackerHelper
 {
 public:
@@ -73,7 +82,9 @@ public:
 
     bool ClearCache();
 
-    bool GetAllBeautyStarForNoClan(const base::Callback<void(uint32, uint32)>& progress_callback,
+    // 获取所有女神分类中没有公会的主播，不管是否开播
+    bool GetAllBeautyStarForNoClan(
+        const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
 
 private:
@@ -108,7 +119,7 @@ private:
     bool GetPhoneRoomInfos(std::vector<uint32>* roomids);
 
     bool GetAllStarRoomInfos(std::vector<uint32>* roomids); // 从全站获取所有正在直播的主播直播粗略信息，为下一步获取房间用户列表做准备
-    bool GetTargetStarRoomInfos(const std::string& url, std::vector<uint32>* roomids);
+    bool GetTargetStarRoomInfos(const std::string& url, std::vector<DisplayRoomInfo>* roomids);
 
     // 强制更新房间用户信息，roomid_user_map返回所有房间在线用户信息
     bool GetAllRoomViewers(const std::vector<uint32>& roomids,
