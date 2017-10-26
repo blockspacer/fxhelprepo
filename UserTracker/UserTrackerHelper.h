@@ -87,6 +87,10 @@ public:
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
 
+    bool RunSearchHotKey(const std::wstring& hotkey, uint32 times,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
+
 private:
 
     void DoLoginUser(const std::string& user_name, 
@@ -112,6 +116,14 @@ private:
     void DoGetUserLocationByUserId(const std::vector<uint32> user_ids,
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
+
+    void DoSearchHotKey(const std::wstring& hotkey, uint32 times,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
+
+    void SearchHotKeyCallback(uint32 all_times,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        bool result);
 
     void DoClearCache();
 
@@ -186,5 +198,7 @@ private:
     uint32 all_room_count_ = 0;
     uint32 current_room_count_ = 0;
     bool is_expired = false; // 内部控制是否过期，如果过期，把配置文件写坏，以后也不让访问
+
+    uint32 search_count_ = 0;
 };
 

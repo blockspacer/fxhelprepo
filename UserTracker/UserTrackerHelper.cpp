@@ -475,6 +475,46 @@ bool UserTrackerHelper::GetAllBeautyStarForNoClan(
     return true;
 }
 
+bool UserTrackerHelper::RunSearchHotKey(const std::wstring& hotkey, uint32 times,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    worker_thread_->message_loop()->PostTask(FROM_HERE,
+        base::Bind(&UserTrackerHelper::DoSearchHotKey,
+        base::Unretained(this), hotkey, times, progress_callback, result_callback));
+    return true;
+}
+
+void UserTrackerHelper::DoSearchHotKey(const std::wstring& hotkey, uint32 times,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    search_count_ = 0;
+    auto callback = std::bind(&UserTrackerHelper::SearchHotKeyCallback,
+        this, times, progress_callback, std::placeholders::_1);
+    HttpRequest request;
+    request.url = std::string("http://service.fanxing.kugou.com/pt_search/pcsearch/v1/hot_words.jsonp");
+    request.queries["keywords"] = base::WideToUTF8(hotkey);
+    request.queries["num"] = "5";
+    request.queries["_t"] = GetNowTimeString();
+    request.queries["callback"] = "jsonpcallback_httpservicefanxingkugoucompt_searchpcsearchv1type_alljsonpkeywordsE5BEAEE7AC91nums168200_t1509013785090";
+
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/";
+    request.cookies = user_->GetCookies();
+    request.asyncHttpResponseCallback = callback;
+
+    easy_http_impl_->AsyncHttpRequest(request);
+}
+
+void UserTrackerHelper::SearchHotKeyCallback(uint32 all_times, 
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    bool result)
+{
+    search_count_++;
+    progress_callback.Run(search_count_, all_times);
+}
+
 bool UserTrackerHelper::GetDanceRoomInfos(std::vector<uint32>* roomids)
 {
     // 暂时不实现，没实际利用价值

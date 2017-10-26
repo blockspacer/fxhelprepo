@@ -97,4 +97,9 @@ private:
     CButton m_check_1_3_crown;
     CButton m_check_4_crown_up;
     CEdit m_edit_last_online_min;
+public:
+    afx_msg void OnBnClickedBtnHotSearchHit();
+private:
+    CEdit m_edit_hot_keys;
+    CEdit m_edit_hot_key_times;
 };

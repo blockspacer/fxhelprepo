@@ -396,8 +396,8 @@ void CUserTrackerDlg::OnBnClickedBtnClearList()
 
 void CUserTrackerDlg::OnBnClickedBtnTagsBeauty()
 {
-    CString cs_last_online_min;
-    m_edit_account.GetWindowText(cs_last_online_min);
+    CString cs_last_online_days;
+    m_edit_account.GetWindowText(cs_last_online_days);
 
     tracker_helper_->GetAllBeautyStarForNoClan(
         base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
