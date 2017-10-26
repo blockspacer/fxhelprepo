@@ -58,6 +58,8 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_CHK_1_4_CROWN, m_check_1_3_crown);
     DDX_Control(pDX, IDC_CHK_5_CROWN, m_check_4_crown_up);
     DDX_Control(pDX, IDC_EDIT_LAST_ONLINE, m_edit_last_online_min);
+    DDX_Control(pDX, IDC_EDIT_HOT_KEY, m_edit_hot_keys);
+    DDX_Control(pDX, IDC_EDIT_HOT_KEY_TIMES, m_edit_hot_key_times);
 }
 
 BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
@@ -77,6 +79,7 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_CLEAR_LIST, &CUserTrackerDlg::OnBnClickedBtnClearList)
     ON_BN_CLICKED(IDC_BTN_CLEAR_CACHE, &CUserTrackerDlg::OnBnClickedBtnClearCache)
     ON_BN_CLICKED(IDC_BTN_TAGS_BEAUTY, &CUserTrackerDlg::OnBnClickedBtnTagsBeauty)
+    ON_BN_CLICKED(IDC_BTN_HOT_SEARCH_HIT, &CUserTrackerDlg::OnBnClickedBtnHotSearchHit)
 END_MESSAGE_MAP()
 
 
@@ -396,10 +399,22 @@ void CUserTrackerDlg::OnBnClickedBtnClearList()
 
 void CUserTrackerDlg::OnBnClickedBtnTagsBeauty()
 {
-    CString cs_last_online_days;
-    m_edit_account.GetWindowText(cs_last_online_days);
+    CString cs_last_online_min;
+    m_edit_account.GetWindowText(cs_last_online_min);
 
     tracker_helper_->GetAllBeautyStarForNoClan(
         base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
         base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this)));
+}
+
+
+void CUserTrackerDlg::OnBnClickedBtnHotSearchHit()
+{
+    CString cs_hot_keys;
+    m_edit_hot_keys.GetWindowText(cs_hot_keys);
+
+    CString cs_hot_key_times;
+    m_edit_hot_key_times.GetWindowText(cs_hot_key_times);
+
+
 }
