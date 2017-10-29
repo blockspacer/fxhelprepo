@@ -60,6 +60,8 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_LAST_ONLINE, m_edit_last_online_min);
     DDX_Control(pDX, IDC_EDIT_HOT_KEY, m_edit_hot_keys);
     DDX_Control(pDX, IDC_EDIT_HOT_KEY_TIMES, m_edit_hot_key_times);
+    DDX_Control(pDX, IDC_EDIT_ROOMID_MIN, m_edit_roomid_min);
+    DDX_Control(pDX, IDC_EDIT_ROOMID_MAX, m_edit_roomid_max);
 }
 
 BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
@@ -80,6 +82,7 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_CLEAR_CACHE, &CUserTrackerDlg::OnBnClickedBtnClearCache)
     ON_BN_CLICKED(IDC_BTN_TAGS_BEAUTY, &CUserTrackerDlg::OnBnClickedBtnTagsBeauty)
     ON_BN_CLICKED(IDC_BTN_HOT_SEARCH_HIT, &CUserTrackerDlg::OnBnClickedBtnHotSearchHit)
+    ON_BN_CLICKED(IDC_BTN_SEARCH_RANGE, &CUserTrackerDlg::OnBnClickedBtnSearchRange)
 END_MESSAGE_MAP()
 
 
@@ -123,6 +126,8 @@ BOOL CUserTrackerDlg::OnInitDialog()
     m_check_diamon.SetCheck(TRUE);
     m_check_1_3_crown.SetCheck(TRUE);
     m_check_4_crown_up.SetCheck(TRUE);
+
+    m_edit_last_online_min.SetWindowTextW(L"300");
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -400,9 +405,12 @@ void CUserTrackerDlg::OnBnClickedBtnClearList()
 void CUserTrackerDlg::OnBnClickedBtnTagsBeauty()
 {
     CString cs_last_online_min;
-    m_edit_account.GetWindowText(cs_last_online_min);
+    m_edit_last_online_min.GetWindowText(cs_last_online_min);
 
-    tracker_helper_->GetAllBeautyStarForNoClan(
+    uint32 days = 0;
+    base::StringToUint(base::WideToUTF8(cs_last_online_min.GetBuffer()), &days);
+
+    tracker_helper_->GetAllBeautyStarForNoClan(days,
         base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
         base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this)));
 }
@@ -416,5 +424,31 @@ void CUserTrackerDlg::OnBnClickedBtnHotSearchHit()
     CString cs_hot_key_times;
     m_edit_hot_key_times.GetWindowText(cs_hot_key_times);
 
+    uint32 hot_key_times = 0;
+    base::StringToUint(base::WideToUTF8(cs_hot_key_times.GetBuffer()), &hot_key_times);
+    tracker_helper_->RunSearchHotKey(cs_hot_keys.GetBuffer(), hot_key_times,
+        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)));
 
+}
+
+void CUserTrackerDlg::OnBnClickedBtnSearchRange()
+{
+    CString cs_last_online_min;
+    m_edit_last_online_min.GetWindowText(cs_last_online_min);
+    uint32 days = 0;
+    base::StringToUint(base::WideToUTF8(cs_last_online_min.GetBuffer()), &days);
+
+    CString cs_roomid_min;
+    m_edit_roomid_min.GetWindowText(cs_roomid_min);
+    uint32 roomid_min = 0;
+    base::StringToUint(base::WideToUTF8(cs_roomid_min.GetBuffer()), &roomid_min);
+
+    CString cs_roomid_max;
+    m_edit_roomid_max.GetWindowText(cs_roomid_max);
+    uint32 roomid_max = 0;
+    base::StringToUint(base::WideToUTF8(cs_roomid_max.GetBuffer()), &roomid_max);
+
+    tracker_helper_->RunSearchRoomIdRange(days, roomid_min, roomid_max,
+        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
+        base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this)));
 }

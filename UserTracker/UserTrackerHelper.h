@@ -83,11 +83,14 @@ public:
     bool ClearCache();
 
     // 获取所有女神分类中没有公会的主播，不管是否开播
-    bool GetAllBeautyStarForNoClan(
+    bool GetAllBeautyStarForNoClan(uint32 days,
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
 
     bool RunSearchHotKey(const std::wstring& hotkey, uint32 times,
+        const base::Callback<void(uint32, uint32)>& progress_callback);
+
+    void RunSearchRoomIdRange(uint32 days, uint32 roomid_min, uint32 roomid_max,
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
 
@@ -118,12 +121,34 @@ private:
         const base::Callback<void(uint32, uint32)>& result_callback);
 
     void DoSearchHotKey(const std::wstring& hotkey, uint32 times,
-        const base::Callback<void(uint32, uint32)>& progress_callback,
-        const base::Callback<void(uint32, uint32)>& result_callback);
+        const base::Callback<void(uint32, uint32)>& progress_callback);
 
     void SearchHotKeyCallback(uint32 all_times,
         const base::Callback<void(uint32, uint32)>& progress_callback,
-        bool result);
+        const HttpResponse& response);
+
+    void SearchRoomIdRangeCallback(uint32 all_times,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const HttpResponse& response);
+
+    bool DoOpenRoomForGetSingerid(
+        uint32 roomid,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
+    void OpenRoomForGetSingeridCallback(
+        uint32 roomid,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback,
+        const HttpResponse& response);
+
+    bool DoGetSingerLastOnline(uint32 roomid, const std::string& singerid,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback);
+
+    void GetSingerLastOnlineCallback(uint32 roomid,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const base::Callback<void(uint32, uint32)>& result_callback,
+        const HttpResponse& response);
 
     void DoClearCache();
 
@@ -199,6 +224,6 @@ private:
     uint32 current_room_count_ = 0;
     bool is_expired = false; // 内部控制是否过期，如果过期，把配置文件写坏，以后也不让访问
 
-    uint32 search_count_ = 0;
+    uint32 search_hot_key_count_ = 0;
 };
 

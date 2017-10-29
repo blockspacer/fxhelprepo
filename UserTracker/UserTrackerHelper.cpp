@@ -23,8 +23,10 @@ namespace
     {
         base::FilePath path;
         PathService::Get(base::DIR_EXE, &path);
-
-        path = path.Append(L"搜索官方主播结果.txt");
+        std::wstring time = base::UTF8ToWide(GetNowTimeString());
+        std::wstring filename = L"搜索官方主播结果";
+        filename += time + L".txt";
+        path = path.Append(filename);
         *outpath = path;
         return true;
     }
@@ -48,10 +50,10 @@ bool UserTrackerHelper::Initialize()
     CurlWrapper::CurlInit();
     tracker_authority_.reset(new UserTrackerAuthority);
     AuthorityHelper authority_helper;
-    if (!authority_helper.LoadUserTrackerAuthority(tracker_authority_.get()))
-    {
-        return false;
-    }
+    //if (!authority_helper.LoadUserTrackerAuthority(tracker_authority_.get()))
+    //{
+    //    return false;
+    //}
     
     authority_helper.GetTrackerAuthorityDisplayInfo(
         *tracker_authority_.get(), &authority_msg_);
@@ -437,7 +439,7 @@ void UserTrackerHelper::DoClearCache()
     roomid_userid_map_.clear();
 }
 
-bool UserTrackerHelper::GetAllBeautyStarForNoClan(
+bool UserTrackerHelper::GetAllBeautyStarForNoClan(uint32 days,
     const base::Callback<void(uint32, uint32)>& progress_callback,
     const base::Callback<void(uint32, uint32)>& result_callback)
 {
@@ -464,7 +466,7 @@ bool UserTrackerHelper::GetAllBeautyStarForNoClan(
     for (const auto& room : all_roomids)
     {
         progress_callback.Run(++count, all_count);
-        if (room.last_online > 160) // 接近一年没播的主播
+        if (room.last_online > days) // 接近一年没播的主播
         {
             result_room.push_back(room);
             result_callback.Run(0, room.roomid);
@@ -476,20 +478,18 @@ bool UserTrackerHelper::GetAllBeautyStarForNoClan(
 }
 
 bool UserTrackerHelper::RunSearchHotKey(const std::wstring& hotkey, uint32 times,
-    const base::Callback<void(uint32, uint32)>& progress_callback,
-    const base::Callback<void(uint32, uint32)>& result_callback)
+    const base::Callback<void(uint32, uint32)>& progress_callback)
 {
     worker_thread_->message_loop()->PostTask(FROM_HERE,
         base::Bind(&UserTrackerHelper::DoSearchHotKey,
-        base::Unretained(this), hotkey, times, progress_callback, result_callback));
+        base::Unretained(this), hotkey, times, progress_callback));
     return true;
 }
 
 void UserTrackerHelper::DoSearchHotKey(const std::wstring& hotkey, uint32 times,
-    const base::Callback<void(uint32, uint32)>& progress_callback,
-    const base::Callback<void(uint32, uint32)>& result_callback)
+    const base::Callback<void(uint32, uint32)>& progress_callback)
 {
-    search_count_ = 0;
+    search_hot_key_count_ = 0;
     auto callback = std::bind(&UserTrackerHelper::SearchHotKeyCallback,
         this, times, progress_callback, std::placeholders::_1);
     HttpRequest request;
@@ -507,12 +507,223 @@ void UserTrackerHelper::DoSearchHotKey(const std::wstring& hotkey, uint32 times,
     easy_http_impl_->AsyncHttpRequest(request);
 }
 
+void UserTrackerHelper::RunSearchRoomIdRange(
+    uint32 days, uint32 roomid_min, uint32 roomid_max,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    if (!worker_thread_->task_runner()->BelongsToCurrentThread())
+    {
+        worker_thread_->message_loop()->PostTask(FROM_HERE,
+            base::Bind(&UserTrackerHelper::RunSearchRoomIdRange,
+            base::Unretained(this), days, roomid_min, roomid_max, 
+            progress_callback, result_callback));
+        return;
+    }
+
+    if (roomid_max < roomid_min)
+        return;
+
+    std::vector<uint32> roomids;
+    std::wstring msg;
+    for (uint32 roomid = roomid_min; roomid <= roomid_max; roomid++)
+    {
+        roomids.push_back(roomid);
+    }
+    all_room_count_ = roomids.size();
+    current_room_count_ = 0;
+
+    msg = L"开始转移任务";
+    message_callback_.Run(msg);
+    uint32 count = 0;
+
+    for (auto roomid : roomids)
+    {
+        progress_callback.Run(++count, roomids.size());
+        std::string singerid;
+        DoOpenRoomForGetSingerid(roomid, progress_callback, result_callback);
+    }
+
+    msg = L"转移任务成功";
+    message_callback_.Run(msg);
+
+    //base::FilePath path;
+    //if (!GetOutputFileName(&path))
+    //    return;
+
+    //// 特殊处理，11111111是放出去的测试用户，不导出房间号
+    //if (tracker_authority_->user_id != 11111111)
+    //{
+    //    base::File file;
+    //    file.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    //    for (auto roomid : roomlist)
+    //    {
+    //        std::string str_roomid = base::UintToString(roomid);
+    //        LOG(INFO) << "=======" << roomid;
+    //        file.WriteAtCurrentPos(str_roomid.c_str(), str_roomid.size());
+    //        file.WriteAtCurrentPos("\r\n", 2);
+    //    }
+    //    file.Close();
+    //}
+
+    return;
+}
+
+
+bool UserTrackerHelper::DoOpenRoomForGetSingerid(uint32 roomid,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    auto callback = std::bind(&UserTrackerHelper::OpenRoomForGetSingeridCallback,
+        this, roomid, progress_callback, result_callback, std::placeholders::_1);
+    HttpRequest request;
+    request.url = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid);
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/";
+    request.asyncHttpResponseCallback = callback;
+
+    return easy_http_impl_->AsyncHttpRequest(request);
+}
+
+void UserTrackerHelper::OpenRoomForGetSingeridCallback(
+    uint32 roomid,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback,
+    const HttpResponse& response)
+{
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+
+    std::string singerid;;
+    do
+    {
+        // 打开房间的功能不需要处理返回来的页面数据
+        if (content.empty())
+            break;
+
+        // 普通房间
+        std::string isClanRoomMark = "isClanRoom";
+        std::string starId = "starId";
+        auto isClanRoomPos = content.find(isClanRoomMark);
+        if (isClanRoomPos == std::string::npos)
+            break;
+
+        auto starPos = content.find(starId, isClanRoomPos + isClanRoomMark.length());
+
+        auto beginPos = content.find(':', starPos);
+        beginPos += 1;
+        auto endPos = content.find(',', beginPos);
+        std::string temp = content.substr(beginPos, endPos - beginPos);
+
+        RemoveSpace(&temp);
+        temp = temp.substr(1, temp.length() - 2);
+        if (temp.length() < 5)
+            break;
+
+        singerid = temp;
+    } while (0);
+
+    if (singerid.empty())
+    {
+        std::wstring str_roomid = base::UintToString16(roomid);
+        std::wstring msg = str_roomid + L"无法获取房间信息";
+        message_callback_.Run(msg);
+        return progress_callback.Run(++current_room_count_, all_room_count_);
+    }
+
+    // 继续下一个流程，获取上次上播时间
+    DoGetSingerLastOnline(roomid, singerid, progress_callback, result_callback);
+}
+
+bool UserTrackerHelper::DoGetSingerLastOnline(
+    uint32 roomid, const std::string& singerid,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    auto callback = std::bind(&UserTrackerHelper::GetSingerLastOnlineCallback,
+        this, roomid, progress_callback, result_callback, std::placeholders::_1);
+
+    std::string url = "http://fanxing.kugou.com";
+    url += "/index.php";
+    HttpRequest request;
+    request.url = url;
+    request.queries["action"] = "user";
+    request.queries["id"] = singerid;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+
+    request.asyncHttpResponseCallback = callback;
+
+    return easy_http_impl_->AsyncHttpRequest(request);
+}
+
+void UserTrackerHelper::GetSingerLastOnlineCallback(
+    uint32 roomid,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const base::Callback<void(uint32, uint32)>& result_callback,
+    const HttpResponse& response)
+{
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+
+    uint32 last_online_month = 0;
+    do 
+    {
+        if (response.content.empty())
+            break;
+
+        std::string responsedata(response.content.begin(), response.content.end());
+
+        std::string target = base::WideToUTF8(L"上次直播");
+        auto beginpos = responsedata.find(target);
+        if (beginpos == std::string::npos)
+            break;
+
+        beginpos += target.size();
+        beginpos = responsedata.find("<dd>", beginpos);
+        beginpos += 4;
+        auto endpos = responsedata.find("</dd>", beginpos);
+        if (endpos == std::string::npos)
+            break;
+
+        std::string time_string = responsedata.substr(beginpos, endpos - beginpos);
+
+        endpos = time_string.find(base::WideToUTF8(L"月前"));
+
+        if (endpos == std::string::npos)
+            break;
+
+        std::string month_string = time_string.substr(0, endpos);
+
+        std::wstring msg = base::Uint64ToString16(roomid) + L":" + base::UTF8ToWide(month_string);
+        message_callback_.Run(msg);
+
+        if (!base::StringToUint(month_string, &last_online_month))
+            break;
+
+    } while (0);
+    
+    progress_callback.Run(++current_room_count_, all_room_count_);
+    if (last_online_month>=11)
+    {
+        result_callback.Run(0, roomid);
+    }
+}
+
+void UserTrackerHelper::SearchRoomIdRangeCallback(uint32 all_times,
+    const base::Callback<void(uint32, uint32)>& progress_callback,
+    const HttpResponse& response)
+{
+    search_hot_key_count_++;
+    progress_callback.Run(search_hot_key_count_, all_times);
+}
+
 void UserTrackerHelper::SearchHotKeyCallback(uint32 all_times, 
     const base::Callback<void(uint32, uint32)>& progress_callback,
-    bool result)
+    const HttpResponse& response)
 {
-    search_count_++;
-    progress_callback.Run(search_count_, all_times);
+    search_hot_key_count_++;
+    progress_callback.Run(search_hot_key_count_, all_times);
 }
 
 bool UserTrackerHelper::GetDanceRoomInfos(std::vector<uint32>* roomids)

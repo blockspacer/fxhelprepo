@@ -63,6 +63,8 @@ protected:
     afx_msg void OnBnClickedBtnClearList();
     afx_msg void OnBnClickedBtnClearCache();
     afx_msg void OnBnClickedBtnTagsBeauty();
+    afx_msg void OnBnClickedBtnHotSearchHit();
+    afx_msg void OnBnClickedBtnSearchRange();
 
 protected:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
@@ -97,9 +99,10 @@ private:
     CButton m_check_1_3_crown;
     CButton m_check_4_crown_up;
     CEdit m_edit_last_online_min;
-public:
-    afx_msg void OnBnClickedBtnHotSearchHit();
-private:
+
     CEdit m_edit_hot_keys;
     CEdit m_edit_hot_key_times;
+    CEdit m_edit_roomid_min;
+    CEdit m_edit_roomid_max;
+
 };
