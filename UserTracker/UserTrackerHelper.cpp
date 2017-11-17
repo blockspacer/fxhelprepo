@@ -622,16 +622,36 @@ void UserTrackerHelper::OpenRoomForGetSingeridCallback(
             break;
 
         singerid = temp;
+
+        std::string starLevel = "starLevel";
+
+        auto starLevelPos = content.find(starLevel, endPos);
+
+        beginPos = content.find('\'', starLevelPos);
+        beginPos += 1;
+        endPos = content.find('\'', beginPos);
+        temp = content.substr(beginPos, endPos - beginPos);
+
+        uint32 star_level = 0;
+        base::StringToUint(temp, &star_level);
+
+        if (star_level < 15) // 5冠以下不要
+        {
+            singerid = "";
+        }
     } while (0);
 
+    std::wstring str_roomid = base::UintToString16(roomid);
+    
     if (singerid.empty())
     {
-        std::wstring str_roomid = base::UintToString16(roomid);
         std::wstring msg = str_roomid + L"无法获取房间信息";
         message_callback_.Run(msg);
         return progress_callback.Run(++current_room_count_, all_room_count_);
     }
 
+    std::wstring msg = str_roomid + L"获取房间信息成功===============";
+    message_callback_.Run(msg);
     // 继续下一个流程，获取上次上播时间
     DoGetSingerLastOnline(roomid, singerid, progress_callback, result_callback);
 }
@@ -704,7 +724,7 @@ void UserTrackerHelper::GetSingerLastOnlineCallback(
     } while (0);
     
     progress_callback.Run(++current_room_count_, all_room_count_);
-    if (last_online_month>=11)
+    if (last_online_month>=12)
     {
         result_callback.Run(0, roomid);
     }
