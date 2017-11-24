@@ -81,7 +81,7 @@ public:
 
     // 这个函数是为了不建立房间连接而获取房间里30天消费数据，是为了追踪指定用户
     bool OpenRoomAndGetConsumerList(const std::string& cookies,
-        std::vector<ConsumerInfo>* consumer_infos);
+        std::vector<ConsumerInfo>* consumer_infos, uint32* star_level);
 
     bool GetConsumerList(const std::string& cookies,
         std::vector<ConsumerInfo>* consumer_infos);
@@ -111,6 +111,7 @@ private:
     uint32 roomid_ = 0;
     uint32 singerid_ = 0;
     uint32 star_kugou_id_ = 0;
+    uint32 singer_star_level_ = 0;
     std::string nickname_;
     uint32 clanid_ = 0;
     std::vector<uint32> guarduserids_;

@@ -105,4 +105,5 @@ private:
     CEdit m_edit_roomid_min;
     CEdit m_edit_roomid_max;
 
+    CEdit m_edit_min_star_level;
 };

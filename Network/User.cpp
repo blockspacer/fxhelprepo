@@ -449,7 +449,7 @@ bool User::OpenRoomAndGetViewerList(uint32 roomid,
 }
 
 bool User::OpenRoomAndGetConsumerList(uint32 roomid,
-    std::vector<ConsumerInfo>* consumer_infos)
+    std::vector<ConsumerInfo>* consumer_infos, uint32* star_level)
 {
     std::shared_ptr<Room> room(new Room(roomid));
     std::vector<std::string> keys;
@@ -462,7 +462,7 @@ bool User::OpenRoomAndGetConsumerList(uint32 roomid,
     keys.push_back("fxClientInfo");
     keys.push_back("KuGoo");
     std::string cookie = cookiesHelper_->GetCookies(keys);
-    if (!room->OpenRoomAndGetConsumerList(cookie, consumer_infos))
+    if (!room->OpenRoomAndGetConsumerList(cookie, consumer_infos, star_level))
         return false;
 
     return true;

@@ -443,7 +443,7 @@ bool Room::GetViewerList(const std::string& cookies,
 }
 
 bool Room::OpenRoomAndGetConsumerList(const std::string& cookies,
-    std::vector<ConsumerInfo>* consumer_infos)
+    std::vector<ConsumerInfo>* consumer_infos, uint32* star_level)
 {
     if (!OpenRoom(cookies))
         return false;
@@ -457,7 +457,7 @@ bool Room::OpenRoomAndGetConsumerList(const std::string& cookies,
     // 因为挖主播的特殊需要，不要找观众列表，这里是省代码，乱写的
     //if (!GetConsumerList(cookies, consumer_infos))
     //    return false;
-
+    *star_level = singer_star_level_;
     return true;
 }
 
@@ -889,6 +889,10 @@ bool Room::GetStarInfo(const std::string& cookies)
         else if (member.compare("nickName")==0)
         {
             nickname_ = data.get(member, "").asString();
+        }
+        else if (member.compare("starLevel") == 0)
+        {
+            singer_star_level_ = GetInt32FromJsonValue(data, member);
         }
     }
     return true;

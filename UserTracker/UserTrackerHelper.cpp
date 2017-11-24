@@ -50,10 +50,10 @@ bool UserTrackerHelper::Initialize()
     CurlWrapper::CurlInit();
     tracker_authority_.reset(new UserTrackerAuthority);
     AuthorityHelper authority_helper;
-    //if (!authority_helper.LoadUserTrackerAuthority(tracker_authority_.get()))
-    //{
-    //    return false;
-    //}
+    if (!authority_helper.LoadUserTrackerAuthority(tracker_authority_.get()))
+    {
+        return false;
+    }
     
     authority_helper.GetTrackerAuthorityDisplayInfo(
         *tracker_authority_.get(), &authority_msg_);
@@ -79,9 +79,11 @@ void UserTrackerHelper::SetNotifyMessageCallback(
     message_callback_ = callback;
 }
 
-void UserTrackerHelper::SetSearchConfig(bool check_star, bool check_diamon,
+void UserTrackerHelper::SetSearchConfig(uint32 min_star_level, 
+    bool check_star, bool check_diamon,
     bool check_1_3_crown, bool check_4_crown_up)
 {
+    min_star_level_ = min_star_level;
     check_star_ = check_star;
     check_diamon_ = check_diamon;
     check_1_3_crown_ = check_1_3_crown;
@@ -192,7 +194,11 @@ void UserTrackerHelper::DoUpdatePhoneForNoClan(
     {
         std::map<uint32, ConsumerInfo> consumer_infos;
         progress_callback.Run(++count, roomids.size());
-        if (!GetRoomConsumerList(roomid, &consumer_infos))
+        uint32 star_level = 0;
+        if (!GetRoomConsumerList(roomid, &star_level, &consumer_infos))
+            continue;
+
+        if (star_level < min_star_level_)
             continue;
 
         consumer_infos_map[roomid] = consumer_infos;
@@ -288,7 +294,11 @@ void UserTrackerHelper::DoUpdataAllStarRoomForNoClan(
     {
         std::map<uint32, ConsumerInfo> consumer_infos;
         progress_callback.Run(++count, roomids.size());
-        if (!GetRoomConsumerList(roomid, &consumer_infos))
+        uint32 star_level = 0;
+        if (!GetRoomConsumerList(roomid, &star_level, &consumer_infos))
+            continue;
+
+        if (star_level < min_star_level_)
             continue;
 
         consumer_infos_map[roomid] = consumer_infos;
@@ -809,7 +819,7 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
         message_callback_.Run(msg);
         GetTargetStarRoomInfos(url2, &roomid2);
         std::vector<uint32> tempids;
-        for (const auto& room : roomid1)
+        for (const auto& room : roomid2)
         {
             if (room.status != 0)
                 tempids.push_back(room.roomid);
@@ -824,7 +834,7 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
         message_callback_.Run(msg);
         GetTargetStarRoomInfos(url3, &roomid3);
         std::vector<uint32> tempids;
-        for (const auto& room : roomid1)
+        for (const auto& room : roomid3)
         {
             if (room.status != 0)
                 tempids.push_back(room.roomid);
@@ -839,7 +849,7 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
         message_callback_.Run(msg);
         GetTargetStarRoomInfos(url4, &roomid4);
         std::vector<uint32> tempids;
-        for (const auto& room : roomid1)
+        for (const auto& room : roomid4)
         {
             if (room.status != 0)
                 tempids.push_back(room.roomid);
@@ -1070,10 +1080,10 @@ bool UserTrackerHelper::GetRoomViewerList(uint32 roomid, std::map<uint32, EnterR
     return true;
 }
 
-bool UserTrackerHelper::GetRoomConsumerList(uint32 roomid, std::map<uint32, ConsumerInfo>* consumers_map)
+bool UserTrackerHelper::GetRoomConsumerList(uint32 roomid, uint32* star_level, std::map<uint32, ConsumerInfo>* consumers_map)
 {
     std::vector<ConsumerInfo> consumer_infos;
-    if (!user_->OpenRoomAndGetConsumerList(roomid, &consumer_infos))
+    if (!user_->OpenRoomAndGetConsumerList(roomid, &consumer_infos, star_level))
     {
         return false;
     }

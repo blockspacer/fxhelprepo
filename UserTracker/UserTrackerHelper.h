@@ -48,7 +48,7 @@ public:
 
     void SetNotifyMessageCallback(const base::Callback<void(const std::wstring&)> callback);
 
-    void SetSearchConfig(bool check_star, bool check_diamon,
+    void SetSearchConfig(uint32 min_star_level, bool check_star, bool check_diamon,
         bool check_1_3_crown, bool check_4_crown_up);
 
     std::wstring GetAuthorityMessage() const;
@@ -175,7 +175,7 @@ private:
     bool GetRoomViewerList(uint32 roomid, std::map<uint32, EnterRoomUserInfo>* user_map);
 
     // 从指定房间获取30天消费用户列表，用于追踪消费用户。通过手机协议，不需要cookie
-    bool GetRoomConsumerList(uint32 roomid, std::map<uint32, ConsumerInfo>* consumers_map);
+    bool GetRoomConsumerList(uint32 roomid, uint32* star_level, std::map<uint32, ConsumerInfo>* consumers_map);
     
     //GET /UServices/UserService/UserExtService/getFollowList?args=[1,10,0,%22%22,0,3]&_=1478426799924
     //Referer: http://fanxing.kugou.com/index.php?action=userFollowList
@@ -215,6 +215,7 @@ private:
 
     bool cancel_flag_ = false;
 
+    uint32 min_star_level_ = 0;
     bool check_star_ = false;
     bool check_diamon_ = false;
     bool check_1_3_crown_ = false;

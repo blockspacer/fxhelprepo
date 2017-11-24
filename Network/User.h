@@ -109,7 +109,7 @@ public:
 
     // 这个函数是为了不建立房间连接而获取房间里30天消费数据，是为了追踪指定用户
     bool OpenRoomAndGetConsumerList(uint32 roomid,
-        std::vector<ConsumerInfo>* consumer_infos);
+        std::vector<ConsumerInfo>* consumer_infos, uint32* star_level);
 
     bool EnterRoomFopHttp(uint32 roomid, std::shared_ptr<Room> room);
 

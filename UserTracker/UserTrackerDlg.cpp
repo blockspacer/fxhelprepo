@@ -62,6 +62,7 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_HOT_KEY_TIMES, m_edit_hot_key_times);
     DDX_Control(pDX, IDC_EDIT_ROOMID_MIN, m_edit_roomid_min);
     DDX_Control(pDX, IDC_EDIT_ROOMID_MAX, m_edit_roomid_max);
+    DDX_Control(pDX, IDC_EDIT_MIN_LEVEL, m_edit_min_star_level);
 }
 
 BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
@@ -201,7 +202,13 @@ void CUserTrackerDlg::SetHScroll()
 
 void CUserTrackerDlg::OnBnClickedBtnGetAllRoomData()
 {
+    CString cs_star_level;
+    m_edit_min_star_level.GetWindowTextW(cs_star_level);
+    uint32 min_star_level = 0;
+    base::StringToUint(base::WideToUTF8(cs_star_level.GetBuffer()), &min_star_level);
+
     tracker_helper_->SetSearchConfig(
+        min_star_level,
         !!m_check_star.GetCheck(),
         !!m_check_diamon.GetCheck(),
         !!m_check_1_3_crown.GetCheck(),
@@ -238,7 +245,13 @@ void CUserTrackerDlg::OnBnClickedBtnClearCache()
 
 void CUserTrackerDlg::OnBnClickedBtnUpdataFind()
 {
+    CString cs_star_level;
+    m_edit_min_star_level.GetWindowTextW(cs_star_level);
+    uint32 min_star_level = 0;
+    base::StringToUint(base::WideToUTF8(cs_star_level.GetBuffer()), &min_star_level);
+
     tracker_helper_->SetSearchConfig(
+        min_star_level,
         !!m_check_star.GetCheck(),
         !!m_check_diamon.GetCheck(),
         !!m_check_1_3_crown.GetCheck(),
