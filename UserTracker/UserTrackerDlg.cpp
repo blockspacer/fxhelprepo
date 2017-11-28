@@ -11,6 +11,11 @@
 #include "third_party/chromium/base/bind.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/files/file.h"
+#include "third_party/chromium/base/files/file_path.h"
+#include "third_party/chromium/base/path_service.h"
+#include "third_party/chromium/base/files/file_enumerator.h"
+#include "Network/EncodeHelper.h"
 #include <shellapi.h>
 
 #ifdef _DEBUG
@@ -84,6 +89,8 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_TAGS_BEAUTY, &CUserTrackerDlg::OnBnClickedBtnTagsBeauty)
     ON_BN_CLICKED(IDC_BTN_HOT_SEARCH_HIT, &CUserTrackerDlg::OnBnClickedBtnHotSearchHit)
     ON_BN_CLICKED(IDC_BTN_SEARCH_RANGE, &CUserTrackerDlg::OnBnClickedBtnSearchRange)
+    ON_BN_CLICKED(IDC_BTN_IMPORT_ROOMS, &CUserTrackerDlg::OnBnClickedBtnImportRooms)
+    ON_BN_CLICKED(IDC_BTN_EXPORT_ROOMS, &CUserTrackerDlg::OnBnClickedBtnExportRooms)
 END_MESSAGE_MAP()
 
 
@@ -464,4 +471,60 @@ void CUserTrackerDlg::OnBnClickedBtnSearchRange()
     tracker_helper_->RunSearchRoomIdRange(days, roomid_min, roomid_max,
         base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
         base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this)));
+}
+
+
+void CUserTrackerDlg::OnBnClickedBtnImportRooms()
+{
+    CString FilePathName;
+    CFileDialog dlg(TRUE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+        NULL,
+        NULL,
+        OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+        (LPCTSTR)_TEXT("TXT Files (*.txt)|*.txt|All Files (*.*)|*.*||"),
+        NULL);
+
+    if (dlg.DoModal() != IDOK)
+        return;
+
+    FilePathName = dlg.GetPathName(); //文件名保存在了FilePathName里
+    if (FilePathName.IsEmpty())
+        return;
+
+    base::FilePath path(FilePathName.GetBuffer());
+    std::vector<std::wstring> roomids;
+    tracker_helper_->LoadRooms(path.value(), &roomids);
+
+    for (auto sroomid : roomids)
+    {
+        uint32 roomid = 0;
+        base::StringToUint(sroomid,&roomid);
+        FoundResult(0, roomid);
+    }
+}
+
+
+void CUserTrackerDlg::OnBnClickedBtnExportRooms()
+{
+    base::FilePath path;
+    if (!UserTrackerHelper::GetOutputFileName(&path))
+        return;
+
+    base::File file;
+    file.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+
+    int itemcount = m_list_result.GetItemCount();
+    for (int index = 0; index < itemcount; ++index)
+    {
+        
+        std::wstring w_roomid = m_list_result.GetItemText(index, 1).GetBuffer();
+        std::string roomid = base::WideToUTF8(w_roomid);
+        LOG(INFO) << "=======" << roomid;
+        file.WriteAtCurrentPos(roomid.c_str(), roomid.size());
+        file.WriteAtCurrentPos("\r\n", 2);
+    }
+
+    file.Close();
+
+    MessageBoxW(path.value().c_str(), L"导入完成", 0);
 }

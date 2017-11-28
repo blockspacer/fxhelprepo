@@ -106,4 +106,7 @@ private:
     CEdit m_edit_roomid_max;
 
     CEdit m_edit_min_star_level;
+public:
+    afx_msg void OnBnClickedBtnImportRooms();
+    afx_msg void OnBnClickedBtnExportRooms();
 };

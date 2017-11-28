@@ -94,6 +94,11 @@ public:
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
 
+    bool SaveRooms(const std::vector<std::wstring>& roomids);
+
+    bool LoadRooms(const std::wstring& path_file_name, std::vector<std::wstring>* roomids);
+
+    static bool GetOutputFileName(base::FilePath* outpath);
 private:
 
     void DoLoginUser(const std::string& user_name, 

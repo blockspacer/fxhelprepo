@@ -19,18 +19,6 @@
 
 namespace
 {
-    bool GetOutputFileName(base::FilePath* outpath)
-    {
-        base::FilePath path;
-        PathService::Get(base::DIR_EXE, &path);
-        std::wstring time = base::UTF8ToWide(GetNowTimeString());
-        std::wstring filename = L"搜索官方主播结果";
-        filename += time + L".txt";
-        path = path.Append(filename);
-        *outpath = path;
-        return true;
-    }
-
     bool GetGoodSinger(const std::string& responsedata)
     {
         std::string good_voice_target = base::WideToUTF8(L"好声音");
@@ -50,6 +38,19 @@ namespace
 
         return false;
     }
+}
+
+//static
+bool UserTrackerHelper::GetOutputFileName(base::FilePath* outpath)
+{
+    base::FilePath path;
+    PathService::Get(base::DIR_EXE, &path);
+    std::wstring time = base::UTF8ToWide(GetNowTimeString());
+    std::wstring filename = L"搜索官方主播结果";
+    filename += time + L".txt";
+    path = path.Append(filename);
+    *outpath = path;
+    return true;
 }
 
 UserTrackerHelper::UserTrackerHelper()
@@ -599,6 +600,68 @@ void UserTrackerHelper::RunSearchRoomIdRange(
     return;
 }
 
+bool UserTrackerHelper::SaveRooms(const std::vector<std::wstring>& roomids)
+{
+    base::FilePath path;
+    if (!GetOutputFileName(&path))
+        return false;
+
+    base::File file;
+    file.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    for (auto roomid : roomids)
+    {
+        std::string str_roomid = base::WideToUTF8(roomid);
+        LOG(INFO) << "=======" << roomid;
+        file.WriteAtCurrentPos(str_roomid.c_str(), str_roomid.size());
+        file.WriteAtCurrentPos("\r\n", 2);
+    }
+    file.Close();
+    return true;
+}
+
+bool UserTrackerHelper::LoadRooms(const std::wstring& path_file_name, 
+    std::vector<std::wstring>* roomids)
+{
+    base::FilePath path(path_file_name);
+    base::File userfile(path, base::File::FLAG_OPEN | base::File::FLAG_READ);
+    if (!userfile.IsValid())
+    {
+        return false;
+    }
+    const uint32 memlen = 1024;
+    std::string data;
+    char str[memlen] = { 0 };
+    userfile.Seek(base::File::FROM_BEGIN, 0);
+    int read = userfile.ReadAtCurrentPos(str, memlen);
+    DWORD err = GetLastError();
+    while (read > 0)
+    {
+        data.insert(data.end(), str, str + read);
+        if (read < memlen)//读完了
+            break;
+        read = userfile.ReadAtCurrentPos(str, memlen);
+    }
+
+    assert(!data.empty());
+
+    std::vector<std::string> rooms = SplitString(data, "\r\n");
+    uint32 total = rooms.size();
+    for (const auto& it : rooms)
+    {
+        std::string roomstr = it;
+        RemoveSpace(&roomstr);
+        uint32 roomid = 0;
+        if (!base::StringToUint(roomstr, &roomid))
+        {
+            //assert(false && L"房间号转换错误");
+            LOG(ERROR) << L"roomid change error! " << it;
+            continue;
+        }
+        std::wstring w_room_id = base::UintToString16(roomid);
+        roomids->push_back(w_room_id);
+    }
+    return true;
+}
 
 bool UserTrackerHelper::DoOpenRoomForGetSingerid(uint32 roomid,
     const base::Callback<void(uint32, uint32)>& progress_callback,
@@ -665,7 +728,7 @@ void UserTrackerHelper::OpenRoomForGetSingeridCallback(
         uint32 star_level = 0;
         base::StringToUint(temp, &star_level);
 
-        if (star_level >= 19) // 5冠以下不要
+        if (star_level >= 19) // 大于等于9冠的不要
         {
             singerid = "";
         }
