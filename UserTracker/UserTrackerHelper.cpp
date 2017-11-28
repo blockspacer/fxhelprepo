@@ -30,6 +30,26 @@ namespace
         *outpath = path;
         return true;
     }
+
+    bool GetGoodSinger(const std::string& responsedata)
+    {
+        std::string good_voice_target = base::WideToUTF8(L"好声音");
+        auto beginpos = responsedata.find(good_voice_target);
+        if (beginpos != std::string::npos)
+            return true;
+
+        std::string beauty_target = base::WideToUTF8(L"女神");
+        beginpos = responsedata.find(beauty_target);
+        if (beginpos != std::string::npos)
+            return true;
+
+        std::string special_target = base::WideToUTF8(L"歌手");
+        beginpos = responsedata.find(special_target);
+        if (beginpos != std::string::npos)
+            return true;
+
+        return false;
+    }
 }
 
 UserTrackerHelper::UserTrackerHelper()
@@ -645,7 +665,7 @@ void UserTrackerHelper::OpenRoomForGetSingeridCallback(
         uint32 star_level = 0;
         base::StringToUint(temp, &star_level);
 
-        if (star_level < 15) // 5冠以下不要
+        if (star_level >= 19) // 5冠以下不要
         {
             singerid = "";
         }
@@ -704,6 +724,10 @@ void UserTrackerHelper::GetSingerLastOnlineCallback(
 
         std::string responsedata(response.content.begin(), response.content.end());
 
+        std::string clan("/index.php?action=clan&id=");
+        if (responsedata.find(clan) != std::string::npos) // 如果是公会艺人，忽略
+            break;
+
         std::string target = base::WideToUTF8(L"上次直播");
         auto beginpos = responsedata.find(target);
         if (beginpos == std::string::npos)
@@ -734,10 +758,96 @@ void UserTrackerHelper::GetSingerLastOnlineCallback(
     } while (0);
     
     progress_callback.Run(++current_room_count_, all_room_count_);
-    if (last_online_month>=12)
+    if (last_online_month>=3)
     {
-        result_callback.Run(0, roomid);
+        std::string target = "_starKugouId=\"";
+        auto beginpos = content.find(target);
+        if (beginpos == std::string::npos)
+            return;
+
+        beginpos += target.size();
+        auto endpos = content.find("\"", beginpos);
+        if (endpos == std::string::npos)
+            return;
+
+        // 获取标签再区分
+        std::string star_kugou_id = content.substr(beginpos, endpos - beginpos);
+        worker_thread_->task_runner()->PostTask(
+            FROM_HERE,
+            base::Bind(&UserTrackerHelper::DoGetSingerTags,
+            base::Unretained(this),
+            roomid, star_kugou_id, result_callback));
+
+        //result_callback.Run(0, roomid);
     }
+}
+
+// 如果也满足标签要求，就回调为目标房间号
+void UserTrackerHelper::DoGetSingerTags(uint32 roomid, std::string star_kugou_id,
+    const base::Callback<void(uint32, uint32)>& result_callback)
+{
+    auto callback = std::bind(&UserTrackerHelper::GetSingerTagsCallback,
+        this, roomid, result_callback, std::placeholders::_1);
+
+    std::string url = "http://fx.service.kugou.com";
+    url += "/VServices/StarTagsService.StarTagsService.getStarUserTagsList/";
+    url += star_kugou_id + "/";
+    HttpRequest request;
+    request.url = url;
+    request.queries["jsoncallback"] = std::string("jsonpcallback_httpsfxservicekugoucomVServicesStarTagsServiceStarTagsServicegetStarUserTagsList")+star_kugou_id;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+
+    request.asyncHttpResponseCallback = callback;
+
+    easy_http_impl_->AsyncHttpRequest(request);
+}
+
+void UserTrackerHelper::GetSingerTagsCallback(uint32 roomid,
+    const base::Callback<void(uint32, uint32)>& result_callback,
+    const HttpResponse& response)
+{
+    if (base::MessageLoop::current() != worker_thread_->message_loop())
+    {
+        worker_thread_->message_loop()->PostTask(FROM_HERE,
+            base::Bind(&UserTrackerHelper::GetSingerTagsCallback,
+            base::Unretained(this), roomid, result_callback, response));
+        return;
+    }
+
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+    std::string jsondata = PickJson(content);
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(jsondata, rootdata, false))
+    {
+        assert(false);
+        return;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1506009600).asUInt();
+
+    Json::Value jvdata(Json::ValueType::objectValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull() || !data.isArray())
+    {
+        assert(false);
+        return;
+    }
+
+    std::vector<std::string> tags;
+    for (const auto& tag : data)
+    {
+        std::string tag_name = tag.get("tagsName","").asString();
+        std::wstring w_tag_name = base::UTF8ToWide(tag_name);
+        if (!tag_name.empty())
+            tags.push_back(tag_name);
+    }
+    if (tags.empty())
+        return;
+
+    result_callback.Run(0, roomid);
 }
 
 void UserTrackerHelper::SearchRoomIdRangeCallback(uint32 all_times,
