@@ -42,6 +42,12 @@
     <ClInclude Include="AuthorityHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SingerInfoDatabase.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SingerInfo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UserTracker.cpp">
@@ -60,6 +66,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="AuthorityHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SingerInfoDatabase.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -110,6 +110,8 @@
     <ClInclude Include="AuthorityHelper.h" />
     <ClInclude Include="LoginDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SingerInfoDatabase.h" />
+    <ClInclude Include="SingerInfo.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UserTracker.h" />
@@ -119,6 +121,7 @@
   <ItemGroup>
     <ClCompile Include="AuthorityHelper.cpp" />
     <ClCompile Include="LoginDlg.cpp" />
+    <ClCompile Include="SingerInfoDatabase.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -145,6 +148,12 @@
     </ProjectReference>
     <ProjectReference Include="..\third_party\chromium\base\third_party\dynamic_annotations\dynamic_annotations.vcxproj">
       <Project>{b68ee2bd-0ba9-9949-464b-39ffe5cabd0a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\chromium\sql\sql.vcxproj">
+      <Project>{7d366195-6190-3f15-30c4-52836db24c56}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\third_party\chromium\third_party\sqlite\sqlite.vcxproj">
+      <Project>{5c9bfb96-dbb0-fbfb-52b9-02d595ee5d84}</Project>
     </ProjectReference>
     <ProjectReference Include="..\third_party\json\json.vcxproj">
       <Project>{0deca417-fd94-4652-9881-53f935d89245}</Project>

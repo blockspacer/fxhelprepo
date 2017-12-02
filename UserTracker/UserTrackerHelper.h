@@ -128,12 +128,16 @@ private:
     void DoSearchHotKey(const std::wstring& hotkey, uint32 times,
         const base::Callback<void(uint32, uint32)>& progress_callback);
 
+    void SearchHotKeyCallback(uint32 all_times,
+        const base::Callback<void(uint32, uint32)>& progress_callback,
+        const HttpResponse& response);
+
     // 如果也满足标签要求，就回调为目标房间号
     void DoGetSingerTags(uint32 roomid, std::string star_kugou_id,
         const base::Callback<void(uint32, uint32)>& result_callback);
 
-    void SearchHotKeyCallback(uint32 all_times,
-        const base::Callback<void(uint32, uint32)>& progress_callback,
+    void GetSingerTagsCallback(uint32 roomid,
+        const base::Callback<void(uint32, uint32)>& result_callback,
         const HttpResponse& response);
 
     void SearchRoomIdRangeCallback(uint32 all_times,
@@ -156,10 +160,6 @@ private:
 
     void GetSingerLastOnlineCallback(uint32 roomid,
         const base::Callback<void(uint32, uint32)>& progress_callback,
-        const base::Callback<void(uint32, uint32)>& result_callback,
-        const HttpResponse& response);
-
-    void GetSingerTagsCallback(uint32 roomid,
         const base::Callback<void(uint32, uint32)>& result_callback,
         const HttpResponse& response);
 
