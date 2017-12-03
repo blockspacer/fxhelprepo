@@ -468,11 +468,17 @@ void CUserTrackerDlg::OnBnClickedBtnSearchRange()
     uint32 roomid_max = 0;
     base::StringToUint(base::WideToUTF8(cs_roomid_max.GetBuffer()), &roomid_max);
 
-    tracker_helper_->RunSearchRoomIdRange(days, roomid_min, roomid_max,
+    tracker_helper_->SetRangeSearchCallback(
         base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
-        base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this)));
+        base::Bind(&CUserTrackerDlg::RangeSearchResult, base::Unretained(this)));
+    tracker_helper_->RunSearchRoomIdRange(roomid_min, roomid_max);
 }
 
+void CUserTrackerDlg::RangeSearchResult(uint32 roomid, const SingerInfo& singer_info,
+    uint32 status, RangSearchErrorCode error)
+{
+
+}
 
 void CUserTrackerDlg::OnBnClickedBtnImportRooms()
 {

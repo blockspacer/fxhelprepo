@@ -45,6 +45,9 @@ public:
 private:
     sql::Connection db_conn_;
     SQLErrorLog* sqlLog_;
+    std::string table_name_;
+
+    std::string date_;
 
     bool OpenDatabase(const std::wstring& file_name);
     bool IntegrityCheck();

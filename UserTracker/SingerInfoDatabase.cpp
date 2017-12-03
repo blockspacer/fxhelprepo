@@ -7,6 +7,7 @@
 #undef min
 #include "SingerInfoDatabase.h"
 #include "SingerInfo.h"
+#include "Network/EncodeHelper.h"
 
 #include "third_party/chromium/base/bind.h"
 #include "third_party/chromium/base/files/file_path.h"
@@ -39,10 +40,20 @@ using base::FilePath;
 
 namespace
 {
-    std::string GetCreateWorshipTableSql()
+    const std::string singer_info_table_name_ = "singer_info_";
+    
+    std::string WStringToQueryItem(const std::wstring& value)
+    {
+        std::string ret = "\'";
+        ret += base::WideToUTF8(value);
+        ret += "\'";
+        return ret;
+    }
+
+    std::string GetCreateWorshipTableSql(const std::string table_name)
     {
         std::string sql = "Create TABLE ";
-        sql += "singer_info";
+        sql += table_name;
         // UserInfo
         sql += "(fxid integer PRIMARY KEY NOT NULL,";
         sql += "kgid integer NOT NULL DEFAULT 0,";
@@ -74,28 +85,69 @@ namespace
         sql += "tags nvarchar(260) NOT NULL DEFAULT '',";
         sql += "last_online nvarchar(260) NOT NULL DEFAULT '',";
         sql += "last_online_day integer NOT NULL DEFAULT 0,";
-        sql += "date nvarchar(260) NOT NULL DEFAULT '',);";
+        sql += "date nvarchar(260) NOT NULL DEFAULT '');";
 
         return std::move(sql);
     }
 
-    std::string GetInsertWorshipRecodeSql(const SingerInfo& singer_info)
+    std::string GetInsertWorshipRecodeSql(const std::string& table_name, const SingerInfo& singer_info)
     {
-        std::string sql = "Insert Into tb_worship_raw ";
-        //sql += "( server_time, result, display_result, random ) Values ";
-        //sql += "(" + base::UintToString(singer_info.time);
-        //sql += "," + base::UintToString(singer_info.result);
-        //sql += "," + base::UintToString(singer_info.display_result);
-        //sql += "," + base::UintToString(singer_info.random) + ");";
+        std::string sql = "Insert Into " + table_name;
+        sql += "( fxid, kgid, clanid, nickname,richlevel,starlevel, fanscount, followcount, sex, location,";
+        sql += "roomid, declare, ";
+        sql += "billboard_month_1, billboard_month_2, billboard_month_3, billboard_month_4, billboard_month_5, ";
+        sql += "billboard_all_1, billboard_all_2, billboard_all_3, billboard_all_4, billboard_all_5,";
+        sql +="star_singer, tags, last_online, last_online_day, date) Values ";
 
+        //uint32 fanxing_id;
+        //uint32 kugou_id;
+        //uint32 clan_id;
+        //std::wstring nickname;
+        //uint32 rich_level;
+        //uint32 star_level;
+        //uint32 fans_count;
+        //uint32 follow_count;
+        //std::wstring sex;
+        //std::wstring location;
+
+        sql += "(" + base::UintToString(singer_info.user_info.fanxing_id);
+        sql += "," + base::UintToString(singer_info.user_info.kugou_id);
+        sql += "," + base::UintToString(singer_info.user_info.clan_id);
+        sql += "," + WStringToQueryItem(singer_info.user_info.nickname);
+        sql += "," + base::UintToString(singer_info.user_info.rich_level);
+        sql += "," + base::UintToString(singer_info.user_info.star_level);
+        sql += "," + base::UintToString(singer_info.user_info.fans_count);
+        sql += "," + base::UintToString(singer_info.user_info.follow_count);
+        sql += "," + WStringToQueryItem(singer_info.user_info.sex);
+        sql += "," + WStringToQueryItem(singer_info.user_info.location);
+
+        sql += "," + base::UintToString(singer_info.room_info.room_id);
+        sql += "," + WStringToQueryItem(singer_info.room_info.declare);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_month_1);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_month_2);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_month_3);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_month_4);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_month_5);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_all_1);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_all_2);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_all_3);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_all_4);
+        sql += "," + base::UintToString(singer_info.room_info.billboard_all_5);
+
+        sql += "," + base::UintToString(singer_info.star_singer?1:0);
+        sql += "," + WStringToQueryItem(singer_info.tags);
+        sql += "," + WStringToQueryItem(singer_info.last_online);
+        sql += "," + base::UintToString(singer_info.last_online_day);
+        sql += "," + WStringToQueryItem(singer_info.date) + ");";
 
         return std::move(sql);
     }
 
-    std::string GetQueryAllRecodeSql()
+    std::string GetQueryAllRecodeSql(const std::string& table_name)
     {
+        DCHECK(false);
         std::string sql = "Select server_time, result, display_result, random ";
-        sql += "From tb_worship_raw;";
+        sql += "From " + table_name + ";";
         return std::move(sql);
     }
 }
@@ -157,9 +209,12 @@ bool SingerInfoDatabase::Initialize(const std::wstring& file_name)
         return false;
     }
 
-    if (!db_conn_.DoesTableExist("tb_worship_raw"))
+    date_ = MakeFormatDateString(base::Time::Now());
+    table_name_ = singer_info_table_name_ + date_;
+
+    if (!db_conn_.DoesTableExist(table_name_.c_str()))
     {
-        db_conn_.Execute(GetCreateWorshipTableSql().c_str());
+        db_conn_.Execute(GetCreateWorshipTableSql(table_name_).c_str());
     }
 
     return false;
@@ -176,7 +231,7 @@ bool SingerInfoDatabase::InsertRecord(const SingerInfo& singer_info)
     {
         return false;
     }
-    std::string insert_sql = GetInsertWorshipRecodeSql(singer_info);
+    std::string insert_sql = GetInsertWorshipRecodeSql(table_name_, singer_info);
     if (!db_conn_.Execute(insert_sql.c_str()))
     {
         return false;
@@ -190,7 +245,7 @@ bool SingerInfoDatabase::InsertRecord(const SingerInfo& singer_info)
 
 bool SingerInfoDatabase::Query(std::vector<SingerInfo>* singer_infos)
 {
-    std::string sql = GetQueryAllRecodeSql();
+    std::string sql = GetQueryAllRecodeSql(table_name_);
     try
     {
         Statement stmt(db_conn_.GetUniqueStatement(sql.c_str()));
@@ -201,6 +256,65 @@ bool SingerInfoDatabase::Query(std::vector<SingerInfo>* singer_infos)
             //singer_info.result = stmt.ColumnInt(1);
             //singer_info.display_result = stmt.ColumnInt(2);
             //singer_info.random = stmt.ColumnInt(3);
+
+            singer_info.user_info.fanxing_id = stmt.ColumnInt(0);
+            singer_info.user_info.kugou_id = stmt.ColumnInt(1);
+            singer_info.user_info.clan_id = stmt.ColumnInt(2);
+            singer_info.user_info.nickname = stmt.ColumnString16(3);
+            singer_info.user_info.rich_level = stmt.ColumnInt(4);
+            singer_info.user_info.star_level = stmt.ColumnInt(5);
+            singer_info.user_info.fans_count = stmt.ColumnInt(6);
+            singer_info.user_info.follow_count = stmt.ColumnInt(7);
+            singer_info.user_info.sex = stmt.ColumnString16(8);
+            singer_info.user_info.location = stmt.ColumnString16(9);
+
+            //sql += "(fxid integer PRIMARY KEY NOT NULL,";
+            //sql += "kgid integer NOT NULL DEFAULT 0,";
+            //sql += "clanid integer NOT NULL DEFAULT 0,";
+            //sql += "nickname nvarchar(260) NOT NULL DEFAULT '',";
+            //sql += "richlevel integer NOT NULL DEFAULT 0,";
+            //sql += "starlevel integer NOT NULL DEFAULT 0,";
+            //sql += "fanscount integer NOT NULL DEFAULT 0,";
+            //sql += "followcount integer NOT NULL DEFAULT 0,";
+            //sql += "sex nvarchar(260) NOT NULL DEFAULT '',";
+            //sql += "location nvarchar(260) NOT NULL DEFAULT '',";
+
+            //// RoomInfo
+            //sql += "roomid integer NOT NULL DEFAULT 0,";
+            //sql += "declare nvarchar(260) NOT NULL DEFAULT '',";
+            //sql += "billboard_month_1 integer NOT NULL DEFAULT 0,";
+            //sql += "billboard_month_2 integer NOT NULL DEFAULT 0,";
+            //sql += "billboard_month_3 integer NOT NULL DEFAULT 0,";
+            //sql += "billboard_month_4 integer NOT NULL DEFAULT 0,";
+            //sql += "billboard_month_5 integer NOT NULL DEFAULT 0,";
+            //sql += "billboard_all_1 integer NOT NULL DEFAULT 0,";
+            //sql += "billboard_all_2 integer NOT NULL DEFAULT 0,";
+            //sql += "billboard_all_3 integer NOT NULL DEFAULT 0,";
+            //sql += "billboard_all_4 integer NOT NULL DEFAULT 0,";
+            //sql += "billboard_all_5 integer NOT NULL DEFAULT 0,";
+
+            singer_info.room_info.room_id = stmt.ColumnInt(10);
+            singer_info.room_info.declare = stmt.ColumnString16(11);
+            singer_info.room_info.billboard_month_1 = stmt.ColumnInt(12);
+            singer_info.room_info.billboard_month_2 = stmt.ColumnInt(3);
+            singer_info.room_info.billboard_month_4 = stmt.ColumnInt(4);
+            singer_info.room_info.billboard_month_5 = stmt.ColumnInt(5);
+            singer_info.room_info.billboard_all_1 = stmt.ColumnInt(16);
+            singer_info.room_info.billboard_all_2 = stmt.ColumnInt(17);
+            singer_info.room_info.billboard_all_3 = stmt.ColumnInt(18);
+            singer_info.room_info.billboard_all_4 = stmt.ColumnInt(19);
+            singer_info.room_info.billboard_all_5 = stmt.ColumnInt(20);
+
+            // other
+            //sql += "star_singer integer NOT NULL DEFAULT 0,";
+            //sql += "tags nvarchar(260) NOT NULL DEFAULT '',";
+            //sql += "last_online nvarchar(260) NOT NULL DEFAULT '',";
+            //sql += "last_online_day integer NOT NULL DEFAULT 0,";
+            //sql += "date nvarchar(260) NOT NULL DEFAULT '',);";
+            singer_info.star_singer = !!stmt.ColumnInt(21);
+            singer_info.tags = stmt.ColumnString16(22);
+            singer_info.last_online = stmt.ColumnString16(23);
+            singer_info.last_online_day = stmt.ColumnInt(24);
             singer_infos->push_back(singer_info);
         }
     }

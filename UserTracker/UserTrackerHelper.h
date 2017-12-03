@@ -10,6 +10,8 @@
 #include "third_party/chromium/base/threading/thread.h"
 #include "Network/MessageNotifyManager.h"
 #include "Network/Room.h"
+#include "SingerInfo.h"
+#include "SingerInfoDatabase.h"
 
 
 class User;
@@ -17,7 +19,7 @@ class CurlWrapper;
 class EasyHttpImpl;
 class HttpResponse;
 class AuthorityHelper;
-class UserTrackerAuthority;
+struct UserTrackerAuthority;
 
 struct FollowUserInfo
 {
@@ -35,11 +37,23 @@ struct DisplayRoomInfo
     uint32 last_online;
 };
 
+enum class RangSearchErrorCode
+{
+    RS_OK,
+    RS_ROOM_OPEN_FAILED,
+    RS_GET_SINGINFO_FAILED,
+    RS_GET_LAST_ONLINE_FAILED,
+};
+
 class UserTrackerHelper
 {
 public:
     UserTrackerHelper();
     ~UserTrackerHelper();
+    typedef base::Callback<void(uint32, uint32)> ProgressCallback;
+
+    typedef base::Callback<void(uint32, const SingerInfo&, 
+        uint32/*httpresponsecode*/, RangSearchErrorCode)> ResultCallback;
 
     bool Initialize();// 启动线程
     void Finalize();// 结束线程
@@ -47,6 +61,9 @@ public:
     void Test();
 
     void SetNotifyMessageCallback(const base::Callback<void(const std::wstring&)> callback);
+
+    void SetRangeSearchCallback(ProgressCallback progress_callback, 
+        ResultCallback result_callback);
 
     void SetSearchConfig(uint32 min_star_level, bool check_star, bool check_diamon,
         bool check_1_3_crown, bool check_4_crown_up);
@@ -90,9 +107,7 @@ public:
     bool RunSearchHotKey(const std::wstring& hotkey, uint32 times,
         const base::Callback<void(uint32, uint32)>& progress_callback);
 
-    void RunSearchRoomIdRange(uint32 days, uint32 roomid_min, uint32 roomid_max,
-        const base::Callback<void(uint32, uint32)>& progress_callback,
-        const base::Callback<void(uint32, uint32)>& result_callback);
+    void RunSearchRoomIdRange(uint32 roomid_min, uint32 roomid_max);
 
     bool SaveRooms(const std::vector<std::wstring>& roomids);
 
@@ -125,43 +140,20 @@ private:
         const base::Callback<void(uint32, uint32)>& progress_callback,
         const base::Callback<void(uint32, uint32)>& result_callback);
 
-    void DoSearchHotKey(const std::wstring& hotkey, uint32 times,
-        const base::Callback<void(uint32, uint32)>& progress_callback);
+    //void DoSearchHotKey(const std::wstring& hotkey, uint32 times,
+    //    const base::Callback<void(uint32, uint32)>& progress_callback);
 
-    void SearchHotKeyCallback(uint32 all_times,
-        const base::Callback<void(uint32, uint32)>& progress_callback,
-        const HttpResponse& response);
+    //void SearchHotKeyCallback(uint32 all_times,
+    //    const base::Callback<void(uint32, uint32)>& progress_callback,
+    //    const HttpResponse& response);
 
-    // 如果也满足标签要求，就回调为目标房间号
-    void DoGetSingerTags(uint32 roomid, std::string star_kugou_id,
-        const base::Callback<void(uint32, uint32)>& result_callback);
 
-    void GetSingerTagsCallback(uint32 roomid,
-        const base::Callback<void(uint32, uint32)>& result_callback,
-        const HttpResponse& response);
-
-    void SearchRoomIdRangeCallback(uint32 all_times,
-        const base::Callback<void(uint32, uint32)>& progress_callback,
-        const HttpResponse& response);
-
-    bool DoOpenRoomForGetSingerid(
-        uint32 roomid,
-        const base::Callback<void(uint32, uint32)>& progress_callback,
-        const base::Callback<void(uint32, uint32)>& result_callback);
-    void OpenRoomForGetSingeridCallback(
-        uint32 roomid,
-        const base::Callback<void(uint32, uint32)>& progress_callback,
-        const base::Callback<void(uint32, uint32)>& result_callback,
-        const HttpResponse& response);
-
-    bool DoGetSingerLastOnline(uint32 roomid, const std::string& singerid,
-        const base::Callback<void(uint32, uint32)>& progress_callback,
-        const base::Callback<void(uint32, uint32)>& result_callback);
-
-    void GetSingerLastOnlineCallback(uint32 roomid,
-        const base::Callback<void(uint32, uint32)>& progress_callback,
-        const base::Callback<void(uint32, uint32)>& result_callback,
-        const HttpResponse& response);
+    // 获取指定范围房间号的主播详细信息
+    bool DoOpenRoomForGetSingerid(uint32 roomid);
+    bool DoGetSingerLastOnline(SingerInfo singerid);
+    void DoGetSingerTags(SingerInfo singer_info);
+    void RangeSearchResultToDB(uint32 roomid, const SingerInfo& singer_info,
+        uint32 status, RangSearchErrorCode error);
 
     void DoClearCache();
 
@@ -239,5 +231,14 @@ private:
     bool is_expired = false; // 内部控制是否过期，如果过期，把配置文件写坏，以后也不让访问
 
     uint32 search_hot_key_count_ = 0;
+
+    std::map<uint32, uint32> room_error_map_; // 第一次访问失败需要重试的房间号
+    ProgressCallback progress_callback_;
+    ResultCallback result_callback_;
+    std::unique_ptr<SingerInfoDatabase> database_;
+
+    std::map<uint32, uint32> status_map_;
+
+    std::wstring recode_date_;
 };
 

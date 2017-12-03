@@ -66,6 +66,9 @@ protected:
     afx_msg void OnBnClickedBtnHotSearchHit();
     afx_msg void OnBnClickedBtnSearchRange();
 
+    afx_msg void OnBnClickedBtnImportRooms();
+    afx_msg void OnBnClickedBtnExportRooms();
+
 protected:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnRoomProgress(WPARAM wParam, LPARAM lParam);
@@ -77,6 +80,8 @@ private:
     void RoomProgress(uint32 current, uint32 all);
     void FoundResult(uint32 user_id, uint32 room_id);
     void LoginResult(bool result, uint32 server_time, const std::string& errormsg);
+    void RangeSearchResult(uint32 roomid, const SingerInfo& singer_info,
+        uint32 status, RangSearchErrorCode error);
 
     UserTrackerHelper* tracker_helper_;
     std::mutex message_mutex_;
@@ -106,7 +111,5 @@ private:
     CEdit m_edit_roomid_max;
 
     CEdit m_edit_min_star_level;
-public:
-    afx_msg void OnBnClickedBtnImportRooms();
-    afx_msg void OnBnClickedBtnExportRooms();
+
 };
