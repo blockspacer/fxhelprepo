@@ -68,7 +68,8 @@ namespace
 
         // RoomInfo
         sql += "roomid integer NOT NULL DEFAULT 0,";
-        sql += "declare nvarchar(260) NOT NULL DEFAULT '',";
+        sql += "public_msg nvarchar(260) NOT NULL DEFAULT '',";
+        sql += "private_msg nvarchar(260) NOT NULL DEFAULT '',";
         sql += "billboard_month_1 integer NOT NULL DEFAULT 0,";
         sql += "billboard_month_2 integer NOT NULL DEFAULT 0,";
         sql += "billboard_month_3 integer NOT NULL DEFAULT 0,";
@@ -94,7 +95,7 @@ namespace
     {
         std::string sql = "Insert Into " + table_name;
         sql += "( fxid, kgid, clanid, nickname,richlevel,starlevel, fanscount, followcount, sex, location,";
-        sql += "roomid, declare, ";
+        sql += "roomid, public_msg,private_msg, ";
         sql += "billboard_month_1, billboard_month_2, billboard_month_3, billboard_month_4, billboard_month_5, ";
         sql += "billboard_all_1, billboard_all_2, billboard_all_3, billboard_all_4, billboard_all_5,";
         sql +="star_singer, tags, last_online, last_online_day, date) Values ";
@@ -122,7 +123,8 @@ namespace
         sql += "," + WStringToQueryItem(singer_info.user_info.location);
 
         sql += "," + base::UintToString(singer_info.room_info.room_id);
-        sql += "," + WStringToQueryItem(singer_info.room_info.declare);
+        sql += "," + WStringToQueryItem(singer_info.room_info.public_msg);
+        sql += "," + WStringToQueryItem(singer_info.room_info.private_msg);
         sql += "," + base::UintToString(singer_info.room_info.billboard_month_1);
         sql += "," + base::UintToString(singer_info.room_info.billboard_month_2);
         sql += "," + base::UintToString(singer_info.room_info.billboard_month_3);
@@ -268,53 +270,23 @@ bool SingerInfoDatabase::Query(std::vector<SingerInfo>* singer_infos)
             singer_info.user_info.sex = stmt.ColumnString16(8);
             singer_info.user_info.location = stmt.ColumnString16(9);
 
-            //sql += "(fxid integer PRIMARY KEY NOT NULL,";
-            //sql += "kgid integer NOT NULL DEFAULT 0,";
-            //sql += "clanid integer NOT NULL DEFAULT 0,";
-            //sql += "nickname nvarchar(260) NOT NULL DEFAULT '',";
-            //sql += "richlevel integer NOT NULL DEFAULT 0,";
-            //sql += "starlevel integer NOT NULL DEFAULT 0,";
-            //sql += "fanscount integer NOT NULL DEFAULT 0,";
-            //sql += "followcount integer NOT NULL DEFAULT 0,";
-            //sql += "sex nvarchar(260) NOT NULL DEFAULT '',";
-            //sql += "location nvarchar(260) NOT NULL DEFAULT '',";
-
-            //// RoomInfo
-            //sql += "roomid integer NOT NULL DEFAULT 0,";
-            //sql += "declare nvarchar(260) NOT NULL DEFAULT '',";
-            //sql += "billboard_month_1 integer NOT NULL DEFAULT 0,";
-            //sql += "billboard_month_2 integer NOT NULL DEFAULT 0,";
-            //sql += "billboard_month_3 integer NOT NULL DEFAULT 0,";
-            //sql += "billboard_month_4 integer NOT NULL DEFAULT 0,";
-            //sql += "billboard_month_5 integer NOT NULL DEFAULT 0,";
-            //sql += "billboard_all_1 integer NOT NULL DEFAULT 0,";
-            //sql += "billboard_all_2 integer NOT NULL DEFAULT 0,";
-            //sql += "billboard_all_3 integer NOT NULL DEFAULT 0,";
-            //sql += "billboard_all_4 integer NOT NULL DEFAULT 0,";
-            //sql += "billboard_all_5 integer NOT NULL DEFAULT 0,";
-
             singer_info.room_info.room_id = stmt.ColumnInt(10);
-            singer_info.room_info.declare = stmt.ColumnString16(11);
-            singer_info.room_info.billboard_month_1 = stmt.ColumnInt(12);
-            singer_info.room_info.billboard_month_2 = stmt.ColumnInt(3);
-            singer_info.room_info.billboard_month_4 = stmt.ColumnInt(4);
-            singer_info.room_info.billboard_month_5 = stmt.ColumnInt(5);
-            singer_info.room_info.billboard_all_1 = stmt.ColumnInt(16);
-            singer_info.room_info.billboard_all_2 = stmt.ColumnInt(17);
-            singer_info.room_info.billboard_all_3 = stmt.ColumnInt(18);
-            singer_info.room_info.billboard_all_4 = stmt.ColumnInt(19);
-            singer_info.room_info.billboard_all_5 = stmt.ColumnInt(20);
+            singer_info.room_info.public_msg = stmt.ColumnString16(11);
+            singer_info.room_info.private_msg = stmt.ColumnString16(12);
+            singer_info.room_info.billboard_month_1 = stmt.ColumnInt(13);
+            singer_info.room_info.billboard_month_2 = stmt.ColumnInt(14);
+            singer_info.room_info.billboard_month_4 = stmt.ColumnInt(15);
+            singer_info.room_info.billboard_month_5 = stmt.ColumnInt(16);
+            singer_info.room_info.billboard_all_1 = stmt.ColumnInt(17);
+            singer_info.room_info.billboard_all_2 = stmt.ColumnInt(18);
+            singer_info.room_info.billboard_all_3 = stmt.ColumnInt(19);
+            singer_info.room_info.billboard_all_4 = stmt.ColumnInt(20);
+            singer_info.room_info.billboard_all_5 = stmt.ColumnInt(21);
 
-            // other
-            //sql += "star_singer integer NOT NULL DEFAULT 0,";
-            //sql += "tags nvarchar(260) NOT NULL DEFAULT '',";
-            //sql += "last_online nvarchar(260) NOT NULL DEFAULT '',";
-            //sql += "last_online_day integer NOT NULL DEFAULT 0,";
-            //sql += "date nvarchar(260) NOT NULL DEFAULT '',);";
-            singer_info.star_singer = !!stmt.ColumnInt(21);
-            singer_info.tags = stmt.ColumnString16(22);
-            singer_info.last_online = stmt.ColumnString16(23);
-            singer_info.last_online_day = stmt.ColumnInt(24);
+            singer_info.star_singer = !!stmt.ColumnInt(22);
+            singer_info.tags = stmt.ColumnString16(23);
+            singer_info.last_online = stmt.ColumnString16(24);
+            singer_info.last_online_day = stmt.ColumnInt(25);
             singer_infos->push_back(singer_info);
         }
     }

@@ -152,6 +152,10 @@ private:
     bool DoOpenRoomForGetSingerid(uint32 roomid);
     bool DoGetSingerLastOnline(SingerInfo singerid);
     void DoGetSingerTags(SingerInfo singer_info);
+    void DoGetRoomMessage(SingerInfo singer_info);
+    void DoGetSuperFans(SingerInfo singer_info);
+    void DoGetThirtydays(SingerInfo singer_info);
+
     void RangeSearchResultToDB(uint32 roomid, const SingerInfo& singer_info,
         uint32 status, RangSearchErrorCode error);
 

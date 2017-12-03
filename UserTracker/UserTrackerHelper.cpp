@@ -976,8 +976,11 @@ void UserTrackerHelper::DoGetSingerTags(SingerInfo singer_info)
             result = true;
         } while (0);
 
-        result_callback_.Run(temp.room_info.room_id,
-            temp, response.statuscode, RangSearchErrorCode::RS_OK);
+        worker_thread_->task_runner()->PostTask(
+            FROM_HERE,
+            base::Bind(&UserTrackerHelper::DoGetRoomMessage,
+            base::Unretained(this),
+            temp));
     };
 
 
@@ -988,6 +991,214 @@ void UserTrackerHelper::DoGetSingerTags(SingerInfo singer_info)
     HttpRequest request;
     request.url = url;
     request.queries["jsoncallback"] = std::string("jsonpcallback_httpsfxservicekugoucomVServicesStarTagsServiceStarTagsServicegetStarUserTagsList")+star_kugou_id;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+
+    request.asyncHttpResponseCallback = callback;
+
+    easy_http_impl_->AsyncHttpRequest(request);
+}
+
+void UserTrackerHelper::DoGetRoomMessage(SingerInfo singer_info)
+{
+    auto callback = [=](const HttpResponse& response)
+    {
+        SingerInfo temp = singer_info;
+        std::string content;
+        content.assign(response.content.begin(), response.content.end());
+        std::string jsondata = PickJson(content);
+
+        bool result = false;
+        do
+        {
+            Json::Reader reader;
+            Json::Value rootdata(Json::objectValue);
+            if (!reader.parse(jsondata, rootdata, false))
+                break;
+
+            uint32 unixtime = rootdata.get("servertime", 1506009600).asUInt();
+
+            Json::Value jvdata(Json::ValueType::objectValue);
+            Json::Value data = rootdata.get(std::string("data"), jvdata);
+            if (data.isNull() || !data.isObject())
+                break;
+
+            std::string public_msg = data.get("publicMesg", "").asString();
+            std::string private_msg = data.get("privateMesg", "").asString();
+            temp.room_info.public_msg = base::UTF8ToWide(public_msg);
+            temp.room_info.private_msg = base::UTF8ToWide(private_msg);
+
+            result = true;
+        } while (0);
+
+        worker_thread_->task_runner()->PostTask(
+            FROM_HERE,
+            base::Bind(&UserTrackerHelper::DoGetSuperFans,
+            base::Unretained(this),
+            temp));
+    };
+    std::string roomid = base::UintToString(singer_info.room_info.room_id);
+    std::string url = "http://visitor.fanxing.kugou.com";
+    url += "/VServices/RoomService.RoomService.getInfo/";
+    url += roomid;
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+
+    request.asyncHttpResponseCallback = callback;
+
+    easy_http_impl_->AsyncHttpRequest(request);
+}
+
+void UserTrackerHelper::DoGetSuperFans(SingerInfo singer_info)
+{
+    auto callback = [=](const HttpResponse& response)
+    {
+        SingerInfo temp = singer_info;
+        std::string content;
+        content.assign(response.content.begin(), response.content.end());
+        std::string jsondata = PickJson(content);
+
+        bool result = false;
+        do
+        {
+            Json::Reader reader;
+            Json::Value rootdata(Json::objectValue);
+            if (!reader.parse(jsondata, rootdata, false))
+                break;
+
+            uint32 unixtime = rootdata.get("servertime", 1506009600).asUInt();
+
+            Json::Value jvdata(Json::ValueType::objectValue);
+            Json::Value data = rootdata.get(std::string("data"), jvdata);
+
+            if (data.isNull() || !data.isArray())
+                break;
+
+            std::vector<uint32> fansids;
+            for (const auto& fans : data)
+            {
+                // FIX ME: 目前为了追踪被盗币是否上30天榜，暂时存玩家id
+                uint32 fansid = GetInt32FromJsonValue(fans, "senderId");
+                uint32 send_coin = GetInt32FromJsonValue(fans, "total");
+                std::string fansnickname = fans.get("nickName", "").asString();
+                fansids.push_back(fansid);
+            }
+            if (fansids.size() == 5)
+            {
+                temp.room_info.billboard_all_5 = fansids.at(4);
+            }
+
+            if (fansids.size() >= 4)
+            {
+                temp.room_info.billboard_all_4 = fansids.at(3);
+            }
+
+            if (fansids.size() >= 3)
+            {
+                temp.room_info.billboard_all_3 = fansids.at(2);
+            }
+
+            if (fansids.size() >= 2)
+            {
+                temp.room_info.billboard_all_2 = fansids.at(1);
+            }
+
+            if (fansids.size() >= 1)
+            {
+                temp.room_info.billboard_all_1 = fansids.at(0);
+            }
+
+            result = true;
+        } while (0);
+
+        worker_thread_->task_runner()->PostTask(
+            FROM_HERE,
+            base::Bind(&UserTrackerHelper::DoGetThirtydays,
+            base::Unretained(this),
+            temp));
+    };
+    std::string fanxing_id = base::UintToString(singer_info.user_info.fanxing_id);
+    std::string url = "http://visitor.fanxing.kugou.com/VServices/ChartService.FansService.getSuperFans/";
+    url += fanxing_id;
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+
+    request.asyncHttpResponseCallback = callback;
+
+    easy_http_impl_->AsyncHttpRequest(request);
+}
+
+void UserTrackerHelper::DoGetThirtydays(SingerInfo singer_info)
+{
+    auto callback = [=](const HttpResponse& response)
+    {
+        SingerInfo temp = singer_info;
+        std::string content;
+        content.assign(response.content.begin(), response.content.end());
+        std::string jsondata = PickJson(content);
+
+        bool result = false;
+        do
+        {
+            Json::Reader reader;
+            Json::Value rootdata(Json::objectValue);
+            if (!reader.parse(jsondata, rootdata, false))
+                break;
+
+            uint32 unixtime = rootdata.get("servertime", 1506009600).asUInt();
+
+            Json::Value jvdata(Json::ValueType::objectValue);
+            Json::Value data = rootdata.get(std::string("data"), jvdata);
+
+            if (data.isNull() || !data.isArray())
+                break;
+
+            std::vector<uint32> fansids;
+            for (const auto& fans : data)
+            {
+                // FIX ME: 目前为了追踪被盗币是否上30天榜，暂时存玩家id
+                uint32 fansid = GetInt32FromJsonValue(fans, "senderId");
+                uint32 send_coin = GetInt32FromJsonValue(fans, "total");
+                std::string fansnickname = fans.get("nickName", "").asString();
+                fansids.push_back(fansid);
+            }
+            if (fansids.size() == 5)
+            {
+                temp.room_info.billboard_month_5 = fansids.at(4);
+            }
+
+            if (fansids.size() >= 4)
+            {
+                temp.room_info.billboard_month_4 = fansids.at(3);
+            }
+
+            if (fansids.size() >= 3)
+            {
+                temp.room_info.billboard_month_3 = fansids.at(2);
+            }
+
+            if (fansids.size() >= 2)
+            {
+                temp.room_info.billboard_month_2 = fansids.at(1);
+            }
+
+            if (fansids.size() >= 1)
+            {
+                temp.room_info.billboard_month_1 = fansids.at(0);
+            }
+
+            result = true;
+        } while (0);
+
+        result_callback_.Run(temp.room_info.room_id,
+            temp, response.statuscode, RangSearchErrorCode::RS_OK);
+    };
+    std::string fanxing_id = base::UintToString(singer_info.user_info.fanxing_id);
+    std::string url = "http://visitor.fanxing.kugou.com/VServices/ChartService.FansService.getSuperFans/";
+    url += fanxing_id;
+    HttpRequest request;
+    request.url = url;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
 
     request.asyncHttpResponseCallback = callback;
@@ -1016,7 +1227,7 @@ void UserTrackerHelper::RangeSearchResultToDB(uint32 roomid, const SingerInfo& s
         return;
     }
 
-    if (status == 488) // 服务器认为是攻击，拒绝服务，要稍后再试一次
+    if (status == 488 || status/100==5) // 服务器认为是攻击，拒绝服务，要稍后再试一次
     {
         uint32 error_count = room_error_map_[roomid]++;
 
