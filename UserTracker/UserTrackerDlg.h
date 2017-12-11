@@ -68,6 +68,7 @@ protected:
 
     afx_msg void OnBnClickedBtnImportRooms();
     afx_msg void OnBnClickedBtnExportRooms();
+    afx_msg void OnBnClickedBtnPhoneNoClan();
 
 protected:
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);

@@ -32,9 +32,11 @@ struct DisplayRoomInfo
 {
     uint32 roomid;
     uint32 starid;
+    uint32 kugouid;
     uint32 star_level;
     uint32 status;
     uint32 last_online;
+    std::string nickname;
 };
 
 enum class RangSearchErrorCode
@@ -166,6 +168,8 @@ private:
 
     bool GetAllStarRoomInfos(std::vector<uint32>* roomids); // 从全站获取所有正在直播的主播直播粗略信息，为下一步获取房间用户列表做准备
     bool GetTargetStarRoomInfos(const std::string& url, std::vector<DisplayRoomInfo>* roomids);
+    bool GetPhoneTargetStarRoomInfos(uint32 page_num, 
+        std::vector<DisplayRoomInfo>* roomids, bool* has_next); // 手机请求返回来的数据多一层，结构不一样
 
     // 强制更新房间用户信息，roomid_user_map返回所有房间在线用户信息
     bool GetAllRoomViewers(const std::vector<uint32>& roomids,

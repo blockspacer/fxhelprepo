@@ -967,7 +967,7 @@ void UserTrackerHelper::DoGetSingerTags(SingerInfo singer_info)
                 std::string tag_name = tag.get("tagsName", "").asString();
                 std::wstring w_tag_name = base::UTF8ToWide(tag_name);
                 if (!w_tag_name.empty())
-                    tags += w_tag_name + L";";
+                    tags += w_tag_name + L"_";
             }
 
             if (!tags.empty())
@@ -1221,8 +1221,9 @@ void UserTrackerHelper::RangeSearchResultToDB(uint32 roomid, const SingerInfo& s
         }
         std::wstring msg = base::UintToString16(roomid) + L"请求成功  " + retry;
         message_callback_.Run(msg);
+        DCHECK(singer_info.user_info.fanxing_id);
         bool result = database_->InsertRecord(singer_info);
-        //DCHECK(result);
+        DCHECK(result);
         progress_callback_.Run(++current_room_count_, all_room_count_);
         return;
     }
@@ -1275,20 +1276,36 @@ bool UserTrackerHelper::GetPhoneRoomInfos(std::vector<uint32>* roomids)
 {
     std::vector<DisplayRoomInfo> roomid1;
 
-    const std::string host = "fx.service.kugou.com";
-    std::string url = "http://" + host + "/mps-web/cdn/mobileLive/roomList_v2?pid=85&version=1234&pageNum=1&pageSize=20&jsonpcallback=jsonpcallback_httpsfxservicekugoucommpswebcdnmobileLiveroomList_v2pid85version1234pageNum1pageSize20";
-    std::wstring msg = L"正在获取星级主播房间列表 ...";
+    std::wstring msg = L"正在获取手机主播房间列表 ...";
     message_callback_.Run(msg);
-    GetTargetStarRoomInfos(url, &roomid1);
+    bool has_next = true;
+    uint32 page_num = 1;
 
-    std::vector<uint32> tempids;
+    while (has_next)
+    {
+        bool result = GetPhoneTargetStarRoomInfos(page_num++, &roomid1, &has_next);
+        DCHECK(result);
+    }
+
+
+    //std::vector<uint32> tempids;
+    //for (const auto& room : roomid1)
+    //{
+    //    if (room.status != 0)
+    //        tempids.push_back(room.roomid);
+    //}
+    //roomids->insert(roomids->end(), tempids.begin(), tempids.end());
+
     for (const auto& room : roomid1)
     {
-        if (room.status != 0)
-            tempids.push_back(room.roomid);
+        SingerInfo singer_info;
+        singer_info.room_info.room_id = room.roomid;
+        singer_info.user_info.star_level = room.star_level;
+        singer_info.user_info.fanxing_id = room.starid;
+        singer_info.user_info.kugou_id = room.kugouid;
+        singer_info.user_info.nickname = base::UTF8ToWide(room.nickname);
+        DoGetSingerLastOnline(singer_info);
     }
-    roomids->insert(roomids->end(), tempids.begin(), tempids.end());
-
 
     return true;
 }
@@ -1367,6 +1384,110 @@ bool UserTrackerHelper::GetAllStarRoomInfos(std::vector<uint32>* roomids)
         roomids->insert(roomids->end(), tempids.begin(), tempids.end());
     }
 
+    return true;
+}
+
+
+bool UserTrackerHelper::GetPhoneTargetStarRoomInfos(
+    uint32 page_num, std::vector<DisplayRoomInfo>* roomids,
+    bool* has_next)
+{
+    if (is_expired)
+        return false;
+
+    const std::string host = "fx.service.kugou.com";
+    std::string url = "http://" + host + "/mps-web/cdn/mobileLive/roomList_v2";
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/";
+    request.cookies = user_->GetCookies();
+    request.queries["pid"] = "85";
+    request.queries["version"] = "1234";
+    request.queries["pageNum"] = base::UintToString(page_num);
+    request.queries["pageSize"] = "20";
+    request.queries["jsonpcallback"] = std::string("jsonpcallback_httpsfxservicekugoucommpswebcdnmobileLiveroomList_v2pid85version1234pageNum")
+        + base::UintToString(page_num) + "pageSize20";
+
+    HttpResponse response;
+    if (!curl_wrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string responsedata(response.content.begin(), response.content.end());
+    std::string jsondata = PickJson(responsedata);
+
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(jsondata, rootdata, false))
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 unixtime = rootdata.get("servertime", 1506009600).asUInt();
+
+    uint64 expiretime = tracker_authority_->expiretime - base::Time::UnixEpoch().ToInternalValue();
+    expiretime /= 1000000;
+
+#ifndef _DEBUG
+    if (unixtime > expiretime)
+    {
+        is_expired = true;
+        AuthorityHelper authority_helper;
+        if (!authority_helper.DestoryTrackAuthority())
+        {
+            return false;
+        }
+
+        return false;
+    }
+#endif
+
+    uint32 status = rootdata.get("status", 0).asUInt();
+    if (status != 1)
+    {
+        assert(false);
+        return false;
+    }
+    Json::Value jvdata(Json::ValueType::objectValue);
+    Json::Value data = rootdata.get(std::string("data"), jvdata);
+    if (data.isNull() || !data.isObject())
+    {
+        assert(false);
+        return false;
+    }
+
+    uint32 hasNext = data.get("hasNext", 0).asUInt();
+    *has_next = !!hasNext;
+
+    Json::Value liveStarTypeList = data.get(std::string("liveStarTypeList"), jvdata);
+    if (liveStarTypeList.isNull() || !liveStarTypeList.isArray())
+    {
+        assert(false);
+        return false;
+    }
+
+    for (const auto& roominfo : liveStarTypeList)
+    {
+        uint32 roomId = GetInt32FromJsonValue(roominfo, "roomId");
+        uint32 starId = GetInt32FromJsonValue(roominfo, "userId");
+        uint32 kugouId = GetInt32FromJsonValue(roominfo, "kugouId");
+        uint32 status = GetInt32FromJsonValue(roominfo, "status");
+        uint32 star_level = GetInt32FromJsonValue(roominfo, "starLevel");
+        std::string nickName = roominfo.get("nickName", "").asString();
+        uint32 last_online = 0;
+
+        DisplayRoomInfo display;
+        display.roomid = roomId;
+        display.starid = starId;
+        display.star_level = star_level;
+        display.last_online = last_online;
+        display.kugouid = kugouId;
+        display.nickname = nickName;
+        roomids->push_back(display);
+    }
     return true;
 }
 

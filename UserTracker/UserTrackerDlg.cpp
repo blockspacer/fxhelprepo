@@ -91,6 +91,7 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_SEARCH_RANGE, &CUserTrackerDlg::OnBnClickedBtnSearchRange)
     ON_BN_CLICKED(IDC_BTN_IMPORT_ROOMS, &CUserTrackerDlg::OnBnClickedBtnImportRooms)
     ON_BN_CLICKED(IDC_BTN_EXPORT_ROOMS, &CUserTrackerDlg::OnBnClickedBtnExportRooms)
+    ON_BN_CLICKED(IDC_BTN_PHONE_NO_CLAN, &CUserTrackerDlg::OnBnClickedBtnPhoneNoClan)
 END_MESSAGE_MAP()
 
 
@@ -533,4 +534,18 @@ void CUserTrackerDlg::OnBnClickedBtnExportRooms()
     file.Close();
 
     MessageBoxW(path.value().c_str(), L"导入完成", 0);
+}
+
+void CUserTrackerDlg::OnBnClickedBtnPhoneNoClan()
+{
+    tracker_helper_->SetRangeSearchCallback(
+        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
+        base::Bind(&CUserTrackerDlg::RangeSearchResult, base::Unretained(this)));
+
+    if (!tracker_helper_->UpdatePhoneForNoClan(
+        base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
+        base::Bind(&CUserTrackerDlg::FoundResult, base::Unretained(this))))
+    {
+        return;
+    }
 }
