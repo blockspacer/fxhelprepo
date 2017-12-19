@@ -50,7 +50,7 @@ namespace
         return ret;
     }
 
-    std::string GetCreateWorshipTableSql(const std::string table_name)
+    std::string GetCreateSingerInfoTableSql(const std::string table_name)
     {
         std::string sql = "Create TABLE ";
         sql += table_name;
@@ -67,6 +67,7 @@ namespace
         sql += "location nvarchar(260) NOT NULL DEFAULT '',";
 
         // RoomInfo
+        sql += "phoneroomid integer NOT NULL DEFAULT 0,";
         sql += "roomid integer NOT NULL DEFAULT 0,";
         sql += "public_msg nvarchar(260) NOT NULL DEFAULT '',";
         sql += "private_msg nvarchar(260) NOT NULL DEFAULT '',";
@@ -95,7 +96,7 @@ namespace
     {
         std::string sql = "Insert Into " + table_name;
         sql += "( fxid, kgid, clanid, nickname,richlevel,starlevel, fanscount, followcount, sex, location,";
-        sql += "roomid, public_msg,private_msg, ";
+        sql += "phoneroomid, roomid, public_msg,private_msg, ";
         sql += "billboard_month_1, billboard_month_2, billboard_month_3, billboard_month_4, billboard_month_5, ";
         sql += "billboard_all_1, billboard_all_2, billboard_all_3, billboard_all_4, billboard_all_5,";
         sql +="star_singer, tags, last_online, last_online_day, date) Values ";
@@ -122,6 +123,7 @@ namespace
         sql += "," + WStringToQueryItem(singer_info.user_info.sex);
         sql += "," + WStringToQueryItem(singer_info.user_info.location);
 
+        sql += "," + base::UintToString(singer_info.room_info.phone_room_id);
         sql += "," + base::UintToString(singer_info.room_info.room_id);
         sql += "," + WStringToQueryItem(singer_info.room_info.public_msg);
         sql += "," + WStringToQueryItem(singer_info.room_info.private_msg);
@@ -216,7 +218,7 @@ bool SingerInfoDatabase::Initialize(const std::wstring& file_name)
 
     if (!db_conn_.DoesTableExist(table_name_.c_str()))
     {
-        db_conn_.Execute(GetCreateWorshipTableSql(table_name_).c_str());
+        db_conn_.Execute(GetCreateSingerInfoTableSql(table_name_).c_str());
     }
 
     return false;
@@ -270,23 +272,24 @@ bool SingerInfoDatabase::Query(std::vector<SingerInfo>* singer_infos)
             singer_info.user_info.sex = stmt.ColumnString16(8);
             singer_info.user_info.location = stmt.ColumnString16(9);
 
-            singer_info.room_info.room_id = stmt.ColumnInt(10);
-            singer_info.room_info.public_msg = stmt.ColumnString16(11);
-            singer_info.room_info.private_msg = stmt.ColumnString16(12);
-            singer_info.room_info.billboard_month_1 = stmt.ColumnInt(13);
-            singer_info.room_info.billboard_month_2 = stmt.ColumnInt(14);
-            singer_info.room_info.billboard_month_4 = stmt.ColumnInt(15);
-            singer_info.room_info.billboard_month_5 = stmt.ColumnInt(16);
-            singer_info.room_info.billboard_all_1 = stmt.ColumnInt(17);
-            singer_info.room_info.billboard_all_2 = stmt.ColumnInt(18);
-            singer_info.room_info.billboard_all_3 = stmt.ColumnInt(19);
-            singer_info.room_info.billboard_all_4 = stmt.ColumnInt(20);
-            singer_info.room_info.billboard_all_5 = stmt.ColumnInt(21);
+            singer_info.room_info.phone_room_id = stmt.ColumnInt(10);
+            singer_info.room_info.room_id = stmt.ColumnInt(11);
+            singer_info.room_info.public_msg = stmt.ColumnString16(12);
+            singer_info.room_info.private_msg = stmt.ColumnString16(13);
+            singer_info.room_info.billboard_month_1 = stmt.ColumnInt(14);
+            singer_info.room_info.billboard_month_2 = stmt.ColumnInt(15);
+            singer_info.room_info.billboard_month_4 = stmt.ColumnInt(16);
+            singer_info.room_info.billboard_month_5 = stmt.ColumnInt(17);
+            singer_info.room_info.billboard_all_1 = stmt.ColumnInt(18);
+            singer_info.room_info.billboard_all_2 = stmt.ColumnInt(19);
+            singer_info.room_info.billboard_all_3 = stmt.ColumnInt(20);
+            singer_info.room_info.billboard_all_4 = stmt.ColumnInt(21);
+            singer_info.room_info.billboard_all_5 = stmt.ColumnInt(22);
 
-            singer_info.star_singer = !!stmt.ColumnInt(22);
-            singer_info.tags = stmt.ColumnString16(23);
-            singer_info.last_online = stmt.ColumnString16(24);
-            singer_info.last_online_day = stmt.ColumnInt(25);
+            singer_info.star_singer = !!stmt.ColumnInt(23);
+            singer_info.tags = stmt.ColumnString16(24);
+            singer_info.last_online = stmt.ColumnString16(25);
+            singer_info.last_online_day = stmt.ColumnInt(26);
             singer_infos->push_back(singer_info);
         }
     }

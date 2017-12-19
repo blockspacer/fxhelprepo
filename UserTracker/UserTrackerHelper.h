@@ -30,12 +30,13 @@ struct FollowUserInfo
 
 struct DisplayRoomInfo
 {
-    uint32 roomid;
-    uint32 starid;
-    uint32 kugouid;
-    uint32 star_level;
-    uint32 status;
-    uint32 last_online;
+    uint32 phone_room_id = 0;
+    uint32 roomid = 0;
+    uint32 starid = 0;
+    uint32 kugouid = 0;
+    uint32 star_level = 0;
+    uint32 status = 0;
+    uint32 last_online = 0;
     std::string nickname;
 };
 
@@ -242,6 +243,7 @@ private:
 
     std::map<uint32, uint32> room_error_map_; // 第一次访问失败需要重试的房间号
     ProgressCallback progress_callback_;
+    ResultCallback handle_callback_;
     ResultCallback result_callback_;
     std::unique_ptr<SingerInfoDatabase> database_;
 

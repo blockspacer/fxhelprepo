@@ -98,7 +98,8 @@ namespace
             *days = last_online_month * 30;
         }
         else if (last_string.find(L"时") != std::string::npos ||
-            last_string.find(L"分") != std::string::npos)
+            last_string.find(L"分") != std::string::npos||
+            last_string.find(L"秒") != std::string::npos)
         {
             *days = 0;
         }
@@ -182,8 +183,8 @@ void UserTrackerHelper::SetRangeSearchCallback(ProgressCallback progress_callbac
     ResultCallback result_callback)
 {
     progress_callback_ = progress_callback;
-    //result_callback_ = result_callback;
-    result_callback_ = base::Bind(&UserTrackerHelper::RangeSearchResultToDB, 
+    result_callback_ = result_callback;
+    handle_callback_ = base::Bind(&UserTrackerHelper::RangeSearchResultToDB,
         base::Unretained(this));
 }
 
@@ -296,39 +297,39 @@ void UserTrackerHelper::DoUpdatePhoneForNoClan(
     msg = L"获取房间列表成功";
     message_callback_.Run(msg);
 
-    uint32 count = 0;
-    std::map<uint32, std::map<uint32, ConsumerInfo>> consumer_infos_map;
-    for (auto roomid : roomids)
-    {
-        std::map<uint32, ConsumerInfo> consumer_infos;
-        progress_callback.Run(++count, roomids.size());
-        uint32 star_level = 0;
-        if (!GetRoomConsumerList(roomid, &star_level, &consumer_infos))
-            continue;
+    //uint32 count = 0;
+    //std::map<uint32, std::map<uint32, ConsumerInfo>> consumer_infos_map;
+    //for (auto roomid : roomids)
+    //{
+    //    std::map<uint32, ConsumerInfo> consumer_infos;
+    //    progress_callback.Run(++count, roomids.size());
+    //    uint32 star_level = 0;
+    //    if (!GetRoomConsumerList(roomid, &star_level, &consumer_infos))
+    //        continue;
 
-        if (star_level < min_star_level_)
-            continue;
+    //    if (star_level < min_star_level_)
+    //        continue;
 
-        consumer_infos_map[roomid] = consumer_infos;
-        result_callback.Run(0, roomid);
-    }
+    //    consumer_infos_map[roomid] = consumer_infos;
+    //    result_callback.Run(0, roomid);
+    //}
 
-    base::FilePath path;
-    if (!GetOutputFileName(&path))
-        return;
+    //base::FilePath path;
+    //if (!GetOutputFileName(&path))
+    //    return;
 
-    base::File file;
-    file.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
-    for (auto consumer_infos : consumer_infos_map)
-    {
-        std::string roomid = base::UintToString(consumer_infos.first);
-        LOG(INFO) << "=======" << roomid;
-        file.WriteAtCurrentPos(roomid.c_str(), roomid.size());
-        file.WriteAtCurrentPos("\r\n", 2);
-    }
-    file.Close();
-    msg = L"获取主播成功";
-    message_callback_.Run(msg);
+    //base::File file;
+    //file.Initialize(path, base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+    //for (auto consumer_infos : consumer_infos_map)
+    //{
+    //    std::string roomid = base::UintToString(consumer_infos.first);
+    //    LOG(INFO) << "=======" << roomid;
+    //    file.WriteAtCurrentPos(roomid.c_str(), roomid.size());
+    //    file.WriteAtCurrentPos("\r\n", 2);
+    //}
+    //file.Close();
+    //msg = L"获取主播成功";
+    //message_callback_.Run(msg);
     return;
 }
 
@@ -899,7 +900,28 @@ bool UserTrackerHelper::DoGetSingerLastOnline(SingerInfo singer_info)
                 }
             }
 
-            std::wstring msg = base::Uint64ToString16(temp.room_info.room_id) + L":" + base::UTF8ToWide(time_string);
+            std::string room_addr_str = base::WideToUTF8(L"直播间地址");
+            // <a href="/1439683" target="room_1439683">
+            beginpos = responsedata.find(room_addr_str);
+            if (beginpos != std::string::npos)
+            {
+                std::string href_mark = "href=\"/";
+                beginpos += room_addr_str.size();
+                beginpos = responsedata.find(href_mark, beginpos);
+                beginpos += href_mark.size();
+                endpos = responsedata.find("\"", beginpos);
+                if (endpos != std::string::npos)
+                {
+                    room_addr_str = responsedata.substr(beginpos, endpos - beginpos);
+                    RemoveSpace(&room_addr_str);
+                    bool ret = base::StringToUint(room_addr_str, &temp.room_info.room_id);
+                    DCHECK(ret);
+                }
+            }
+
+            std::wstring msg = base::Uint64ToString16(temp.room_info.phone_room_id) 
+                + L"(" + base::UintToString16(temp.room_info.room_id) + L")" 
+                + L":" + base::UTF8ToWide(time_string);
             message_callback_.Run(msg);
 
             temp.last_online = base::UTF8ToWide(time_string);
@@ -910,7 +932,7 @@ bool UserTrackerHelper::DoGetSingerLastOnline(SingerInfo singer_info)
 
         if (!result)
         {
-            result_callback_.Run(singer_info.room_info.room_id, singer_info,
+            handle_callback_.Run(singer_info.room_info.phone_room_id, singer_info,
                 response.statuscode, RangSearchErrorCode::RS_GET_LAST_ONLINE_FAILED);
             return;
         }
@@ -1191,7 +1213,7 @@ void UserTrackerHelper::DoGetThirtydays(SingerInfo singer_info)
             result = true;
         } while (0);
 
-        result_callback_.Run(temp.room_info.room_id,
+        handle_callback_.Run(temp.room_info.phone_room_id,
             temp, response.statuscode, RangSearchErrorCode::RS_OK);
     };
     std::string fanxing_id = base::UintToString(singer_info.user_info.fanxing_id);
@@ -1225,6 +1247,31 @@ void UserTrackerHelper::RangeSearchResultToDB(uint32 roomid, const SingerInfo& s
         bool result = database_->InsertRecord(singer_info);
         DCHECK(result);
         progress_callback_.Run(++current_room_count_, all_room_count_);
+
+        bool result_to_callback = false;
+        if (singer_info.room_info.room_id == 0)
+        {
+            // 没有roomid代表没有申请过正式直播，是玩家身份，不论是否在公会，都可以申请直播
+            result_to_callback = true;
+        }
+        else if (singer_info.user_info.clan_id == 0)
+        {
+            // 如果有正式房间号，但是没有公会，那么判断90天时间
+            if (singer_info.last_online_day>=90)
+            {
+                result_to_callback = true;
+            }
+        }
+        else // 同时有公会有房间号，就不在考虑范围了
+        {
+            result_to_callback = false;
+        }
+
+        if (result_to_callback)
+        {
+            result_callback_.Run(roomid, singer_info, status, error);
+        }
+
         return;
     }
 
@@ -1288,6 +1335,7 @@ bool UserTrackerHelper::GetPhoneRoomInfos(std::vector<uint32>* roomids)
     }
 
 
+    all_room_count_ = roomid1.size();
     //std::vector<uint32> tempids;
     //for (const auto& room : roomid1)
     //{
@@ -1299,6 +1347,7 @@ bool UserTrackerHelper::GetPhoneRoomInfos(std::vector<uint32>* roomids)
     for (const auto& room : roomid1)
     {
         SingerInfo singer_info;
+        singer_info.room_info.phone_room_id = room.phone_room_id;
         singer_info.room_info.room_id = room.roomid;
         singer_info.user_info.star_level = room.star_level;
         singer_info.user_info.fanxing_id = room.starid;
@@ -1480,7 +1529,7 @@ bool UserTrackerHelper::GetPhoneTargetStarRoomInfos(
         uint32 last_online = 0;
 
         DisplayRoomInfo display;
-        display.roomid = roomId;
+        display.phone_room_id = roomId;
         display.starid = starId;
         display.star_level = star_level;
         display.last_online = last_online;
