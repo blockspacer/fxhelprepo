@@ -397,6 +397,11 @@ void CUserTrackerDlg::OnNMClickListResult(NMHDR *pNMHDR, LRESULT *pResult)
         CString cs_item = m_list_result.GetItemText(
             pNMListView->iItem, pNMListView->iSubItem);
         std::wstring url = L"http://fanxing.kugou.com/";
+        if (cs_item.GetLength()>7)
+        {
+            url += L"i/";
+        }
+        
         url += cs_item.GetBuffer();
         ShellExecute(NULL, _T("open"), url.c_str(), NULL, NULL, SW_SHOWNORMAL);
         m_edit_roomid.SetWindowTextW(cs_item);
@@ -478,7 +483,7 @@ void CUserTrackerDlg::OnBnClickedBtnSearchRange()
 void CUserTrackerDlg::RangeSearchResult(uint32 roomid, const SingerInfo& singer_info,
     uint32 status, RangSearchErrorCode error)
 {
-
+    this->PostMessage(WM_USER_FOUND_RESULT, (WPARAM)(roomid), (LPARAM)roomid);
 }
 
 void CUserTrackerDlg::OnBnClickedBtnImportRooms()

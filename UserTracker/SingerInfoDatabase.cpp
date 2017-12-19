@@ -92,7 +92,7 @@ namespace
         return std::move(sql);
     }
 
-    std::string GetInsertWorshipRecodeSql(const std::string& table_name, const SingerInfo& singer_info)
+    std::string GetInsertSingerInfoRecodeSql(const std::string& table_name, const SingerInfo& singer_info)
     {
         std::string sql = "Insert Into " + table_name;
         sql += "( fxid, kgid, clanid, nickname,richlevel,starlevel, fanscount, followcount, sex, location,";
@@ -235,7 +235,7 @@ bool SingerInfoDatabase::InsertRecord(const SingerInfo& singer_info)
     {
         return false;
     }
-    std::string insert_sql = GetInsertWorshipRecodeSql(table_name_, singer_info);
+    std::string insert_sql = GetInsertSingerInfoRecodeSql(table_name_, singer_info);
     if (!db_conn_.Execute(insert_sql.c_str()))
     {
         return false;

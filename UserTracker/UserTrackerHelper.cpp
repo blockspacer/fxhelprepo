@@ -1267,6 +1267,11 @@ void UserTrackerHelper::RangeSearchResultToDB(uint32 roomid, const SingerInfo& s
             result_to_callback = false;
         }
 
+        if (singer_info.user_info.sex.find(L"ÄÐ") != std::string::npos)
+        {
+            result_to_callback = false;
+        }
+
         if (result_to_callback)
         {
             result_callback_.Run(roomid, singer_info, status, error);
