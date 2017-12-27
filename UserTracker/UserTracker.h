@@ -39,6 +39,8 @@ public:
 private:
     bool LoginProcedure(UserTrackerHelper* tracker_helper);
     bool TrackerProcedure(UserTrackerHelper* tracker_helper);
+    bool VMPVerifyProcedure(UserTrackerHelper* tracker_helper);
+
     void InitAppLog();
     scoped_ptr<base::AtExitManager> atExitManager_;
 };

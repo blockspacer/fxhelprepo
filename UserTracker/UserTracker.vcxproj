@@ -73,6 +73,9 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -117,6 +120,7 @@
     <ClInclude Include="UserTracker.h" />
     <ClInclude Include="UserTrackerDlg.h" />
     <ClInclude Include="UserTrackerHelper.h" />
+    <ClInclude Include="VMPVerifyDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthorityHelper.cpp" />
@@ -129,6 +133,7 @@
     <ClCompile Include="UserTracker.cpp" />
     <ClCompile Include="UserTrackerDlg.cpp" />
     <ClCompile Include="UserTrackerHelper.cpp" />
+    <ClCompile Include="VMPVerifyDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="UserTracker.rc" />

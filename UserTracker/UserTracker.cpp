@@ -16,6 +16,7 @@
 #include "UserTracker.h"
 #include "UserTrackerDlg.h"
 #include "LoginDlg.h"
+#include "VMPVerifyDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -85,10 +86,10 @@ BOOL CUserTrackerApp::InitInstance()
     UserTrackerHelper tracker_helper;
     tracker_helper.Initialize();
 
-    //if (LoginProcedure(&tracker_helper))
-    //{
+    if (VMPVerifyProcedure(&tracker_helper))
+    {
         TrackerProcedure(&tracker_helper);
-    //}
+    }
     tracker_helper.Finalize();
 
 	// 删除上面创建的 shell 管理器。
@@ -128,6 +129,26 @@ bool CUserTrackerApp::TrackerProcedure(UserTrackerHelper* tracker_helper)
     CUserTrackerDlg tracker_dlg(NULL, tracker_helper);
     m_pMainWnd = &tracker_dlg;
     INT_PTR nResponse = tracker_dlg.DoModal();
+    if (nResponse == IDOK)
+    {
+        return true;
+    }
+    else if (nResponse == IDCANCEL)
+    {
+        return false;
+    }
+    else if (nResponse == -1)
+    {
+        TRACE(traceAppMsg, 0, "警告: 对话框创建失败，应用程序将意外终止。\n");
+        TRACE(traceAppMsg, 0, "警告: 如果您在对话框上使用 MFC 控件，则无法 #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS。\n");
+    }
+    return false;
+}
+
+bool CUserTrackerApp::VMPVerifyProcedure(UserTrackerHelper* tracker_helper)
+{
+    CVMPVerifyDlg vmp_verify_dlg;
+    INT_PTR nResponse = vmp_verify_dlg.DoModal();
     if (nResponse == IDOK)
     {
         return true;
