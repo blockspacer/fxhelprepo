@@ -11,15 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{6B681212-0AAE-4614-9404-0710FEA8A7B1}</ProjectGuid>
-    <RootNamespace>UserTracker</RootNamespace>
+    <ProjectGuid>{3D26F237-C6A6-4F8B-ABDC-46887CAB9656}</ProjectGuid>
+    <RootNamespace>VmpHWID</RootNamespace>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
@@ -43,18 +43,18 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>主播搜索工具(试用版)</TargetName>
+    <TargetName>获取硬件码</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>主播搜索工具(试用版)</TargetName>
+    <TargetName>获取硬件码</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;_DEBUG;_CONSOLE;_LIB;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;__GXX_EXPERIMENTAL_CXX0X__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)third_party/chromium;$(SolutionDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -62,6 +62,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir)</AdditionalLibraryDirectories>
       <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib;libevent.lib</AdditionalDependencies>
+      <GenerateMapFile>false</GenerateMapFile>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -69,18 +70,15 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </Midl>
     <ResourceCompile>
-      <Culture>0x0804</Culture>
+      <Culture>0x0409</Culture>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
-    <ProjectReference>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
-    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -93,7 +91,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;libevent.lib;Wldap32.lib</AdditionalDependencies>
+      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib;libevent.lib</AdditionalDependencies>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -101,7 +100,7 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </Midl>
     <ResourceCompile>
-      <Culture>0x0804</Culture>
+      <Culture>0x0409</Culture>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
@@ -110,67 +109,32 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AuthorityHelper.h" />
-    <ClInclude Include="LoginDlg.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="SingerInfoDatabase.h" />
-    <ClInclude Include="SingerInfo.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="UserTracker.h" />
-    <ClInclude Include="UserTrackerDlg.h" />
-    <ClInclude Include="UserTrackerHelper.h" />
-    <ClInclude Include="VMPVerifyDlg.h" />
+    <ClInclude Include="VmpHWID.h" />
+    <ClInclude Include="VmpHWIDDlg.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AuthorityHelper.cpp" />
-    <ClCompile Include="LoginDlg.cpp" />
-    <ClCompile Include="SingerInfoDatabase.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="UserTracker.cpp" />
-    <ClCompile Include="UserTrackerDlg.cpp" />
-    <ClCompile Include="UserTrackerHelper.cpp" />
-    <ClCompile Include="VMPVerifyDlg.cpp" />
+    <ClCompile Include="VmpHWID.cpp" />
+    <ClCompile Include="VmpHWIDDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="UserTracker.rc" />
+    <ResourceCompile Include="VmpHWID.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\UserTracker.rc2" />
+    <None Include="res\VmpHWID.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\UserTracker.ico" />
+    <Image Include="res\VmpHWID.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Network\Network.vcxproj">
-      <Project>{2147cb51-23f6-4022-8e4a-291b70570cb7}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
       <Project>{ed99d404-f6b3-517a-4ea7-604a10269355}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\third_party\chromium\base\third_party\dynamic_annotations\dynamic_annotations.vcxproj">
-      <Project>{b68ee2bd-0ba9-9949-464b-39ffe5cabd0a}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\third_party\chromium\sql\sql.vcxproj">
-      <Project>{7d366195-6190-3f15-30c4-52836db24c56}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\third_party\chromium\third_party\sqlite\sqlite.vcxproj">
-      <Project>{5c9bfb96-dbb0-fbfb-52b9-02d595ee5d84}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\third_party\json\json.vcxproj">
-      <Project>{0deca417-fd94-4652-9881-53f935d89245}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\third_party\libcurl\curl\lib\libcurl.vcxproj">
-      <Project>{a9b789e9-ca2d-4b2f-b5fb-6d515ecfb31e}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\third_party\openssl\libeay32\libeay32.vcxproj">
-      <Project>{ac33ff8e-59e7-4e1e-8111-f446e9fb0231}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\third_party\openssl\ssleay32\ssleay32.vcxproj">
-      <Project>{057ea5b8-8c47-4519-b5fc-9b28191d6843}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -178,7 +142,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties RESOURCE_FILE="UserTracker.rc" />
+      <UserProperties RESOURCE_FILE="VmpHWID.rc" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
