@@ -793,7 +793,11 @@ bool UserTrackerHelper::DoOpenRoomForGetSingerid(uint32 roomid)
         {
             std::wstring msg = str_roomid + L"无法获取房间信息";
             message_callback_.Run(msg);
-            result_callback_.Run(roomid, singer_info, response.statuscode, RangSearchErrorCode::RS_ROOM_OPEN_FAILED);
+            //result_callback_.Run(roomid, singer_info, response.statuscode, RangSearchErrorCode::RS_ROOM_OPEN_FAILED);
+
+            handle_callback_.Run(singer_info.room_info.phone_room_id, singer_info,
+                response.statuscode, RangSearchErrorCode::RS_ROOM_OPEN_FAILED);
+
             return;
         }
 
@@ -1052,11 +1056,23 @@ void UserTrackerHelper::DoGetRoomMessage(SingerInfo singer_info)
             result = true;
         } while (0);
 
-        worker_thread_->task_runner()->PostTask(
-            FROM_HERE,
-            base::Bind(&UserTrackerHelper::DoGetSuperFans,
-            base::Unretained(this),
-            temp));
+        //worker_thread_->task_runner()->PostTask(
+        //    FROM_HERE,
+        //    base::Bind(&UserTrackerHelper::DoGetSuperFans,
+        //    base::Unretained(this),
+        //    temp));
+
+        if (!result)
+        {
+            handle_callback_.Run(temp.room_info.room_id, temp,
+                response.statuscode, RangSearchErrorCode::RS_GET_LAST_ONLINE_FAILED);
+            return;
+        }
+        else
+        {
+            handle_callback_.Run(temp.room_info.room_id, temp,
+                response.statuscode, RangSearchErrorCode::RS_OK);
+        }
     };
     std::string roomid = base::UintToString(singer_info.room_info.room_id);
     std::string url = "http://visitor.fanxing.kugou.com";

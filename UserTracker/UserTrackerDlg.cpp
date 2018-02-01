@@ -31,6 +31,12 @@ namespace
         uint32 current;
         uint32 all;
     };
+
+    void FakeRangeSearchResult(uint32 roomid, const SingerInfo& singer_info,
+        uint32 status, RangSearchErrorCode error)
+    {
+
+    }
 }
 
 
@@ -476,7 +482,7 @@ void CUserTrackerDlg::OnBnClickedBtnSearchRange()
 
     tracker_helper_->SetRangeSearchCallback(
         base::Bind(&CUserTrackerDlg::RoomProgress, base::Unretained(this)),
-        base::Bind(&CUserTrackerDlg::RangeSearchResult, base::Unretained(this)));
+        base::Bind(&FakeRangeSearchResult));
     tracker_helper_->RunSearchRoomIdRange(roomid_min, roomid_max);
 }
 
