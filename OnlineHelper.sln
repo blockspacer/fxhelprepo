@@ -85,6 +85,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LibEventClient", "LibEventC
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VmpHWID", "VmpHWID\VmpHWID.vcxproj", "{3D26F237-C6A6-4F8B-ABDC-46887CAB9656}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SingerRank", "SingerRank\SingerRank.vcxproj", "{24E40FF3-E802-4457-B005-7CBD955907D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -265,6 +267,12 @@ Global
 		{3D26F237-C6A6-4F8B-ABDC-46887CAB9656}.Release|Win32.ActiveCfg = Release|Win32
 		{3D26F237-C6A6-4F8B-ABDC-46887CAB9656}.Release|Win32.Build.0 = Release|Win32
 		{3D26F237-C6A6-4F8B-ABDC-46887CAB9656}.Release|x64.ActiveCfg = Release|Win32
+		{24E40FF3-E802-4457-B005-7CBD955907D0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{24E40FF3-E802-4457-B005-7CBD955907D0}.Debug|Win32.Build.0 = Debug|Win32
+		{24E40FF3-E802-4457-B005-7CBD955907D0}.Debug|x64.ActiveCfg = Debug|Win32
+		{24E40FF3-E802-4457-B005-7CBD955907D0}.Release|Win32.ActiveCfg = Release|Win32
+		{24E40FF3-E802-4457-B005-7CBD955907D0}.Release|Win32.Build.0 = Release|Win32
+		{24E40FF3-E802-4457-B005-7CBD955907D0}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
