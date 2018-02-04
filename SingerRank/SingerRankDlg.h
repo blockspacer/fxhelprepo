@@ -35,6 +35,8 @@ protected:
     virtual void OnOK();
 
 private:
+    void MessageCallback(const std::wstring& message);
+
     PhoneRank phone_rank_;
     CEdit m_edit_roomid;
 

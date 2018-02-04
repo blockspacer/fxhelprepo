@@ -12,6 +12,11 @@
 
 namespace
 {
+    const uint32 kPagesize = 80;
+    const uint32 kPlatform = 6;
+    const uint32 kVersion = 3910;
+    std::wstring kUseragent = L"酷狗直播 3.9.1 rv:3.9.1.0 (iPhone; iOS 10.3.3; zh_CN)";
+
 
 //baiduCode = 257 & cityName = 广州市&page = 1 & pageSize = 80 & platform = 5 & version = 3302$_fan_xing_$
 //
@@ -58,9 +63,9 @@ bool PhoneRank::InitNewSingerRankInfos()
     rank_param.mobileFromIndex = 0;
     rank_param.pageSize = 80;
     rank_param.pcFromIndex = 0;
-    rank_param.platform = 6;
+    rank_param.platform = kPlatform;
     rank_param.type_t = 3;
-    rank_param.version = 3910;
+    rank_param.version = kVersion;
     
     bool has_next_page = true;
     bool all_online = true;
@@ -98,8 +103,7 @@ bool PhoneRank::GetSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) 
 }
 
 bool PhoneRank::GetCityRankInfos(uint32 roomid,
-    const base::Callback<void(const std::wstring&)>& callback,
-    std::wstring* display_msg)
+    const base::Callback<void(const std::wstring&)>& callback)
 {
     std::map<std::string, std::vector<CityInfo>> province_citys;
     bool result = GetCityInfos(&province_citys);
@@ -159,6 +163,7 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid,
 
     // 查看某个主播id的手机推荐排名
     uint32 singer_fanxing_id = normal_room_info.fanxing_id;
+    uint32 singer_kugou_id = normal_room_info.kugou_id;
     uint32 rank_id = 0;
     uint32 count = 0;
     uint32 online_num = 0;
@@ -167,6 +172,12 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid,
     {
         count++;
         if (it.userId == singer_fanxing_id)
+        {
+            rank_id = count;
+            singer_info = it;
+        }
+
+        if (it.userId == singer_kugou_id)
         {
             rank_id = count;
             singer_info = it;
@@ -181,8 +192,6 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid,
     msg += base::UintToString16(online_num) + L"/";
     msg += base::UintToString16(rank_singer_infos.size());
     callback.Run(msg);
-
-    *display_msg = msg;
 
     if (!rank_id)
     {
@@ -199,23 +208,15 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid,
 }
 
 bool PhoneRank::GetSinglePageDataByCity(
-    const QueryCityRankParam& query_city_rank_param,
+    const std::map<std::string, std::string>& query_city_rank_param,
     std::vector<RankSingerInfo>* rank_singer_infos,
     bool* has_next_page, uint32* online_number) const
 {
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = "http://mo.fanxing.kugou.com/mfx/rank/cdn/room/cityLbs_v2/";
-    request.queries["baiduCode"] = base::UintToString(query_city_rank_param.baidu_code);
-    request.queries["cityName"] = UrlEncode(query_city_rank_param.city_name);
-    //request.queries["cityName"] = query_city_rank_param.city_name;
-    request.queries["page"] = base::UintToString(query_city_rank_param.page_number);
-    request.queries["pageSize"] = base::UintToString(query_city_rank_param.page_size);
-    request.queries["platform"] = base::UintToString(query_city_rank_param.platform);
-    request.queries["sign"] = query_city_rank_param.sign;
-    request.queries["version"] = base::UintToString(query_city_rank_param.version);;
-
-    request.useragent = "繁星直播 3.0.5 rv:3.0.5.9 (iPhone; iPhone OS 8.4; zh_CN)";
+    request.queries = query_city_rank_param;
+    request.useragent = base::WideToUTF8(kUseragent);
 
     // 数据分析
     CurlWrapper curl_wrapper;
@@ -339,8 +340,8 @@ bool PhoneRank::GetSinglePageDataByCity(
 bool PhoneRank::GetCityInfos(std::map<std::string, std::vector<CityInfo>>* province_citys) const
 {
     std::map<std::string, std::string> param_map;
-    param_map["platform"] = base::UintToString(5);
-    param_map["version"] = base::UintToString(3302);
+    param_map["platform"] = base::UintToString(6);
+    param_map["version"] = base::UintToString(3910);
     std::string sign = GetSignFromMap(param_map);
 
     HttpRequest request;
@@ -410,6 +411,10 @@ bool PhoneRank::GetCityInfos(std::map<std::string, std::vector<CityInfo>>* provi
                 {
                     city_info.fx_city_id = GetInt32FromJsonValue(city_obj, member);
                 }
+                else if (member.compare("gaodeCode") == 0)
+                {
+                    city_info.gaode_code = city_obj.get(member, defaultval).asString();
+                }
             }
             city_infos.push_back(city_info);
         }
@@ -423,20 +428,6 @@ bool PhoneRank::GetCityInfos(std::map<std::string, std::vector<CityInfo>>* provi
 bool PhoneRank::GetRankSingerListByCity(const CityInfo& city_info, 
     std::vector<RankSingerInfo>* rank_singer_infos) const
 {
-    //QueryCityRankParam query_city_rank_param;
-    //query_city_rank_param.baidu_code = 257;
-    //query_city_rank_param.city_name = base::WideToUTF8(L"广州市");
-    //query_city_rank_param.page_size = 80;
-    //query_city_rank_param.platform = 5; //6是ios,5是android
-    //query_city_rank_param.version = 3302; // ios使用版本号是3059, android使用版本号是3302;
-
-    QueryCityRankParam query_city_rank_param;
-    query_city_rank_param.baidu_code = city_info.city_code;
-    query_city_rank_param.city_name = city_info.city_name;
-    query_city_rank_param.page_size = 80;
-    query_city_rank_param.platform = 6; //6是ios,5是android
-    query_city_rank_param.version = 3302; // 更新ios使用版本号是3302, android使用版本号是3302;
-
     std::vector<RankSingerInfo> rank_singer_infos_part;
     bool has_next_page = true;
     uint32 page_number = 1;
@@ -444,18 +435,17 @@ bool PhoneRank::GetRankSingerListByCity(const CityInfo& city_info,
     while (has_next_page)
     {
         rank_singer_infos_part.clear();
-        query_city_rank_param.page_number = page_number;
         std::map<std::string, std::string> param_map;
-        param_map["baiduCode"] = base::UintToString(query_city_rank_param.baidu_code);
-        param_map["cityName"] = query_city_rank_param.city_name;
-        param_map["page"] = base::UintToString(query_city_rank_param.page_number);
-        param_map["pageSize"] = base::UintToString(query_city_rank_param.page_size);
-        param_map["platform"] = base::UintToString(query_city_rank_param.platform);
-        param_map["version"] = base::UintToString(query_city_rank_param.version);
+        param_map["gaodeCode"] = city_info.gaode_code;
+        param_map["cityName"] = city_info.city_name;
+        param_map["page"] = base::UintToString(page_number);
+        param_map["pageSize"] = base::UintToString(kPagesize);
+        param_map["platform"] = base::UintToString(kPlatform);
+        param_map["version"] = base::UintToString(kVersion);
         std::string sign = GetSignFromMap(param_map);
-        query_city_rank_param.sign = sign;
+        param_map["sign"] = sign;
 
-        if (!GetSinglePageDataByCity(query_city_rank_param, &rank_singer_infos_part,
+        if (!GetSinglePageDataByCity(param_map, &rank_singer_infos_part,
             &has_next_page, &online_number))
         {
             return false;
@@ -473,8 +463,8 @@ bool PhoneRank::GetEnterRoomInfoByRoomId(uint32 roomid,
     NormalRoomInfo* normal_room_info) const
 {
     std::map<std::string, std::string> param_map;
-    param_map["platform"] = base::UintToString(6);
-    param_map["version"] = base::UintToString(3302);
+    param_map["platform"] = base::UintToString(kPlatform);
+    param_map["version"] = base::UintToString(kVersion);
     param_map["roomId"] = base::UintToString(roomid);
     param_map["roomType"] = "0";// 未明确这个值的意义
     std::string sign = GetSignFromMap(param_map);

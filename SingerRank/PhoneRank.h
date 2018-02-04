@@ -15,8 +15,7 @@ public:
     ~PhoneRank();
 
     bool GetCityRankInfos(uint32 roomid,
-        const base::Callback<void(const std::wstring&)>& callback,
-        std::wstring* display_msg);
+        const base::Callback<void(const std::wstring&)>& callback);
 
     bool InitNewSingerRankInfos();
 
@@ -45,17 +44,6 @@ private:
         double score = 0.0;
     };
 
-    struct QueryCityRankParam
-    {
-        uint32 baidu_code = 0;
-        std::string city_name = "";
-        uint32 page_number = 0;
-        uint32 page_size = 0;
-        uint32 platform = 0;
-        std::string sign = "";
-        uint32 version = 0;
-    };
-
     struct CityInfo
     {
         uint32 area_id = 0; // 省份id
@@ -63,6 +51,7 @@ private:
         uint32 city_code = 0; // 城市id
         std::string city_name = "";
         uint32 fx_city_id = 0;
+        std::string gaode_code; // 高德地图对城市的编号，实际上的电话区号
     };
 
     struct NormalRoomInfo // 只取了部分目前认为有用的信息
@@ -93,7 +82,7 @@ private:
 
     bool GetRankSingerListByCity(const CityInfo& city_info, std::vector<RankSingerInfo>* rank_singer_infos) const;
     bool GetSinglePageDataByCity(
-        const QueryCityRankParam& query_city_rank_param,
+        const std::map<std::string, std::string>& query_city_rank_param,
         std::vector<RankSingerInfo>* rank_singer_infos,
         bool* has_next_page, uint32* online_number) const;
 

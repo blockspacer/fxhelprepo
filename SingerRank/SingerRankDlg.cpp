@@ -10,7 +10,9 @@
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "third_party/chromium/base/time/time.h"
 #include "Network/CurlWrapper.h"
+#include "Network/EncodeHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -120,24 +122,35 @@ void CSingerRankDlg::OnBnClickedBtnGetRoomRank()
     m_edit_roomid.GetWindowTextW(cs_roomid);
     uint32 roomid = 0;
     base::StringToUint(base::WideToUTF8(cs_roomid.GetBuffer()), &roomid);
-    uint32 rank = 0;
-    uint32 all = 0;
-    if (!phone_rank_.GetSingerRankByRoomid(roomid, &rank, &all))
-    {
-        std::wstring w_message = L"无法获取排名";
-        m_list_info.InsertString(message_index++, w_message.c_str());
-        return;
-    }
 
+    // 获取同城排名
+    auto callback = base::Bind(&CSingerRankDlg::MessageCallback, base::Unretained(this));
+    phone_rank_.GetCityRankInfos(roomid, callback);
 
-    std::string message;
-    message += base::UintToString(roomid);
-    message += " rank ( ";
-    message += base::UintToString(rank);
-    message += "/";
-    message += base::UintToString(all);
-    message += " )";
+    // 获取新秀排名
+    //uint32 rank = 0;
+    //uint32 all = 0;
+    //if (!phone_rank_.GetSingerRankByRoomid(roomid, &rank, &all))
+    //{
+    //    std::wstring w_message = L"无法获取排名";
+    //    m_list_info.InsertString(message_index++, w_message.c_str());
+    //    return;
+    //}
 
-    m_list_info.InsertString(message_index++, base::UTF8ToWide(message).c_str());
+    //std::string message;
+    //message += base::UintToString(roomid);
+    //message += " rank ( ";
+    //message += base::UintToString(rank);
+    //message += "/";
+    //message += base::UintToString(all);
+    //message += " )";
 
+    //m_list_info.InsertString(message_index++, base::UTF8ToWide(message).c_str());
+}
+
+void CSingerRankDlg::MessageCallback(const std::wstring& message)
+{
+    std::string time_string = MakeFormatTimeString(base::Time::Now());
+    std::wstring new_wstring = base::UTF8ToWide(time_string) + L" " + message;
+    m_list_info.InsertString(message_index++, new_wstring.c_str());
 }
