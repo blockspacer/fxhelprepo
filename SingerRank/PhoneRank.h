@@ -18,8 +18,10 @@ public:
         const base::Callback<void(const std::wstring&)>& callback);
 
     bool InitNewSingerRankInfos();
+    bool GetNewSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const;
 
-    bool GetSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const;
+    bool InitBeautifulSingerRankInfos();
+    bool GetBeautifulSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const;
 
 private:
     struct RankSingerInfo
@@ -62,17 +64,6 @@ private:
         std::string nickname = "";
     };
 
-    struct QueryNewSingerRankParam
-    {
-        uint32 doubleLiveFirst;
-        uint32 mobileFromIndex;
-        uint32 pageSize;
-        uint32 pcFromIndex;
-        uint32 platform;
-        uint32 type_t;
-        uint32 version;
-    };
-
     struct StarCard // 只取了部分目前认为有用的信息
     {
         std::string location; // 主播定位的所在城市
@@ -92,8 +83,9 @@ private:
     bool GetStarCardByKugouId(uint32 kugouid, StarCard* star_card) const;
 
     // 获取新秀列表
-    bool GetNewSinglePageData(
-        const QueryNewSingerRankParam& query_city_rank_param,
+    bool GetSinglePageData(
+        const std::string& url,
+        const std::map<std::string, std::string>& param_map,
         std::vector<RankSingerInfo>* rank_singer_infos,
         bool* has_next_page, bool* all_online, uint32* doubleLiveFirst,
         uint32* mobileFromIndex) const;
@@ -101,5 +93,7 @@ private:
     std::map<std::string, std::vector<CityInfo>> province_citys_;
 
     std::vector<RankSingerInfo> new_singers_rank_;
+
+    std::vector<RankSingerInfo> beautiful_singers_rank_;
 };
 

@@ -109,8 +109,11 @@ HCURSOR CSingerRankDlg::OnQueryDragIcon()
 
 void CSingerRankDlg::OnBnClickedBtnSearchRank()
 {
-    // TODO:  在此添加控件通知处理程序代码
-    phone_rank_.InitNewSingerRankInfos();
+    // 新主播
+    //phone_rank_.InitNewSingerRankInfos();
+
+    // 女神
+    phone_rank_.InitBeautifulSingerRankInfos();
 
 }
 
@@ -124,28 +127,29 @@ void CSingerRankDlg::OnBnClickedBtnGetRoomRank()
     base::StringToUint(base::WideToUTF8(cs_roomid.GetBuffer()), &roomid);
 
     // 获取同城排名
-    auto callback = base::Bind(&CSingerRankDlg::MessageCallback, base::Unretained(this));
-    phone_rank_.GetCityRankInfos(roomid, callback);
+    //auto callback = base::Bind(&CSingerRankDlg::MessageCallback, base::Unretained(this));
+    //phone_rank_.GetCityRankInfos(roomid, callback);
 
     // 获取新秀排名
-    //uint32 rank = 0;
-    //uint32 all = 0;
-    //if (!phone_rank_.GetSingerRankByRoomid(roomid, &rank, &all))
-    //{
-    //    std::wstring w_message = L"无法获取排名";
-    //    m_list_info.InsertString(message_index++, w_message.c_str());
-    //    return;
-    //}
+    uint32 rank = 0;
+    uint32 all = 0;
+    //if (!phone_rank_.GetNewSingerRankByRoomid(roomid, &rank, &all))
+    if (!phone_rank_.GetBeautifulSingerRankByRoomid(roomid, &rank, &all))
+    {
+        std::wstring w_message = L"无法获取排名";
+        m_list_info.InsertString(message_index++, w_message.c_str());
+        return;
+    }
 
-    //std::string message;
-    //message += base::UintToString(roomid);
-    //message += " rank ( ";
-    //message += base::UintToString(rank);
-    //message += "/";
-    //message += base::UintToString(all);
-    //message += " )";
+    std::string message;
+    message += base::UintToString(roomid);
+    message += " rank ( ";
+    message += base::UintToString(rank);
+    message += "/";
+    message += base::UintToString(all);
+    message += " )";
 
-    //m_list_info.InsertString(message_index++, base::UTF8ToWide(message).c_str());
+    m_list_info.InsertString(message_index++, base::UTF8ToWide(message).c_str());
 }
 
 void CSingerRankDlg::MessageCallback(const std::wstring& message)

@@ -58,23 +58,35 @@ bool PhoneRank::InitNewSingerRankInfos()
 {
     new_singers_rank_.clear();
 
-    QueryNewSingerRankParam rank_param;
-    rank_param.doubleLiveFirst = 0;
-    rank_param.mobileFromIndex = 0;
-    rank_param.pageSize = 80;
-    rank_param.pcFromIndex = 0;
-    rank_param.platform = kPlatform;
-    rank_param.type_t = 3;
-    rank_param.version = kVersion;
+    uint32 doubleLiveFirst = 0;
+    uint32 mobileFromIndex = 0;
+    uint32 pageSize = 80;
+    uint32 pcFromIndex = 0;
+    uint32 platform = kPlatform;
+    uint32 type_t = 3;
+    uint32 version = kVersion;
     
     bool has_next_page = true;
     bool all_online = true;
     while (has_next_page && all_online)
     {
+        std::map<std::string, std::string> param_map;
+        param_map["doubleLiveFirst"] = base::UintToString(doubleLiveFirst);
+        param_map["mobileFromIndex"] = base::UintToString(mobileFromIndex);
+        param_map["pageSize"] = base::UintToString(pageSize);
+        param_map["pcFromIndex"] = base::UintToString(pcFromIndex);
+        param_map["platform"] = base::UintToString(platform);
+        param_map["type"] = base::UintToString(type_t);
+        param_map["version"] = base::UintToString(version);
+        std::string sign = GetSignFromMap(param_map);
+        param_map["sign"] = sign;
+
+        std::string url = "http://gzacshow.kugou.com/mfanxing-home/cdn/room/live_list_by_group/v02";
+
         std::vector<RankSingerInfo> rank_singer_infos;
-        if (!GetNewSinglePageData(rank_param, &rank_singer_infos,
-            &has_next_page, &all_online, &rank_param.mobileFromIndex,
-            &rank_param.pcFromIndex))
+        if (!GetSinglePageData(url, param_map, &rank_singer_infos,
+            &has_next_page, &all_online, &mobileFromIndex,
+            &pcFromIndex))
         {
             return false;
         }
@@ -85,11 +97,71 @@ bool PhoneRank::InitNewSingerRankInfos()
     return true;
 }
 
-bool PhoneRank::GetSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const
+bool PhoneRank::GetNewSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const
 {
     uint32 count = 0;
     *all = new_singers_rank_.size();
     for (auto& singerinfo : new_singers_rank_)
+    {
+        count++;
+        if (singerinfo.roomId == roomid)
+        {
+            *rank = count;
+            return true;
+        }
+
+    }
+    return false;
+}
+
+bool PhoneRank::InitBeautifulSingerRankInfos()
+{
+    beautiful_singers_rank_.clear();
+
+    uint32 doubleLiveFirst = 0;
+    uint32 mobileFromIndex = 0;
+    uint32 pageSize = 80;
+    uint32 pcFromIndex = 0;
+    uint32 platform = kPlatform;
+    uint32 cId = 20;
+    uint32 version = kVersion;
+
+    bool has_next_page = true;
+    bool all_online = true;
+    while (has_next_page && all_online)
+    {
+        std::map<std::string, std::string> param_map;
+        param_map["doubleLiveFirst"] = base::UintToString(doubleLiveFirst);
+        param_map["mobileFromIndex"] = base::UintToString(mobileFromIndex);
+        param_map["pageSize"] = base::UintToString(pageSize);
+        param_map["pcFromIndex"] = base::UintToString(pcFromIndex);
+        param_map["platform"] = base::UintToString(platform);
+        param_map["cId"] = base::UintToString(cId);
+        param_map["version"] = base::UintToString(version);
+        std::string sign = GetSignFromMap(param_map);
+        param_map["sign"] = sign;
+
+        std::string url = "http://gzacshow.kugou.com/mfanxing-home/cdn/room/live_list_by_group_v3";
+
+        std::vector<RankSingerInfo> rank_singer_infos;
+        if (!GetSinglePageData(url, param_map, &rank_singer_infos,
+            &has_next_page, &all_online, &mobileFromIndex,
+            &pcFromIndex))
+        {
+            return false;
+        }
+        beautiful_singers_rank_.insert(beautiful_singers_rank_.end(),
+            rank_singer_infos.begin(), rank_singer_infos.end());
+    }
+
+    return true;
+}
+
+bool PhoneRank::GetBeautifulSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const
+{
+    uint32 count = 0;
+    *all = beautiful_singers_rank_.size();
+    for (auto& singerinfo : beautiful_singers_rank_)
     {
         count++;
         if (singerinfo.roomId == roomid)
@@ -580,26 +652,16 @@ bool PhoneRank::GetStarCardByKugouId(uint32 kugouid,
     return true;
 }
 
-bool PhoneRank::GetNewSinglePageData(
-    const QueryNewSingerRankParam& query_city_rank_param,
+bool PhoneRank::GetSinglePageData(
+    const std::string& url,
+    const std::map<std::string, std::string>& param_map,
     std::vector<RankSingerInfo>* rank_singer_infos,
     bool* has_next_page, bool* all_online, uint32* mobileFromIndex,
     uint32* pcFromIndex) const
 {
-    std::map<std::string, std::string> param_map;
-    param_map["doubleLiveFirst"] = base::UintToString(query_city_rank_param.doubleLiveFirst);
-    param_map["mobileFromIndex"] = base::UintToString(query_city_rank_param.mobileFromIndex);
-    param_map["pageSize"] = base::UintToString(query_city_rank_param.pageSize);
-    param_map["pcFromIndex"] = base::UintToString(query_city_rank_param.pcFromIndex);
-    param_map["platform"] = base::UintToString(query_city_rank_param.platform);
-    param_map["type"] = base::UintToString(query_city_rank_param.type_t);
-    param_map["version"] = base::UintToString(query_city_rank_param.version);
-    std::string sign = GetSignFromMap(param_map);
-    param_map["sign"] = sign;
-
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.url = "http://gzacshow.kugou.com/mfanxing-home/cdn/room/live_list_by_group/v02";
+    request.url = url;
     request.queries = param_map;
 
     request.useragent = "¿á¹·Ö±²¥ 3.9.1 rv:3.9.1.0 (iPhone; iOS 10.3.3; zh_CN)";
