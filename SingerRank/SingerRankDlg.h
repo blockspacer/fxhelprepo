@@ -43,4 +43,10 @@ private:
     int message_index;
     CListCtrl m_singer_list;
     CListBox m_list_info;
+public:
+    CButton m_chk_beautiful;
+private:
+    CButton m_chk_new_singer;
+public:
+    afx_msg void OnBnClickedBtnCityRank();
 };

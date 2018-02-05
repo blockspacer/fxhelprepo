@@ -36,6 +36,8 @@ void CSingerRankDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_SINGER_ID, m_edit_roomid);
     DDX_Control(pDX, IDC_LIST_SINGERS, m_singer_list);
     DDX_Control(pDX, IDC_LIST_INFO, m_list_info);
+    DDX_Control(pDX, IDC_CHK_BEAUTY, m_chk_beautiful);
+    DDX_Control(pDX, IDC_CHK_NEW_SINGER, m_chk_new_singer);
 }
 
 BEGIN_MESSAGE_MAP(CSingerRankDlg, CDialogEx)
@@ -43,6 +45,7 @@ BEGIN_MESSAGE_MAP(CSingerRankDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BTN_SEARCH_RANK, &CSingerRankDlg::OnBnClickedBtnSearchRank)
     ON_BN_CLICKED(IDC_BTN_GET_ROOM_RANK, &CSingerRankDlg::OnBnClickedBtnGetRoomRank)
+    ON_BN_CLICKED(IDC_BTN_CITY_RANK, &CSingerRankDlg::OnBnClickedBtnCityRank)
 END_MESSAGE_MAP()
 
 
@@ -109,47 +112,84 @@ HCURSOR CSingerRankDlg::OnQueryDragIcon()
 
 void CSingerRankDlg::OnBnClickedBtnSearchRank()
 {
-    // 新主播
-    //phone_rank_.InitNewSingerRankInfos();
-
-    // 女神
-    phone_rank_.InitBeautifulSingerRankInfos();
-
+    if (!!m_chk_beautiful.GetCheck())
+    {
+        // 女神
+        phone_rank_.InitBeautifulSingerRankInfos();
+    }
+    
+    if (!!m_chk_new_singer.GetCheck())
+    {
+        // 新主播
+        phone_rank_.InitNewSingerRankInfos();
+    }
 }
 
 
 void CSingerRankDlg::OnBnClickedBtnGetRoomRank()
 {
-    // TODO:  在此添加控件通知处理程序代码
     CString cs_roomid;
     m_edit_roomid.GetWindowTextW(cs_roomid);
     uint32 roomid = 0;
     base::StringToUint(base::WideToUTF8(cs_roomid.GetBuffer()), &roomid);
-
-    // 获取同城排名
-    //auto callback = base::Bind(&CSingerRankDlg::MessageCallback, base::Unretained(this));
-    //phone_rank_.GetCityRankInfos(roomid, callback);
+    if (roomid <= 0)
+    {
+        MessageBox(L"房间号错误", L"请重新输入", 0);
+    }
 
     // 获取新秀排名
     uint32 rank = 0;
     uint32 all = 0;
-    //if (!phone_rank_.GetNewSingerRankByRoomid(roomid, &rank, &all))
+
     if (!phone_rank_.GetBeautifulSingerRankByRoomid(roomid, &rank, &all))
     {
-        std::wstring w_message = L"无法获取排名";
-        m_list_info.InsertString(message_index++, w_message.c_str());
-        return;
+        MessageCallback(L"无法获取女神分类排名");
+    }
+    else
+    {
+        std::wstring message;
+        message += base::UTF8ToWide(base::UintToString(roomid));
+        message += L"女神分类 rank ( ";
+        message += base::UTF8ToWide(base::UintToString(rank));
+        message += L"/";
+        message += base::UTF8ToWide(base::UintToString(all));
+        message += L" )";
+
+        MessageCallback(message);
     }
 
-    std::string message;
-    message += base::UintToString(roomid);
-    message += " rank ( ";
-    message += base::UintToString(rank);
-    message += "/";
-    message += base::UintToString(all);
-    message += " )";
+    if (!phone_rank_.GetNewSingerRankByRoomid(roomid, &rank, &all))
+    {
+        MessageCallback(L"无法获取新秀分类排名");
+    }
+    else
+    {
+        std::wstring message;
+        message += base::UTF8ToWide(base::UintToString(roomid));
+        message += L"新秀分类 rank ( ";
+        message += base::UTF8ToWide(base::UintToString(rank));
+        message += L"/";
+        message += base::UTF8ToWide(base::UintToString(all));
+        message += L" )";
 
-    m_list_info.InsertString(message_index++, base::UTF8ToWide(message).c_str());
+        MessageCallback(message);
+    }
+}
+
+void CSingerRankDlg::OnBnClickedBtnCityRank()
+{
+    CString cs_roomid;
+    m_edit_roomid.GetWindowTextW(cs_roomid);
+    uint32 roomid = 0;
+    base::StringToUint(base::WideToUTF8(cs_roomid.GetBuffer()), &roomid);
+    if (roomid<=0)
+    {
+        MessageBox(L"房间号错误", L"请重新输入", 0);
+    }
+
+     //获取同城排名
+    auto callback = base::Bind(&CSingerRankDlg::MessageCallback, base::Unretained(this));
+    phone_rank_.GetCityRankInfos(roomid, callback);
 }
 
 void CSingerRankDlg::MessageCallback(const std::wstring& message)
@@ -158,3 +198,4 @@ void CSingerRankDlg::MessageCallback(const std::wstring& message)
     std::wstring new_wstring = base::UTF8ToWide(time_string) + L" " + message;
     m_list_info.InsertString(message_index++, new_wstring.c_str());
 }
+
