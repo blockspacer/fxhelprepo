@@ -46,6 +46,9 @@ BEGIN_MESSAGE_MAP(CSingerRankDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_SEARCH_RANK, &CSingerRankDlg::OnBnClickedBtnSearchRank)
     ON_BN_CLICKED(IDC_BTN_GET_ROOM_RANK, &CSingerRankDlg::OnBnClickedBtnGetRoomRank)
     ON_BN_CLICKED(IDC_BTN_CITY_RANK, &CSingerRankDlg::OnBnClickedBtnCityRank)
+    ON_MESSAGE(WM_USER_MSG, &CSingerRankDlg::OnMessage)
+    ON_MESSAGE(WM_USER_PROGRESS, &CSingerRankDlg::OnProgress)
+    ON_MESSAGE(WM_USER_FOUND_RESULT, &CSingerRankDlg::OnFoundResult)
 END_MESSAGE_MAP()
 
 
@@ -65,6 +68,11 @@ BOOL CSingerRankDlg::OnInitDialog()
 
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
+}
+
+void CSingerRankDlg::OnClose()
+{
+
 }
 
 void CSingerRankDlg::OnOK()
@@ -108,8 +116,6 @@ HCURSOR CSingerRankDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-
-
 void CSingerRankDlg::OnBnClickedBtnSearchRank()
 {
     if (!!m_chk_beautiful.GetCheck())
@@ -140,6 +146,10 @@ void CSingerRankDlg::OnBnClickedBtnGetRoomRank()
     // 获取新秀排名
     uint32 rank = 0;
     uint32 all = 0;
+
+    auto singer_info_callback = base::Bind(&CSingerRankDlg::SingerInfoCallback, base::Unretained(this));
+
+    auto message_callback = base::Bind(&CSingerRankDlg::MessageCallback, base::Unretained(this));
 
     if (!phone_rank_.GetBeautifulSingerRankByRoomid(roomid, &rank, &all))
     {
@@ -192,10 +202,30 @@ void CSingerRankDlg::OnBnClickedBtnCityRank()
     phone_rank_.GetCityRankInfos(roomid, callback);
 }
 
+LRESULT CSingerRankDlg::OnMessage(WPARAM wParam, LPARAM lParam)
+{
+    scoped_ptr<std::wstring> message((std::wstring*)(lParam));
+    m_list_info.InsertString(message_index++, message->c_str());
+}
+
+LRESULT CSingerRankDlg::OnProgress(WPARAM wParam, LPARAM lParam)
+{
+
+}
+
+LRESULT CSingerRankDlg::OnFoundResult(WPARAM wParam, LPARAM lParam)
+{
+
+}
+
 void CSingerRankDlg::MessageCallback(const std::wstring& message)
 {
     std::string time_string = MakeFormatTimeString(base::Time::Now());
-    std::wstring new_wstring = base::UTF8ToWide(time_string) + L" " + message;
-    m_list_info.InsertString(message_index++, new_wstring.c_str());
+    std::wstring* new_wstring = new std::wstring(base::UTF8ToWide(time_string) + L" " + message);
+    this->PostMessage(WM_USER_MSG, 0, (LPARAM)(new_wstring));
 }
 
+void CSingerRankDlg::SingerInfoCallback(const GridData& singer_infos)
+{
+
+}

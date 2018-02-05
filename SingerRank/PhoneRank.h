@@ -7,6 +7,12 @@
 #undef min // 因为微软这个二比在某些头文件定义了min宏
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/bind.h"
+#include "third_party/chromium/base/threading/thread.h"
+#include "third_party/chromium/base/single_thread_task_runner.h"
+#include "third_party/chromium/base/memory/scoped_ptr.h"
+
+typedef std::vector<std::wstring> RowData;
+typedef std::vector<RowData> GridData;
 
 class PhoneRank
 {
@@ -14,8 +20,19 @@ public:
     PhoneRank();
     ~PhoneRank();
 
+    bool Initialize(const base::Callback<void(const GridData&)>& singer_info_callback,
+        const base::Callback<void(const std::wstring&)>& message_callback);
+
+    void Finalize();
+
+    void BreakRequest();
+
+    void DoStop();
+
     bool GetCityRankInfos(uint32 roomid,
         const base::Callback<void(const std::wstring&)>& callback);
+
+    bool InitCheckGroupSingers(bool beauty, bool newsinger);
 
     bool InitNewSingerRankInfos();
     bool GetNewSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const;
@@ -90,10 +107,20 @@ private:
         bool* has_next_page, bool* all_online, uint32* doubleLiveFirst,
         uint32* mobileFromIndex) const;
 
+    base::Thread worker_thread_;
+    scoped_refptr<base::SingleThreadTaskRunner> runner_;
+
+
     std::map<std::string, std::vector<CityInfo>> province_citys_;
 
     std::vector<RankSingerInfo> new_singers_rank_;
 
     std::vector<RankSingerInfo> beautiful_singers_rank_;
+
+    base::Callback<void(const GridData&)> singer_info_callback_;
+    base::Callback<void(const std::wstring&)> message_callback_;
+
+    // 优化体验的参数
+    bool break_all_request_;
 };
 

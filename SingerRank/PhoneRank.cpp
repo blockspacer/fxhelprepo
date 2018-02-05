@@ -47,11 +47,41 @@ std::string GetSignFromMap(const std::map<std::string,std::string>& param_map)
 }
 
 PhoneRank::PhoneRank()
+    :break_all_request_(false)
 {
 }
 
 PhoneRank::~PhoneRank()
 {
+}
+
+bool PhoneRank::Initialize(const base::Callback<void(const GridData&)>& singer_info_callback,
+    const base::Callback<void(const std::wstring&)>& message_callback)
+{
+    singer_info_callback_ = singer_info_callback;
+    message_callback_ = message_callback;
+
+    if (!worker_thread_.Start())
+        return false;
+
+    runner_ = worker_thread_.task_runner();
+}
+
+void PhoneRank::Finalize()
+{
+    BreakRequest();
+    runner_->PostTask(FROM_HERE,
+        base::Bind(base::IgnoreResult(&PhoneRank::DoStop), base::Unretained(this)));
+}
+
+void PhoneRank::BreakRequest()
+{
+    break_all_request_ = true;
+}
+
+void PhoneRank::DoStop()
+{
+    // ∂œµÙÀ˘”–«Î«Û
 }
 
 bool PhoneRank::InitNewSingerRankInfos()
