@@ -290,16 +290,16 @@ bool UserTracker::GetRoomViewerList(uint32 roomid, std::map<uint32, EnterRoomUse
 bool UserTracker::GetConsumerList(uint32 roomid,
     std::map<uint32, ConsumerInfo>* consumer_map)
 {
-    std::vector<ConsumerInfo> consumer_info;
-    if (!user_->OpenRoomAndGetConsumerList(roomid, &consumer_info))
-    {
-        return false;
-    }
+    //std::vector<ConsumerInfo> consumer_info;
+    //if (!user_->OpenRoomAndGetConsumerList(roomid, &consumer_info))
+    //{
+    //    return false;
+    //}
 
-    for (auto user : consumer_info)
-    {
-        (*consumer_map)[user.fanxing_id] = user;
-    }
+    //for (auto user : consumer_info)
+    //{
+    //    (*consumer_map)[user.fanxing_id] = user;
+    //}
     return true;
 }
 

@@ -61,6 +61,7 @@ int ZLibTest()
     return 0;
 }
 
+int websocket_test();
 
 int _tmain(int argc, _TCHAR* argv[])
 {   
@@ -68,13 +69,15 @@ int _tmain(int argc, _TCHAR* argv[])
     InitAppLog();
     NetworkInitialize();
 
-    std::unique_ptr<TcpClientController> tcp_manager(new TcpClientController);
-    tcp_manager->Initialize();
-    SingleUserSingleRoomTest(tcp_manager.get());
-    tcp_manager->Finalize();
-    ZLibTest();
-    UserTracker tracker;
-    tracker.Test();
+    //std::unique_ptr<TcpClientController> tcp_manager(new TcpClientController);
+    //tcp_manager->Initialize();
+    //SingleUserSingleRoomTest(tcp_manager.get());
+    //tcp_manager->Finalize();
+    //ZLibTest();
+    //UserTracker tracker;
+    //tracker.Test();
+
+    websocket_test();
 
     NetworkFainalize();
 	return 0;
