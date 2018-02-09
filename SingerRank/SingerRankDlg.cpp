@@ -66,6 +66,11 @@ BOOL CSingerRankDlg::OnInitDialog()
 	// TODO:  在此添加额外的初始化代码
     CurlWrapper::CurlInit();
 
+    auto singer_info_callback = base::Bind(&CSingerRankDlg::SingerInfoCallback, base::Unretained(this));
+
+    auto message_callback = base::Bind(&CSingerRankDlg::MessageCallback, base::Unretained(this));
+
+    phone_rank_.Initialize(singer_info_callback, message_callback);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -197,9 +202,7 @@ void CSingerRankDlg::OnBnClickedBtnCityRank()
         MessageBox(L"房间号错误", L"请重新输入", 0);
     }
 
-     //获取同城排名
-    auto callback = base::Bind(&CSingerRankDlg::MessageCallback, base::Unretained(this));
-    phone_rank_.GetCityRankInfos(roomid, callback);
+    phone_rank_.GetCityRankInfos(roomid);
 }
 
 LRESULT CSingerRankDlg::OnMessage(WPARAM wParam, LPARAM lParam)

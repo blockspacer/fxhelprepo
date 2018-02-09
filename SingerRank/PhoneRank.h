@@ -29,8 +29,7 @@ public:
 
     void DoStop();
 
-    bool GetCityRankInfos(uint32 roomid,
-        const base::Callback<void(const std::wstring&)>& callback);
+    bool GetCityRankInfos(uint32 roomid);
 
     bool InitCheckGroupSingers(bool beauty, bool newsinger);
 

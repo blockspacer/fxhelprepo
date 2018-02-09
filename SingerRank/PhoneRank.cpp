@@ -47,7 +47,8 @@ std::string GetSignFromMap(const std::map<std::string,std::string>& param_map)
 }
 
 PhoneRank::PhoneRank()
-    :break_all_request_(false)
+    :worker_thread_("phone rank")
+    , break_all_request_(false)
 {
 }
 
@@ -65,6 +66,7 @@ bool PhoneRank::Initialize(const base::Callback<void(const GridData&)>& singer_i
         return false;
 
     runner_ = worker_thread_.task_runner();
+    return true;
 }
 
 void PhoneRank::Finalize()
@@ -86,6 +88,14 @@ void PhoneRank::DoStop()
 
 bool PhoneRank::InitNewSingerRankInfos()
 {
+    if (!runner_->RunsTasksOnCurrentThread())
+    {
+        runner_->PostTask(FROM_HERE,
+            base::Bind(base::IgnoreResult(&PhoneRank::InitNewSingerRankInfos), 
+            base::Unretained(this)));
+        return true;
+    }
+
     new_singers_rank_.clear();
 
     uint32 doubleLiveFirst = 0;
@@ -98,6 +108,7 @@ bool PhoneRank::InitNewSingerRankInfos()
     
     bool has_next_page = true;
     bool all_online = true;
+    uint32 page_num = 0;
     while (has_next_page && all_online)
     {
         std::map<std::string, std::string> param_map;
@@ -118,11 +129,20 @@ bool PhoneRank::InitNewSingerRankInfos()
             &has_next_page, &all_online, &mobileFromIndex,
             &pcFromIndex))
         {
+            std::wstring message = L"获取新秀主播第[ " + base::UintToString16(++page_num) + L" ]页 失败";
+            message_callback_.Run(message);
+            message = L"结束请求流程XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
             return false;
         }
+
+        std::wstring message = L"获取新秀主播第[ " + base::UintToString16(++page_num) + L" ]页 成功";
+        message_callback_.Run(message);
         new_singers_rank_.insert(new_singers_rank_.end(),
             rank_singer_infos.begin(), rank_singer_infos.end());
     }
+
+    std::wstring message = L"获取新秀主播完成,一共 " + base::UintToString16(new_singers_rank_.size()) +L" 个主播";
+    message_callback_.Run(message);
 
     return true;
 }
@@ -146,6 +166,14 @@ bool PhoneRank::GetNewSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* al
 
 bool PhoneRank::InitBeautifulSingerRankInfos()
 {
+    if (!runner_->RunsTasksOnCurrentThread())
+    {
+        runner_->PostTask(FROM_HERE,
+            base::Bind(base::IgnoreResult(&PhoneRank::InitBeautifulSingerRankInfos),
+            base::Unretained(this)));
+        return true;
+    }
+
     beautiful_singers_rank_.clear();
 
     uint32 doubleLiveFirst = 0;
@@ -158,6 +186,7 @@ bool PhoneRank::InitBeautifulSingerRankInfos()
 
     bool has_next_page = true;
     bool all_online = true;
+    uint32 page_num = 0;
     while (has_next_page && all_online)
     {
         std::map<std::string, std::string> param_map;
@@ -178,11 +207,20 @@ bool PhoneRank::InitBeautifulSingerRankInfos()
             &has_next_page, &all_online, &mobileFromIndex,
             &pcFromIndex))
         {
+            std::wstring message = L"获取女神主播第[ " + base::UintToString16(++page_num) + L" ]页 失败";
+            message_callback_.Run(message);
+            message = L"结束请求流程XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
             return false;
         }
+
+        std::wstring message = L"获取女神主播第[ " + base::UintToString16(++page_num) + L" ]页 成功";
+        message_callback_.Run(message);
         beautiful_singers_rank_.insert(beautiful_singers_rank_.end(),
             rank_singer_infos.begin(), rank_singer_infos.end());
     }
+
+    std::wstring message = L"获取女神主播完成,一共 " + base::UintToString16(new_singers_rank_.size()) + L" 个主播";
+    message_callback_.Run(message);
 
     return true;
 }
@@ -204,23 +242,30 @@ bool PhoneRank::GetBeautifulSingerRankByRoomid(uint32 roomid, uint32* rank, uint
     return false;
 }
 
-bool PhoneRank::GetCityRankInfos(uint32 roomid,
-    const base::Callback<void(const std::wstring&)>& callback)
+bool PhoneRank::GetCityRankInfos(uint32 roomid)
 {
+    if (!runner_->RunsTasksOnCurrentThread())
+    {
+        runner_->PostTask(FROM_HERE,
+            base::Bind(base::IgnoreResult(&PhoneRank::GetCityRankInfos),
+            base::Unretained(this), roomid));
+        return true;
+    }
+
     std::map<std::string, std::vector<CityInfo>> province_citys;
     bool result = GetCityInfos(&province_citys);
 
     NormalRoomInfo normal_room_info;
     if (!GetEnterRoomInfoByRoomId(roomid, &normal_room_info))
     {
-        callback.Run(L"无法获取对应房间的主播信息");
+        message_callback_.Run(L"无法获取对应房间的主播信息");
         return false;
     }
     
     StarCard star_card;
     if (!GetStarCardByKugouId(normal_room_info.kugou_id, &star_card))
     {
-        callback.Run(L"无法获取主播位置信息");
+        message_callback_.Run(L"无法获取主播位置信息");
         return false;
     }
     
@@ -252,14 +297,14 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid,
     if (!found)
     {
         std::wstring msg = L"在城市列表无法获取城市：" + base::UTF8ToWide(star_card.location);
-        callback.Run(msg);
+        message_callback_.Run(msg);
         return false;
     }
 
     std::vector<RankSingerInfo> rank_singer_infos;
     if (!GetRankSingerListByCity(city_info, &rank_singer_infos))
     {
-        callback.Run(L"无法获取主播所在城市的主播列表");
+        message_callback_.Run(L"无法获取主播所在城市的主播列表");
         return false;
     }
 
@@ -293,17 +338,17 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid,
     msg += base::UintToString16(rank_id) + L"/";
     msg += base::UintToString16(online_num) + L"/";
     msg += base::UintToString16(rank_singer_infos.size());
-    callback.Run(msg);
+    message_callback_.Run(msg);
 
     if (!rank_id)
     {
-        callback.Run(L"在定位城市无法找到主播");
+        message_callback_.Run(L"在定位城市无法找到主播");
         return false;
     }
 
     if (!singer_info.status)
     {
-        callback.Run(L"主播为未开播状态");
+        message_callback_.Run(L"主播为未开播状态");
     }
 
     return true;
