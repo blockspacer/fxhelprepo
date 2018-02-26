@@ -14,9 +14,11 @@
 #include "Network/common.h"
 #include "Network/TcpDefines.h"
 #include "Network/BetData.h"
+#include "Network/WebsocketDefine.h"
 
 //class TcpClient;
 class TcpClientController;
+class WebsocketClientController;
 
 //typedef int SocketHandle;
 // 201消息回来解析后出去的数据包
@@ -85,6 +87,7 @@ public:
     bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
     void Finalize();
     void SetTcpManager(TcpClientController* tcpManager);
+    void SetWebsockClientController(WebsocketClientController* controller);
     void SetServerIp(const std::string& serverip);
     void SetIpProxy(const IpProxy& ipproxy);
 
@@ -104,6 +107,14 @@ public:
                          const std::string& message);
 
     bool NewSendChatMessageRobot(const RoomChatMessage& roomChatMessage);
+
+    // 改用websocket以后的新接口
+    bool Connect(uint32 room_id, uint32 user_id,
+        const std::string& usertoken, const std::string& soctoken,
+        const base::Callback<void()>& conn_break_callback);
+
+    bool SendMessage(const std::string& nickname, uint32 richlevel,
+        const std::string& message);
 
 private:
 
@@ -143,6 +154,16 @@ private:
     void DoNewSendChatMessage(const std::vector<char>& msg); // 发言需要符合间隔时间
     void DoNewSendDataCallback(SocketHandle handle, bool result);
 
+    // 改为websocket模式
+    void AddClientConnectCallback(
+        bool result, WebsocketHandle handle);
+
+    void ClientDataCallback(
+        uint32 roomid, uint32 userid, const std::string& usertoken, bool result,
+        const std::vector<uint8>& data);
+
+    void DoSendDataCallback(WebsocketHandle handle, bool result);
+
     //base::Thread baseThread_;
     scoped_refptr<base::TaskRunner> runner_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;
@@ -167,6 +188,9 @@ private:
     TcpClientController* tcp_client_controller_;
     base::Callback<void()> conn_break_callback_; // 处理掉线问题
     bool connected_;// 未连接时和连接失败后，都不应该处理回调和线程任务
+
+    WebsocketClientController* websocket_client_controller_;
+    WebsocketHandle websocket_handle_;
 
     base::RepeatingTimer<MessageNotifyManager> newRepeatingTimer_;
     base::TimeDelta chat_message_space_;

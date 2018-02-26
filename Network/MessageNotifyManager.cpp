@@ -6,6 +6,8 @@
 
 #include "EncodeHelper.h"
 #include "Network/TcpClientController.h"
+#include "Network/WebsocketDefine.h"
+#include "Network/WebsocketClientController.h"
 
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/time/time.h"
@@ -428,6 +430,12 @@ void MessageNotifyManager::Finalize()
 void MessageNotifyManager::SetTcpManager(TcpClientController* tcpManager)
 {
     tcp_client_controller_ = tcpManager;
+}
+
+void MessageNotifyManager::SetWebsockClientController(
+    WebsocketClientController* controller)
+{
+    websocket_client_controller_ = controller;
 }
 
 void MessageNotifyManager::SetServerIp(const std::string& serverip)
@@ -1086,4 +1094,95 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
 
     return runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg));
+}
+
+bool MessageNotifyManager::Connect(
+    uint32 room_id, uint32 user_id, const std::string& usertoken,
+    const std::string& soctoken, const base::Callback<void()>& conn_break_callback)
+{
+    conn_break_callback_ = conn_break_callback;
+    bool result = websocket_client_controller_->AddClient(
+        std::bind(&MessageNotifyManager::AddClientConnectCallback,
+        //std::weak_ptr<MessageNotifyManager>(shared_from_this()),
+        this,
+        std::placeholders::_1, std::placeholders::_2),
+        ipProxy_, serverip_, port843,
+        std::bind(&MessageNotifyManager::ClientDataCallback,
+        //std::weak_ptr<MessageNotifyManager>(shared_from_this()),
+        this,
+        room_id, user_id, usertoken,
+        std::placeholders::_1, std::placeholders::_2));
+
+    return result;
+}
+
+bool MessageNotifyManager::SendMessage(const std::string& nickname, uint32 richlevel,
+    const std::string& message)
+{
+    std::vector<uint8> data;
+    websocket_client_controller_->Send(websocket_handle_, data, 
+        std::bind(&MessageNotifyManager::DoSendDataCallback, this, 
+        std::placeholders::_1, std::placeholders::_2));
+    return true;
+}
+
+void MessageNotifyManager::AddClientConnectCallback(bool result, WebsocketHandle handle)
+{
+    if (!result)
+    {
+        assert(false && L"连接错误，应该结束MessageNotifyManager的流程了");
+        // 要向上层通知，确认是否出错重连
+        connected_ = false;
+        conn_break_callback_.Run();
+        return;
+    }
+
+    connected_ = true; // 唯一标记连接成功的地方
+
+    if (newRepeatingTimer_.IsRunning())
+        newRepeatingTimer_.Stop();
+
+    newRepeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10),
+        base::Bind(&MessageNotifyManager::DoNewSendHeartBeat, this, SocketHandle_8080_));
+
+    return;
+}
+
+void MessageNotifyManager::ClientDataCallback(
+    uint32 roomid, uint32 userid, const std::string& usertoken, bool result,
+    const std::vector<uint8>& data)
+{
+    // 处理第一个数据包到达，要发送数据
+    //uint32 keytime = static_cast<uint32>(base::Time::Now().ToDoubleT());
+    //std::vector<uint8> data_for_send;
+    //cmd201package package = {
+    //    201, roomid, userid, usertoken };
+    //GetFirstPackage(package, &data_for_send);
+    //std::vector<uint8> data_8080;
+    //data_8080.assign(data_for_send.begin(), data_for_send.end());
+    //tcp_client_controller_->Send(SocketHandle_8080_, data_8080,
+    //    std::bind(&MessageNotifyManager::NewSendDataCallback,
+    //    std::weak_ptr<MessageNotifyManager>(shared_from_this()),
+    //    SocketHandle_8080_, std::placeholders::_1));
+
+    return;
+}
+
+void MessageNotifyManager::DoSendDataCallback(WebsocketHandle handle, bool result)
+{
+    if (!connected_)
+        return;
+
+    std::wstring state = L"发送数据正常";
+    if (!result)
+    {
+        state = L"发送数据异常，请重新进入房间";
+        newRepeatingTimer_.Stop();
+        tcp_client_controller_->RemoveClient(handle);
+        // 要向上层通知，确认是否出错重连
+        conn_break_callback_.Run();
+    }
+
+    if (normalNotify_)
+        normalNotify_(MessageLevel::MESSAGE_LEVEL_ONCE, state);
 }

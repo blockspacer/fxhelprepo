@@ -72,6 +72,18 @@
     <ClInclude Include="common.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="WebsocketClientController.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WebsocketClient.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WebsocketDefine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectMetadata.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -114,6 +126,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="TcpClientController.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WebsocketClientController.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WebsocketClient.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ConnectMetadata.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -42,6 +42,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(BOOST_DIR);$(SolutionDir)websocketpp;$(IncludePath)</IncludePath>
+    <LibraryPath>$(BOOST_DIR)\lib64-msvc-12.0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -53,6 +55,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>PSAPI_VERSION=1;WIN32;_DEBUG;_LIB;NOMINMAX;_CRT_SECURE_NO_WARNINGS;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)third_party/chromium;$(SolutionDir)third_party\libevent\include;$(SolutionDir)third_party\libevent\WIN32-Code;$(SolutionDir)third_party\libevent\compat;$(SolutionDir)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -88,6 +91,7 @@
   <ItemGroup>
     <ClInclude Include="BetData.h" />
     <ClInclude Include="common.h" />
+    <ClInclude Include="ConnectMetadata.h" />
     <ClInclude Include="TcpClientController.h" />
     <ClInclude Include="CookiesHelper.h" />
     <ClInclude Include="CurlWrapper.h" />
@@ -104,8 +108,12 @@
     <ClInclude Include="TcpProxyClient.h" />
     <ClInclude Include="User.h" />
     <ClInclude Include="utf_help.h" />
+    <ClInclude Include="WebsocketClient.h" />
+    <ClInclude Include="WebsocketClientController.h" />
+    <ClInclude Include="WebsocketDefine.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConnectMetadata.cpp" />
     <ClCompile Include="CookiesHelper.cpp" />
     <ClCompile Include="CurlWrapper.cpp" />
     <ClCompile Include="dllmain.cpp">
@@ -130,6 +138,8 @@
     <ClCompile Include="TcpClientController.cpp" />
     <ClCompile Include="TcpProxyClient.cpp" />
     <ClCompile Include="User.cpp" />
+    <ClCompile Include="WebsocketClient.cpp" />
+    <ClCompile Include="WebsocketClientController.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\third_party\chromium\base\base.vcxproj">
