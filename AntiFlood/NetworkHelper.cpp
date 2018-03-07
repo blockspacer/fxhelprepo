@@ -3,7 +3,7 @@
 #include "NetworkHelper.h"
 
 #include "PhoneRank.h"
-#include "Network/TcpClientController.h"
+//#include "Network/TcpClientController.h"
 #include "Network/User.h"
 #include "third_party/chromium/base/strings/sys_string_conversions.h"
 
@@ -369,7 +369,7 @@ bool GiftStrategy::GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* 
 
 NetworkHelper::NetworkHelper()
     : authority_(new AntiFloodAuthority)
-    , tcp_client_controller_(new TcpClientController)
+    //, tcp_client_controller_(new TcpClientController)
     , workThread_(new base::Thread("NetworkHelper"))
 {
 }
@@ -383,13 +383,13 @@ bool NetworkHelper::Initialize()
     CurlWrapper::CurlInit();
     workThread_->Start();
     user_.reset(new User);
-    tcp_client_controller_->Initialize();
+    //tcp_client_controller_->Initialize();
     AuthorityHelper authorityHelper;
     bool result = authorityHelper.LoadAntiFloodAuthority(authority_.get());
     assert(!authority_->serverip.empty());
     user_->Initialize(workThread_->message_loop_proxy());
     user_->SetRoomServerIp(authority_->serverip);
-    user_->SetTcpManager(tcp_client_controller_.get());
+    //user_->SetTcpManager(tcp_client_controller_.get());
     user_->Initialize(workThread_->message_loop_proxy());
     return result;
 }
@@ -398,7 +398,7 @@ void NetworkHelper::Finalize()
 {
     chatRepeatingTimer_.Stop();
     workThread_->Stop();
-    tcp_client_controller_->Finalize();
+    //tcp_client_controller_->Finalize();
     CurlWrapper::CurlCleanup();
     return;
 }

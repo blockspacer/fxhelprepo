@@ -51,22 +51,10 @@
     <ClInclude Include="IpProxy.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="TcpProxyClient.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="easy_http_impl.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="BetData.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="SingleTcpClient.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="TcpClientController.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="TcpDefines.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="common.h">
@@ -82,6 +70,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ConnectMetadata.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="WebsocketClientControllerImpl.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -116,16 +107,7 @@
     <ClCompile Include="IpProxy.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="TcpProxyClient.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="easy_http_impl.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="SingleTcpClient.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="TcpClientController.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="WebsocketClientController.cpp">
@@ -135,6 +117,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ConnectMetadata.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WebsocketClientControllerImpl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

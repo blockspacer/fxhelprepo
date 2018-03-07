@@ -117,10 +117,10 @@ void User::SetRoomServerIp(const std::string& serverip)
     //serverip_ = response.server_ip;
 }
 
-void User::SetTcpManager(TcpClientController* tcpManager)
-{
-    tcpManager_ = tcpManager;
-}
+//void User::SetTcpManager(TcpClientController* tcpManager)
+//{
+//    tcpManager_ = tcpManager;
+//}
 
 //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
 void User::SetNormalNotify(NormalNotify normalNotify)
@@ -321,7 +321,7 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
     const base::Callback<void()>& conn_break_callback)
 {
     std::shared_ptr<Room> room(new Room(roomid));
-    room->SetTcpManager(tcpManager_);
+    //room->SetTcpManager(tcpManager_);
     room->SetRoomServerIp(serverip_);
     room->Initialize(runner_);
     std::vector<std::string> keys;
@@ -376,7 +376,7 @@ bool User::EnterRoomFopAlive(uint32 roomid,
 {
     std::shared_ptr<Room> room(new Room(roomid));
     room->Initialize(runner_);
-    room->SetTcpManager(tcpManager_);
+    //room->SetTcpManager(tcpManager_);
     room->SetRoomServerIp(serverip_);
     std::vector<std::string> keys;
     keys.push_back("_fx_coin");

@@ -90,10 +90,10 @@ void Room::SetRoomServerIp(const std::string& serverip)
     messageNotifyManager_->SetServerIp(serverip);
 }
 
-void Room::SetTcpManager(TcpClientController* tcpManager)
-{
-    messageNotifyManager_->SetTcpManager(tcpManager);
-}
+//void Room::SetTcpManager(TcpClientController* tcpManager)
+//{
+//    messageNotifyManager_->SetTcpManager(tcpManager);
+//}
 
 bool Room::EnterForOperation(const std::string& cookies, 
     const std::string& usertoken, uint32 userid, uint32* singer_clanid,
@@ -1079,8 +1079,10 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     {
         messageNotifyManager_->SetIpProxy(ipproxy_);
     }
-    
-    ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken, conn_break_callback);
+    std::string soctoken;
+    //ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken, conn_break_callback);
+    ret = messageNotifyManager_->Connect(roomid, userid, usertoken, soctoken, conn_break_callback);
+
     assert(ret);
     return ret;
 }

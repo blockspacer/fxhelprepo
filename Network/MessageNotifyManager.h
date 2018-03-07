@@ -12,12 +12,12 @@
 #include "third_party/chromium/base/task_runner.h"
 #include "Network/IpProxy.h"
 #include "Network/common.h"
-#include "Network/TcpDefines.h"
+//#include "Network/TcpDefines.h"
 #include "Network/BetData.h"
 #include "Network/WebsocketDefine.h"
 
 //class TcpClient;
-class TcpClientController;
+//class TcpClientController;
 class WebsocketClientController;
 
 //typedef int SocketHandle;
@@ -86,7 +86,6 @@ public:
 
     bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
     void Finalize();
-    void SetTcpManager(TcpClientController* tcpManager);
     void SetWebsockClientController(WebsocketClientController* controller);
     void SetServerIp(const std::string& serverip);
     void SetIpProxy(const IpProxy& ipproxy);
@@ -99,10 +98,10 @@ public:
     void SetNormalNotify(NormalNotify normalNotify);
 
     // 使用新的高效的多路tcp请求分发模式
-    bool NewConnect843(uint32 roomid, uint32 userid,
-        const std::string& usertoken, 
-        const base::Callback<void()>& conn_break_callback);
-    bool NewConnect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
+    //bool NewConnect843(uint32 roomid, uint32 userid,
+    //    const std::string& usertoken, 
+    //    const base::Callback<void()>& conn_break_callback);
+    //bool NewConnect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
     bool NewSendChatMessage(const std::string& nickname, uint32 richlevel,
                          const std::string& message);
 
@@ -127,32 +126,32 @@ private:
     void Notify(const std::vector<char>& data);
     std::vector<std::string> HandleMixPackage(const std::string& package);
 
-    // 使用新的高效的多路tcp请求分发模式
-    static void NewConnect843Callback(std::weak_ptr<MessageNotifyManager> weakptr,
-        bool result, SocketHandle handle);
-    static void NewConnect8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
-        uint32 roomid, uint32 userid,
-        const std::string& usertoken,
-        bool result, SocketHandle handle);
-    static void NewData843Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
-        uint32 roomid, uint32 userid, const std::string& usertoken, bool result, 
-        const std::vector<uint8>& data);
-    static void NewData8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
-        bool result, const std::vector<uint8>& data);
-    static void NewSendDataCallback(std::weak_ptr<MessageNotifyManager> weakptr, 
-        SocketHandle handle, bool result);
+    //// 使用新的高效的多路tcp请求分发模式
+    //static void NewConnect843Callback(std::weak_ptr<MessageNotifyManager> weakptr,
+    //    bool result, SocketHandle handle);
+    //static void NewConnect8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+    //    uint32 roomid, uint32 userid,
+    //    const std::string& usertoken,
+    //    bool result, SocketHandle handle);
+    //static void NewData843Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+    //    uint32 roomid, uint32 userid, const std::string& usertoken, bool result, 
+    //    const std::vector<uint8>& data);
+    //static void NewData8080Callback(std::weak_ptr<MessageNotifyManager> weakptr, 
+    //    bool result, const std::vector<uint8>& data);
+    //static void NewSendDataCallback(std::weak_ptr<MessageNotifyManager> weakptr, 
+    //    SocketHandle handle, bool result);
 
-    void DoNewConnect843Callback(bool result, SocketHandle handle);
-    void DoNewConnect8080Callback(uint32 roomid, uint32 userid,
-                             const std::string& usertoken,
-                             bool result, SocketHandle handle);
-    void DoNewData843Callback(uint32 roomid, uint32 userid,
-        const std::string& usertoken, bool result, const std::vector<uint8>& data);
-    void DoNewData8080Callback(bool result, const std::vector<uint8>& data);
+    //void DoNewConnect843Callback(bool result, SocketHandle handle);
+    //void DoNewConnect8080Callback(uint32 roomid, uint32 userid,
+    //                         const std::string& usertoken,
+    //                         bool result, SocketHandle handle);
+    //void DoNewData843Callback(uint32 roomid, uint32 userid,
+    //    const std::string& usertoken, bool result, const std::vector<uint8>& data);
+    //void DoNewData8080Callback(bool result, const std::vector<uint8>& data);
 
-    void DoNewSendHeartBeat(SocketHandle handle);
-    void DoNewSendChatMessage(const std::vector<char>& msg); // 发言需要符合间隔时间
-    void DoNewSendDataCallback(SocketHandle handle, bool result);
+    //void DoNewSendHeartBeat(SocketHandle handle);
+    //void DoNewSendChatMessage(const std::vector<char>& msg); // 发言需要符合间隔时间
+    //void DoNewSendDataCallback(SocketHandle handle, bool result);
 
     // 改为websocket模式
     void AddClientConnectCallback(
@@ -175,8 +174,8 @@ private:
     //std::unique_ptr<TcpClient> tcpClient_8080_;
     //std::unique_ptr<TcpClient> tcpClient_843_;
 
-    SocketHandle SocketHandle_8080_ = -1;
-    SocketHandle SocketHandle_843_ = -1;
+    //SocketHandle SocketHandle_8080_ = -1;
+    //SocketHandle SocketHandle_843_ = -1;
 
     Notify201 notify201_;
     Notify501 notify501_;
@@ -185,7 +184,6 @@ private:
 
     NormalNotify normalNotify_;
 
-    TcpClientController* tcp_client_controller_;
     base::Callback<void()> conn_break_callback_; // 处理掉线问题
     bool connected_;// 未连接时和连接失败后，都不应该处理回调和线程任务
 

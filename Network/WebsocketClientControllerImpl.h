@@ -5,18 +5,18 @@
 #include <functional>
 #include "WebsocketDefine.h"
 #include "third_party/chromium/base/basictypes.h"
-#include "third_party/chromium/base/memory/scoped_ptr.h"
 
 #include "Network/IpProxy.h"
+#include "ConnectMetadata.h"
 
 class WebsocketClient;
-class WebsocketClientControllerImpl;
 
-class WebsocketClientController
+class WebsocketClientControllerImpl
 {
 public:
-    WebsocketClientController();
-    ~WebsocketClientController();
+
+    WebsocketClientControllerImpl();
+    ~WebsocketClientControllerImpl();
 
     bool Initialize();
     void Finalize();
@@ -29,7 +29,13 @@ public:
     bool Send(WebsocketHandle handle, const std::vector<uint8>& data, SendDataCallback callback);
 
 private:
-    scoped_ptr<WebsocketClientControllerImpl> Impl_;
+    typedef std::map<int, connection_metadata::ptr> con_list;
+
+    client m_endpoint;
+    websocketpp::lib::shared_ptr<websocketpp::lib::thread> m_thread;
+
+    con_list m_connection_list;
+    int m_next_id;
 
 };
 
