@@ -509,7 +509,18 @@ bool MessageNotifyManager::Connect(uint32 room_id, uint32 user_id,
     DCHECK(!usertoken.empty());
     DCHECK(!soctoken.empty());
 
-    return false;
+    std::function<void(bool, WebsocketHandle)> AddClientCallback;
+
+    auto add_callback = std::bind(&MessageNotifyManager::AddClientConnectCallback,
+        this, std::placeholders::_1, std::placeholders::_2);
+
+    auto data_callback = std::bind(&MessageNotifyManager::ClientDataCallback,
+        this, room_id, user_id, usertoken,
+        std::placeholders::_1, std::placeholders::_2);
+
+    websocket_client_controller_->AddClient(add_callback, ipProxy_, serverip_, 1314, data_callback);
+
+    return true;
 }
 
 bool MessageNotifyManager::SendMessage(const std::string& nickname, uint32 richlevel,

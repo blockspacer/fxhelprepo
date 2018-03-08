@@ -2,7 +2,7 @@
 #include "WebsocketClient.h"
 
 #include "third_party/chromium/base/strings/string_number_conversions.h"
-
+#include "third_party/chromium/base/logging.h"
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
 
@@ -88,7 +88,7 @@ bool WebsocketClientControllerImpl::AddClient(
 
     if (ec) {
         std::cout << "> Connect initialization error: " << ec.message() << std::endl;
-        return -1;
+        return false;
     }
 
     int new_id = m_next_id++;
@@ -120,7 +120,8 @@ bool WebsocketClientControllerImpl::AddClient(
         websocketpp::lib::placeholders::_2
         ));
 
-    m_endpoint.connect(con);
+    client::connection_ptr ptr = m_endpoint.connect(con);
+    DCHECK(ptr);
     addcallback(true, new_id);
 
     return true;
