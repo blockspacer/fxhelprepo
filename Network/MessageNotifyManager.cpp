@@ -1207,3 +1207,21 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
 //    if (normalNotify_)
 //        normalNotify_(MessageLevel::MESSAGE_LEVEL_ONCE, state);
 //}
+
+void MessageNotifyManager::AddClientConnectCallback(
+    bool result, WebsocketHandle handle)
+{
+
+}
+
+void MessageNotifyManager::ClientDataCallback(
+    uint32 roomid, uint32 userid, const std::string& usertoken, bool result,
+    const std::vector<uint8>& data)
+{
+
+}
+
+void MessageNotifyManager::DoSendDataCallback(WebsocketHandle handle, bool result)
+{
+
+}
