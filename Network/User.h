@@ -74,6 +74,7 @@ public:
     void SetRoomServerIp(const std::string& serverip);
 
     //void SetTcpManager(TcpClientController* tcpManager);
+    void SetWebsocketClientController(WebsocketClientController* controller);
 
     //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
     void SetNormalNotify(NormalNotify normalNotify);
@@ -168,7 +169,8 @@ private:
     bool Worship_(const std::string& cookies, uint32 roomid, uint32 userid,
         std::string* errormsg);
 
-    TcpClientController* tcpManager_;
+    //TcpClientController* tcpManager_;
+    WebsocketClientController* websocket_client_controller_;
     std::string username_;
     std::string password_;
     std::string serverip_;

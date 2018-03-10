@@ -122,6 +122,11 @@ void User::SetRoomServerIp(const std::string& serverip)
 //    tcpManager_ = tcpManager;
 //}
 
+void User::SetWebsocketClientController(WebsocketClientController* controller)
+{
+    websocket_client_controller_ = controller;
+}
+
 //设置房间命令消息回调函数,命令的解析和行为处理要在另外的模块处理
 void User::SetNormalNotify(NormalNotify normalNotify)
 {
@@ -322,6 +327,7 @@ bool User::EnterRoomFopOperation(uint32 roomid, uint32* singer_clanid,
 {
     std::shared_ptr<Room> room(new Room(roomid));
     //room->SetTcpManager(tcpManager_);
+    room->SetWebsocketClientController(websocket_client_controller_);
     room->SetRoomServerIp(serverip_);
     room->Initialize(runner_);
     std::vector<std::string> keys;

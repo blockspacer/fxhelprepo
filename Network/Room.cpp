@@ -95,6 +95,11 @@ void Room::SetRoomServerIp(const std::string& serverip)
 //    messageNotifyManager_->SetTcpManager(tcpManager);
 //}
 
+void Room::SetWebsocketClientController(WebsocketClientController* controller)
+{
+    messageNotifyManager_->SetWebsockClientController(controller);
+}
+
 bool Room::EnterForOperation(const std::string& cookies, 
     const std::string& usertoken, uint32 userid, uint32* singer_clanid,
     const base::Callback<void()>& conn_break_callback)
@@ -1079,7 +1084,7 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     {
         messageNotifyManager_->SetIpProxy(ipproxy_);
     }
-    std::string soctoken;
+    std::string soctoken = usertoken;
     //ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken, conn_break_callback);
     ret = messageNotifyManager_->Connect(roomid, userid, usertoken, soctoken, conn_break_callback);
 

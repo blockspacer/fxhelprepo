@@ -19,6 +19,7 @@ class GiftInfoHelper;
 class GiftInfo;
 class User;
 //class TcpClientController;
+class WebsocketClientController;
 
 typedef std::function<void(MessageLevel, const std::wstring&)> notifyfn;
 
@@ -134,6 +135,9 @@ public:
                const std::wstring& verifycode,std::string* errormsg);
     bool LoginGetVerifyCode(std::vector<uint8>* picture);
 
+    bool LoginWithCookies(const std::string& cookies,
+        std::string* errormsg);
+
     bool GetCurrentUserDisplay(std::wstring* display);
     bool EnterRoom(const std::wstring& roomid);
     bool EnterRoom(uint32 roomid);
@@ -197,6 +201,7 @@ private:
     std::shared_ptr<GiftStrategy> giftStrategy_;
     std::shared_ptr<EnterRoomStrategy> enterRoomStrategy_;
     //std::unique_ptr<TcpClientController> tcp_client_controller_;
+    std::unique_ptr<WebsocketClientController> websocket_client_controller_;
 
     scoped_ptr<base::Thread> workThread_;
     base::RepeatingTimer<NetworkHelper> chatRepeatingTimer_;

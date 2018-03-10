@@ -647,7 +647,9 @@ bool CAntiFloodDlg::LoginByRequest(const std::wstring& username,
     }
   
     std::string errormsg;
-    bool result = network_->Login(username, password, verifycode, &errormsg);
+    //bool result = network_->Login(username, password, verifycode, &errormsg);
+    std::string cookie = R"(KuGoo=KugooID=691794011&KugooPwd=0EC2801BEC41E74391EE020A4B0B347E&NickName=%u7b11%u9a82%u7531%u4eba%u6d12%u8131%u5730%u505a%u4eba&Pic=http://imge.kugou.com/kugouicon/165/20100101/20100101192931478054.jpg&RegState=1&RegFrom=&t=b8d15fe0b9ddb3ee85db3d8daf763980a9fa7c87305bcc8ed89089c01ef9a5df&a_id=1010&ct=1521124587&UserName=%u0066%u0061%u006e%u0078%u0069%u006e%u0067%u0074%u0065%u0073%u0074%u0030%u0030%u0032)";
+    bool result = network_->LoginWithCookies(cookie, &errormsg);
 
     std::wstring message = username + L" µÇÂ¼";
     if (!result)

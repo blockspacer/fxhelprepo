@@ -18,6 +18,7 @@
 #include "third_party/chromium/base/files/file_path.h"
 #include "third_party/chromium/base/files/file.h"
 #include "third_party/chromium/base/path_service.h"
+#include "Network/WebsocketClientController.h"
 
 namespace
 {
@@ -370,6 +371,7 @@ bool GiftStrategy::GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* 
 NetworkHelper::NetworkHelper()
     : authority_(new AntiFloodAuthority)
     //, tcp_client_controller_(new TcpClientController)
+    , websocket_client_controller_(new WebsocketClientController)
     , workThread_(new base::Thread("NetworkHelper"))
 {
 }
@@ -388,8 +390,11 @@ bool NetworkHelper::Initialize()
     bool result = authorityHelper.LoadAntiFloodAuthority(authority_.get());
     assert(!authority_->serverip.empty());
     user_->Initialize(workThread_->message_loop_proxy());
-    user_->SetRoomServerIp(authority_->serverip);
+    //user_->SetRoomServerIp(authority_->serverip);
+    user_->SetRoomServerIp("106.39.193.69");
     //user_->SetTcpManager(tcp_client_controller_.get());
+    websocket_client_controller_->Initialize();
+    user_->SetWebsocketClientController(websocket_client_controller_.get());
     user_->Initialize(workThread_->message_loop_proxy());
     return result;
 }
@@ -513,6 +518,12 @@ bool NetworkHelper::Login(const std::wstring& username,
 bool NetworkHelper::LoginGetVerifyCode(std::vector<uint8>* picture)
 {
     return user_->LoginGetVerifyCode(picture);
+}
+
+bool NetworkHelper::LoginWithCookies(const std::string& cookies,
+    std::string* errormsg)
+{
+    return user_->LoginWithCookies(cookies, errormsg);
 }
 
 bool NetworkHelper::GetCurrentUserDisplay(std::wstring* display)
