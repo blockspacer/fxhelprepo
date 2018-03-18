@@ -123,12 +123,13 @@ bool Room::EnterForOperation(const std::string& cookies,
 
     // 年度大奖需求，不需要连接房间
     //GetStarGuard();
-    if (!GetRoomConnectionInfo(cookies))
-        return false;
 
     if (!EnterRoom(cookies, userid, usertoken))
         return false;
-    
+
+    if (!GetRoomConnectionInfo(cookies))
+        return false;
+
     if (!ConnectToNotifyServer_(roomid_, userid, usertoken, conn_break_callback))
         return false;
 
