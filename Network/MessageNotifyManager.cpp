@@ -38,6 +38,10 @@ bool GetFirstPackage(const cmd201package& package,
 {
     // 10位的时间截
     //uint32 nowtime = static_cast<uint32>(base::Time::Now().ToDoubleT());
+    //std::string message = R"({"cmd":201,"roomid":1417487,"kugouid":615887139,
+    //"token":"3808e2cb686c5f3accb4dcd831b2048f7202d77efe0617b58e54e3dc8a8c70e1",
+    //    "appid":1010,"referer":0,"clientid":100,"v":20171111,
+    //    "soctoken":"121252524f4993cb81342253d1f7e313352386ad29357db11867451"})";
 
     Json::FastWriter writer;
     Json::Value root(Json::objectValue);
@@ -46,6 +50,11 @@ bool GetFirstPackage(const cmd201package& package,
     root["kugouid"] = package.userid;
     root["token"] = package.usertoken;
     root["appid"] = 1010;
+    root["referer"] = 0;
+    root["clientid"] = 100;
+    root["v"] = 20171111;
+    root["soctoken"] = package.usertoken;
+
     std::string data = writer.write(root);
     packagedata->assign(data.begin(), data.end());
 
@@ -508,6 +517,8 @@ bool MessageNotifyManager::Connect(uint32 room_id, uint32 user_id,
     DCHECK(user_id);
     DCHECK(!usertoken.empty());
     DCHECK(!soctoken.empty());
+
+    message_count_ = 0;
 
     std::function<void(bool, WebsocketHandle)> AddClientCallback;
 
@@ -1211,14 +1222,56 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
 void MessageNotifyManager::AddClientConnectCallback(
     bool result, WebsocketHandle handle)
 {
+    if (!result)
+    {
+        return;
+    }
 
+    websocket_handle_ = handle;
+}
+
+void MessageNotifyManager::StartSendHeartbeat()
+{
+    if (newRepeatingTimer_.IsRunning())
+        newRepeatingTimer_.Stop();
+
+    newRepeatingTimer_.Start(FROM_HERE, base::TimeDelta::FromSeconds(10),
+        base::Bind(&MessageNotifyManager::SendHeartbeat, base::Unretained(this)));
+}
+
+void MessageNotifyManager::SendHeartbeat()
+{
+    std::string heartbeat = "HEARTBEAT_REQUEST";
+    heartbeat.append("\n");
+    std::vector<uint8> data(heartbeat.begin(), heartbeat.end());
+    websocket_client_controller_->Send(websocket_handle_, data,
+        std::bind(&MessageNotifyManager::DoSendDataCallback,this,
+        websocket_handle_, std::placeholders::_1));
 }
 
 void MessageNotifyManager::ClientDataCallback(
     uint32 roomid, uint32 userid, const std::string& usertoken, bool result,
     const std::vector<uint8>& data)
 {
+    if (!message_count_)
+    {
+        std::vector<uint8> data_for_send;
+        cmd201package package = {
+            201, roomid, userid, usertoken };
+        GetFirstPackage(package, &data_for_send);
 
+        //std::string message = R"({"cmd":201,"roomid":1417487,"kugouid":615887139,"token":"3808e2cb686c5f3accb4dcd831b2048f7202d77efe0617b58e54e3dc8a8c70e1","appid":1010,"referer":0,"clientid":100,"v":20171111,"soctoken":"121252524f4993cb81342253d1f7e313352386ad29357db11867451"})";
+
+        websocket_client_controller_->Send(websocket_handle_, data_for_send,
+            std::bind(&MessageNotifyManager::DoSendDataCallback, this,
+            websocket_handle_, std::placeholders::_1));
+
+        runner_->PostTask(FROM_HERE,
+            base::Bind(&MessageNotifyManager::StartSendHeartbeat, 
+            base::Unretained(this)));
+    }
+    message_count_++;
+    LOG(INFO) << base::UintToString16(message_count_);
 }
 
 void MessageNotifyManager::DoSendDataCallback(WebsocketHandle handle, bool result)

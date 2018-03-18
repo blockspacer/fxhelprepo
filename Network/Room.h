@@ -40,7 +40,6 @@ public:
         return nickname_;
     }
 
-
     // 需要获得房间信息来做下一步操作的函数, 传出singer_clanid是为判断授权使用
     bool EnterForOperation(const std::string& cookies, 
         const std::string& usertoken, uint32 userid, uint32* singer_clanid,
@@ -103,6 +102,9 @@ private:
     bool GetStarKugouId(const std::string& cookies);
     bool EnterRoom(const std::string& cookies, uint32 userid, const std::string& usertoken);
     bool GetStarGuard();
+
+    bool GetRoomConnectionInfo(const std::string& cookies);
+
     void TranferNotify601(const RoomGiftInfo601& roomgiftinfo);
 
     bool ConnectToNotifyServer_(uint32 roomid, uint32 userid,
@@ -120,5 +122,8 @@ private:
     std::unique_ptr<CurlWrapper> curlWrapper_;
     std::shared_ptr<MessageNotifyManager> messageNotifyManager_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;
+
+    std::string server_ip_;
+    std::string soctoken_;// 使用websocket进入房间的协议里面需要这个参数
 };
 

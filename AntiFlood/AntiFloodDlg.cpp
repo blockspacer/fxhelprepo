@@ -521,12 +521,12 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
     Config config;
     config.SaveRoomId(strRoomid.GetBuffer());
 
-    std::wstring privilegeMsg;
-    if (!network_->GetActionPrivilege(&privilegeMsg))
-    {
-        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
-        return;
-    }
+    //std::wstring privilegeMsg;
+    //if (!network_->GetActionPrivilege(&privilegeMsg))
+    //{
+    //    Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+    //    return;
+    //}
 
     // 为根据礼物大小感谢做准备
     std::string content;

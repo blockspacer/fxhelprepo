@@ -54,13 +54,17 @@ public:
         m_error_reason = s.str();
     }
 
-    void on_message(websocketpp::connection_hdl, client::message_ptr msg) {
+    void on_message(websocketpp::connection_hdl, client::message_ptr msg,
+        const std::function<void(bool, const std::vector<uint8>&)>& callback) {
         if (msg->get_opcode() == websocketpp::frame::opcode::text) {
             m_messages.push_back("<< " + msg->get_payload());
         }
         else {
             m_messages.push_back("<< " + websocketpp::utility::to_hex(msg->get_payload()));
         }
+        std::string temp = msg->get_payload();
+        std::vector<uint8> data(temp.begin(), temp.end());
+        callback(true, data);
     }
 
     websocketpp::connection_hdl get_hdl() const {

@@ -157,6 +157,10 @@ private:
     void AddClientConnectCallback(
         bool result, WebsocketHandle handle);
 
+    void StartSendHeartbeat();
+
+    void SendHeartbeat();
+
     void ClientDataCallback(
         uint32 roomid, uint32 userid, const std::string& usertoken, bool result,
         const std::vector<uint8>& data);
@@ -186,6 +190,8 @@ private:
 
     base::Callback<void()> conn_break_callback_; // 处理掉线问题
     bool connected_;// 未连接时和连接失败后，都不应该处理回调和线程任务
+
+    int message_count_ = 0;
 
     WebsocketClientController* websocket_client_controller_;
     WebsocketHandle websocket_handle_;

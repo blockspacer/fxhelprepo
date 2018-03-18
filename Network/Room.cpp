@@ -87,6 +87,8 @@ void Room::SetIpProxy(const IpProxy& ipproxy)
 
 void Room::SetRoomServerIp(const std::string& serverip)
 {
+    // 批量进房间的时候才不在每次进房去获取ip
+    server_ip_ = serverip;
     messageNotifyManager_->SetServerIp(serverip);
 }
 
@@ -121,6 +123,8 @@ bool Room::EnterForOperation(const std::string& cookies,
 
     // 年度大奖需求，不需要连接房间
     //GetStarGuard();
+    if (!GetRoomConnectionInfo(cookies))
+        return false;
 
     if (!EnterRoom(cookies, userid, usertoken))
         return false;
@@ -1061,6 +1065,92 @@ bool Room::GetStarGuard()
     return true;
 }
 
+bool Room::GetRoomConnectionInfo(const std::string& cookies)
+{
+    assert(singerid_ && roomid_);
+    std::string url = "http://fx2.service.kugou.com//socket_scheduler/pc/v2/address.jsonp";
+    HttpRequest request;
+    request.url = url;
+    request.queries["jsonpcallback"] = "jsonpcallback_httpsfx2servicekugoucomsocket_schedulerpcv2addressjsonp";
+    request.queries["_p"] = "0";
+    request.queries["_v"] = "7.0.0";
+    request.queries["pv"] = "20171111";
+    request.queries["rid"] = base::UintToString(roomid_);
+    request.queries["cid"] = "100";
+    request.queries["at"] = "101";
+    request.queries["_"] = GetNowTimeString();
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_);
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string content;
+    content.assign(response.content.begin(), response.content.end());
+
+    for (const auto& it : response.cookies)
+        cookiesHelper_->SetCookies(it);
+
+    if (content.empty())
+        return false;
+
+    const std::string& rootdata = PickJson(content);
+    //解析json数据
+    Json::Reader reader;
+    Json::Value root(Json::objectValue);
+    if (!reader.parse(rootdata, root, false))
+        return false;
+
+    uint32 status = GetInt32FromJsonValue(root, "code");
+    if (status != 0)
+        return false;
+
+    Json::Value defaultval(Json::objectValue);
+    auto data = root.get("data", defaultval);
+    if (!data.isObject())
+    {
+        return false;
+    }
+
+    auto members = data.getMemberNames();
+    for (const auto& member : members)
+    {
+        if (member.compare("addrs") == 0)
+        {
+            auto addrslist = data.get("addrs", defaultval);
+            if (!addrslist.isArray())
+            {
+                return false;
+            }
+            auto add = data.getMemberNames();
+
+        }
+        else if (member.compare("age") == 0)
+        {
+            uint32 age = data.get(member, 0).asUInt();
+        }
+        else if (member.compare("pv") == 0)
+        {
+            uint32 pv = data.get(member, 0).asUInt();
+        }
+        else if (member.compare("socketype") == 0)
+        {
+            uint32 socketype = data.get(member, 0).asUInt();
+        }
+        else if (member.compare("soctoken") == 0)
+        {
+            soctoken_ = data.get(member, 0).asString();
+        }
+    }
+    DCHECK(!soctoken_.empty());
+    return true;
+}
+
 void Room::TranferNotify601(const RoomGiftInfo601& roomgiftinfo)
 {
     // 如果不是在本房间送给主播的消息，过滤掉不回调
@@ -1084,7 +1174,8 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     {
         messageNotifyManager_->SetIpProxy(ipproxy_);
     }
-    std::string soctoken = usertoken;
+    std::string soctoken = soctoken_;
+    messageNotifyManager_->SetServerIp(server_ip_);
     //ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken, conn_break_callback);
     ret = messageNotifyManager_->Connect(roomid, userid, usertoken, soctoken, conn_break_callback);
 

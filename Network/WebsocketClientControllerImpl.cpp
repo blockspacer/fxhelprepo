@@ -117,8 +117,8 @@ bool WebsocketClientControllerImpl::AddClient(
         &connection_metadata::on_message,
         metadata_ptr,
         websocketpp::lib::placeholders::_1,
-        websocketpp::lib::placeholders::_2
-        ));
+        websocketpp::lib::placeholders::_2,
+        callback));
 
     client::connection_ptr ptr = m_endpoint.connect(con);
     DCHECK(ptr);

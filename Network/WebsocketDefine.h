@@ -7,4 +7,4 @@ typedef uint32 WebsocketHandle;
 
 typedef std::function<void(bool, WebsocketHandle)> AddClientCallback;
 typedef std::function<void(bool, const std::vector<uint8>&)> ClientCallback;
-typedef std::function<void(WebsocketHandle, bool)> SendDataCallback;
+typedef std::function<void(bool)> SendDataCallback;
