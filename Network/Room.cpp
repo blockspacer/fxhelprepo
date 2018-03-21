@@ -145,8 +145,10 @@ bool Room::EnterForOperation(const std::string& cookies,
 bool Room::EnterForAlive(const std::string& cookies, const std::string& usertoken, uint32 userid,
     const base::Callback<void()>& conn_break_callback)
 {
-
     if (!OpenRoom(cookies))
+        return false;
+
+    if (!GetRoomConnectionInfo(cookies))
         return false;
 
     if (!ConnectToNotifyServer_(roomid_, userid, usertoken, conn_break_callback))

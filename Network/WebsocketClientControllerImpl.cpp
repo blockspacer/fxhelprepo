@@ -15,20 +15,6 @@
 #include <string>
 #include <sstream>
 
-
-
-class websocket_endpoint {
-public:
-    websocket_endpoint() : m_next_id(0) {}
-    ~websocket_endpoint() {}
-    int connect(std::string const & uri) {}
-    void close(int id, websocketpp::close::status::value code, std::string reason) {}
-    void send(int id, std::string message) {}
-    connection_metadata::ptr get_metadata(int id) const {}
-private:
-    int m_next_id;
-};
-
 WebsocketClientControllerImpl::WebsocketClientControllerImpl()
     :m_next_id(0)
 {

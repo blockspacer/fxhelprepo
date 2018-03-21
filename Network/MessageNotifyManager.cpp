@@ -1271,7 +1271,7 @@ void MessageNotifyManager::ClientDataCallback(
             base::Unretained(this)));
     }
     message_count_++;
-    LOG(INFO) << base::UintToString16(message_count_);
+    LOG(INFO) << base::IntToString16(message_count_);
 }
 
 void MessageNotifyManager::DoSendDataCallback(WebsocketHandle handle, bool result)

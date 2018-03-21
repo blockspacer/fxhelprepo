@@ -13,7 +13,7 @@ namespace
     //const char* serverip = "42.62.68.50";
     const char* serverip = "114.54.2.205";
 }
-UserController::UserController(TcpClientController* tcpManager)
+UserController::UserController(WebsocketClientController* tcpManager)
     : mvBillboard_(new MVBillboard)
     , tcpManager_(tcpManager)
 {
@@ -54,7 +54,7 @@ bool UserController::AddUser(const std::string& username,
         return false;
     }
    
-    shared_user->SetTcpManager(tcpManager_);
+    shared_user->SetWebsocketClientController(tcpManager_);
     shared_user->SetRoomServerIp(serverip);
     users_[username] = shared_user;
 
@@ -82,7 +82,7 @@ bool UserController::AddUserWithCookies(const std::string& username,
         return false;
     }
 
-    shared_user->SetTcpManager(tcpManager_);
+    shared_user->SetWebsocketClientController(tcpManager_);
     shared_user->SetRoomServerIp(serverip);
     users_[username] = shared_user;
 

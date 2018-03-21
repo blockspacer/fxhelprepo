@@ -13,7 +13,7 @@
 #include "afxwin.h"
 
 class UserRoomManager;
-class TcpClientController;
+class WebsocketClientController;
 // CBatchLoginDlg ¶Ô»°¿ò
 class CBatchLoginDlg : public CDialogEx
 {
@@ -79,7 +79,7 @@ private:
     void GetSelectUsers(std::vector<std::wstring>* users);
 
     std::unique_ptr<UserRoomManager> userRoomManager_;
-    std::unique_ptr<TcpClientController> tcpManager_;
+    std::unique_ptr<WebsocketClientController> tcpManager_;
     CListCtrl m_ListCtrl_Users;
     //CListCtrl m_ListCtrl_Rooms;
     CListCtrl m_list_proxy;

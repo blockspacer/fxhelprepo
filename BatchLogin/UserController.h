@@ -7,7 +7,7 @@
 #undef min
 #include "third_party/chromium/base/basictypes.h"
 
-class TcpClientController;
+class WebsocketClientController;
 #include "Network/User.h"
 class User;
 class MVBillboard;
@@ -23,7 +23,7 @@ struct UserLoginInfo
 class UserController
 {
 public:
-    UserController(TcpClientController* tcpManager);
+    UserController(WebsocketClientController* tcpManager);
     ~UserController();
 
     bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
@@ -85,7 +85,7 @@ private:
     // 提供连接状态出错重连的功能
     void ConnectionBreakCallback(const std::string& user_name, uint32 room_id);
 
-    TcpClientController* tcpManager_;
+    WebsocketClientController* tcpManager_;
     std::map<std::string, std::shared_ptr<User> > users_;
     std::unique_ptr<MVBillboard> mvBillboard_;
 

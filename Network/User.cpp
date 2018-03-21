@@ -383,6 +383,7 @@ bool User::EnterRoomFopAlive(uint32 roomid,
     std::shared_ptr<Room> room(new Room(roomid));
     room->Initialize(runner_);
     //room->SetTcpManager(tcpManager_);
+    room->SetWebsocketClientController(websocket_client_controller_);
     room->SetRoomServerIp(serverip_);
     std::vector<std::string> keys;
     keys.push_back("_fx_coin");

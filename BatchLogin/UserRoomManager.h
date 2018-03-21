@@ -9,13 +9,13 @@
 #include "third_party/chromium/base/memory/scoped_ptr.h"
 #include "third_party/chromium/base/threading/thread.h"
 
-class TcpClientController;
+class WebsocketClientController;
 // 带线程控制
 class UserRoomManager 
     :public std::enable_shared_from_this<UserRoomManager>
 {
 public:
-    UserRoomManager(TcpClientController* tcpManager_);
+    UserRoomManager(WebsocketClientController* tcpManager_);
     ~UserRoomManager();
 
     static void AddRef() {}

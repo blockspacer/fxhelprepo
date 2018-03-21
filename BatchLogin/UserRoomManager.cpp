@@ -22,7 +22,7 @@ namespace
     const uint32 roomusercount = 200;
 }
 
-UserRoomManager::UserRoomManager(TcpClientController* tcpManager)
+UserRoomManager::UserRoomManager(WebsocketClientController* tcpManager)
     :userController_(new UserController(tcpManager))
     , roomController_(new RoomController)
     , workerThread_("UserRoomManagerThread")
