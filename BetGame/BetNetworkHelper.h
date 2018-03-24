@@ -7,7 +7,6 @@
 #undef min
 #include "third_party/chromium/base/basictypes.h"
 #include "third_party/chromium/base/callback.h"
-#include "Network/TcpClientController.h"
 #include "Network/User.h"
 
 // 即时数据分析结果，每一期数据开出的时候都计算进去
@@ -26,6 +25,7 @@ struct CaculationData
 };
 
 class BetGameDatabase;
+class WebsocketClientController;
 class BetNetworkHelper
 {
 public:
@@ -50,7 +50,7 @@ private:
     // 提供连接状态出错重连的功能
     void ConnectionBreakCallback(uint32 room_id);
 
-    std::unique_ptr<TcpClientController> tcp_manager_;
+    std::unique_ptr<WebsocketClientController> websocket_client_controller_;
     std::unique_ptr<User> user_;
     base::Callback<void(const std::wstring&)> tips_callback_;
     base::Callback<void(const  BetResult&)> result_callback_;

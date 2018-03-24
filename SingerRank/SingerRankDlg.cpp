@@ -213,12 +213,12 @@ LRESULT CSingerRankDlg::OnMessage(WPARAM wParam, LPARAM lParam)
 
 LRESULT CSingerRankDlg::OnProgress(WPARAM wParam, LPARAM lParam)
 {
-
+    return 0;
 }
 
 LRESULT CSingerRankDlg::OnFoundResult(WPARAM wParam, LPARAM lParam)
 {
-
+    return 0;
 }
 
 void CSingerRankDlg::MessageCallback(const std::wstring& message)

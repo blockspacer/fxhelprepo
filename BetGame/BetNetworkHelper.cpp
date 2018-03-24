@@ -3,6 +3,7 @@
 #include <memory>
 #include "BetNetworkHelper.h"
 #include "BetGameDatabase.h"
+#include "Network/WebsocketClientController.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/path_service.h"
@@ -15,7 +16,7 @@ namespace
 }
 
 BetNetworkHelper::BetNetworkHelper()
-    : tcp_manager_(new TcpClientController)
+    : websocket_client_controller_(new WebsocketClientController)
     , worker_thread_(new base::Thread("worker_thread"))
     , database_(new BetGameDatabase)
     , retry_break_seconds_(1)
@@ -59,11 +60,11 @@ bool BetNetworkHelper::Login(const std::string& account, const std::string& pass
     CurlWrapper::CurlInit();
     worker_thread_->Start();
     user_.reset(new User);
-    if (!tcp_manager_->Initialize())
+    if (!websocket_client_controller_->Initialize())
         return false;
 
     user_->SetRoomServerIp("114.54.2.204");
-    user_->SetTcpManager(tcp_manager_.get());
+    user_->SetWebsocketClientController(websocket_client_controller_.get());
     std::string errmsg;
     if (!user_->Login(account, password, "", &errmsg))
     {
