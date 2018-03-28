@@ -60,7 +60,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir);$(BOOST_DIR)\lib32-msvc-12.0</AdditionalLibraryDirectories>
       <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;libevent.lib;Wldap32.lib</AdditionalDependencies>
     </Link>
     <Midl>
@@ -89,7 +89,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir);$(BOOST_DIR)\lib32-msvc-12.0</AdditionalLibraryDirectories>
       <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib;libevent.lib</AdditionalDependencies>
     </Link>
     <Midl>

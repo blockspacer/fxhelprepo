@@ -80,7 +80,6 @@ private:
     void NotifyMessage(const std::wstring& message);
     void RoomProgress(uint32 current, uint32 all);
     void FoundResult(uint32 user_id, uint32 room_id);
-    void LoginResult(bool result, uint32 server_time, const std::string& errormsg);
     void RangeSearchResult(uint32 roomid, const SingerInfo& singer_info,
         uint32 status, RangSearchErrorCode error);
 
@@ -113,4 +112,6 @@ private:
 
     CEdit m_edit_min_star_level;
 
+public:
+    afx_msg void OnBnClickedBtnGoodVoice();
 };

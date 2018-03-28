@@ -795,12 +795,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\lib\</OutDir>
     <IntDir>$(SolutionDir)$(Configuration)\obj\$(ProjectName)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\lib\</OutDir>
     <IntDir>$(SolutionDir)$(Configuration)\obj\$(ProjectName)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>

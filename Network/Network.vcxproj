@@ -44,11 +44,13 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(BOOST_DIR);$(SolutionDir)websocketpp;$(IncludePath)</IncludePath>
     <LibraryPath>$(BOOST_DIR)\lib64-msvc-12.0;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\lib\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(BOOST_DIR);$(SolutionDir)websocketpp;$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);</IncludePath>
     <LibraryPath>$(BOOST_DIR);$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);</LibraryPath>
+    <OutDir>$(SolutionDir)$(Configuration)\lib\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

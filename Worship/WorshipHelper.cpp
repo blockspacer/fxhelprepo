@@ -6,7 +6,7 @@
 #include "Network/easy_http_impl.h"
 #include "Network/EncodeHelper.h"
 #include "AuthorityHelper.h"
-#include "Network/TcpClientController.h"
+#include "Network/WebsocketClientController.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
 #include "third_party/chromium/base/bind.h"
@@ -15,7 +15,7 @@ WorshipHelper::WorshipHelper()
     :curl_wrapper_(new CurlWrapper)
     , easy_http_impl_(new EasyHttpImpl)
     , worker_thread_(new base::Thread("WorshipHelper"))
-    , tcp_manager_(new TcpClientController)
+    , websocket_client_controller_(new WebsocketClientController)
     , user_(nullptr) //必须先登录再让操作
 {
 }
@@ -34,7 +34,7 @@ bool WorshipHelper::Initialize()
     authority_helper.GetTrackerAuthorityDisplayInfo(
         *worship_authority_.get(), &authority_msg_);
 
-    tcp_manager_->Initialize();
+    websocket_client_controller_->Initialize();
 
     worker_thread_->Start();   
     return true;
@@ -42,7 +42,7 @@ bool WorshipHelper::Initialize()
 
 void WorshipHelper::Finalize()
 {
-    tcp_manager_->Finalize();
+    websocket_client_controller_->Finalize();
     easy_http_impl_->ShutdownService();
     worker_thread_->Stop();
     CurlWrapper::CurlCleanup();
@@ -376,7 +376,7 @@ void WorshipHelper::DoEnterRoom(uint32 roomid)
     user_->SetNormalNotify(std::bind(&WorshipHelper::NormalNotify, this,
         std::placeholders::_1, std::placeholders::_2));
     user_->SetRoomServerIp("chat1.fanxing.kugou.com");
-    user_->SetTcpManager(tcp_manager_.get());
+    user_->SetWebsocketClientController(websocket_client_controller_.get());
     roomid_ = roomid;
     uint32 singer_clanid = 0;
     user_->EnterRoomFopOperation(roomid, &singer_clanid,

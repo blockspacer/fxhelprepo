@@ -10,7 +10,7 @@
 #include "Network/CurlWrapper.h"
 #include "Network/EncodeHelper.h"
 #include "Network/Network.h"
-#include "Network/TcpClientController.h"
+#include "Network/WebsocketClientController.h"
 #include "third_party/chromium/base/at_exit.h"
 #include "third_party/chromium/base/run_loop.h"
 #include "third_party/zlib/zlib.h"
@@ -20,7 +20,7 @@
 #include "third_party/chromium/base/command_line.h"
 #include "third_party/chromium/base/at_exit.h"
 
-extern void SingleUserSingleRoomTest(TcpClientController* tcp_manager);
+extern void SingleUserSingleRoomTest(WebsocketClientController* tcp_manager);
 void InitAppLog();
 int ZLibTest()
 {
@@ -69,9 +69,9 @@ int _tmain(int argc, _TCHAR* argv[])
     InitAppLog();
     NetworkInitialize();
 
-    //std::unique_ptr<TcpClientController> tcp_manager(new TcpClientController);
+    //std::unique_ptr<WebsocketClientController> tcp_manager(new WebsocketClientController);
     //tcp_manager->Initialize();
-    //SingleUserSingleRoomTest(tcp_manager.get());
+    //SingleUserSingleRoomTest(WebsocketClientController.get());
     //tcp_manager->Finalize();
     //ZLibTest();
     //UserTracker tracker;

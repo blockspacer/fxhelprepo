@@ -52,8 +52,6 @@ void CUserTrackerDlg::DoDataExchange(CDataExchange* pDX)
     CDialogEx::DoDataExchange(pDX);
     DDX_Control(pDX, IDC_EDIT_USER_ID, m_edit_target_fanxing_id);
     DDX_Control(pDX, IDC_LIST_MESSAGE, m_list_message);
-    DDX_Control(pDX, IDC_EDIT_ACCOUNT, m_edit_account);
-    DDX_Control(pDX, IDC_EDIT_PASSWORD, m_edit_password);
     DDX_Control(pDX, IDC_STATIC_ROOM_PROGRESS, m_static_room_progress);
     DDX_Control(pDX, IDC_PROGRESS1, m_progress1);
     DDX_Control(pDX, IDC_LIST_RESULT, m_list_result);
@@ -80,7 +78,6 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_MESSAGE(WM_USER_MSG, &CUserTrackerDlg::OnNotifyMessage)
     ON_MESSAGE(WM_USER_PROGRESS, &CUserTrackerDlg::OnRoomProgress)
     ON_MESSAGE(WM_USER_FOUND_RESULT, &CUserTrackerDlg::OnFoundResult)
-    ON_BN_CLICKED(IDC_BTN_LOGIN, &CUserTrackerDlg::OnBnClickedBtnLogin)
     ON_BN_CLICKED(IDC_BTN_CANCEL, &CUserTrackerDlg::OnBnClickedBtnCancel)
     ON_NOTIFY(NM_CLICK, IDC_LIST_RESULT, &CUserTrackerDlg::OnNMClickListResult)
     ON_NOTIFY(HDN_BEGINTRACK, 0, &CUserTrackerDlg::OnHdnBegintrackListResult)
@@ -92,6 +89,7 @@ BEGIN_MESSAGE_MAP(CUserTrackerDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_IMPORT_ROOMS, &CUserTrackerDlg::OnBnClickedBtnImportRooms)
     ON_BN_CLICKED(IDC_BTN_EXPORT_ROOMS, &CUserTrackerDlg::OnBnClickedBtnExportRooms)
     ON_BN_CLICKED(IDC_BTN_PHONE_NO_CLAN, &CUserTrackerDlg::OnBnClickedBtnPhoneNoClan)
+    ON_BN_CLICKED(IDC_BTN_GOOD_VOICE, &CUserTrackerDlg::OnBnClickedBtnGoodVoice)
 END_MESSAGE_MAP()
 
 
@@ -356,32 +354,6 @@ LRESULT CUserTrackerDlg::OnFoundResult(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-void CUserTrackerDlg::OnBnClickedBtnLogin()
-{
-    CString cs_account;
-    CString cs_password;
-    m_edit_account.GetWindowText(cs_account);
-    m_edit_password.GetWindowText(cs_password);
-
-    std::string account = base::WideToUTF8(cs_account.GetBuffer());
-    std::string password = base::WideToUTF8(cs_password.GetBuffer());
-    std::string verifycode = "";
-
-    auto callback = base::Bind(&CUserTrackerDlg::LoginResult,
-        base::Unretained(this));
-    if (!tracker_helper_->LoginUser(account, password, verifycode, callback))
-    {
-        AfxMessageBox(L"登录失败");
-        return;
-    }
-}
-
-void CUserTrackerDlg::LoginResult(bool result, uint32 server_time, const std::string& errormsg)
-{
-    if (!result)
-        AfxMessageBox(L"登录失败");
-}
-
 void CUserTrackerDlg::OnBnClickedBtnCancel()
 {
     tracker_helper_->CancelCurrentOperation();
@@ -553,4 +525,9 @@ void CUserTrackerDlg::OnBnClickedBtnPhoneNoClan()
     {
         return;
     }
+}
+
+void CUserTrackerDlg::OnBnClickedBtnGoodVoice()
+{
+    // TODO:  在此添加控件通知处理程序代码
 }

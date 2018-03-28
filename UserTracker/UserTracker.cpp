@@ -86,10 +86,10 @@ BOOL CUserTrackerApp::InitInstance()
     UserTrackerHelper tracker_helper;
     tracker_helper.Initialize();
 
-    if (VMPVerifyProcedure(&tracker_helper))
-    {
+    //if (VMPVerifyProcedure(&tracker_helper))
+    //{
         TrackerProcedure(&tracker_helper);
-    }
+    //}
     tracker_helper.Finalize();
 
 	// 删除上面创建的 shell 管理器。

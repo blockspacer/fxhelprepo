@@ -209,6 +209,7 @@ LRESULT CSingerRankDlg::OnMessage(WPARAM wParam, LPARAM lParam)
 {
     scoped_ptr<std::wstring> message((std::wstring*)(lParam));
     m_list_info.InsertString(message_index++, message->c_str());
+    return 0;
 }
 
 LRESULT CSingerRankDlg::OnProgress(WPARAM wParam, LPARAM lParam)

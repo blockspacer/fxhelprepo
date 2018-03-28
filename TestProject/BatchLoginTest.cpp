@@ -8,12 +8,12 @@ void ConnectBreakCallback()
 {
 }
 
-void SingleUserSingleRoomTest(TcpClientController* tcp_manager)
+void SingleUserSingleRoomTest(WebsocketClientController* tcp_manager)
 {
     bool result = true;
     User user;
     std::string errormsg;
-    user.SetTcpManager(tcp_manager);
+    user.SetWebsocketClientController(tcp_manager);
     result &= user.Login("fanxingtest002", "1233211234567","", &errormsg);
     result &= user.EnterRoomFopAlive(1201793, base::Bind(&ConnectBreakCallback));
 
