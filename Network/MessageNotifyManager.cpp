@@ -178,14 +178,7 @@ bool CommandHandle_501(const Json::Value& jvalue,
     {
         // 两层connect
         Json::Value jvContent(Json::ValueType::objectValue);
-        Json::Value  out_content = jvalue.get("content", jvContent);
-        if (out_content.isNull())
-        {
-            assert(false);
-            return false;
-        }
-
-        Json::Value  content = out_content.get("content", jvContent);
+        Json::Value  content = jvalue.get("content", jvContent);
         if (content.isNull())
         {
             assert(false);
@@ -207,8 +200,8 @@ bool CommandHandle_501(const Json::Value& jvalue,
 
         *outmsg = base::WideToUTF8(L"聊天消息:") + chatmsg;
 
-		enterRoomUserInfo->roomid = GetInt32FromJsonValue(jvalue, "roomid");
-		enterRoomUserInfo->unixtime = GetInt32FromJsonValue(jvalue, "time");
+        enterRoomUserInfo->roomid = GetInt32FromJsonValue(jvalue, "roomid");
+        enterRoomUserInfo->unixtime = GetInt32FromJsonValue(jvalue, "time");
 		enterRoomUserInfo->nickname = sendername;
 		enterRoomUserInfo->richlevel = senderrichlevel;
 		enterRoomUserInfo->userid = senderid;
