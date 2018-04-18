@@ -672,6 +672,10 @@ void NetworkHelper::SetHandleChatUsers(bool handleall501)
 
 bool NetworkHelper::GetActionPrivilege(std::wstring* message)
 {
+#ifdef _DEBUG
+    return true;
+#endif
+
     // 三个值都是0，不正确
     if (!authority_->roomid && !authority_->userid && !authority_->clanid)
     {

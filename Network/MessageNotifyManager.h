@@ -102,7 +102,7 @@ public:
     //    const std::string& usertoken, 
     //    const base::Callback<void()>& conn_break_callback);
     //bool NewConnect8080(uint32 roomid, uint32 userid, const std::string& usertoken);
-    bool NewSendChatMessage(const std::string& nickname, uint32 richlevel,
+    bool SendChatMessage(const std::string& nickname, uint32 richlevel,
                          const std::string& message);
 
     bool NewSendChatMessageRobot(const RoomChatMessage& roomChatMessage);
@@ -112,10 +112,10 @@ public:
         const std::string& usertoken, const std::string& soctoken,
         const base::Callback<void()>& conn_break_callback);
 
-    bool SendMessage(const std::string& nickname, uint32 richlevel,
-        const std::string& message);
+
 
 private:
+    void DoSendMessage(const std::vector<uint8>& message);
 
     void DoSetNotify201(Notify201 notify201);
     void DoSetNotify501(Notify501 notify201);
@@ -123,7 +123,7 @@ private:
     void DoSetNotify620(Notify620 notify_620);
     void DoSetNormalNotify(NormalNotify normalNotify);
 
-    void Notify(const std::vector<char>& data);
+    void Notify(const std::vector<uint8>& data);
     std::vector<std::string> HandleMixPackage(const std::string& package);
 
     //// 使用新的高效的多路tcp请求分发模式

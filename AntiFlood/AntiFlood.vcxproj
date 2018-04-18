@@ -64,7 +64,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;libevent.lib;Wldap32.lib;libcurl.lib;ssleay32.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir);$(BOOST_DIR)\lib32-msvc-12.0</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir);$(BOOST_DIR)\lib32-msvc-12.0;"D:\local\boost_1_57_0\lib32-msvc\"</AdditionalLibraryDirectories>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>

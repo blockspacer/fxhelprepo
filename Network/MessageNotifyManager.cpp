@@ -176,8 +176,16 @@ bool CommandHandle_501(const Json::Value& jvalue,
     // 房间聊天消息
     try
     {
+        // 两层connect
         Json::Value jvContent(Json::ValueType::objectValue);
-        Json::Value  content = jvalue.get("content", jvContent);
+        Json::Value  out_content = jvalue.get("content", jvContent);
+        if (out_content.isNull())
+        {
+            assert(false);
+            return false;
+        }
+
+        Json::Value  content = out_content.get("content", jvContent);
         if (content.isNull())
         {
             assert(false);
@@ -185,17 +193,20 @@ bool CommandHandle_501(const Json::Value& jvalue,
         }
 
         Json::Value jvString("");
-        uint32 receiverid = GetInt32FromJsonValue(content, "receiverid");
+        uint32 receiverid = GetInt32FromJsonValue(content, "receiverid");    
+        uint32 receiverkugouid = GetInt32FromJsonValue(content, "receiverkugouid"); // 新增加
+        uint32 receiverrichlevel = GetInt32FromJsonValue(content, "receiverrichlevel"); // 新增加
+        std::string receivername = content.get("receivername", jvString).asString();
+
         uint32 senderid = GetInt32FromJsonValue(content, "senderid");
         uint32 senderkugouid = GetInt32FromJsonValue(content, "senderkugouid");
 		uint32 senderrichlevel = GetInt32FromJsonValue(content, "senderrichlevel");
+        std::string sendername = content.get("sendername", jvString).asString();
         uint32 issecrect = GetInt32FromJsonValue(content, "issecrect");//是否私聊
         std::string chatmsg = content.get("chatmsg", jvString).asString();
-        std::string sendername = content.get("sendername", jvString).asString();
-        std::string receivername = content.get("receivername", jvString).asString();
+
         *outmsg = base::WideToUTF8(L"聊天消息:") + chatmsg;
 
-		
 		enterRoomUserInfo->roomid = GetInt32FromJsonValue(jvalue, "roomid");
 		enterRoomUserInfo->unixtime = GetInt32FromJsonValue(jvalue, "time");
 		enterRoomUserInfo->nickname = sendername;
@@ -534,11 +545,6 @@ bool MessageNotifyManager::Connect(uint32 room_id, uint32 user_id,
     return true;
 }
 
-bool MessageNotifyManager::SendMessage(const std::string& nickname, uint32 richlevel,
-    const std::string& message)
-{
-    return false;
-}
 //"cmd" : 601,
 //"roomid" : "1096718",
 //"senderid" : "22202340",
@@ -560,7 +566,7 @@ bool MessageNotifyManager::SendMessage(const std::string& nickname, uint32 richl
 //        "giftid" : "41",
 //        "num" : "1",
 //        "type" : 2,
-void MessageNotifyManager::Notify(const std::vector<char>& data)
+void MessageNotifyManager::Notify(const std::vector<uint8>& data)
 {
     // 需要处理粘包问题
     std::string datastr(data.begin(), data.end());
@@ -578,154 +584,154 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
         // 暂时没有必要检测status的值
         Json::Value jvCmd(Json::ValueType::intValue);
         uint32 cmd = GetInt32FromJsonValue(rootdata, "cmd");
-        uint32 roomid = GetInt32FromJsonValue(rootdata, "roomid");
-        uint32 senderid = GetInt32FromJsonValue(rootdata, "senderid");
+        //uint32 roomid = GetInt32FromJsonValue(rootdata, "roomid");
+        //uint32 senderid = GetInt32FromJsonValue(rootdata, "senderid");
             
         uint32 time = GetInt32FromJsonValue(rootdata, "time");
         std::string str_display_time = MakeFormatTimeStringFromUnixTime(time);
-        if (cmd == 601)
-        {
-            Json::Value jvContent(Json::ValueType::objectValue);
-            Json::Value  content = rootdata.get("content", jvContent);
-            if (!content.isNull())
-            {
-                RoomGiftInfo601 roomgiftinfo;
-                roomgiftinfo.time = time;
-                roomgiftinfo.roomid = roomid;
-                roomgiftinfo.senderid = GetInt32FromJsonValue(content, "senderid");
-                roomgiftinfo.sendername = content.get("sendername", "").asString();
-                roomgiftinfo.receiverid = GetInt32FromJsonValue(content, "receiverid");
-                roomgiftinfo.receivername = content.get("receivername", "").asString();
-                roomgiftinfo.giftid = GetInt32FromJsonValue(content, "giftid");
-                roomgiftinfo.giftname = content.get("giftname", "").asString();
-                roomgiftinfo.gitfnumber = GetInt32FromJsonValue(content, "num");
-                roomgiftinfo.tips = content.get("tip", "").asString();
-                roomgiftinfo.happyobj = GetInt32FromJsonValue(content, "happyobj");
-                roomgiftinfo.happytype = GetInt32FromJsonValue(content, "happytype");
-                roomgiftinfo.token = content.get("token", "").asString();
-                if (notify601_)
-                {
-                    notify601_(roomgiftinfo);
-                }                
-            }
-        }
-        else if (cmd == 201)
-        {
-            EnterRoomUserInfo enterRoomUserInfo;
-            Json::Value jvContent(Json::ValueType::objectValue);
-            enterRoomUserInfo.roomid = GetInt32FromJsonValue(rootdata,"roomid");
-            enterRoomUserInfo.unixtime = GetInt32FromJsonValue(rootdata, "time");
-            std::string extentinfo = rootdata.get("ext", "").asString();
-            std::string decodeext = UrlDecode(extentinfo);
+    //    if (cmd == 601)
+    //    {
+    //        Json::Value jvContent(Json::ValueType::objectValue);
+    //        Json::Value  content = rootdata.get("content", jvContent);
+    //        if (!content.isNull())
+    //        {
+    //            RoomGiftInfo601 roomgiftinfo;
+    //            roomgiftinfo.time = time;
+    //            roomgiftinfo.roomid = roomid;
+    //            roomgiftinfo.senderid = GetInt32FromJsonValue(content, "senderid");
+    //            roomgiftinfo.sendername = content.get("sendername", "").asString();
+    //            roomgiftinfo.receiverid = GetInt32FromJsonValue(content, "receiverid");
+    //            roomgiftinfo.receivername = content.get("receivername", "").asString();
+    //            roomgiftinfo.giftid = GetInt32FromJsonValue(content, "giftid");
+    //            roomgiftinfo.giftname = content.get("giftname", "").asString();
+    //            roomgiftinfo.gitfnumber = GetInt32FromJsonValue(content, "num");
+    //            roomgiftinfo.tips = content.get("tip", "").asString();
+    //            roomgiftinfo.happyobj = GetInt32FromJsonValue(content, "happyobj");
+    //            roomgiftinfo.happytype = GetInt32FromJsonValue(content, "happytype");
+    //            roomgiftinfo.token = content.get("token", "").asString();
+    //            if (notify601_)
+    //            {
+    //                notify601_(roomgiftinfo);
+    //            }                
+    //        }
+    //    }
+    //    else if (cmd == 201)
+    //    {
+    //        EnterRoomUserInfo enterRoomUserInfo;
+    //        Json::Value jvContent(Json::ValueType::objectValue);
+    //        enterRoomUserInfo.roomid = GetInt32FromJsonValue(rootdata,"roomid");
+    //        enterRoomUserInfo.unixtime = GetInt32FromJsonValue(rootdata, "time");
+    //        std::string extentinfo = rootdata.get("ext", "").asString();
+    //        std::string decodeext = UrlDecode(extentinfo);
 
-            Json::Value jvDefault;
-            Json::Value extdata(Json::objectValue);
-            if (reader.parse(decodeext, extdata, false))
-            {
-				auto extdata_members = extdata.getMemberNames();
-				for (const auto& extdata_member : extdata_members)
-				{
-					if (extdata_member.compare("stli") == 0)
-					{
-						Json::Value stli = extdata.get(extdata_member, jvDefault);
-						auto stli_members = stli.getMemberNames();
-						for (const auto& member : stli_members)
-						{
-							if (member.compare("isAdmin") == 0)
-							{
-								uint32 isAdmin = stli.get(member, 0).asInt();
-								enterRoomUserInfo.isAdmin = !!isAdmin;
-							}
-						}
-					}
-					else if (extdata_member.compare("vipData") == 0)
-					{
-						Json::Value vipData = extdata.get(extdata_member, jvDefault);
-						auto vipData_members = vipData.getMemberNames();
-						for (const auto& member : vipData_members)
-						{
-							if (member.compare("v") == 0)
-							{
-								uint32 vip_v = GetInt32FromJsonValue(vipData, member);
-								enterRoomUserInfo.vip_v = (vip_v == 2); // 2是白金vip, 进入房间是隐身的
-							}
-                            else if (member.compare("c") == 0)
-                            {
-                                uint32 visable = GetInt32FromJsonValue(vipData, member);
-                                enterRoomUserInfo.visable = (visable == 0); // 0是不开隐身的，是可见的；1是开隐身的，是不可见的。
-                            }
-						}// for vipData_members
-					}
-				}// for extdata_members
-            }//if reader
+    //        Json::Value jvDefault;
+    //        Json::Value extdata(Json::objectValue);
+    //        if (reader.parse(decodeext, extdata, false))
+    //        {
+				//auto extdata_members = extdata.getMemberNames();
+				//for (const auto& extdata_member : extdata_members)
+				//{
+				//	if (extdata_member.compare("stli") == 0)
+				//	{
+				//		Json::Value stli = extdata.get(extdata_member, jvDefault);
+				//		auto stli_members = stli.getMemberNames();
+				//		for (const auto& member : stli_members)
+				//		{
+				//			if (member.compare("isAdmin") == 0)
+				//			{
+				//				uint32 isAdmin = stli.get(member, 0).asInt();
+				//				enterRoomUserInfo.isAdmin = !!isAdmin;
+				//			}
+				//		}
+				//	}
+				//	else if (extdata_member.compare("vipData") == 0)
+				//	{
+				//		Json::Value vipData = extdata.get(extdata_member, jvDefault);
+				//		auto vipData_members = vipData.getMemberNames();
+				//		for (const auto& member : vipData_members)
+				//		{
+				//			if (member.compare("v") == 0)
+				//			{
+				//				uint32 vip_v = GetInt32FromJsonValue(vipData, member);
+				//				enterRoomUserInfo.vip_v = (vip_v == 2); // 2是白金vip, 进入房间是隐身的
+				//			}
+    //                        else if (member.compare("c") == 0)
+    //                        {
+    //                            uint32 visable = GetInt32FromJsonValue(vipData, member);
+    //                            enterRoomUserInfo.visable = (visable == 0); // 0是不开隐身的，是可见的；1是开隐身的，是不可见的。
+    //                        }
+				//		}// for vipData_members
+				//	}
+				//}// for extdata_members
+    //        }//if reader
 
-            auto jvArray = rootdata.get("userGuard", jvDefault);
-            if (jvArray.isArray())
-            {
-                for (auto guard : jvArray)
-                {
-                    assert(false && L"参考一下这个守护的数据");
-                }
-            }
+    //        auto jvArray = rootdata.get("userGuard", jvDefault);
+    //        if (jvArray.isArray())
+    //        {
+    //            for (auto guard : jvArray)
+    //            {
+    //                assert(false && L"参考一下这个守护的数据");
+    //            }
+    //        }
 
-            Json::Value  content = rootdata.get("content", jvContent);
-                
-            if (!content.isNull())
-            {
-                Json::Value jvString("");
-                enterRoomUserInfo.nickname = content.get("nickname", jvString).asString();
-                enterRoomUserInfo.richlevel = GetInt32FromJsonValue(content, "richlevel");
-                enterRoomUserInfo.userid = GetInt32FromJsonValue(content, "userid");
-            }
+    //        Json::Value  content = rootdata.get("content", jvContent);
+    //            
+    //        if (!content.isNull())
+    //        {
+    //            Json::Value jvString("");
+    //            enterRoomUserInfo.nickname = content.get("nickname", jvString).asString();
+    //            enterRoomUserInfo.richlevel = GetInt32FromJsonValue(content, "richlevel");
+    //            enterRoomUserInfo.userid = GetInt32FromJsonValue(content, "userid");
+    //        }
 
-            if (notify201_)
-            {
-                notify201_(enterRoomUserInfo);
-            }
-        }
-        else if (cmd==620)
-        {
-            std::vector<BetShowData> bet_show_datas;
-            BetResult bet_result;
-            bet_result.time = time;
-            if (CommandHandle_620(rootdata, &bet_show_datas, &bet_result))
-            {
-                if (!bet_show_datas.empty())
-                {
-                    if (bet_show_datas_.empty())
-                    {
-                        bet_show_datas_ = bet_show_datas;
-                    }
-                    else
-                    {
-                        auto show_data = bet_show_datas.begin();
-                        auto show_data_ = bet_show_datas_.begin();
-                        for (; (show_data != bet_show_datas.end()) 
-                            && (show_data_ != bet_show_datas_.end());
-                            show_data++, show_data_++)
-                        {
-                            if ((show_data->bet_gid != show_data_->bet_gid)
-                                || (show_data->odds != show_data_->odds))
-                            {
-                                assert(false);
-                                LOG(ERROR) << L"两次通知的开奖数据不一致，有问题";
-                                break;
-                            }
-                        }
-                    }
-                    //LOG(INFO) << L"tulong +++++++++++++++++++++++++++++++++++++++++++++";
-                }
-                else // 开奖结果数据
-                {
-                    LOG(INFO) << L"tulong result = " + base::UintToString16(bet_result.result) +
-                        L" random = " + base::UintToString16(bet_result.random);
-                }
-                if (notify_620_)
-                {
-                    notify_620_(bet_result);
-                }
-            }
-        }
+    //        if (notify201_)
+    //        {
+    //            notify201_(enterRoomUserInfo);
+    //        }
+    //    }
+    //    else if (cmd==620)
+    //    {
+    //        std::vector<BetShowData> bet_show_datas;
+    //        BetResult bet_result;
+    //        bet_result.time = time;
+    //        if (CommandHandle_620(rootdata, &bet_show_datas, &bet_result))
+    //        {
+    //            if (!bet_show_datas.empty())
+    //            {
+    //                if (bet_show_datas_.empty())
+    //                {
+    //                    bet_show_datas_ = bet_show_datas;
+    //                }
+    //                else
+    //                {
+    //                    auto show_data = bet_show_datas.begin();
+    //                    auto show_data_ = bet_show_datas_.begin();
+    //                    for (; (show_data != bet_show_datas.end()) 
+    //                        && (show_data_ != bet_show_datas_.end());
+    //                        show_data++, show_data_++)
+    //                    {
+    //                        if ((show_data->bet_gid != show_data_->bet_gid)
+    //                            || (show_data->odds != show_data_->odds))
+    //                        {
+    //                            assert(false);
+    //                            LOG(ERROR) << L"两次通知的开奖数据不一致，有问题";
+    //                            break;
+    //                        }
+    //                    }
+    //                }
+    //                //LOG(INFO) << L"tulong +++++++++++++++++++++++++++++++++++++++++++++";
+    //            }
+    //            else // 开奖结果数据
+    //            {
+    //                LOG(INFO) << L"tulong result = " + base::UintToString16(bet_result.result) +
+    //                    L" random = " + base::UintToString16(bet_result.random);
+    //            }
+    //            if (notify_620_)
+    //            {
+    //                notify_620_(bet_result);
+    //            }
+    //        }
+    //    }
 
 		EnterRoomUserInfo enterRoomUserInfo;
         std::string outmsg;
@@ -734,10 +740,10 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
         case 100:
             break;
         case 201:
-            CommandHandle_201(rootdata, &outmsg);
+            //CommandHandle_201(rootdata, &outmsg);
             break;
         case 315:
-            CommandHandle_315(rootdata, &outmsg);
+            //CommandHandle_315(rootdata, &outmsg);
             break;
         case 501:
         {
@@ -750,18 +756,18 @@ void MessageNotifyManager::Notify(const std::vector<char>& data)
             break;
         }
         case 601:
-            CommandHandle_601(rootdata, &outmsg);
+            //CommandHandle_601(rootdata, &outmsg);
             break;
         case 602:
-            CommandHandle_602(rootdata, &outmsg);
-            {
-                std::wstring wstr_display_time = base::UTF8ToUTF16(str_display_time);
-                if (normalNotify_)
-                    normalNotify_(MessageLevel::MESSAGE_LEVEL_ONCE, wstr_display_time + L" 房间状态正常");
-            }
+            //CommandHandle_602(rootdata, &outmsg);
+            //{
+            //    std::wstring wstr_display_time = base::UTF8ToUTF16(str_display_time);
+            //    if (normalNotify_)
+            //        normalNotify_(MessageLevel::MESSAGE_LEVEL_ONCE, wstr_display_time + L" 房间状态正常");
+            //}
             break;
         case 606:
-            CommandHandle_606(rootdata, &outmsg);
+            //CommandHandle_606(rootdata, &outmsg);
             break;
         case 620:
             break;
@@ -1079,29 +1085,49 @@ std::vector<std::string> MessageNotifyManager::HandleMixPackage(const std::strin
 //        normalNotify_(MessageLevel::MESSAGE_LEVEL_ONCE, state);
 //}
 
-bool MessageNotifyManager::NewSendChatMessage(const std::string& nickname, uint32 richlevel,
+bool MessageNotifyManager::SendChatMessage(const std::string& nickname, uint32 richlevel,
                                               const std::string& message)
 {
-    Json::FastWriter writer;
-    Json::Value root(Json::objectValue);
-    root["cmd"] = 501;
-    root["nickname"] = nickname;
-    root["richlevel"] = base::UintToString(richlevel);
-    root["receiverid"] = 0;
-    root["receivername"] = "";
-    root["chatmsg"] = message;
-    root["issecrect"] = 0;
+    //Json::FastWriter writer;
+    //Json::Value root(Json::objectValue);
+    //root["cmd"] = 501;
+    ////root["nickname"] = nickname;
+    ////root["richlevel"] = base::UintToString(richlevel);
+    //root["receiverid"] = 0;
+    ////root["receivername"] = "";
+    //root["chatmsg"] = message;
+    //root["issecrect"] = 0;
+    //int64 sequenceid = 0;
+    //base::StringToInt64(GetNowTimeString(), &sequenceid);
+    //root["seq"] = double(sequenceid);
+    //root["v"] = 20171111;
 
-    std::string data = writer.write(root);
-    std::vector<char> msg;
+    //std::string data = writer.write(root);
+    std::string data = "{\"cmd\":501";
+    data += ",\"chatmsg\": \"" +message + "\"";
+    data += ",\"receiverid\":0";
+    data += ",\"issecrect\":0";
+    data += ",\"seq\":" + GetNowTimeString();
+    data += ",\"v\" : 20171111}";
+
+    std::vector<uint8> msg;
     msg.assign(data.begin(), data.end());
 
     std::wstring ws_message = base::UTF8ToWide(message);
     LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(ws_message, 936);
 
-    //return runner_->PostTask(FROM_HERE,
-    //    base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg));
+    runner_->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSendMessage,
+        base::Unretained(this), msg));
+
     return true;
+}
+
+void MessageNotifyManager::DoSendMessage(const std::vector<uint8>& message)
+{
+    websocket_client_controller_->Send(websocket_handle_, message,
+        std::bind(&MessageNotifyManager::DoSendDataCallback, this,
+        websocket_handle_, std::placeholders::_1));
 }
 
 bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomChatMessage)
@@ -1109,22 +1135,28 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
     Json::FastWriter writer;
     Json::Value root(Json::objectValue);
     root["cmd"] = 501;
-    root["nickname"] = roomChatMessage.sendername;
-    root["richlevel"] = base::UintToString(roomChatMessage.richlevel);
+    //root["nickname"] = roomChatMessage.sendername;
+    //root["richlevel"] = base::UintToString(roomChatMessage.richlevel);
     root["receiverid"] = roomChatMessage.receiverid;
-    root["receivername"] = roomChatMessage.receivername;
+    //root["receivername"] = roomChatMessage.receivername;
     root["chatmsg"] = roomChatMessage.chatmessage;
     root["issecrect"] = roomChatMessage.issecrect ? "1" : "0";
+    int64 sequenceid = 0;
+    base::StringToInt64(GetNowTimeString(), &sequenceid);
+    root["seq"] = double(sequenceid);;
+    root["v"] = 20171111;
 
     std::string data = writer.write(root);
-    std::vector<char> msg;
-    msg.assign(data.begin(), data.end());
+    std::vector<uint8> message;
+    message.assign(data.begin(), data.end());
 
-    std::wstring message = base::UTF8ToWide(roomChatMessage.chatmessage);
-    LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(message, 936);
+    std::wstring ws_message = base::UTF8ToWide(data);
+    LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(ws_message, 936);
 
-    //return runner_->PostTask(FROM_HERE,
-    //    base::Bind(&MessageNotifyManager::DoNewSendChatMessage, this, msg));
+    runner_->PostTask(FROM_HERE,
+        base::Bind(&MessageNotifyManager::DoSendMessage,
+        base::Unretained(this), message));
+
     return true;
 }
 //
@@ -1269,6 +1301,10 @@ void MessageNotifyManager::ClientDataCallback(
         runner_->PostTask(FROM_HERE,
             base::Bind(&MessageNotifyManager::StartSendHeartbeat, 
             base::Unretained(this)));
+    }
+    else
+    {
+        Notify(data);
     }
     message_count_++;
     LOG(INFO) << base::IntToString16(message_count_);

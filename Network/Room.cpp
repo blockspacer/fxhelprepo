@@ -575,6 +575,7 @@ bool Room::KickOutUser(KICK_TYPE kicktype, const std::string&cookies,
     jsonstr = UrlEncode(jsonstr);
 
     url += jsonstr;
+    url += "&_=" + GetNowTimeString();
 
     HttpRequest request;
     request.url = url;
@@ -629,6 +630,7 @@ bool Room::BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoo
     jsonstr = UrlEncode(jsonstr);
 
     url += jsonstr;
+    url += "&_=" + GetNowTimeString();
 
     HttpRequest request;
     request.url = url;
@@ -719,7 +721,7 @@ bool Room::SendChatMessage(const std::string& nickname, uint32 richlevel,
     const std::string& message)
 {
     //return messageNotifyManager_->SendChatMessage(nickname, richlevel, message);
-    return messageNotifyManager_->NewSendChatMessage(nickname, richlevel, message);
+    return messageNotifyManager_->SendChatMessage(nickname, richlevel, message);
 }
 
 bool Room::SendChatMessage(const RoomChatMessage& roomChatMessage)
