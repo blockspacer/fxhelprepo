@@ -208,4 +208,8 @@ private:
     CButton m_btn_thanks_setting;
     CEdit m_edit_retrive_gift_coin;
     CEdit m_edit_once_message;
+public:
+    afx_msg void OnBnClickedBtnReceiveid();
+private:
+    CEdit m_edit_receiveid;
 };

@@ -171,8 +171,8 @@ HANDLE_TYPE AntiStrategy::GetUserHandleType(uint32 rich_level,
     return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 }
 
-HANDLE_TYPE AntiStrategy::GetMessageHandleType(uint32 rich_level,
-    const std::string& message) const
+HANDLE_TYPE AntiStrategy::GetMessageHandleType(uint32 receiveid, 
+    uint32 rich_level, const std::string& message) const
 {
     if (rich_level >= rich_level_)// 指定等级以上的不处理
         return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
@@ -182,6 +182,12 @@ HANDLE_TYPE AntiStrategy::GetMessageHandleType(uint32 rich_level,
         if (message.find(it) != std::string::npos)
             return handletype_;
     }
+
+    uint32 id = receiveid;
+    auto it = receiveids_.find(id);
+    if (it != receiveids_.end())
+        return handletype_;
+
     return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 }
 
@@ -242,6 +248,32 @@ bool AntiStrategy::RemoveNickname(const std::string& vestname)
     vestnames_.erase(it);
     return true;  
 }
+
+bool AntiStrategy::AddReceiveId(const std::string& receiveid)
+{
+    uint32 id = 0;
+    base::StringToUint(receiveid, &id);
+    if (receiveids_.end() != receiveids_.find(id))
+    {
+        return false;
+    }
+    receiveids_.insert(id);
+    return true;
+    
+}
+
+bool AntiStrategy::RemoveReceiveId(const std::string& receiveid)
+{
+    uint32 id = 0;
+    base::StringToUint(receiveid, &id);
+    auto it = receiveids_.find(id);
+    if (it == receiveids_.end())
+        return false;
+
+    receiveids_.erase(it);
+    return true;
+}
+
 
 GiftStrategy::GiftStrategy()
 {
@@ -859,7 +891,8 @@ void NetworkHelper::TryHandle501Msg(const EnterRoomUserInfo& enterRoomUserInfo,
     if (!handleall501_) // 仅处理关键词
     {
         handletype = antiStrategy_->GetMessageHandleType(
-            enterRoomUserInfo.richlevel, roomChatMessage.chatmessage);
+            roomChatMessage.receiverid, enterRoomUserInfo.richlevel, 
+            roomChatMessage.chatmessage);
     }
     else
     {

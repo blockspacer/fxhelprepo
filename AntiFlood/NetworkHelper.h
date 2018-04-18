@@ -48,7 +48,7 @@ public:
     bool AntiStrategy::SaveAntiSetting() const;
 
     HANDLE_TYPE GetUserHandleType(uint32 rich_level, const std::string& nickname) const;
-    HANDLE_TYPE GetMessageHandleType(uint32 rich_level, const std::string& message) const;
+    HANDLE_TYPE GetMessageHandleType(uint32 receiveid, uint32 rich_level, const std::string& message) const;
     HANDLE_TYPE GetHandleType(uint32 rich_level) const;
     void SetHandleType(HANDLE_TYPE handletype);
     void SetHandleRichLevel(uint32 rich_level);
@@ -57,10 +57,13 @@ public:
     bool RemoveSensitive(const std::string& sensitive);
     bool AddNickname(const std::string& vestname);
     bool RemoveNickname(const std::string& vestname);
+    bool AddReceiveId(const std::string& receiveid);
+    bool RemoveReceiveId(const std::string& receiveid);
 
 private:
     std::set<std::string> vestnames_;
     std::set<std::string> sensitives_;
+    std::set<uint32> receiveids_;
     HANDLE_TYPE handletype_ = HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
     uint32 rich_level_ = 3;
 };

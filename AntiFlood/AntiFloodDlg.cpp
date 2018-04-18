@@ -38,7 +38,8 @@ namespace
     const wchar_t* vestcolumnlist[] = {
         L"类别",
         L"马甲",
-        L"发言特征"
+        L"发言特征",
+        L"接收者"
     };
 
     const wchar_t* userstrategylist[] = {
@@ -147,6 +148,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_BTN_THANKS_SETTING, m_btn_thanks_setting);
     DDX_Control(pDX, IDC_EDIT_RETRIVE_GIFT_COIN, m_edit_retrive_gift_coin);
     DDX_Control(pDX, IDC_EDIT_ONCE_MESSAGE, m_edit_once_message);
+    DDX_Control(pDX, IDC_EDIT_RECEIVEID, m_edit_receiveid);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -205,6 +207,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_THANKS_SETTING, &CAntiFloodDlg::OnBnClickedBtnThanksSetting)
     ON_BN_CLICKED(IDC_BTN_WELCOME_SETTING, &CAntiFloodDlg::OnBnClickedBtnWelcomeSetting)
     ON_BN_CLICKED(IDC_BTN_PHONE_CITY_RANK, &CAntiFloodDlg::OnBnClickedBtnPhoneCityRank)
+    ON_BN_CLICKED(IDC_BTN_RECEIVEID, &CAntiFloodDlg::OnBnClickedBtnReceiveid)
 END_MESSAGE_MAP()
 
 
@@ -289,7 +292,7 @@ BOOL CAntiFloodDlg::OnInitDialog()
     m_list_vest.SetExtendedStyle(dwStyle);
     index = 0;
     for (const auto& it : vestcolumnlist)
-        m_list_vest.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列   
+        m_list_vest.InsertColumn(index++, it, LVCFMT_LEFT, 80);//插入列   
     m_radiogroup = 1;
     std::vector<RowData> rowdatas;
     antiStrategy_->LoadAntiSetting(&rowdatas);
@@ -1790,4 +1793,35 @@ void CAntiFloodDlg::OnBnClickedBtnWelcomeSetting()
 
     std::wstring new_welcome = dlg.GetNormalWelcome();
     enterRoomStrategy_->SetNormalWelcomeContent(new_welcome);
+}
+
+
+void CAntiFloodDlg::OnBnClickedBtnReceiveid()
+{
+    CString receiveid;
+    m_edit_receiveid.GetWindowTextW(receiveid);
+    std::string utfsensitive = base::WideToUTF8(receiveid.GetBuffer());
+    if (!antiStrategy_->AddReceiveId(utfsensitive))
+        return; // 已经存在，不需要重新添加
+
+    int itemcount = m_list_vest.GetItemCount();
+    bool exist = false;
+    // 检测是否存在相同用户id
+    for (int index = 0; index < itemcount; index++)
+    {
+        CString text = m_list_vest.GetItemText(index, 3);
+        if (receiveid.CompareNoCase(text.GetBuffer()) == 0)
+        {
+            exist = true;
+            break;
+        }
+    }
+
+    if (!exist) // 如果不存在，需要插入新数据
+    {
+        int nitem = m_list_vest.InsertItem(itemcount + 1, L"接收者");
+        m_list_vest.SetItemText(nitem, 3, receiveid);
+        CString msg = receiveid + L"接收者被加入到自动处理列表中";
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg.GetBuffer());
+    }
 }
