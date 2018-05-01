@@ -423,7 +423,7 @@ bool NetworkHelper::Initialize()
     assert(!authority_->serverip.empty());
     user_->Initialize(workThread_->message_loop_proxy());
     //user_->SetRoomServerIp(authority_->serverip);
-    user_->SetRoomServerIp("106.39.193.69");
+    user_->SetRoomServerIp("119.146.204.168");
     //user_->SetTcpManager(tcp_client_controller_.get());
     websocket_client_controller_->Initialize();
     user_->SetWebsocketClientController(websocket_client_controller_.get());

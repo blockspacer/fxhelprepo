@@ -155,15 +155,16 @@ private:
 
     // 改为websocket模式
     void AddClientConnectCallback(
+		uint32 roomid, uint32 userid, const std::string& usertoken,
         bool result, WebsocketHandle handle);
+
+	void ConnectBreakCallback(const base::Callback<void()>& conn_break_callback, WebsocketHandle handle);
 
     void StartSendHeartbeat();
 
     void SendHeartbeat();
 
-    void ClientDataCallback(
-        uint32 roomid, uint32 userid, const std::string& usertoken, bool result,
-        const std::vector<uint8>& data);
+    void ClientDataCallback(bool result, const std::vector<uint8>& data);
 
     void DoSendDataCallback(WebsocketHandle handle, bool result);
 

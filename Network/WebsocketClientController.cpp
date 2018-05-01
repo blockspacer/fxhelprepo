@@ -26,10 +26,11 @@ void WebsocketClientController::Finalize()
 }
 
 bool WebsocketClientController::AddClient(
-    AddClientCallback addcallback, const IpProxy& ipproxy,
+	AddClientCallback addcallback, ConnectBreakCallback connect_callback, 
+	const IpProxy& ipproxy,
     const std::string& ip, uint16 port, ClientCallback callback)
 {
-    return Impl_->AddClient(addcallback, ipproxy, ip, port, callback);
+	return Impl_->AddClient(addcallback, connect_callback, ipproxy, ip, port, callback);
 }
 
 void WebsocketClientController::RemoveClient(WebsocketHandle handle)
