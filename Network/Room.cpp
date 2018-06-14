@@ -1073,10 +1073,10 @@ bool Room::GetStarGuard()
 bool Room::GetRoomConnectionInfo(const std::string& cookies)
 {
     assert(singerid_ && roomid_);
-    std::string url = "http://fx2.service.kugou.com//socket_scheduler/pc/v2/address.jsonp";
+    std::string url = "https://fx2.service.kugou.com/socket_scheduler/pc/v2/address.jsonp";
     HttpRequest request;
     request.url = url;
-    request.queries["jsonpcallback"] = "jsonpcallback_httpsfx2servicekugoucomsocket_schedulerpcv2addressjsonp";
+    request.queries["jsonpcallback"] = "jsonphttpsfx2servicekugoucomsocketschedulerpcv2addressjsonpp0v700pv20171111rid1452108cid100at1011532572529522jsonpcallback";
     request.queries["_p"] = "0";
     request.queries["_v"] = "7.0.0";
     request.queries["pv"] = "20171111";
@@ -1085,8 +1085,9 @@ bool Room::GetRoomConnectionInfo(const std::string& cookies)
     request.queries["at"] = "101";
     request.queries["_"] = GetNowTimeString();
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_);
-    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_) + "?refer=605";
+	request.cookies = cookies;
+	if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
     HttpResponse response;

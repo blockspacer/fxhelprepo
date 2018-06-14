@@ -117,6 +117,7 @@ protected:
     afx_msg void OnHdnItemclickListUserStatus(NMHDR *pNMHDR, LRESULT *pResult);
     static int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
+    afx_msg void OnBnClickedBtnReceiveid();
 
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam);
@@ -128,8 +129,9 @@ private:
     void Notify(MessageLevel level, const std::wstring& message);
     void NotifyEnterRoom(const RowData& rowdata);
     void NotifyRetriveGiftCoin(uint32 coin);
-    bool LoginByRequest(const std::wstring& username, 
-        const std::wstring& password, const std::wstring& verifycode);
+	bool LoginByRequest(const std::wstring& username,
+		const std::wstring& password, const std::wstring& verifycode,
+		const std::wstring& cookie, bool use_cookie);
     bool RefreshVerifyCode();
     bool GetSelectViewers(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
     bool GetSelectBlacks(std::vector<EnterRoomUserInfo>* enterRoomUserInfos);
@@ -208,8 +210,7 @@ private:
     CButton m_btn_thanks_setting;
     CEdit m_edit_retrive_gift_coin;
     CEdit m_edit_once_message;
-public:
-    afx_msg void OnBnClickedBtnReceiveid();
-private:
     CEdit m_edit_receiveid;
+    CEdit m_edit_cookie;
+    CButton m_chk_use_cookie;
 };

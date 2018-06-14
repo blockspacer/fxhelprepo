@@ -31,6 +31,7 @@ struct cmd201package
     uint32 roomid;
     uint32 userid;
     std::string usertoken;
+	std::string soctoken;
 };
 // 这个数据包应该从http请求那边返回过来设置
 bool GetFirstPackage(const cmd201package& package, 
@@ -50,10 +51,10 @@ bool GetFirstPackage(const cmd201package& package,
     root["kugouid"] = package.userid;
     root["token"] = package.usertoken;
     root["appid"] = 1010;
-    root["referer"] = 0;
+    root["referer"] = 605;
     root["clientid"] = 100;
     root["v"] = 20171111;
-    root["soctoken"] = package.usertoken;
+	root["soctoken"] = package.soctoken;
 
     std::string data = writer.write(root);
     packagedata->assign(data.begin(), data.end());
@@ -593,7 +594,7 @@ bool MessageNotifyManager::Connect(uint32 room_id, uint32 user_id,
 	conn_break_callback_ = conn_break_callback;
 
     auto add_callback = std::bind(&MessageNotifyManager::AddClientConnectCallback,
-		this, room_id, user_id, usertoken, std::placeholders::_1, std::placeholders::_2);
+		this, room_id, user_id, usertoken, soctoken, std::placeholders::_1, std::placeholders::_2);
 
     auto data_callback = std::bind(&MessageNotifyManager::ClientDataCallback,
         this, std::placeholders::_1, std::placeholders::_2);
@@ -1248,6 +1249,7 @@ bool MessageNotifyManager::NewSendChatMessageRobot(const RoomChatMessage& roomCh
 
 void MessageNotifyManager::AddClientConnectCallback(
 	uint32 roomid, uint32 userid, const std::string& usertoken,
+	const std::string& soctoken,
     bool result, WebsocketHandle handle)
 {
     if (!result)
@@ -1262,7 +1264,7 @@ void MessageNotifyManager::AddClientConnectCallback(
 	{
 		std::vector<uint8> data_for_send;
 		cmd201package package = {
-			201, roomid, userid, usertoken };
+			201, roomid, userid, usertoken, soctoken };
 		GetFirstPackage(package, &data_for_send);
 
 		//std::string message = R"({"cmd":201,"roomid":1417487,"kugouid":615887139,"token":"3808e2cb686c5f3accb4dcd831b2048f7202d77efe0617b58e54e3dc8a8c70e1","appid":1010,"referer":0,"clientid":100,"v":20171111,"soctoken":"121252524f4993cb81342253d1f7e313352386ad29357db11867451"})";

@@ -155,7 +155,7 @@ private:
 
     // 改为websocket模式
     void AddClientConnectCallback(
-		uint32 roomid, uint32 userid, const std::string& usertoken,
+		uint32 roomid, uint32 userid, const std::string& usertoken, const std::string& soctoken,
         bool result, WebsocketHandle handle);
 
 	void ConnectBreakCallback(const base::Callback<void()>& conn_break_callback, WebsocketHandle handle);
