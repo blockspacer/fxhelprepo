@@ -1180,7 +1180,9 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     {
         messageNotifyManager_->SetIpProxy(ipproxy_);
     }
-    std::string soctoken = soctoken_;
+
+    //std::string soctoken = soctoken_;
+    std::string soctoken = "15ba55721fbed869e70ef6bd3b8d793701fc4ef9e0527dd5e0a";
     messageNotifyManager_->SetServerIp(server_ip_);
     //ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken, conn_break_callback);
     ret = messageNotifyManager_->Connect(roomid, userid, usertoken, soctoken, conn_break_callback);

@@ -51,7 +51,7 @@ bool GetFirstPackage(const cmd201package& package,
     root["kugouid"] = package.userid;
     root["token"] = package.usertoken;
     root["appid"] = 1010;
-    root["referer"] = 605;
+    root["referer"] = 0;
     root["clientid"] = 100;
     root["v"] = 20171111;
 	root["soctoken"] = package.soctoken;
