@@ -89,7 +89,7 @@ void Room::SetRoomServerIp(const std::string& serverip)
 {
     // 批量进房间的时候才不在每次进房去获取ip
     server_ip_ = serverip;
-    messageNotifyManager_->SetServerIp(serverip);
+    messageNotifyManager_->SetServerIp(serverip, port_);
 }
 
 //void Room::SetTcpManager(TcpClientController* tcpManager)
@@ -1133,8 +1133,34 @@ bool Room::GetRoomConnectionInfo(const std::string& cookies)
             {
                 return false;
             }
-            auto add = data.getMemberNames();
 
+            bool get_addr_port = false;
+            for (const auto& addr : addrslist)
+            {
+                auto addr_values = addr.getMemberNames();
+                for (const auto& addr_value : addr_values)
+                {
+                    if (addr_value.compare("host") == 0)
+                    {
+                        std::string host = addr.get(addr_value, "").asString();
+                        std::vector<std::string> vec_host_port = SplitString(host, ":");
+                        if (vec_host_port.size() != 2)
+                        {
+                            DCHECK(false);
+                            continue;
+                        }
+
+                        server_ip_ = vec_host_port.at(0);
+                        int port = 0;
+                        base::StringToInt(vec_host_port.at(1), &port);
+                        port_ = (uint16)port;
+                        get_addr_port = true;
+                        break;
+                    }
+                }
+                if (get_addr_port)
+                    break;                
+            }
         }
         else if (member.compare("age") == 0)
         {
@@ -1150,7 +1176,7 @@ bool Room::GetRoomConnectionInfo(const std::string& cookies)
         }
         else if (member.compare("soctoken") == 0)
         {
-            soctoken_ = data.get(member, 0).asString();
+            soctoken_ = data.get(member, "").asString();
         }
     }
     DCHECK(!soctoken_.empty());
@@ -1181,10 +1207,8 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
         messageNotifyManager_->SetIpProxy(ipproxy_);
     }
 
-    //std::string soctoken = soctoken_;
-    std::string soctoken = "15ba55721fbed869e70ef6bd3b8d793701fc4ef9e0527dd5e0a";
-    messageNotifyManager_->SetServerIp(server_ip_);
-    //ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken, conn_break_callback);
+    std::string soctoken = soctoken_;
+    messageNotifyManager_->SetServerIp(server_ip_, port_);
     ret = messageNotifyManager_->Connect(roomid, userid, usertoken, soctoken, conn_break_callback);
 
     assert(ret);

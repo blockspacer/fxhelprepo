@@ -87,7 +87,7 @@ public:
     bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
     void Finalize();
     void SetWebsockClientController(WebsocketClientController* controller);
-    void SetServerIp(const std::string& serverip);
+    void SetServerIp(const std::string& serverip, uint16 port);
     void SetIpProxy(const IpProxy& ipproxy);
 
     // 可动态改变的功能，都要转到工作线程去完成
@@ -172,6 +172,7 @@ private:
     scoped_refptr<base::TaskRunner> runner_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;
     std::string serverip_ = "192.168.0.1";
+    uint16 port_ = 0;
     IpProxy ipProxy_;
     std::string Packet_ = "";
     int position_ = 0;

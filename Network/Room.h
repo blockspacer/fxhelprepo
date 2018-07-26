@@ -24,7 +24,7 @@ class Room
 public:
     explicit Room(uint32 roomid);
     ~Room();
-    
+
     bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
     void Finalize();
 
@@ -41,7 +41,7 @@ public:
     }
 
     // 需要获得房间信息来做下一步操作的函数, 传出singer_clanid是为判断授权使用
-    bool EnterForOperation(const std::string& cookies, 
+    bool EnterForOperation(const std::string& cookies,
         const std::string& usertoken, uint32 userid, uint32* singer_clanid,
         const base::Callback<void()>& conn_break_callback);
 
@@ -61,17 +61,17 @@ public:
 
     // GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
     bool SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count,
-                  std::string* errormsg);
+        std::string* errormsg);
 
     bool SendStar(const std::string& cookies, uint32 roomid, uint32 count,
         std::string* errormsg);
 
-    bool RealSingLike(const std::string& cookies, 
+    bool RealSingLike(const std::string& cookies,
         uint32 user_kugou_id, const std::string& user_token,
         const std::wstring& song_name, std::string* errormsg);
 
     bool RobVotes(uint32* award_count, uint32* single_count,
-                  std::string* errormsg);
+        std::string* errormsg);
     // 这个函数是为了不建立房间连接而获取房间里观众列表使用，是为了追踪指定用户
     bool OpenRoomAndGetViewerList(const std::string& cookies,
         std::vector<EnterRoomUserInfo>* enterRoomUserInfoList);
@@ -86,7 +86,7 @@ public:
     bool GetConsumerList(const std::string& cookies,
         std::vector<ConsumerInfo>* consumer_infos);
 
-	bool KickOutUser(KICK_TYPE kicktype, const std::string& cookies,
+    bool KickOutUser(KICK_TYPE kicktype, const std::string& cookies,
         const EnterRoomUserInfo& enterRoomUserInfo);
 
     bool BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo);
@@ -123,7 +123,8 @@ private:
     std::shared_ptr<MessageNotifyManager> messageNotifyManager_;
     std::unique_ptr<CookiesHelper> cookiesHelper_;
 
-    std::string server_ip_;
+    std::string server_ip_ = "";
+    uint16 port_ = 0;
     std::string soctoken_;// 使用websocket进入房间的协议里面需要这个参数
 };
 

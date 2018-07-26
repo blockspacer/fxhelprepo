@@ -276,6 +276,7 @@ BOOL CAntiFloodDlg::OnInitDialog()
     std::wstring w_cookie;
     if (config.GetCookie(&w_cookie))
     {
+        SetDlgItemText(IDC_EDIT_COOKIE, w_cookie.c_str());
     }
     
     bool remember = config.GetRemember();

@@ -521,9 +521,10 @@ void MessageNotifyManager::SetWebsockClientController(
     websocket_client_controller_ = controller;
 }
 
-void MessageNotifyManager::SetServerIp(const std::string& serverip)
+void MessageNotifyManager::SetServerIp(const std::string& serverip, uint16 port)
 {
     serverip_ = serverip;
+    port_ = port;
 }
 
 void MessageNotifyManager::SetIpProxy(const IpProxy& ipproxy)
@@ -614,7 +615,7 @@ bool MessageNotifyManager::Connect(uint32 room_id, uint32 user_id,
 	auto break_callback = std::bind(&MessageNotifyManager::ConnectBreakCallback,
 		this, conn_break_callback, std::placeholders::_1);
 
-	websocket_client_controller_->AddClient(add_callback, break_callback, ipProxy_, serverip_, 1315, data_callback);
+    websocket_client_controller_->AddClient(add_callback, break_callback, ipProxy_, serverip_, port_, data_callback);
 
     return true;
 }
