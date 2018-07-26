@@ -245,7 +245,19 @@ bool CommandHandle_501(const Json::Value& jvalue,
     {
         // 两层connect
         Json::Value jvContent(Json::ValueType::objectValue);
-        Json::Value  content = jvalue.get("content", jvContent);
+        Json::Value  outside_content = jvalue.get("content", jvContent);
+        if (outside_content.isNull())
+        {
+            assert(false);
+            return false;
+        }
+
+        uint32 roomid = GetInt32FromJsonValue(outside_content, "roomid");
+        uint32 time = GetInt32FromJsonValue(outside_content, "time");
+
+        // 两层connect
+        Json::Value default_content(Json::ValueType::objectValue);
+        Json::Value  content = outside_content.get("content", default_content);
         if (content.isNull())
         {
             assert(false);
@@ -267,13 +279,13 @@ bool CommandHandle_501(const Json::Value& jvalue,
 
         *outmsg = base::WideToUTF8(L"聊天消息:") + chatmsg;
 
-        enterRoomUserInfo->roomid = GetInt32FromJsonValue(jvalue, "roomid");
-        enterRoomUserInfo->unixtime = GetInt32FromJsonValue(jvalue, "time");
+        enterRoomUserInfo->roomid = roomid;
+        enterRoomUserInfo->unixtime = time;
 		enterRoomUserInfo->nickname = sendername;
 		enterRoomUserInfo->richlevel = senderrichlevel;
 		enterRoomUserInfo->userid = senderid;
 
-        roomChatMessage->roomid = GetInt32FromJsonValue(jvalue, "roomid");
+        roomChatMessage->roomid = roomid;
         roomChatMessage->senderid = senderid;
         roomChatMessage->sendername = sendername;
         roomChatMessage->receiverid = receiverid;
