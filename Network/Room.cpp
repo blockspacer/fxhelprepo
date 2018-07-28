@@ -89,7 +89,7 @@ void Room::SetRoomServerIp(const std::string& serverip)
 {
     // 批量进房间的时候才不在每次进房去获取ip
     server_ip_ = serverip;
-    messageNotifyManager_->SetServerIp(serverip);
+    messageNotifyManager_->SetServerIp(serverip, port_);
 }
 
 //void Room::SetTcpManager(TcpClientController* tcpManager)
@@ -1073,10 +1073,10 @@ bool Room::GetStarGuard()
 bool Room::GetRoomConnectionInfo(const std::string& cookies)
 {
     assert(singerid_ && roomid_);
-    std::string url = "http://fx2.service.kugou.com//socket_scheduler/pc/v2/address.jsonp";
+    std::string url = "https://fx2.service.kugou.com/socket_scheduler/pc/v2/address.jsonp";
     HttpRequest request;
     request.url = url;
-    request.queries["jsonpcallback"] = "jsonpcallback_httpsfx2servicekugoucomsocket_schedulerpcv2addressjsonp";
+    request.queries["jsonpcallback"] = "jsonphttpsfx2servicekugoucomsocketschedulerpcv2addressjsonpp0v700pv20171111rid1452108cid100at1011532572529522jsonpcallback";
     request.queries["_p"] = "0";
     request.queries["_v"] = "7.0.0";
     request.queries["pv"] = "20171111";
@@ -1085,8 +1085,9 @@ bool Room::GetRoomConnectionInfo(const std::string& cookies)
     request.queries["at"] = "101";
     request.queries["_"] = GetNowTimeString();
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_);
-    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+    request.referer = "http://fanxing.kugou.com/" + base::IntToString(roomid_) + "?refer=605";
+	request.cookies = cookies;
+	if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
 
     HttpResponse response;
@@ -1132,8 +1133,34 @@ bool Room::GetRoomConnectionInfo(const std::string& cookies)
             {
                 return false;
             }
-            auto add = data.getMemberNames();
 
+            bool get_addr_port = false;
+            for (const auto& addr : addrslist)
+            {
+                auto addr_values = addr.getMemberNames();
+                for (const auto& addr_value : addr_values)
+                {
+                    if (addr_value.compare("host") == 0)
+                    {
+                        std::string host = addr.get(addr_value, "").asString();
+                        std::vector<std::string> vec_host_port = SplitString(host, ":");
+                        if (vec_host_port.size() != 2)
+                        {
+                            DCHECK(false);
+                            continue;
+                        }
+
+                        server_ip_ = vec_host_port.at(0);
+                        int port = 0;
+                        base::StringToInt(vec_host_port.at(1), &port);
+                        port_ = (uint16)port;
+                        get_addr_port = true;
+                        break;
+                    }
+                }
+                if (get_addr_port)
+                    break;                
+            }
         }
         else if (member.compare("age") == 0)
         {
@@ -1149,7 +1176,7 @@ bool Room::GetRoomConnectionInfo(const std::string& cookies)
         }
         else if (member.compare("soctoken") == 0)
         {
-            soctoken_ = data.get(member, 0).asString();
+            soctoken_ = data.get(member, "").asString();
         }
     }
     DCHECK(!soctoken_.empty());
@@ -1179,9 +1206,9 @@ bool Room::ConnectToNotifyServer_(uint32 roomid, uint32 userid,
     {
         messageNotifyManager_->SetIpProxy(ipproxy_);
     }
+
     std::string soctoken = soctoken_;
-    messageNotifyManager_->SetServerIp(server_ip_);
-    //ret = messageNotifyManager_->NewConnect843(roomid, userid, usertoken, conn_break_callback);
+    messageNotifyManager_->SetServerIp(server_ip_, port_);
     ret = messageNotifyManager_->Connect(roomid, userid, usertoken, soctoken, conn_break_callback);
 
     assert(ret);

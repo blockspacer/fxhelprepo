@@ -149,6 +149,8 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_RETRIVE_GIFT_COIN, m_edit_retrive_gift_coin);
     DDX_Control(pDX, IDC_EDIT_ONCE_MESSAGE, m_edit_once_message);
     DDX_Control(pDX, IDC_EDIT_RECEIVEID, m_edit_receiveid);
+    DDX_Control(pDX, IDC_EDIT_COOKIE, m_edit_cookie);
+    DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -271,6 +273,12 @@ BOOL CAntiFloodDlg::OnInitDialog()
 
     // 初始化保存数据
     Config config;
+    std::wstring w_cookie;
+    if (config.GetCookie(&w_cookie))
+    {
+        SetDlgItemText(IDC_EDIT_COOKIE, w_cookie.c_str());
+    }
+    
     bool remember = config.GetRemember();
     if (remember)
     {
@@ -473,9 +481,13 @@ void CAntiFloodDlg::OnBnClickedButtonLogin()
     m_edit_verifycode.GetWindowTextW(verifycode);
     bool remember = !!m_check_remember.GetCheck();
 
+    CString cookie;
+    GetDlgItemText(IDC_EDIT_COOKIE, cookie);
+    bool use_cookie = !!m_chk_use_cookie.GetCheck();
+
     // 测试通过的curl登录方式
-    bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer(),
-        verifycode.GetBuffer());
+    bool result = LoginByRequest(username.GetBuffer(), password.GetBuffer(), 
+        verifycode.GetBuffer(), cookie.GetBuffer(), use_cookie);
     std::wstring message = std::wstring(L"登录 ") + (result ? L"成功" : L"失败");
     if (result)
     {
@@ -485,6 +497,11 @@ void CAntiFloodDlg::OnBnClickedButtonLogin()
 
         Config config;
         config.SaveUserInfo(username.GetBuffer(), password.GetBuffer(), remember);
+        config.SaveCookie(cookie.GetBuffer());
+    }
+    else
+    {
+
     }
     
     Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, message);
@@ -629,7 +646,8 @@ void CAntiFloodDlg::NotifyRetriveGiftCoin(uint32 coin)
 }
 
 bool CAntiFloodDlg::LoginByRequest(const std::wstring& username, 
-    const std::wstring& password, const std::wstring& verifycode)
+    const std::wstring& password, const std::wstring& verifycode,
+    const std::wstring& cookie, bool use_cookie)
 {
     if (username_ != username)
     {
@@ -651,8 +669,14 @@ bool CAntiFloodDlg::LoginByRequest(const std::wstring& username,
   
     std::string errormsg;
     //bool result = network_->Login(username, password, verifycode, &errormsg);
-    std::string cookie = R"(KuGoo=KugooID=691794502&KugooPwd=93AA5BD73B8435C27EFBF23975CA22EB&NickName=%u73af%u5b87%u4f20%u5a92&Pic=http://imge.kugou.com/kugouicon/165/20100101/20100101192931478054.jpg&RegState=1&RegFrom=&t=25f913cdb8cbd492aef4c4bb33e199d117e49d02308b73657f41b71c0d112043&a_id=1010&ct=1524061959&UserName=%u0066%u0061%u006e%u0078%u0069%u006e%u0067%u0074%u0065%u0073%u0074%u0030%u0030%u0033)";
-    bool result = network_->LoginWithCookies(cookie, &errormsg);
+
+    if (!use_cookie)
+        return false;
+
+    // 因为目前没绕过验证码，只能使用cookie登录的形式
+    std::string cookiess = base::WideToUTF8(cookie);
+    bool result = network_->LoginWithCookies(cookiess, &errormsg);
+
 
     std::wstring message = username + L" 登录";
     if (!result)

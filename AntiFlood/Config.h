@@ -9,6 +9,9 @@ public:
     bool GetPassword(std::wstring* password) const;
     bool GetRoomid(std::wstring* roomid) const;
 
+	bool SaveCookie(const std::wstring& cookie);
+	bool GetCookie(std::wstring* cookie) const;
+
     bool SaveUserInfo(const std::wstring& username, const std::wstring& password,
         bool remember) const;
     bool SaveRoomId(const std::wstring& roomid) const;

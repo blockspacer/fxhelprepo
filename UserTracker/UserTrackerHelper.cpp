@@ -3,6 +3,8 @@
 #include "UserTrackerHelper.h"
 #include "SingerInfo.h"
 
+#include "CommonTaskManager.h"
+
 #include "Network/User.h"
 #include "Network/CurlWrapper.h"
 #include "Network/easy_http_impl.h"
@@ -171,6 +173,9 @@ void UserTrackerHelper::Finalize()
 
 void UserTrackerHelper::Test()
 {
+    std::vector<std::shared_ptr<TaskBase>> tasks;
+    std::shared_ptr<TaskBase> task1(new OpenRoomForGetSingeridTask);
+
 }
 
 void UserTrackerHelper::SetNotifyMessageCallback(

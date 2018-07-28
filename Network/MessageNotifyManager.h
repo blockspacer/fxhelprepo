@@ -87,7 +87,7 @@ public:
     bool Initialize(const scoped_refptr<base::TaskRunner>& runner);
     void Finalize();
     void SetWebsockClientController(WebsocketClientController* controller);
-    void SetServerIp(const std::string& serverip);
+    void SetServerIp(const std::string& serverip, uint16 port);
     void SetIpProxy(const IpProxy& ipproxy);
 
     // 可动态改变的功能，都要转到工作线程去完成
@@ -155,15 +155,16 @@ private:
 
     // 改为websocket模式
     void AddClientConnectCallback(
+		uint32 roomid, uint32 userid, const std::string& usertoken, const std::string& soctoken,
         bool result, WebsocketHandle handle);
+
+	void ConnectBreakCallback(const base::Callback<void()>& conn_break_callback, WebsocketHandle handle);
 
     void StartSendHeartbeat();
 
     void SendHeartbeat();
 
-    void ClientDataCallback(
-        uint32 roomid, uint32 userid, const std::string& usertoken, bool result,
-        const std::vector<uint8>& data);
+    void ClientDataCallback(bool result, const std::vector<uint8>& data);
 
     void DoSendDataCallback(WebsocketHandle handle, bool result);
 
@@ -171,6 +172,7 @@ private:
     scoped_refptr<base::TaskRunner> runner_;
     base::RepeatingTimer<MessageNotifyManager> repeatingTimer_;
     std::string serverip_ = "192.168.0.1";
+    uint16 port_ = 0;
     IpProxy ipProxy_;
     std::string Packet_ = "";
     int position_ = 0;

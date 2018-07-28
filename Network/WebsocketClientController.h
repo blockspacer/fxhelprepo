@@ -21,8 +21,9 @@ public:
     bool Initialize();
     void Finalize();
 
-    bool AddClient(AddClientCallback addcallback, const IpProxy& ipproxy,
-        const std::string& ip, uint16 port, ClientCallback callback);
+    bool AddClient(AddClientCallback addcallback, 
+		ConnectBreakCallback connect_callback, const IpProxy& ipproxy,
+		const std::string& ip, uint16 port, ClientCallback callback);
 
     void RemoveClient(WebsocketHandle handle);
 

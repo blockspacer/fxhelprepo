@@ -51,6 +51,9 @@
     <ClInclude Include="VMPVerifyDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="CommonTaskManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="UserTracker.cpp">
@@ -75,6 +78,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="VMPVerifyDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonTaskManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

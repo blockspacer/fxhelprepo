@@ -29,14 +29,17 @@ public:
         , m_server("N/A")
     {}
 
-    void on_open(client * c, websocketpp::connection_hdl hdl) {
+    void on_open(client * c, websocketpp::connection_hdl hdl,
+		const std::function<void()> connect_callback) {
         m_status = "Open";
 
         client::connection_ptr con = c->get_con_from_hdl(hdl);
         m_server = con->get_response_header("Server");
+		connect_callback();
     }
 
-    void on_fail(client * c, websocketpp::connection_hdl hdl) {
+	void on_fail(client * c, websocketpp::connection_hdl hdl, 
+		const std::function<void()> connect_callback) {
         m_status = "Failed";
 
         client::connection_ptr con = c->get_con_from_hdl(hdl);
@@ -44,7 +47,8 @@ public:
         m_error_reason = con->get_ec().message();
     }
 
-    void on_close(client * c, websocketpp::connection_hdl hdl) {
+    void on_close(client * c, websocketpp::connection_hdl hdl,
+		const std::function<void()> connect_callback) {
         m_status = "Closed";
         client::connection_ptr con = c->get_con_from_hdl(hdl);
         std::stringstream s;
@@ -52,6 +56,7 @@ public:
             << websocketpp::close::status::get_string(con->get_remote_close_code())
             << "), close reason: " << con->get_remote_close_reason();
         m_error_reason = s.str();
+		connect_callback();
     }
 
     void on_message(websocketpp::connection_hdl, client::message_ptr msg,

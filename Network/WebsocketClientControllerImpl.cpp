@@ -61,7 +61,9 @@ void WebsocketClientControllerImpl::Finalize()
 }
 
 bool WebsocketClientControllerImpl::AddClient(
-    AddClientCallback addcallback, const IpProxy& ipproxy,
+    AddClientCallback addcallback, 
+	ConnectBreakCallback connect_callback, 
+	const IpProxy& ipproxy,
     const std::string& ip, uint16 port, ClientCallback callback)
 {
     //WebsocketClient* client = new WebsocketClient;
@@ -81,23 +83,35 @@ bool WebsocketClientControllerImpl::AddClient(
     connection_metadata::ptr metadata_ptr = websocketpp::lib::make_shared<connection_metadata>(new_id, con->get_handle(), uri);
     m_connection_list[new_id] = metadata_ptr;
 
+	auto _add_callback = [=](){
+		addcallback(true, new_id);
+	};
+
     con->set_open_handler(websocketpp::lib::bind(
         &connection_metadata::on_open,
         metadata_ptr,
         &m_endpoint,
-        websocketpp::lib::placeholders::_1
+        websocketpp::lib::placeholders::_1,
+		_add_callback
         ));
+
+	auto _connect_callback = [=](){
+		connect_callback(new_id);
+	};
+
     con->set_fail_handler(websocketpp::lib::bind(
         &connection_metadata::on_fail,
         metadata_ptr,
         &m_endpoint,
-        websocketpp::lib::placeholders::_1
+        websocketpp::lib::placeholders::_1,
+		_connect_callback
         ));
     con->set_close_handler(websocketpp::lib::bind(
         &connection_metadata::on_close,
         metadata_ptr,
         &m_endpoint,
-        websocketpp::lib::placeholders::_1
+        websocketpp::lib::placeholders::_1,
+		_connect_callback
         ));
     con->set_message_handler(websocketpp::lib::bind(
         &connection_metadata::on_message,
@@ -108,7 +122,7 @@ bool WebsocketClientControllerImpl::AddClient(
 
     client::connection_ptr ptr = m_endpoint.connect(con);
     DCHECK(ptr);
-    addcallback(true, new_id);
+    //addcallback(true, new_id);
 
     return true;
 }

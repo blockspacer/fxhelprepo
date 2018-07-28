@@ -99,6 +99,29 @@ bool Config::GetRemember() const
     return result == 1;
 }
 
+bool Config::SaveCookie(const std::wstring& cookie)
+{
+	WritePrivateProfileString(L"UserInfo", L"Cookie", cookie.c_str(),
+		filepath_.c_str());
+	return true;
+}
+
+bool Config::GetCookie(std::wstring* cookie) const
+{
+	wchar_t temp[1024] = { 0 };
+	int32 count = GetPrivateProfileString(L"UserInfo", L"Cookie", L"",
+		temp, 1024, filepath_.c_str());
+	if (count >= 1024 || count <= 0)
+	{
+		return false;
+	}
+	std::wstring tempstr;
+	tempstr.assign(temp, temp + count);
+	*cookie = tempstr;
+	return true;
+}
+
+
 bool Config::SaveUserInfo(const std::wstring& username,
     const std::wstring& password, bool remember) const
 {  

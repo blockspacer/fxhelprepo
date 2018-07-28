@@ -19,6 +19,16 @@ struct RoomInfo
     uint32 billboard_all_3 = 0;
     uint32 billboard_all_4 = 0;
     uint32 billboard_all_5 = 0;
+
+    // 可改进为从手机展示列表中获取，信息比较全一点
+    // 30天消费+用户id, 以后过滤出来用户再找用户详细信息
+    std::vector<std::pair<uint32, uint32>> billboard_month;
+
+    // 所有消费+用户id, 以后过滤出来用户再找用户详细信息
+    std::vector<std::pair<uint32, uint32>> billboard_all;
+
+    // 当场消费+用户id, 以后过滤出来用户再找用户详细信息
+    std::vector<std::pair<uint32, uint32>> billboard_current;
 };
 
 struct ClanInfo
@@ -42,7 +52,6 @@ struct UserInfo
     uint32 follow_count = 0;
     std::wstring sex;
     std::wstring location;
-
 };
 
 struct SingerInfo
