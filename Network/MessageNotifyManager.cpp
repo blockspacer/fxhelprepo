@@ -227,6 +227,7 @@ bool CommandHandle_201(const Json::Value& jvalue, EnterRoomUserInfo* info, std::
         assert(false);
         return false;
     }
+    *info = enterRoomUserInfo;
     return true;
 }
 
@@ -335,13 +336,27 @@ bool CommandHandle_602(const Json::Value& jvalue, std::string* outmsg)
     return true;
 }
 
-bool CommandHandle_601(const Json::Value& jvalue, std::string* outmsg)
+bool CommandHandle_601(const Json::Value& jvalue, RoomGiftInfo601* gift_info, std::string* outmsg)
 {
-    // 房间礼物数据信息
+    RoomGiftInfo601 temp;
+    // 房间聊天消息
     try
     {
+        // 两层connect
         Json::Value jvContent(Json::ValueType::objectValue);
-        Json::Value  content = jvalue.get("content", jvContent);
+        Json::Value  outside_content = jvalue.get("content", jvContent);
+        if (outside_content.isNull())
+        {
+            assert(false);
+            return false;
+        }
+
+        uint32 roomid = GetInt32FromJsonValue(outside_content, "roomid");
+        uint32 time = GetInt32FromJsonValue(outside_content, "time");
+
+        // 两层connect
+        Json::Value default_content(Json::ValueType::objectValue);
+        Json::Value  content = outside_content.get("content", default_content);
         if (content.isNull())
         {
             assert(false);
@@ -349,25 +364,44 @@ bool CommandHandle_601(const Json::Value& jvalue, std::string* outmsg)
         }
 
         Json::Value jvString("");
+
         uint32 actionId = GetInt32FromJsonValue(content, "actionId");
         std::string token = content.get("token", jvString).asString();
+        uint32 senderid = GetInt32FromJsonValue(content, "senderid");
         std::string sendername = content.get("sendername", jvString).asString();
+        uint32 receiverid = GetInt32FromJsonValue(content, "receiverid");
         std::string receivername = content.get("receivername", jvString).asString();
 
         uint32 giftid = GetInt32FromJsonValue(content, "giftid");
         std::string giftname = content.get("giftname", jvString).asString();
-        uint32 num = GetInt32FromJsonValue(content, "num");
-        std::string tips = content.get("tip",jvString).asString();
-
+        uint32 gitfnumber = GetInt32FromJsonValue(content, "num");
+        std::string tips = content.get("tip", jvString).asString();
+        uint32 happytype = GetInt32FromJsonValue(content, "happyType");
         uint32 happyObj = GetInt32FromJsonValue(content, "happyObj");//是否是幸运礼物
 
-        *outmsg = base::WideToUTF8(L"房间大礼物数据 ") + tips;
+        *outmsg = base::WideToUTF8(L"房间礼物数据 ") + tips;
+
+        temp.time = time;
+        temp.roomid = roomid;
+        temp.senderid = senderid;
+        temp.sendername = sendername;
+        temp.receiverid = receiverid;
+        temp.receivername = receivername;
+        temp.giftid = giftid;
+        temp.giftname = giftname;
+        temp.gitfnumber = gitfnumber;
+        temp.tips = tips;
+        temp.happytype = happytype;
+        temp.happyobj = happyObj;
+
     }
     catch (...)
     {
         assert(false);
         return false;
     }
+
+    *gift_info = temp;
     return true;
 }
 // 房间抢座信息
@@ -664,32 +698,7 @@ void MessageNotifyManager::Notify(const std::vector<uint8>& data)
             
         uint32 time = GetInt32FromJsonValue(rootdata, "time");
         std::string str_display_time = MakeFormatTimeStringFromUnixTime(time);
-    //    if (cmd == 601)
-    //    {
-    //        Json::Value jvContent(Json::ValueType::objectValue);
-    //        Json::Value  content = rootdata.get("content", jvContent);
-    //        if (!content.isNull())
-    //        {
-    //            RoomGiftInfo601 roomgiftinfo;
-    //            roomgiftinfo.time = time;
-    //            roomgiftinfo.roomid = roomid;
-    //            roomgiftinfo.senderid = GetInt32FromJsonValue(content, "senderid");
-    //            roomgiftinfo.sendername = content.get("sendername", "").asString();
-    //            roomgiftinfo.receiverid = GetInt32FromJsonValue(content, "receiverid");
-    //            roomgiftinfo.receivername = content.get("receivername", "").asString();
-    //            roomgiftinfo.giftid = GetInt32FromJsonValue(content, "giftid");
-    //            roomgiftinfo.giftname = content.get("giftname", "").asString();
-    //            roomgiftinfo.gitfnumber = GetInt32FromJsonValue(content, "num");
-    //            roomgiftinfo.tips = content.get("tip", "").asString();
-    //            roomgiftinfo.happyobj = GetInt32FromJsonValue(content, "happyobj");
-    //            roomgiftinfo.happytype = GetInt32FromJsonValue(content, "happytype");
-    //            roomgiftinfo.token = content.get("token", "").asString();
-    //            if (notify601_)
-    //            {
-    //                notify601_(roomgiftinfo);
-    //            }                
-    //        }
-    //    }
+
     //    else if (cmd==620)
     //    {
     //        std::vector<BetShowData> bet_show_datas;
@@ -765,8 +774,16 @@ void MessageNotifyManager::Notify(const std::vector<uint8>& data)
             break;
         }
         case 601:
-            //CommandHandle_601(rootdata, &outmsg);
+        {
+            RoomGiftInfo601 gift_info;
+            CommandHandle_601(rootdata, &gift_info, &outmsg);
+            if (notify601_)
+            {
+                notify601_(gift_info);
+            }
             break;
+        }
+          
         case 602:
             //CommandHandle_602(rootdata, &outmsg);
             //{
