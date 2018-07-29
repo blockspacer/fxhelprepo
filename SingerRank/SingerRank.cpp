@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "SingerRank.h"
 #include "SingerRankDlg.h"
+#include "third_party/chromium/base/at_exit.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,6 +28,7 @@ CSingerRankApp::CSingerRankApp()
 
 	// TODO:  在此处添加构造代码，
 	// 将所有重要的初始化放置在 InitInstance 中
+    atExitManager_.reset(new base::AtExitManager);
 }
 
 

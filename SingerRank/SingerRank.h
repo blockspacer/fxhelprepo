@@ -9,6 +9,12 @@
 #endif
 
 #include "resource.h"		// Ö÷·ûºÅ
+#include "third_party/chromium/base/memory/scoped_ptr.h"
+
+namespace base
+{
+    class AtExitManager;
+}
 
 
 // CSingerRankApp: 
@@ -25,7 +31,7 @@ public:
 	virtual BOOL InitInstance();
 
 // ÊµÏÖ
-
+    scoped_ptr<base::AtExitManager> atExitManager_;
 	DECLARE_MESSAGE_MAP()
 };
 
