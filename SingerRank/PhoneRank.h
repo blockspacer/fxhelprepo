@@ -85,7 +85,7 @@ private:
         std::string location; // 主播定位的所在城市
     };
 
-    bool GetCityInfos(std::map<std::string, std::vector<CityInfo>>* province_citys) const;
+    bool GetCityInfos();
 
     bool GetRankSingerListByCity(const CityInfo& city_info, std::vector<RankSingerInfo>* rank_singer_infos) const;
     bool GetSinglePageDataByCity(
@@ -113,8 +113,17 @@ private:
     std::map<std::string, std::vector<CityInfo>> province_citys_;
 
     std::vector<RankSingerInfo> new_singers_rank_;
-
     std::vector<RankSingerInfo> beautiful_singers_rank_;
+
+    // 未实现
+    std::vector<RankSingerInfo> register_singer_rank_;
+    std::vector<RankSingerInfo> man_singer_rank_;
+    std::vector<RankSingerInfo> good_voice_rank_;
+    std::vector<RankSingerInfo> band_rank_;
+    std::vector<RankSingerInfo> group_rank_;
+    std::vector<RankSingerInfo> dj_rank_;
+
+
 
     base::Callback<void(const GridData&)> singer_info_callback_;
     base::Callback<void(const std::wstring&)> message_callback_;

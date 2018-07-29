@@ -66,6 +66,10 @@ bool PhoneRank::Initialize(const base::Callback<void(const GridData&)>& singer_i
         return false;
 
     runner_ = worker_thread_.task_runner();
+
+    runner_->PostTask(FROM_HERE,
+        base::Bind(base::IgnoreResult(&PhoneRank::GetCityInfos), base::Unretained(this)));
+
     return true;
 }
 
@@ -83,6 +87,7 @@ void PhoneRank::BreakRequest()
 
 void PhoneRank::DoStop()
 {
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     // 断掉所有请求
 }
 
@@ -96,6 +101,7 @@ bool PhoneRank::InitNewSingerRankInfos()
         return true;
     }
 
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     new_singers_rank_.clear();
 
     uint32 doubleLiveFirst = 0;
@@ -149,6 +155,7 @@ bool PhoneRank::InitNewSingerRankInfos()
 
 bool PhoneRank::GetNewSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const
 {
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     uint32 count = 0;
     *all = new_singers_rank_.size();
     for (auto& singerinfo : new_singers_rank_)
@@ -174,6 +181,7 @@ bool PhoneRank::InitBeautifulSingerRankInfos()
         return true;
     }
 
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     beautiful_singers_rank_.clear();
 
     uint32 doubleLiveFirst = 0;
@@ -227,6 +235,8 @@ bool PhoneRank::InitBeautifulSingerRankInfos()
 
 bool PhoneRank::GetBeautifulSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const
 {
+    // FIX ME: 有多线程访问变量的风险，暂时不管
+    // DCHECK(runner_->RunsTasksOnCurrentThread());
     uint32 count = 0;
     *all = beautiful_singers_rank_.size();
     for (auto& singerinfo : beautiful_singers_rank_)
@@ -252,9 +262,7 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid)
         return true;
     }
 
-    std::map<std::string, std::vector<CityInfo>> province_citys;
-    bool result = GetCityInfos(&province_citys);
-
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     NormalRoomInfo normal_room_info;
     if (!GetEnterRoomInfoByRoomId(roomid, &normal_room_info))
     {
@@ -276,7 +284,7 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid)
 
     CityInfo city_info;
     bool found = false;
-    for (const auto& province : province_citys)
+    for (const auto& province : province_citys_)
     {
         for (const auto& it : province.second)
         {
@@ -347,9 +355,7 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid)
     }
 
     if (!singer_info.status)
-    {
         message_callback_.Run(L"主播为未开播状态");
-    }
 
     return true;
 }
@@ -359,6 +365,7 @@ bool PhoneRank::GetSinglePageDataByCity(
     std::vector<RankSingerInfo>* rank_singer_infos,
     bool* has_next_page, uint32* online_number) const
 {
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = "http://mo.fanxing.kugou.com/mfx/rank/cdn/room/cityLbs_v2/";
@@ -387,24 +394,18 @@ bool PhoneRank::GetSinglePageDataByCity(
     Json::Value defaultval(Json::objectValue);
     auto data = root.get("data", defaultval);
     if (!data.isObject())
-    {
         return false;
-    }
 
     auto cityRoom = data.get("cityRoom", defaultval);
     if (!cityRoom.isObject())
-    {
         return false;
-    }
 
     *has_next_page = !!GetInt32FromJsonValue(cityRoom, "hasNextPage");
     *online_number = GetInt32FromJsonValue(cityRoom, "onlineNum");
 
     auto singer_list = cityRoom.get("list", defaultval);
     if (!singer_list.isArray())
-    {
         return false;
-    }
 
     std::vector<RankSingerInfo> rank_singer_info_vector;
     for (const auto& singer_info_obj : singer_list)
@@ -484,8 +485,9 @@ bool PhoneRank::GetSinglePageDataByCity(
     return true;
 }
 
-bool PhoneRank::GetCityInfos(std::map<std::string, std::vector<CityInfo>>* province_citys) const
+bool PhoneRank::GetCityInfos()
 {
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     std::map<std::string, std::string> param_map;
     param_map["platform"] = base::UintToString(6);
     param_map["version"] = base::UintToString(3910);
@@ -519,9 +521,7 @@ bool PhoneRank::GetCityInfos(std::map<std::string, std::vector<CityInfo>>* provi
     Json::Value defaultval(Json::objectValue);
     auto data = root.get("data", defaultval);
     if (!data.isArray())
-    {
         return false;
-    }
 
     std::map<std::string, std::vector<CityInfo>> temp_map;
     for (const auto& province : data)
@@ -530,9 +530,8 @@ bool PhoneRank::GetCityInfos(std::map<std::string, std::vector<CityInfo>>* provi
         std::string province_name = province.get("areaName", "").asString();
         auto cityList = province.get("cityList", defaultval);
         if (!cityList.isArray())
-        {
             return false;
-        }
+
         std::vector<CityInfo> city_infos;
         for (const auto& city_obj : cityList)
         {
@@ -568,13 +567,14 @@ bool PhoneRank::GetCityInfos(std::map<std::string, std::vector<CityInfo>>* provi
         temp_map[province_name] = city_infos;
     }
 
-    *province_citys = temp_map;
+    province_citys_ = temp_map;
     return true;
 }
 
 bool PhoneRank::GetRankSingerListByCity(const CityInfo& city_info, 
     std::vector<RankSingerInfo>* rank_singer_infos) const
 {
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     std::vector<RankSingerInfo> rank_singer_infos_part;
     bool has_next_page = true;
     uint32 page_number = 1;
@@ -609,6 +609,7 @@ bool PhoneRank::GetRankSingerListByCity(const CityInfo& city_info,
 bool PhoneRank::GetEnterRoomInfoByRoomId(uint32 roomid,
     NormalRoomInfo* normal_room_info) const
 {
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     std::map<std::string, std::string> param_map;
     param_map["platform"] = base::UintToString(kPlatform);
     param_map["version"] = base::UintToString(kVersion);
@@ -644,15 +645,11 @@ bool PhoneRank::GetEnterRoomInfoByRoomId(uint32 roomid,
     Json::Value defaultval(Json::objectValue);
     auto data = root.get("data", defaultval);
     if (!data.isObject())
-    {
         return false;
-    }
 
     auto normalRoomInfo = data.get("normalRoomInfo", defaultval);
     if (!normalRoomInfo.isObject())
-    {
         return false;
-    }
 
     auto members = normalRoomInfo.getMemberNames();
     for (const auto& member : members)
@@ -677,6 +674,7 @@ bool PhoneRank::GetEnterRoomInfoByRoomId(uint32 roomid,
 bool PhoneRank::GetStarCardByKugouId(uint32 kugouid,
     StarCard* star_card) const
 {
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     std::map<std::string, std::string> param_map;
     param_map["platform"] = base::UintToString(6);
     param_map["version"] = base::UintToString(3302);
@@ -711,17 +709,13 @@ bool PhoneRank::GetStarCardByKugouId(uint32 kugouid,
     Json::Value defaultval(Json::objectValue);
     auto data = root.get("data", defaultval);
     if (!data.isObject())
-    {
         return false;
-    }
 
     auto members = data.getMemberNames();
     for (const auto& member : members)
     {
         if (member.compare("location") == 0)
-        {
             star_card->location = data.get("location", "").asString();
-        }
     }
 
     return true;
@@ -734,6 +728,7 @@ bool PhoneRank::GetSinglePageData(
     bool* has_next_page, bool* all_online, uint32* mobileFromIndex,
     uint32* pcFromIndex) const
 {
+    DCHECK(runner_->RunsTasksOnCurrentThread());
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = url;
@@ -763,9 +758,7 @@ bool PhoneRank::GetSinglePageData(
     Json::Value defaultval(Json::objectValue);
     auto data = root.get("data", defaultval);
     if (!data.isObject())
-    {
         return false;
-    }
 
     *has_next_page = !!GetInt32FromJsonValue(data, "hasNextPage");
     *mobileFromIndex = GetInt32FromJsonValue(data, "mobileFromIndex");
@@ -773,9 +766,7 @@ bool PhoneRank::GetSinglePageData(
 
     auto singer_list = data.get("list", defaultval);
     if (!singer_list.isArray())
-    {
         return false;
-    }
 
     std::vector<RankSingerInfo> rank_singer_info_vector;
     for (const auto& singer_info_obj : singer_list)
