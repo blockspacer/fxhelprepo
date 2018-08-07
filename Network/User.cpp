@@ -39,6 +39,7 @@ User::User()
     :curlWrapper_(new CurlWrapper)
     , cookiesHelper_(new CookiesHelper)
 {
+    servertime_ = 1549114389;
 }
 
 User::~User()

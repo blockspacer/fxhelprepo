@@ -731,11 +731,11 @@ bool NetworkHelper::GetActionPrivilege(std::wstring* message)
         return false;
     }
 
-    if (authority_->clanid && user_->GetClanId() != authority_->clanid)
-    {
-        *message = L"当前授权仅限指定公会成员使用!";
-        return false;
-    }
+    //if (authority_->clanid && user_->GetClanId() != authority_->clanid)
+    //{
+    //    *message = L"当前授权仅限指定公会成员使用!";
+    //    return false;
+    //}
 
     if (authority_->clanid && singer_clanid_ != authority_->clanid)
     {
