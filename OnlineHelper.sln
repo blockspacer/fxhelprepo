@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "third_party", "third_party", "{5D2BA8C2-3BD9-49B6-AC01-A3C43CC2CA8E}"
 EndProject
@@ -86,6 +86,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VmpHWID", "VmpHWID\VmpHWID.vcxproj", "{3D26F237-C6A6-4F8B-ABDC-46887CAB9656}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SingerRank", "SingerRank\SingerRank.vcxproj", "{24E40FF3-E802-4457-B005-7CBD955907D0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LoginTest", "LoginTest\LoginTest.vcxproj", "{B90E8691-3F51-4053-AE75-B68A2C3F92B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -273,6 +275,12 @@ Global
 		{24E40FF3-E802-4457-B005-7CBD955907D0}.Release|Win32.ActiveCfg = Release|Win32
 		{24E40FF3-E802-4457-B005-7CBD955907D0}.Release|Win32.Build.0 = Release|Win32
 		{24E40FF3-E802-4457-B005-7CBD955907D0}.Release|x64.ActiveCfg = Release|Win32
+		{B90E8691-3F51-4053-AE75-B68A2C3F92B0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B90E8691-3F51-4053-AE75-B68A2C3F92B0}.Debug|Win32.Build.0 = Debug|Win32
+		{B90E8691-3F51-4053-AE75-B68A2C3F92B0}.Debug|x64.ActiveCfg = Debug|Win32
+		{B90E8691-3F51-4053-AE75-B68A2C3F92B0}.Release|Win32.ActiveCfg = Release|Win32
+		{B90E8691-3F51-4053-AE75-B68A2C3F92B0}.Release|Win32.Build.0 = Release|Win32
+		{B90E8691-3F51-4053-AE75-B68A2C3F92B0}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
