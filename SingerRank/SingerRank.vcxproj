@@ -110,6 +110,7 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SingerRank.h" />
     <ClInclude Include="SingerRankDlg.h" />
+    <ClInclude Include="SingerRetriver.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -117,6 +118,7 @@
     <ClCompile Include="PhoneRank.cpp" />
     <ClCompile Include="SingerRank.cpp" />
     <ClCompile Include="SingerRankDlg.cpp" />
+    <ClCompile Include="SingerRetriver.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
