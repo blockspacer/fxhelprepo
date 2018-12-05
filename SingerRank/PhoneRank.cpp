@@ -9,45 +9,12 @@
 #include "third_party/chromium/base/time/time.h"
 #include "Network/CurlWrapper.h"
 #include "Network/EncodeHelper.h"
-
-namespace
-{
-    const uint32 kPagesize = 80;
-    const uint32 kPlatform = 6;
-    const uint32 kVersion = 3910;
-    std::wstring kUseragent = L"酷狗直播 3.9.1 rv:3.9.1.0 (iPhone; iOS 10.3.3; zh_CN)";
-
-
-//baiduCode = 257 & cityName = 广州市&page = 1 & pageSize = 80 & platform = 5 & version = 3302$_fan_xing_$
-//
-//计算sing的方案
-//cityName使用中文编码，不要转换成urlencode
-//1. 所有参数以key - value方式放进map中
-//2. 按key升序排列出key1 = value1&key2 = value2的格式的字符串str1
-//3. 在str1后面紧跟$_fan_xing_$串，然后计算md5值
-//4. 取md5的第8位到24位，一共是16位数据。
-
-std::string GetSignFromMap(const std::map<std::string,std::string>& param_map)
-{
-    if (param_map.empty())
-        return std::string("");
-
-    std::string target;
-    for (const auto& it : param_map)
-    {
-        target += it.first + "=" + it.second + "&";
-    }
-    target = target.substr(0, target.length() - 1);
-    target += "$_fan_xing_$";
-    std::string md5 = MakeMd5FromString(target);
-
-    return md5.substr(8, 16);
-}
-
-}
+#include "CitySingersManager.h"
+#include "common.h"
 
 PhoneRank::PhoneRank()
     : break_all_request_(false)
+    ,city_manager_(new CitySingersManager())
 {
 }
 
@@ -56,16 +23,14 @@ PhoneRank::~PhoneRank()
 }
 
 bool PhoneRank::Initialize(base::SingleThreadTaskRunner* runner, 
-    const base::Callback<void(const GridData&)>& singer_info_callback,
+    const base::Callback<void(uint32, bool, const RowData&)>& singer_info_callback,
     const base::Callback<void(const std::wstring&)>& message_callback)
 {
     singer_info_callback_ = singer_info_callback;
     message_callback_ = message_callback;
 
     runner_ = runner;
-
-    runner_->PostTask(FROM_HERE,
-        base::Bind(base::IgnoreResult(&PhoneRank::GetCityInfos), base::Unretained(this)));
+    city_manager_->Initialize(runner);
 
     return true;
 }
@@ -86,6 +51,87 @@ void PhoneRank::DoStop()
 {
     DCHECK(runner_->RunsTasksOnCurrentThread());
     // 断掉所有请求
+}
+
+void PhoneRank::InitCheckGroupSingers(bool beauty, bool newsinger)
+{
+    beauty_ = beauty;
+    newsinger_ = newsinger;
+}
+
+void PhoneRank::RetriveSingerRankResult(uint32 roomid)
+{
+    if (!runner_->RunsTasksOnCurrentThread())
+    {
+        runner_->PostTask(FROM_HERE,
+            base::Bind(base::IgnoreResult(&PhoneRank::RetriveSingerRankResult),
+                base::Unretained(this), roomid));
+        return;
+    }
+
+    DCHECK(runner_->RunsTasksOnCurrentThread());
+
+    // 先获取房间主播信息
+
+    // 获取同城排名，如果该城市的信息不是本次更新过，则更新
+	RankSingerInfo rank_singer_info;
+	uint32 city_rank_id = 0;
+	uint32 city_online_num = 0;
+	uint32 city_all_count = 0;
+	if (!DoGetCityRankInfos(roomid, &rank_singer_info, &city_rank_id,
+		&city_online_num, &city_all_count))
+	{
+		
+	}
+
+    // 获取新秀类排名，不更新女神类全站数据
+	bool find_result = false;
+    uint32 new_rank = 0;
+    uint32 new_all = new_singers_rank_.size();
+    for (auto& singerinfo : new_singers_rank_)
+    {
+        new_rank++;
+        if (singerinfo.roomId == roomid)
+        {
+            rank_singer_info = singerinfo;
+			find_result = true;
+            break;
+        }
+    }
+
+	if (!find_result)
+		new_rank = 0;
+
+    // 获取女神类排名，不更新新秀娄全站数据
+    uint32 beauty_rank = 0;
+    uint32 beauty_all = beautiful_singers_rank_.size();
+    for (auto& singerinfo : beautiful_singers_rank_)
+    {
+        beauty_rank++;
+        if (singerinfo.roomId == roomid)
+        {
+            rank_singer_info = singerinfo;
+			find_result = true;
+            break;
+        }
+    }
+
+	if (!find_result)
+		beauty_rank = 0;
+
+    RowData row_data;
+    row_data.push_back(base::UTF8ToWide(rank_singer_info.nickName));
+    row_data.push_back(base::UTF8ToWide(rank_singer_info.cityName));
+	row_data.push_back(base::UintToString16(city_rank_id) + L"/" + 
+		base::UintToString16(city_online_num) +L"/" + 
+		base::UintToString16(city_all_count));
+    row_data.push_back(base::UTF8ToWide(rank_singer_info.labelName));
+    row_data.push_back(base::UintToString16(rank_singer_info.viewerNum));
+    row_data.push_back(base::UintToString16(new_rank) + L"/" + base::UintToString16(new_all));
+    row_data.push_back(base::UintToString16(beauty_rank) + L"/" + base::UintToString16(beauty_all));
+
+	bool result = !rank_singer_info.nickName.empty();
+	singer_info_callback_.Run(roomid, result, row_data);
 }
 
 bool PhoneRank::InitNewSingerRankInfos()
@@ -152,7 +198,6 @@ bool PhoneRank::InitNewSingerRankInfos()
 
 bool PhoneRank::GetNewSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const
 {
-    DCHECK(runner_->RunsTasksOnCurrentThread());
     uint32 count = 0;
     *all = new_singers_rank_.size();
     for (auto& singerinfo : new_singers_rank_)
@@ -161,9 +206,16 @@ bool PhoneRank::GetNewSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* al
         if (singerinfo.roomId == roomid)
         {
             *rank = count;
+            RowData row_data;
+            row_data.push_back(base::UTF8ToWide(singerinfo.nickName));
+            row_data.push_back(base::UTF8ToWide(singerinfo.cityName));
+            row_data.push_back(base::UTF8ToWide(singerinfo.labelName));
+            row_data.push_back(base::UintToString16(singerinfo.viewerNum));
+            std::wstring str_rank = base::UintToString16(count) + L"/" + base::UintToString16(*all);
+            row_data.push_back(str_rank);
+            singer_info_callback_.Run(roomid, true, row_data);
             return true;
         }
-
     }
     return false;
 }
@@ -224,7 +276,7 @@ bool PhoneRank::InitBeautifulSingerRankInfos()
             rank_singer_infos.begin(), rank_singer_infos.end());
     }
 
-    std::wstring message = L"获取女神主播完成,一共 " + base::UintToString16(new_singers_rank_.size()) + L" 个主播";
+    std::wstring message = L"获取女神主播完成,一共 " + base::UintToString16(beautiful_singers_rank_.size()) + L" 个主播";
     message_callback_.Run(message);
 
     return true;
@@ -260,89 +312,20 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid)
     }
 
     DCHECK(runner_->RunsTasksOnCurrentThread());
-    NormalRoomInfo normal_room_info;
-    if (!GetEnterRoomInfoByRoomId(roomid, &normal_room_info))
-    {
-        message_callback_.Run(L"无法获取对应房间的主播信息");
-        return false;
-    }
-    
-    StarCard star_card;
-    if (!GetStarCardByKugouId(normal_room_info.kugou_id, &star_card))
-    {
-        message_callback_.Run(L"无法获取主播位置信息");
-        return false;
-    }
-    
-    std::string city_name = star_card.location;
-    std::wstring w_city_name = base::UTF8ToWide(city_name);
-    if (w_city_name.size()>2)
-        w_city_name = w_city_name.substr(0, 2);
 
-    CityInfo city_info;
-    bool found = false;
-    for (const auto& province : province_citys_)
-    {
-        for (const auto& it : province.second)
-        {
-            std::wstring temp = base::UTF8ToWide(it.city_name);
-            if (temp.size() > 2)
-                temp = temp.substr(0, 2);
-            if (temp.compare(w_city_name)==0)
-            {
-                city_info = it;
-                found = true;
-                break;
-            }
-        }
-        if (found)
-            break;
-    }
-
-    if (!found)
-    {
-        std::wstring msg = L"在城市列表无法获取城市：" + base::UTF8ToWide(star_card.location);
-        message_callback_.Run(msg);
-        return false;
-    }
-
-    std::vector<RankSingerInfo> rank_singer_infos;
-    if (!GetRankSingerListByCity(city_info, &rank_singer_infos))
-    {
-        message_callback_.Run(L"无法获取主播所在城市的主播列表");
-        return false;
-    }
-
-    // 查看某个主播id的手机推荐排名
-    uint32 singer_fanxing_id = normal_room_info.fanxing_id;
-    uint32 singer_kugou_id = normal_room_info.kugou_id;
-    uint32 rank_id = 0;
-    uint32 count = 0;
-    uint32 online_num = 0;
-    RankSingerInfo singer_info;
-    for (const auto& it : rank_singer_infos)
-    {
-        count++;
-        if (it.userId == singer_fanxing_id)
-        {
-            rank_id = count;
-            singer_info = it;
-        }
-
-        if (it.userId == singer_kugou_id)
-        {
-            rank_id = count;
-            singer_info = it;
-        }
-
-        if (it.status) // status=1,电脑直播 status=2,手机直播
-            online_num++;
-    }
-
-    std::wstring msg = L"排名/在线/" + w_city_name +L": ";
+	RankSingerInfo singer_info;
+	uint32 rank_id = 0;
+	uint32 online_num = 0;
+	uint32 all_count = 0;
+	if (!DoGetCityRankInfos(roomid, &singer_info,&rank_id,&online_num, &all_count))
+	{
+		return false;
+	}
+	
+    std::wstring msg = L"排名/在线/" + base::UTF8ToWide(singer_info.cityName) +L": ";
     msg += base::UintToString16(rank_id) + L"/";
     msg += base::UintToString16(online_num) + L"/";
-    msg += base::UintToString16(rank_singer_infos.size());
+    msg += base::UintToString16(all_count);
     message_callback_.Run(msg);
 
     if (!rank_id)
@@ -357,250 +340,68 @@ bool PhoneRank::GetCityRankInfos(uint32 roomid)
     return true;
 }
 
-bool PhoneRank::GetSinglePageDataByCity(
-    const std::map<std::string, std::string>& query_city_rank_param,
-    std::vector<RankSingerInfo>* rank_singer_infos,
-    bool* has_next_page, uint32* online_number) const
+bool PhoneRank::DoGetCityRankInfos(uint32 roomid, RankSingerInfo* singer_info,
+	uint32* rank_id, uint32* online_num, uint32* all_count)
 {
-    DCHECK(runner_->RunsTasksOnCurrentThread());
-    HttpRequest request;
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.url = "http://mo.fanxing.kugou.com/mfx/rank/cdn/room/cityLbs_v2/";
-    request.queries = query_city_rank_param;
-    request.useragent = base::WideToUTF8(kUseragent);
+	DCHECK(runner_->RunsTasksOnCurrentThread());
+	NormalRoomInfo normal_room_info;
+	if (!GetEnterRoomInfoByRoomId(roomid, &normal_room_info))
+	{
+		message_callback_.Run(L"无法获取对应房间的主播信息");
+		return false;
+	}
 
-    // 数据分析
-    CurlWrapper curl_wrapper;
-    HttpResponse http_reponse;
-    if (!curl_wrapper.Execute(request, &http_reponse))
-        return false;
+	StarCard star_card;
+	if (!GetStarCardByKugouId(normal_room_info.kugou_id, &star_card))
+	{
+		message_callback_.Run(L"无法获取主播位置信息");
+		return false;
+	}
 
-    std::string content;
-    content.assign(http_reponse.content.begin(),
-        http_reponse.content.end());
+	std::string city_name = star_card.location;
 
-    Json::Reader reader;
-    Json::Value root(Json::objectValue);
-    if (!reader.parse(content, root, false))
-        return false;
+	CityInfo city_info;
+	if (!city_manager_->FindCity(city_name, &city_info))
+	{
+		std::wstring msg = L"在城市列表无法获取城市：" + base::UTF8ToWide(star_card.location);
+		message_callback_.Run(msg);
+		return false;
+	}
 
-    uint32 code = GetInt32FromJsonValue(root, "code");
-    if (code != 0)
-        return false;
+	std::vector<RankSingerInfo> rank_singer_infos;
+	if (!city_manager_->GetRankSingerListByCity(city_info, &rank_singer_infos))
+	{
+		message_callback_.Run(L"无法获取主播所在城市的主播列表");
+		return false;
+	}
 
-    Json::Value defaultval(Json::objectValue);
-    auto data = root.get("data", defaultval);
-    if (!data.isObject())
-        return false;
+	// 查看某个主播id的手机推荐排名
+	uint32 singer_fanxing_id = normal_room_info.fanxing_id;
+	uint32 singer_kugou_id = normal_room_info.kugou_id;
+	//uint32 rank_id = 0;
+	uint32 count = 0;
+	//uint32 online_num = 0;
 
-    auto cityRoom = data.get("cityRoom", defaultval);
-    if (!cityRoom.isObject())
-        return false;
+	for (const auto& it : rank_singer_infos)
+	{
+		count++;
+		if (it.userId == singer_fanxing_id)
+		{
+			*rank_id = count;
+			*singer_info = it;
+		}
 
-    *has_next_page = !!GetInt32FromJsonValue(cityRoom, "hasNextPage");
-    *online_number = GetInt32FromJsonValue(cityRoom, "onlineNum");
+		if (it.userId == singer_kugou_id)
+		{
+			*rank_id = count;
+			*singer_info = it;
+		}
 
-    auto singer_list = cityRoom.get("list", defaultval);
-    if (!singer_list.isArray())
-        return false;
-
-    std::vector<RankSingerInfo> rank_singer_info_vector;
-    for (const auto& singer_info_obj : singer_list)
-    {
-        auto members = singer_info_obj.getMemberNames();
-        RankSingerInfo singer_info;
-        for (const auto& member : members)
-        {
-            if (member.compare("activityPic") == 0)
-            {
-                singer_info.activityPic = singer_info_obj.get(member, defaultval).asString();
-            }
-            else if (member.compare("baiduCode") == 0)
-            {
-                singer_info.baiduCode = GetInt32FromJsonValue(singer_info_obj, member);
-            }
-            else if (member.compare("cityName") == 0)
-            {
-                singer_info.cityName = singer_info_obj.get(member, defaultval).asString();
-            }
-            else if (member.compare("company") == 0)
-            {
-                singer_info.company = singer_info_obj.get(member, defaultval).asString();
-            }
-            else if (member.compare("imgPath") == 0)
-            {
-                singer_info.imgPath = singer_info_obj.get(member, defaultval).asString();
-            }
-            else if (member.compare("isOriginal") == 0)
-            {
-                singer_info.isOriginal = GetInt32FromJsonValue(singer_info_obj, member);
-            }
-            else if (member.compare("kugouId") == 0)
-            {
-                singer_info.kugouId = GetInt32FromJsonValue(singer_info_obj, member);
-            }
-            else if (member.compare("labelName") == 0)
-            {
-                singer_info.labelName = singer_info_obj.get(member, defaultval).asString();
-            }
-            else if (member.compare("lastOnlineTime") == 0)
-            {
-                singer_info.lastLiveTime = GetInt32FromJsonValue(singer_info_obj, member);
-            }
-            else if (member.compare("liveTitle") == 0)
-            {
-                singer_info.liveTitle = singer_info_obj.get(member, defaultval).asString();
-            }
-            else if (member.compare("nickName") == 0)
-            {
-                singer_info.nickName = singer_info_obj.get(member, defaultval).asString();
-            }
-            else if (member.compare("roomId") == 0)
-            {
-                singer_info.roomId = GetInt32FromJsonValue(singer_info_obj, member);
-            }
-            else if (member.compare("starLevel") == 0)
-            {
-                singer_info.starLevel = GetInt32FromJsonValue(singer_info_obj, member);
-            }
-            else if (member.compare("status") == 0)
-            {
-                singer_info.status = GetInt32FromJsonValue(singer_info_obj, member);
-            }
-            else if (member.compare("userId") == 0)
-            {
-                singer_info.userId = GetInt32FromJsonValue(singer_info_obj, member);
-            }
-            else if (member.compare("viewerNum") == 0)
-            {
-                singer_info.viewerNum = GetInt32FromJsonValue(singer_info_obj, member);
-            }
-        }
-        rank_singer_info_vector.push_back(singer_info);
-    }
-    *rank_singer_infos = std::move(rank_singer_info_vector);
-    return true;
-}
-
-bool PhoneRank::GetCityInfos()
-{
-    DCHECK(runner_->RunsTasksOnCurrentThread());
-    std::map<std::string, std::string> param_map;
-    param_map["platform"] = base::UintToString(6);
-    param_map["version"] = base::UintToString(3910);
-    std::string sign = GetSignFromMap(param_map);
-
-    HttpRequest request;
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
-    request.url = "http://mo.fanxing.kugou.com/mfx/logic/cdn/config/getProvinceCityList";
-    request.queries = param_map;
-    request.queries["sign"] = sign;
-
-    // 数据分析
-    CurlWrapper curl_wrapper;
-    HttpResponse http_reponse;
-    if (!curl_wrapper.Execute(request, &http_reponse))
-        return false;
-
-    std::string content;
-    content.assign(http_reponse.content.begin(),
-        http_reponse.content.end());
-
-    Json::Reader reader;
-    Json::Value root(Json::objectValue);
-    if (!reader.parse(content, root, false))
-        return false;
-
-    uint32 code = GetInt32FromJsonValue(root, "code");
-    if (code != 0)
-        return false;
-
-    Json::Value defaultval(Json::objectValue);
-    auto data = root.get("data", defaultval);
-    if (!data.isArray())
-        return false;
-
-    std::map<std::string, std::vector<CityInfo>> temp_map;
-    for (const auto& province : data)
-    {
-        uint32 province_id = GetInt32FromJsonValue(province, "areaId");
-        std::string province_name = province.get("areaName", "").asString();
-        auto cityList = province.get("cityList", defaultval);
-        if (!cityList.isArray())
-            return false;
-
-        std::vector<CityInfo> city_infos;
-        for (const auto& city_obj : cityList)
-        {
-            auto members = city_obj.getMemberNames();
-            CityInfo city_info;
-            city_info.area_name = province_name;
-            for (const auto& member : members)
-            {
-                if (member.compare("areaId") == 0)
-                {
-                    city_info.area_id = GetInt32FromJsonValue(city_obj, member);
-                    assert(province_id == city_info.area_id);
-                }
-                else if (member.compare("cityCode") == 0)
-                {
-                    city_info.city_code = GetInt32FromJsonValue(city_obj, member);
-                }
-                else if (member.compare("cityName") == 0)
-                {
-                    city_info.city_name = city_obj.get(member, defaultval).asString();
-                }
-                else if (member.compare("fxCityId") == 0)
-                {
-                    city_info.fx_city_id = GetInt32FromJsonValue(city_obj, member);
-                }
-                else if (member.compare("gaodeCode") == 0)
-                {
-                    city_info.gaode_code = city_obj.get(member, defaultval).asString();
-                }
-            }
-            city_infos.push_back(city_info);
-        }
-        temp_map[province_name] = city_infos;
-    }
-
-    province_citys_ = temp_map;
-    return true;
-}
-
-bool PhoneRank::GetRankSingerListByCity(const CityInfo& city_info, 
-    std::vector<RankSingerInfo>* rank_singer_infos) const
-{
-    DCHECK(runner_->RunsTasksOnCurrentThread());
-    std::vector<RankSingerInfo> rank_singer_infos_part;
-    bool has_next_page = true;
-    uint32 page_number = 1;
-    uint32 online_number = 0;
-    while (has_next_page)
-    {
-        rank_singer_infos_part.clear();
-        std::map<std::string, std::string> param_map;
-        param_map["gaodeCode"] = city_info.gaode_code;
-        param_map["cityName"] = city_info.city_name;
-        param_map["page"] = base::UintToString(page_number);
-        param_map["pageSize"] = base::UintToString(kPagesize);
-        param_map["platform"] = base::UintToString(kPlatform);
-        param_map["version"] = base::UintToString(kVersion);
-        std::string sign = GetSignFromMap(param_map);
-        param_map["sign"] = sign;
-
-        if (!GetSinglePageDataByCity(param_map, &rank_singer_infos_part,
-            &has_next_page, &online_number))
-        {
-            return false;
-        }
-        rank_singer_infos->insert(rank_singer_infos->end(),
-            rank_singer_infos_part.begin(), rank_singer_infos_part.end());
-
-        page_number++;
-    }
-
-    return true;
+		if (it.status) // status=1,电脑直播 status=2,手机直播
+			(*online_num)++;
+	}
+	*all_count = rank_singer_infos.size();
+	return true;
 }
 
 bool PhoneRank::GetEnterRoomInfoByRoomId(uint32 roomid,

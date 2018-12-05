@@ -106,7 +106,10 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CitySingersManager.h" />
+    <ClInclude Include="common.h" />
     <ClInclude Include="PhoneRank.h" />
+    <ClInclude Include="RankTypes.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SingerRank.h" />
     <ClInclude Include="SingerRankDlg.h" />
@@ -115,6 +118,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CitySingersManager.cpp" />
+    <ClCompile Include="common.cpp" />
     <ClCompile Include="PhoneRank.cpp" />
     <ClCompile Include="SingerRank.cpp" />
     <ClCompile Include="SingerRankDlg.cpp" />

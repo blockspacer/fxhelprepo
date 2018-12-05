@@ -39,6 +39,7 @@ void CSingerRankDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_LIST_INFO, m_list_info);
     DDX_Control(pDX, IDC_CHK_BEAUTY, m_chk_beautiful);
     DDX_Control(pDX, IDC_CHK_NEW_SINGER, m_chk_new_singer);
+    DDX_Control(pDX, IDC_EDIT_CLANID, m_edit_clan);
 }
 
 BEGIN_MESSAGE_MAP(CSingerRankDlg, CDialogEx)
@@ -50,6 +51,7 @@ BEGIN_MESSAGE_MAP(CSingerRankDlg, CDialogEx)
     ON_MESSAGE(WM_USER_MSG, &CSingerRankDlg::OnMessage)
     ON_MESSAGE(WM_USER_PROGRESS, &CSingerRankDlg::OnProgress)
     ON_MESSAGE(WM_USER_FOUND_RESULT, &CSingerRankDlg::OnFoundResult)
+    ON_BN_CLICKED(IDC_BTN_CLAN_RETRIVE, &CSingerRankDlg::OnBnClickedBtnClanRetrive)
 END_MESSAGE_MAP()
 
 
@@ -229,6 +231,16 @@ LRESULT CSingerRankDlg::OnFoundResult(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+void CSingerRankDlg::SingerInfoCallback(uint32 roomid, bool result, const RowData& singer_infos)
+{
+	std::string time_string = MakeFormatTimeString(base::Time::Now());
+
+	std::wstring* new_wstring = new std::wstring(base::UTF8ToWide(time_string) + L" " + 
+		base::UintToString16(roomid) + L"获取排名" + (result?L"成功":L"失败"));
+	this->PostMessage(WM_USER_MSG, 0, (LPARAM)(new_wstring));
+
+}
+
 void CSingerRankDlg::MessageCallback(const std::wstring& message)
 {
     std::string time_string = MakeFormatTimeString(base::Time::Now());
@@ -236,7 +248,27 @@ void CSingerRankDlg::MessageCallback(const std::wstring& message)
     this->PostMessage(WM_USER_MSG, 0, (LPARAM)(new_wstring));
 }
 
-void CSingerRankDlg::SingerInfoCallback(const GridData& singer_infos)
+void CSingerRankDlg::ClanSingerCallback(const std::vector<uint32>& roomids)
+{
+    for (auto roomid : roomids)
+    {
+        phone_rank_.RetriveSingerRankResult(roomid);
+    }
+}
+
+void CSingerRankDlg::OneSingerInfoCallback(const RowData& singer_info)
 {
 
+}
+
+void CSingerRankDlg::OnBnClickedBtnClanRetrive()
+{
+    CString cs_clanid;
+    m_edit_clan.GetWindowTextW(cs_clanid);
+
+    uint32 clan_id = 0;
+    base::StringToUint(base::WideToUTF8(cs_clanid.GetBuffer()), &clan_id);
+
+    singer_retriver_.GetSingerInfoByClan(clan_id, 
+        base::Bind(&CSingerRankDlg::ClanSingerCallback, base::Unretained(this)));
 }

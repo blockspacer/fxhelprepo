@@ -50,6 +50,7 @@ protected:
     afx_msg void OnBnClickedBtnSearchRank();
     afx_msg void OnBnClickedBtnGetRoomRank();
     afx_msg void OnBnClickedBtnCityRank();
+    afx_msg void OnBnClickedBtnClanRetrive();
 
 protected:
     LRESULT OnMessage(WPARAM wParam, LPARAM lParam);
@@ -57,8 +58,10 @@ protected:
     LRESULT OnFoundResult(WPARAM wParam, LPARAM lParam);
 
 private:
-    void SingerInfoCallback(const GridData& singer_infos);
+    void SingerInfoCallback(uint32 roomid, bool result, const RowData& singer_infos);
     void MessageCallback(const std::wstring& message);
+    void ClanSingerCallback(const std::vector<uint32>& roomids);
+    void OneSingerInfoCallback(const RowData& singer_info);
 
     PhoneRank phone_rank_;
     SingerRetriver singer_retriver_;
@@ -70,5 +73,5 @@ private:
     CListBox m_list_info;
     CButton m_chk_beautiful;
     CButton m_chk_new_singer;
-
+    CEdit m_edit_clan;
 };

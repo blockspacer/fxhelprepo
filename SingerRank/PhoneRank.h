@@ -11,6 +11,10 @@
 #include "third_party/chromium/base/single_thread_task_runner.h"
 #include "third_party/chromium/base/memory/scoped_ptr.h"
 
+#include "RankTypes.h"
+
+class CitySingersManager;
+
 typedef std::vector<std::wstring> RowData;
 typedef std::vector<RowData> GridData;
 
@@ -21,7 +25,7 @@ public:
     ~PhoneRank();
 
     bool Initialize(base::SingleThreadTaskRunner* runner,
-        const base::Callback<void(const GridData&)>& singer_info_callback,
+        const base::Callback<void(uint32, bool, const RowData&)>& singer_info_callback,
         const base::Callback<void(const std::wstring&)>& message_callback);
 
     void Finalize();
@@ -30,9 +34,10 @@ public:
 
     void DoStop();
 
-    bool GetCityRankInfos(uint32 roomid);
+    void InitCheckGroupSingers(bool beauty, bool newsinger);
+    void RetriveSingerRankResult(uint32 roomid);
 
-    bool InitCheckGroupSingers(bool beauty, bool newsinger);
+    bool GetCityRankInfos(uint32 roomid);
 
     bool InitNewSingerRankInfos();
     bool GetNewSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const;
@@ -41,37 +46,8 @@ public:
     bool GetBeautifulSingerRankByRoomid(uint32 roomid, uint32* rank, uint32* all) const;
 
 private:
-    struct RankSingerInfo
-    {
-        std::string activityPic = "";
-        uint32 baiduCode = 0;
-        std::string cityName = "";
-        std::string company = "";
-        std::string imgPath = "";
-        uint32 isOriginal = 0;
-        uint32 kugouId = 0;
-        std::string labelName = "";
-        uint32 lastLiveTime = 0;
-        std::string liveTitle = "";
-        std::string nickName = "";
-        uint32 roomId = 0;
-        uint32 starLevel = 0;
-        uint32 status = 0;
-        uint32 userId = 0;
-        uint32 viewerNum = 0;
-        double rankScore = 0.0;
-        double score = 0.0;
-    };
-
-    struct CityInfo
-    {
-        uint32 area_id = 0; // 省份id
-        std::string area_name = ""; // 省份名称
-        uint32 city_code = 0; // 城市id
-        std::string city_name = "";
-        uint32 fx_city_id = 0;
-        std::string gaode_code; // 高德地图对城市的编号，实际上的电话区号
-    };
+	bool DoGetCityRankInfos(uint32 roomid, RankSingerInfo* singer_info,
+		uint32* rank_id, uint32* online_num, uint32* all_count);
 
     struct NormalRoomInfo // 只取了部分目前认为有用的信息
     {
@@ -86,13 +62,6 @@ private:
         std::string location; // 主播定位的所在城市
     };
 
-    bool GetCityInfos();
-
-    bool GetRankSingerListByCity(const CityInfo& city_info, std::vector<RankSingerInfo>* rank_singer_infos) const;
-    bool GetSinglePageDataByCity(
-        const std::map<std::string, std::string>& query_city_rank_param,
-        std::vector<RankSingerInfo>* rank_singer_infos,
-        bool* has_next_page, uint32* online_number) const;
 
     bool GetEnterRoomInfoByRoomId(uint32 roomid, 
         NormalRoomInfo* normal_room_info) const;
@@ -110,11 +79,14 @@ private:
     scoped_refptr<base::SingleThreadTaskRunner> runner_;
 
 
-    std::map<std::string, std::vector<CityInfo>> province_citys_;
-
     std::vector<RankSingerInfo> new_singers_rank_;
     std::vector<RankSingerInfo> beautiful_singers_rank_;
 
+    std::unique_ptr<CitySingersManager> city_manager_;
+
+
+    bool beauty_ = false;
+    bool newsinger_ = false;
     // 未实现
     std::vector<RankSingerInfo> register_singer_rank_;
     std::vector<RankSingerInfo> man_singer_rank_;
@@ -123,9 +95,7 @@ private:
     std::vector<RankSingerInfo> group_rank_;
     std::vector<RankSingerInfo> dj_rank_;
 
-
-
-    base::Callback<void(const GridData&)> singer_info_callback_;
+    base::Callback<void(uint32, bool, const RowData&)> singer_info_callback_;
     base::Callback<void(const std::wstring&)> message_callback_;
 
     // 优化体验的参数
