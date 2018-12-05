@@ -5,6 +5,7 @@
 #pragma once
 #include <vector>
 #include "PhoneRank.h"
+#include "SingerRetriver.h"
 #include "afxwin.h"
 #include "afxcmn.h"
 
@@ -60,6 +61,9 @@ private:
     void MessageCallback(const std::wstring& message);
 
     PhoneRank phone_rank_;
+    SingerRetriver singer_retriver_;
+    base::Thread worker_thread_;
+
     CEdit m_edit_roomid;
     int message_index;
     CListCtrl m_singer_list;

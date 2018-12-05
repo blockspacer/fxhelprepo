@@ -25,6 +25,7 @@
 
 CSingerRankDlg::CSingerRankDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CSingerRankDlg::IDD, pParent)
+    , worker_thread_("WorkerThread")
     , message_index(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -70,14 +71,20 @@ BOOL CSingerRankDlg::OnInitDialog()
 
     auto message_callback = base::Bind(&CSingerRankDlg::MessageCallback, base::Unretained(this));
 
-    phone_rank_.Initialize(singer_info_callback, message_callback);
+    if (!worker_thread_.Start())
+        return false;
+    
+    phone_rank_.Initialize(worker_thread_.task_runner().get(), singer_info_callback, message_callback);
+    singer_retriver_.Initialize(worker_thread_.task_runner().get());
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
 void CSingerRankDlg::OnClose()
 {
-
+    singer_retriver_.Finalize();
+    phone_rank_.Finalize();
+    worker_thread_.Stop();
 }
 
 void CSingerRankDlg::OnOK()

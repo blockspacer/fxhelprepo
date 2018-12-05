@@ -20,7 +20,8 @@ public:
     PhoneRank();
     ~PhoneRank();
 
-    bool Initialize(const base::Callback<void(const GridData&)>& singer_info_callback,
+    bool Initialize(base::SingleThreadTaskRunner* runner,
+        const base::Callback<void(const GridData&)>& singer_info_callback,
         const base::Callback<void(const std::wstring&)>& message_callback);
 
     void Finalize();
@@ -106,7 +107,6 @@ private:
         bool* has_next_page, bool* all_online, uint32* doubleLiveFirst,
         uint32* mobileFromIndex) const;
 
-    base::Thread worker_thread_;
     scoped_refptr<base::SingleThreadTaskRunner> runner_;
 
 
