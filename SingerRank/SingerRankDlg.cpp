@@ -20,7 +20,19 @@
 
 
 // CSingerRankDlg 对话框
-
+namespace
+{
+	const wchar_t* singercolumnlist[] = {
+		L"时间",
+		L"主播",
+		L"主播等级",
+		L"开播次数",
+		L"累计直播",
+		L"有效直播",
+		L"直播间最高人气",
+		L"星豆收入"
+	};
+}
 
 
 CSingerRankDlg::CSingerRankDlg(CWnd* pParent /*=NULL*/)
@@ -51,7 +63,9 @@ BEGIN_MESSAGE_MAP(CSingerRankDlg, CDialogEx)
     ON_MESSAGE(WM_USER_MSG, &CSingerRankDlg::OnMessage)
     ON_MESSAGE(WM_USER_PROGRESS, &CSingerRankDlg::OnProgress)
     ON_MESSAGE(WM_USER_FOUND_RESULT, &CSingerRankDlg::OnFoundResult)
+	ON_MESSAGE(WM_USER_SINGER_RESULT, &CSingerRankDlg::OnDisplaySingerResult)
     ON_BN_CLICKED(IDC_BTN_CLAN_RETRIVE, &CSingerRankDlg::OnBnClickedBtnClanRetrive)
+	ON_NOTIFY(LVN_GETDISPINFO, IDC_LIST_SINGERS, &CSingerRankDlg::OnLvnGetdispinfoListSummaryData)
 END_MESSAGE_MAP()
 
 
@@ -78,6 +92,38 @@ BOOL CSingerRankDlg::OnInitDialog()
     
     phone_rank_.Initialize(worker_thread_.task_runner().get(), singer_info_callback, message_callback);
     singer_retriver_.Initialize(worker_thread_.task_runner().get());
+
+	
+	// TODO:  在此添加额外的初始化代码
+	DWORD dwStyle = m_singer_list.GetExtendedStyle();
+//dwStyle |= LVS_EX_CHECKBOXES;
+	dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
+	dwStyle |= LVS_EX_GRIDLINES;//网格线（只适用与report风格的listctrl）
+	dwStyle |= LVS_OWNERDATA;
+	dwStyle |= LVS_AUTOARRANGE;
+
+	m_singer_list.SetExtendedStyle(dwStyle); //设置扩展风格
+	int nColumnCount = m_singer_list.GetHeaderCtrl()->GetItemCount();
+	for (int i = nColumnCount - 1; i >= 0; i--)
+		m_singer_list.DeleteColumn(i);
+	int index = 0;
+	RECT rect;
+	m_singer_list.GetWindowRect(&rect);
+	int time_width = 60;
+	int width = (rect.right - rect.left - time_width) / ((sizeof(singercolumnlist) / sizeof(singercolumnlist[0]) - 1));
+	bool first = true;
+	for (const auto& it : singercolumnlist)
+	{
+		if (first)
+		{
+			first = false;
+			m_singer_list.InsertColumn(index++, it, LVCFMT_LEFT, time_width);//插入列
+		}
+		else
+		{
+			m_singer_list.InsertColumn(index++, it, LVCFMT_LEFT, width);//插入列
+		}
+	}
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -231,6 +277,20 @@ LRESULT CSingerRankDlg::OnFoundResult(WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+LRESULT CSingerRankDlg::OnDisplaySingerResult(WPARAM wParam, LPARAM lParam)
+{
+	scoped_ptr<RowData> row_data((RowData*)(lParam));
+
+	// 显示增加一条信息
+	m_griddata.push_back(*row_data.get());
+
+	int nItemCount = m_griddata.size();
+	m_singer_list.SetItemCountEx(nItemCount);
+	m_singer_list.Invalidate();
+	UpdateData(FALSE);
+	return 0;
+}
+
 void CSingerRankDlg::SingerInfoCallback(uint32 roomid, bool result, const RowData& singer_infos)
 {
 	std::string time_string = MakeFormatTimeString(base::Time::Now());
@@ -238,7 +298,8 @@ void CSingerRankDlg::SingerInfoCallback(uint32 roomid, bool result, const RowDat
 	std::wstring* new_wstring = new std::wstring(base::UTF8ToWide(time_string) + L" " + 
 		base::UintToString16(roomid) + L"获取排名" + (result?L"成功":L"失败"));
 	this->PostMessage(WM_USER_MSG, 0, (LPARAM)(new_wstring));
-
+	RowData* row = new RowData(singer_infos);
+	this->PostMessage(WM_USER_SINGER_RESULT, 0, (LPARAM)(row));
 }
 
 void CSingerRankDlg::MessageCallback(const std::wstring& message)
@@ -263,6 +324,14 @@ void CSingerRankDlg::OneSingerInfoCallback(const RowData& singer_info)
 
 void CSingerRankDlg::OnBnClickedBtnClanRetrive()
 {
+	//删除之前的数据
+	if (m_singer_list.GetItemCount()>0)
+	{
+		m_singer_list.SetItemCountEx(0);
+		m_singer_list.Invalidate();
+		m_singer_list.UpdateWindow();
+	}
+
     CString cs_clanid;
     m_edit_clan.GetWindowTextW(cs_clanid);
 
@@ -271,4 +340,25 @@ void CSingerRankDlg::OnBnClickedBtnClanRetrive()
 
     singer_retriver_.GetSingerInfoByClan(clan_id, 
         base::Bind(&CSingerRankDlg::ClanSingerCallback, base::Unretained(this)));
+}
+
+void CSingerRankDlg::DisplayDataToGrid()
+{
+	//生成新的数据缓冲区
+	int nItemCount = m_griddata.size();
+	m_singer_list.SetItemCountEx(nItemCount);
+	m_singer_list.Invalidate();
+}
+
+void CSingerRankDlg::OnLvnGetdispinfoListSummaryData(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LV_DISPINFO* pDispInfo = (LV_DISPINFO*)pNMHDR;
+	LV_ITEM *pItem = &(pDispInfo)->item;
+	if (pItem->mask & LVIF_TEXT)
+	{
+		//使缓冲区数据与表格子项对应
+		pItem->pszText = (LPWSTR)m_griddata[pItem->iItem][pItem->iSubItem].c_str();
+	}
+
+	*pResult = 0;
 }

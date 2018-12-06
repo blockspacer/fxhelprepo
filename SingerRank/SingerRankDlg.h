@@ -24,6 +24,7 @@ public:
         WM_USER_MSG = WM_USER + 1,
         WM_USER_PROGRESS = WM_USER + 2,
         WM_USER_FOUND_RESULT = WM_USER + 3,
+		WM_USER_SINGER_RESULT = WM_USER + 4,
     };
 
     enum ProgressType
@@ -52,16 +53,22 @@ protected:
     afx_msg void OnBnClickedBtnCityRank();
     afx_msg void OnBnClickedBtnClanRetrive();
 
+	afx_msg void OnLvnGetdispinfoListSummaryData(NMHDR *pNMHDR, LRESULT *pResult);
+
 protected:
     LRESULT OnMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnProgress(WPARAM wParam, LPARAM lParam);
     LRESULT OnFoundResult(WPARAM wParam, LPARAM lParam);
+	LRESULT OnDisplaySingerResult(WPARAM wParam, LPARAM lParam);
+
 
 private:
     void SingerInfoCallback(uint32 roomid, bool result, const RowData& singer_infos);
     void MessageCallback(const std::wstring& message);
     void ClanSingerCallback(const std::vector<uint32>& roomids);
     void OneSingerInfoCallback(const RowData& singer_info);
+
+	void DisplayDataToGrid();
 
     PhoneRank phone_rank_;
     SingerRetriver singer_retriver_;
@@ -74,4 +81,6 @@ private:
     CButton m_chk_beautiful;
     CButton m_chk_new_singer;
     CEdit m_edit_clan;
+
+	GridData m_griddata;
 };
