@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="base">
+      <UniqueIdentifier>{840b350e-ea26-4603-a5c5-544a7cb28a7b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -29,6 +32,21 @@
     </ClInclude>
     <ClInclude Include="UserTracker.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Cpp11Test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="base\IncomingTaskQueue.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\MessageLoop.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\Thread.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="base\TaskRunner.h">
+      <Filter>base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +70,21 @@
     </ClCompile>
     <ClCompile Include="echo_client.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Cpp11Test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="base\IncomingTaskQueue.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\MessageLoop.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\Thread.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="base\TaskRunner.cpp">
+      <Filter>base</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

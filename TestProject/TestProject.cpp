@@ -20,6 +20,8 @@
 #include "third_party/chromium/base/command_line.h"
 #include "third_party/chromium/base/at_exit.h"
 
+#include "Cpp11Test.h"
+
 extern void SingleUserSingleRoomTest(WebsocketClientController* tcp_manager);
 void InitAppLog();
 int ZLibTest()
@@ -74,12 +76,16 @@ int _tmain(int argc, _TCHAR* argv[])
     //SingleUserSingleRoomTest(WebsocketClientController.get());
     //tcp_manager->Finalize();
     //ZLibTest();
-    //UserTracker tracker;
-    //tracker.Test();
+    UserTracker tracker;
+    tracker.Test();
 
-    websocket_test();
+    //websocket_test();
 
     NetworkFainalize();
+
+    //Cpp11Test test;
+    //test.Test();
+
 	return 0;
 }
 
@@ -88,7 +94,7 @@ void InitAppLog()
     CommandLine::Init(0, NULL);
     base::FilePath path;
     PathService::Get(base::DIR_APP_DATA, &path);
-    path = path.Append(L"FanXingHelper").Append(L"fanxinghelper.log");
+    path = path.Append(L"testlog").Append(L"test.log");
     logging::LoggingSettings setting;
 #ifdef _DEBUG
     setting.logging_dest = logging::LOG_TO_ALL;

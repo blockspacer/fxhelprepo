@@ -91,13 +91,23 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="base\IncomingTaskQueue.h" />
+    <ClInclude Include="base\MessageLoop.h" />
+    <ClInclude Include="base\TaskRunner.h" />
+    <ClInclude Include="base\Thread.h" />
+    <ClInclude Include="Cpp11Test.h" />
     <ClInclude Include="RobotTest.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UserTracker.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="base\IncomingTaskQueue.cpp" />
+    <ClCompile Include="base\MessageLoop.cpp" />
+    <ClCompile Include="base\TaskRunner.cpp" />
+    <ClCompile Include="base\Thread.cpp" />
     <ClCompile Include="BatchLoginTest.cpp" />
+    <ClCompile Include="Cpp11Test.cpp" />
     <ClCompile Include="echo_client.cpp" />
     <ClCompile Include="RobotTest.cpp" />
     <ClCompile Include="RSATest.cpp" />
