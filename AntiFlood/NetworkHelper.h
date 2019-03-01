@@ -78,6 +78,11 @@ public:
     bool Initialize(const std::string& content);
     void SetThanksFlag(bool enable);
     void SetGiftValue(uint32 gift_value);
+
+    // 设置自己给对自己送礼物的人限制显示其礼物一段时间
+    void SetGiftDisplayValue(uint32 gift_value, uint32 seconds);
+    bool GetBanDisplaySeconds(const RoomGiftInfo601& giftinfo, uint32* seconds, 
+        uint32* ban_gift_value);
     bool GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage);
 private:
 
@@ -93,9 +98,12 @@ private:
 
     std::map<uint32, GiftInfo> giftmap_;
     std::map<uint32, std::string> category_;
+    std::vector<uint32> ban_gift_setting_values_;
 
-    uint32 gift_value_ = 0;
+    uint32 thank_gift_value_ = 0;
     bool thanksflag_ = false;
+    uint32 ban_gift_value_ = 0;
+    uint32 ban_gift_seconds_ = 0;
 };
 
 class NetworkHelper
@@ -157,6 +165,8 @@ public:
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+    bool SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value);
+
     bool SendChatMessage(uint32 roomid, const std::string& message);
 
     void SetRobotHandle(bool enable);

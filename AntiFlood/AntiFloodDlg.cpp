@@ -151,6 +151,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_RECEIVEID, m_edit_receiveid);
     DDX_Control(pDX, IDC_EDIT_COOKIE, m_edit_cookie);
     DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
+    DDX_Control(pDX, IDC_EDIT_GIFT_LEVET, m_edit_gift_level);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -210,6 +211,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_WELCOME_SETTING, &CAntiFloodDlg::OnBnClickedBtnWelcomeSetting)
     ON_BN_CLICKED(IDC_BTN_PHONE_CITY_RANK, &CAntiFloodDlg::OnBnClickedBtnPhoneCityRank)
     ON_BN_CLICKED(IDC_BTN_RECEIVEID, &CAntiFloodDlg::OnBnClickedBtnReceiveid)
+    ON_BN_CLICKED(IDC_BTN_SET_GIFT_DISPLAY_LEVEL, &CAntiFloodDlg::OnBnClickedBtnSetGiftDisplayLevel)
 END_MESSAGE_MAP()
 
 
@@ -1848,4 +1850,14 @@ void CAntiFloodDlg::OnBnClickedBtnReceiveid()
         CString msg = receiveid + L"接收者被加入到自动处理列表中";
         Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg.GetBuffer());
     }
+}
+
+
+void CAntiFloodDlg::OnBnClickedBtnSetGiftDisplayLevel()
+{
+    CString gift_value;
+    m_edit_gift_level.GetWindowTextW(gift_value);
+    uint32 gift_level = 0;
+    base::StringToUint(base::WideToUTF8(gift_value.GetBuffer()), &gift_level);
+    network_->SetRoomGiftNotifyLevel(roomid_, gift_level);
 }

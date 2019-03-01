@@ -363,6 +363,13 @@ bool GiftStrategy::Initialize(const std::string& content)
         giftmap_.insert(std::make_pair(giftinfo.giftid, giftinfo));
     }
 
+    ban_gift_setting_values_.push_back(5);
+    ban_gift_setting_values_.push_back(10);
+    ban_gift_setting_values_.push_back(20);
+    ban_gift_setting_values_.push_back(50);
+    ban_gift_setting_values_.push_back(100);
+    ban_gift_setting_values_.push_back(200);
+
     return true;
 }
 
@@ -373,8 +380,38 @@ void GiftStrategy::SetThanksFlag(bool enable)
 
 void GiftStrategy::SetGiftValue(uint32 gift_value)
 {
-    gift_value_ = gift_value;
+    thank_gift_value_ = gift_value;
 }
+
+void GiftStrategy::SetGiftDisplayValue(uint32 gift_value, uint32 seconds)
+{
+    ban_gift_value_ = gift_value;
+    ban_gift_seconds_ = seconds;
+}
+
+
+bool GiftStrategy::GetBanDisplaySeconds(const RoomGiftInfo601& giftinfo, 
+    uint32* seconds, uint32* ban_gift_value)
+{
+    auto gift_it = giftmap_.find(giftinfo.giftid);
+    if (gift_it == giftmap_.end())
+        return false;
+
+    if (giftinfo.senderid == giftinfo.receiverid)
+    {
+        auto gift_values = gift_it->second.price*giftinfo.gitfnumber;
+        *seconds = ban_gift_seconds_;
+        //auto find_result = std::find_if(ban_gift_setting_values_.begin(), ban_gift_setting_values_.end(), 
+        //    cmp_func(gift_values));
+        //if (find_result != ban_gift_setting_values_.end())
+        //{
+        //    *ban_gift_value = *find_result;
+        //    return true;
+        //}
+    }
+    return false;
+}
+
 
 bool GiftStrategy::GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage)
 {
@@ -386,8 +423,8 @@ bool GiftStrategy::GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* 
     if (it != giftmap_.end()) // 如果在礼物列表能找到，就判断价值，如果找不到直接感谢
     {
         gift_value = giftinfo.gitfnumber * it->second.price;
-        LOG(INFO) << __FUNCTION__ << L"gift value = [" << base::UintToString16(gift_value) << L" / " << base::UintToString16(gift_value_)<< L"]";
-        if (gift_value < gift_value_) // 价值少于设置点的，不发送感谢
+        LOG(INFO) << __FUNCTION__ << L"gift value = [" << base::UintToString16(gift_value) << L" / " << base::UintToString16(thank_gift_value_)<< L"]";
+        if (gift_value < thank_gift_value_) // 价值少于设置点的，不发送感谢
             return false;
     }
 
@@ -653,6 +690,12 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
     return user_->UnbanChat(roomid, enterRoomUserInfo);
 }
 
+// 设置房间星低星币礼物显示
+bool NetworkHelper::SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value)
+{
+    return user_->SetRoomGiftNotifyLevel(roomid, gift_value);
+}
+
 bool NetworkHelper::SendChatMessage(uint32 roomid, const std::string& message)
 {
     return user_->SendChatMessage(roomid, message);
@@ -778,6 +821,13 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
 
         //if (coin_count && !retrive_gift_coin_callback_.is_null())
         //    retrive_gift_coin_callback_.Run(coin_count);
+    }
+
+    // 处理自己给自己送礼物来捣乱的人
+    if (roomgiftinfo601.senderid == roomgiftinfo601.receiverid)
+    {
+        roomgiftinfo601.giftid*roomgiftinfo601.gitfnumber;
+        // TODO:
     }
 
     std::wstring chatmsg;

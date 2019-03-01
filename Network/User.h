@@ -142,6 +142,9 @@ public:
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
 
+    // 设置房间星低星币礼物显示
+    bool SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value);
+
     // 年度相关功能
     bool GetAnnualInfo(std::string* username, uint32 coin_count,
         uint32* award_count, uint32* single_count) const;

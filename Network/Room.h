@@ -92,6 +92,8 @@ public:
     bool BanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(const std::string& cookies, const EnterRoomUserInfo& enterRoomUserInfo);
 
+    bool SetRoomGiftNotifyLevel(const std::string& cookies, uint32 gift_value);
+
     bool SendChatMessage(const std::string& nickname, uint32 richlevel,
         const std::string& message);
 

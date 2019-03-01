@@ -213,4 +213,7 @@ private:
     CEdit m_edit_receiveid;
     CEdit m_edit_cookie;
     CButton m_chk_use_cookie;
+    CEdit m_edit_gift_level;
+public:
+    afx_msg void OnBnClickedBtnSetGiftDisplayLevel();
 };

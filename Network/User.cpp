@@ -855,6 +855,28 @@ bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
     return room->second->UnbanChat(cookies, enterRoomUserInfo);
 }
 
+bool User::SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value)
+{
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    return room->second->SetRoomGiftNotifyLevel(cookies, gift_value);
+}
+
 bool User::GetAnnualInfo(std::string* username, uint32 coin_count,
     uint32* award_count, uint32* single_count) const
 {
