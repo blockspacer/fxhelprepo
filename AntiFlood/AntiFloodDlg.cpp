@@ -670,15 +670,18 @@ bool CAntiFloodDlg::LoginByRequest(const std::wstring& username,
     }
   
     std::string errormsg;
-    //bool result = network_->Login(username, password, verifycode, &errormsg);
+    bool result = false;
 
     if (!use_cookie)
-        return false;
-
-    // 因为目前没绕过验证码，只能使用cookie登录的形式
-    std::string cookiess = base::WideToUTF8(cookie);
-    bool result = network_->LoginWithCookies(cookiess, &errormsg);
-
+    {
+        result = network_->Login(username, password, verifycode, &errormsg);
+    }
+    else
+    {
+        // 因为目前没绕过验证码，只能使用cookie登录的形式
+        std::string cookiess = base::WideToUTF8(cookie);
+        result = network_->LoginWithCookies(cookiess, &errormsg);
+    }
 
     std::wstring message = username + L" 登录";
     if (!result)

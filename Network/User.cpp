@@ -1290,7 +1290,10 @@ bool User::LoginHttps(const std::string& username, const std::string& password,
     queries["state"] = "";
     queries["callback"] = login_callback_string;
     queries["login_ver"] = "1";
+    queries["mobile"] = "";
+    queries["mobile_code"] = "";
     queries["mid"] = kg_mid_;
+    queries["kguser_jv"] = "180925";
 
     HttpResponse response;
     if (!curlWrapper_->Execute(request, &response))
