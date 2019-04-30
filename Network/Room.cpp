@@ -77,6 +77,7 @@ bool Room::Initialize(const scoped_refptr<base::TaskRunner>& runner)
 
 void Room::Finalize()
 {
+    msgid_time_map_.clear();
     messageNotifyManager_->Finalize();
 }
 
@@ -1230,6 +1231,24 @@ void Room::TranferNotify601(const RoomGiftInfo601& roomgiftinfo)
     {
         return;
     }
+
+    // 重复的消息id需要忽略
+    auto find_result = msgid_time_map_.find(roomgiftinfo.msgid);
+    if (find_result != msgid_time_map_.end())
+        return;
+
+    if (msgid_time_map_.size()>100)
+    {
+        int count = 50;
+        for (auto it = msgid_time_map_.begin(); 
+            (it != msgid_time_map_.end()) && (--count);)
+        {
+            msgid_time_map_.erase(it++);
+        }
+    }
+
+    msgid_time_map_.insert(std::make_pair(roomgiftinfo.msgid, roomgiftinfo.time));
+
     if (!notify601transfer_)
         return;
 

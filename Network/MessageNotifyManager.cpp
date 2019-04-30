@@ -342,6 +342,7 @@ bool CommandHandle_601(const Json::Value& jvalue, RoomGiftInfo601* gift_info, st
     // 房间聊天消息
     try
     {
+        int64 msgid = GetInt64FromJsonValue(jvalue, "msgId");
         // 两层connect
         Json::Value jvContent(Json::ValueType::objectValue);
         Json::Value  outside_content = jvalue.get("content", jvContent);
@@ -381,6 +382,7 @@ bool CommandHandle_601(const Json::Value& jvalue, RoomGiftInfo601* gift_info, st
 
         *outmsg = base::WideToUTF8(L"房间礼物数据 ") + tips;
 
+        temp.msgid = msgid;
         temp.time = time;
         temp.roomid = roomid;
         temp.senderid = senderid;
@@ -1141,6 +1143,10 @@ bool MessageNotifyManager::SendChatMessage(const std::string& nickname, uint32 r
 
     std::wstring ws_message = base::UTF8ToWide(message);
     LOG(INFO) << __FUNCTION__ << L" " << base::SysWideToMultiByte(ws_message, 936);
+
+//#ifndef NDEBUG
+//    return true;
+//#endif
 
     runner_->PostTask(FROM_HERE,
         base::Bind(&MessageNotifyManager::DoSendMessage,

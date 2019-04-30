@@ -57,6 +57,8 @@ void RemoveSpace(std::string* str);
 
 uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name);
 
+int64 GetInt64FromJsonValue(const Json::Value& jvalue, const std::string& name);
+
 double GetDoubleFromJsonValue(const Json::Value& jvalue, const std::string& name);
 
 std::string RSADecryptString(std::istream* privFilename, const std::string& ciphertext);

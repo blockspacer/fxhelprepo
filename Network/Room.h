@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <string>
 #include <memory>
 #include "IpProxy.h"
@@ -128,5 +129,8 @@ private:
     std::string server_ip_ = "";
     uint16 port_ = 0;
     std::string soctoken_;// 使用websocket进入房间的协议里面需要这个参数
+
+    // 为了防止服务器出现礼物消息发多次的问题，在一定时间内，不要重复处理同样id的礼物消息
+    std::map<int64, uint32> msgid_time_map_;
 };
 

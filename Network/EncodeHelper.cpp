@@ -378,6 +378,20 @@ uint32 GetInt32FromJsonValue(const Json::Value& jvalue, const std::string& name)
 	return ret;
 }
 
+int64 GetInt64FromJsonValue(const Json::Value& jvalue, const std::string& name)
+{
+    int64 ret = 0;
+    Json::Value jvdefault(Json::ValueType::objectValue);
+    auto getdata = jvalue.get(name, jvdefault);
+    if (!getdata.isString())
+    {
+        return 0;
+    }
+
+    base::StringToInt64(getdata.asString(), &ret);
+    return ret;
+}
+
 double GetDoubleFromJsonValue(const Json::Value& jvalue, const std::string& name)
 {
 	double ret = 0;

@@ -52,6 +52,7 @@ struct RoomChatMessage
 
 struct RoomGiftInfo601
 {
+    int64 msgid;
     uint32 time;
     uint32 roomid;
     uint32 senderid;
