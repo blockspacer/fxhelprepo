@@ -237,12 +237,12 @@ bool User::LoginWithCookies(const std::string& cookies, std::string* errormsg)
 
     cookiesHelper_->SetCookies(cookies);
 
-    //std::string msg;
-    //if (!LoginUServiceGetMyUserDataInfo(&msg))
-    //{
-    //    *errormsg = msg;
-    //    return false;
-    //}
+    std::string msg;
+    if (!LoginUServiceGetMyUserDataInfo(&msg))
+    {
+        *errormsg = msg;
+        return false;
+    }
 
     //if (!LoginIndexServiceGetUserCenter(&msg))
     //{
@@ -1458,7 +1458,7 @@ bool User::LoginHttps(const std::string& username, const std::string& password,
 
 bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
 {
-    const char* GetMyUserDataInfoUrl = "http://fanxing.kugou.com/UServices/UserService/UserService/getMyUserDataInfo";
+    const char* GetMyUserDataInfoUrl = "http://fanxing.kugou.com/biz/UserPlat/UserService/UserService/getCurrentUserInfoV2";
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = GetMyUserDataInfoUrl;
@@ -1546,7 +1546,7 @@ bool User::LoginUServiceGetMyUserDataInfo(std::string* errormsg)
 
 bool User::LoginIndexServiceGetUserCenter(std::string* errormsg)
 {
-    const char* GetMyUserDataInfoUrl = "http://fanxing.kugou.com/Services/IndexService/IndexService/getUserCenter";
+    const char* GetMyUserDataInfoUrl = "http://fx.service.kugou.com/Services/IndexService/IndexService/getUserCenter";
     HttpRequest request;
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.url = GetMyUserDataInfoUrl;
