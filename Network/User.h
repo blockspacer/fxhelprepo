@@ -142,6 +142,9 @@ public:
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
 
+    bool BanEnter(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+    bool UnbanEnter(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+
     // 设置房间星低星币礼物显示
     bool SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value);
 

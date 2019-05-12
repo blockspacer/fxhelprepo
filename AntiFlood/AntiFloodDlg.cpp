@@ -187,7 +187,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE_BLACK, &CAntiFloodDlg::OnBnClickedBtnSelectReverseBlack)
     ON_BN_CLICKED(IDC_BTN_REMOVE_BLACK, &CAntiFloodDlg::OnBnClickedBtnRemoveBlack)
     ON_BN_CLICKED(IDC_BTN_LOAD_BLACK, &CAntiFloodDlg::OnBnClickedBtnLoadBlack)
-    ON_BN_CLICKED(IDC_BTN_ADD_TO_BLACK, &CAntiFloodDlg::OnBnClickedBtnAddToBlack)
+    ON_BN_CLICKED(IDC_BTN_ADD_TO_OBSERVER, &CAntiFloodDlg::OnBnClickedBtnAddToObserver)
     ON_BN_CLICKED(IDC_BTN_SAVE_BLACK, &CAntiFloodDlg::OnBnClickedBtnSaveBlack)
     ON_BN_CLICKED(IDC_BTN_CLEAR_INFO, &CAntiFloodDlg::OnBnClickedBtnClearInfo)
     ON_BN_CLICKED(IDCANCEL, &CAntiFloodDlg::OnBnClickedCancel)
@@ -212,6 +212,9 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_PHONE_CITY_RANK, &CAntiFloodDlg::OnBnClickedBtnPhoneCityRank)
     ON_BN_CLICKED(IDC_BTN_RECEIVEID, &CAntiFloodDlg::OnBnClickedBtnReceiveid)
     ON_BN_CLICKED(IDC_BTN_SET_GIFT_DISPLAY_LEVEL, &CAntiFloodDlg::OnBnClickedBtnSetGiftDisplayLevel)
+
+    ON_BN_CLICKED(IDC_BTN_BAN_ENTER, &CAntiFloodDlg::OnBnClickedBtnBanEnter)
+    ON_BN_CLICKED(IDC_BTN_UNBAN_ENTER, &CAntiFloodDlg::OnBnClickedBtnUnbanEnter)
 END_MESSAGE_MAP()
 
 
@@ -244,7 +247,7 @@ BOOL CAntiFloodDlg::OnInitDialog()
     // 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
     //  执行此操作
 
-    SetWindowText(L"房间管理工具6.1_支持pk房");
+    SetWindowText(L"房间管理工具6.2_支持黑名单设置");
 
     SetIcon(m_hIcon, TRUE);            // 设置大图标
     SetIcon(m_hIcon, FALSE);        // 设置小图标
@@ -874,6 +877,55 @@ bool CAntiFloodDlg::SendChatMessage_(uint32 roomid, const std::wstring& message)
     return network_->SendChatMessage(roomid, utf8message);
 }
 
+
+bool CAntiFloodDlg::BanEnter_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
+{
+    if (!network_)
+        return false;
+
+    for (const auto& enterRoomUserInfo : enterRoomUserInfos)
+    {
+        std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
+        if (!network_->BanEnter(
+            enterRoomUserInfo.roomid, enterRoomUserInfo))
+        {
+            msg += L"禁止进入房间失败!权限不够或网络错误!";
+        }
+        else
+        {
+            // 把要删除的消息发到日志记录列表上, id = 2 是用户id                
+            msg += L"被禁止进入房间";
+        }
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg);
+    }
+
+    return true;
+}
+
+bool CAntiFloodDlg::UnbanEnter_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos)
+{
+    if (!network_)
+        return false;
+
+    for (const auto& enterRoomUserInfo : enterRoomUserInfos)
+    {
+        std::wstring msg = base::UTF8ToWide(enterRoomUserInfo.nickname);
+        if (!network_->UnbanEnter(
+            enterRoomUserInfo.roomid, enterRoomUserInfo))
+        {
+            msg += L"禁止进入房间失败!权限不够或网络错误!";
+        }
+        else
+        {
+            // 把要删除的消息发到日志记录列表上, id = 2 是用户id                
+            msg += L"被恢复进入房间";
+        }
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, msg);
+    }
+
+    return true;
+}
+
 // 界面线程执行
 LRESULT CAntiFloodDlg::OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam)
 {
@@ -1341,8 +1393,7 @@ void CAntiFloodDlg::OnBnClickedBtnLoadBlack()
     this->PostMessage(WM_USER_ADD_TO_BLACK_LIST, 0, 0);
 }
 
-
-void CAntiFloodDlg::OnBnClickedBtnAddToBlack()
+void CAntiFloodDlg::OnBnClickedBtnAddToObserver()
 {
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectViewers(&enterRoomUserInfos);
@@ -1870,4 +1921,37 @@ void CAntiFloodDlg::OnBnClickedBtnSetGiftDisplayLevel()
     uint32 gift_level = 0;
     base::StringToUint(base::WideToUTF8(gift_value.GetBuffer()), &gift_level);
     network_->SetRoomGiftNotifyLevel(roomid_, gift_level);
+}
+
+void CAntiFloodDlg::OnBnClickedBtnBanEnter()
+{
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        return;
+    }
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectViewers(&enterRoomUserInfos);
+    BanEnter_(enterRoomUserInfos);
+}
+
+
+void CAntiFloodDlg::OnBnClickedBtnUnbanEnter()
+{
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        return;
+    }
+    std::vector<EnterRoomUserInfo> enterRoomUserInfos;
+    GetSelectViewers(&enterRoomUserInfos);
+    UnbanEnter_(enterRoomUserInfos);
 }

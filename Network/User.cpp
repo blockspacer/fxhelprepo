@@ -855,6 +855,113 @@ bool User::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
     return room->second->UnbanChat(cookies, enterRoomUserInfo);
 }
 
+bool User::BanEnter(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
+    std::string url = std::string("https://fx.service.kugou.com");
+    url += "/UServices/RoomService/RoomManageService/kickOutAnyForStar";
+    HttpRequest request;
+    request.url = url;
+    request.queries["args"] = "[" + base::IntToString(enterRoomUserInfo.userid) + "]";
+    request.queries["jsonpcallback"] = "jsonpcallback_httpsfxservicekugoucomUServicesRoomServiceRoomManageServicekickOutAnyForStarargs" + base::IntToString(enterRoomUserInfo.userid);
+    request.queries["_"] = GetNowTimeString();
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/index.php?action=userBlackList";
+    request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string data(response.content.begin(), response.content.end());
+    //解析json数据
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(data, rootdata, false))
+    {
+        return false;
+    }
+
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
+    if (status != 1)
+    {
+        return false;
+    }
+    return true;
+}
+
+bool User::UnbanEnter(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    auto room = rooms_.find(roomid);
+    if (room == rooms_.end())
+    {
+        return false;
+    }
+    std::vector<std::string> keys;
+    keys.push_back("KuGoo");
+    keys.push_back("_fx_coin");
+    keys.push_back("_fxNickName");
+    keys.push_back("_fxRichLevel");
+    keys.push_back("FANXING_COIN");
+    keys.push_back("FANXING");
+    keys.push_back("fxClientInfo");
+    keys.push_back("LoginCheckCode");
+    keys.push_back("kg_mid");
+    std::string cookies = cookiesHelper_->GetCookies(keys);
+
+    std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
+    std::string url = std::string("https://fx.service.kugou.com");
+    url += "/UServices/RoomService/RoomManageService/undoKickOutAnyForStar";
+    HttpRequest request;
+    request.url = url;
+    request.queries["args"] = "[" + base::IntToString(enterRoomUserInfo.userid) + "]";
+    request.queries["jsonpcallback"] = "jsonpcallback_httpsfxservicekugoucomUServicesRoomServiceRoomManageServiceundoKickOutAnyForStarargs" + base::IntToString(enterRoomUserInfo.userid);
+    request.queries["_"] = GetNowTimeString();
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = "http://fanxing.kugou.com/index.php?action=userBlackList";
+    request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string data(response.content.begin(), response.content.end());
+    //解析json数据
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(data, rootdata, false))
+    {
+        return false;
+    }
+
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
+    if (status != 1)
+    {
+        return false;
+    }
+    return true;
+}
+
 bool User::SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value)
 {
     auto room = rooms_.find(roomid);

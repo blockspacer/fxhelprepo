@@ -165,6 +165,10 @@ public:
         const EnterRoomUserInfo& enterRoomUserInfo);
     bool BanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
     bool UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+
+    bool BanEnter(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+    bool UnbanEnter(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo);
+
     bool SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value);
 
     bool SendChatMessage(uint32 roomid, const std::string& message);

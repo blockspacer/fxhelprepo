@@ -141,6 +141,9 @@ private:
     bool UnbanChat_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos);
     bool SendChatMessage_(uint32 roomid, const std::wstring& message);
 
+    bool BanEnter_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos);
+    bool UnbanEnter_(const std::vector<EnterRoomUserInfo>& enterRoomUserInfos);
+
     HICON m_hIcon;
     CImage image;
 
@@ -216,4 +219,7 @@ private:
     CEdit m_edit_gift_level;
 public:
     afx_msg void OnBnClickedBtnSetGiftDisplayLevel();
+    afx_msg void OnBnClickedBtnAddToObserver();
+    afx_msg void OnBnClickedBtnBanEnter();
+    afx_msg void OnBnClickedBtnUnbanEnter();
 };

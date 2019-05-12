@@ -690,6 +690,16 @@ bool NetworkHelper::UnbanChat(uint32 roomid, const EnterRoomUserInfo& enterRoomU
     return user_->UnbanChat(roomid, enterRoomUserInfo);
 }
 
+bool NetworkHelper::BanEnter(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    return user_->BanEnter(roomid, enterRoomUserInfo);
+}
+
+bool NetworkHelper::UnbanEnter(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
+{
+    return user_->UnbanEnter(roomid, enterRoomUserInfo);
+}
+
 // 设置房间星低星币礼物显示
 bool NetworkHelper::SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value)
 {
