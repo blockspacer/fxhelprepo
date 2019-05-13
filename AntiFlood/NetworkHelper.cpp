@@ -276,6 +276,8 @@ bool AntiStrategy::RemoveReceiveId(const std::string& receiveid)
 
 GiftStrategy::GiftStrategy()
     :handle_send_gift_to_self(true)
+    , ban_gift_seconds_(60)
+    , ban_gift_value_(20)
 {
 
 }
@@ -401,13 +403,17 @@ bool GiftStrategy::GetBanDisplaySeconds(const RoomGiftInfo601& giftinfo,
     {
         auto gift_values = gift_it->second.price*giftinfo.gitfnumber;
         *seconds = ban_gift_seconds_;
-        //auto find_result = std::find_if(ban_gift_setting_values_.begin(), ban_gift_setting_values_.end(), 
-        //    cmp_func(gift_values));
-        //if (find_result != ban_gift_setting_values_.end())
-        //{
-        //    *ban_gift_value = *find_result;
-        //    return true;
-        //}
+
+        *ban_gift_value = ban_gift_value_;
+
+        for (auto value : ban_gift_setting_values_)
+        {
+            if (gift_values < value)
+            {
+                *ban_gift_value = value;
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -845,20 +851,19 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
     }
 
     // 处理自己给自己送礼物来捣乱的人
-    if (roomgiftinfo601.senderid == roomgiftinfo601.receiverid)
+    if (giftStrategy_->GetSendToSelfHandle() &&
+        (roomgiftinfo601.senderid == roomgiftinfo601.receiverid))
     {
-        roomgiftinfo601.giftid*roomgiftinfo601.gitfnumber;
-        // TODO:
-    }
-
-    if (giftStrategy_->GetSendToSelfHandle())
-    {
-        // 处理自己给自己送礼物的情况
-        if (roomgiftinfo601.senderid == roomgiftinfo601.receiverid)
+        uint32 gift_value = 0;
+        uint32 ban_second = 0;
+            
+        if (giftStrategy_->GetBanDisplaySeconds(roomgiftinfo601, &ban_second, &gift_value))
         {
-            uint32 gift_value = roomgiftinfo601.gitfnumber;
-
-            SetRoomGiftNotifyLevel(roomid_, gift_level);
+            SetRoomGiftNotifyLevel(roomid_, gift_value);
+            workThread_->message_loop_proxy()->PostDelayedTask(
+                FROM_HERE, base::Bind(
+                base::IgnoreResult(&NetworkHelper::SetRoomGiftNotifyLevel),
+                base::Unretained(this), roomid_, 0), base::TimeDelta::FromSeconds(ban_second));
         }
     }
 

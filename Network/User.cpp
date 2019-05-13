@@ -981,7 +981,41 @@ bool User::SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value)
     keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
-    return room->second->SetRoomGiftNotifyLevel(cookies, gift_value);
+    std::string url = std::string("https://fx.service.kugou.com");
+    url += "/UServices/GiftService/GiftService/setShowLimit";
+    HttpRequest request;
+    request.url = url;
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.referer = std::string("http://fanxing.kugou.com/") +
+        base::UintToString(roomid);
+    request.queries["args"] = "[" + base::IntToString(static_cast<int>(gift_value)) + "]";
+    request.queries["jsonpcallback"] = "jsonphttpsfxservicekugoucomUServicesGiftServiceGiftServicesetShowLimitargs0jsonpcallback";
+    request.cookies = cookies;
+    if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
+        request.ipproxy = ipproxy_;
+
+    HttpResponse response;
+    if (!curlWrapper_->Execute(request, &response))
+    {
+        return false;
+    }
+
+    std::string data(response.content.begin(), response.content.end());
+    //½âÎöjsonÊý¾Ý
+    std::string json = PickJson(data);
+    Json::Reader reader;
+    Json::Value rootdata(Json::objectValue);
+    if (!reader.parse(json, rootdata, false))
+    {
+        return false;
+    }
+
+    uint32 status = GetInt32FromJsonValue(rootdata, "status");
+    if (status != 1)
+    {
+        return false;
+    }
+    return true;
 }
 
 bool User::GetAnnualInfo(std::string* username, uint32 coin_count,

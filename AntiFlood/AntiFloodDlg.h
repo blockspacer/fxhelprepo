@@ -226,4 +226,11 @@ private:
 
     // 处理自己给自己送礼物的黑粉
     CButton m_chk_send_gift_to_self;
+public:
+    afx_msg void OnBnClickedBtnSetGiftDisplay10();
+    afx_msg void OnBnClickedBtnSetGiftDisplay20();
+    afx_msg void OnBnClickedBtnSetGiftDisplay50();
+    afx_msg void OnBnClickedBtnSetGiftDisplay100();
+    afx_msg void OnBnClickedBtnSetGiftDisplay200();
+    afx_msg void OnBnClickedBtnCancelBanDisplayGift();
 };

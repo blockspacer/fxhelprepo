@@ -217,6 +217,12 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_BAN_ENTER, &CAntiFloodDlg::OnBnClickedBtnBanEnter)
     ON_BN_CLICKED(IDC_BTN_UNBAN_ENTER, &CAntiFloodDlg::OnBnClickedBtnUnbanEnter)
     ON_BN_CLICKED(IDC_CHK_SEND_GIFT_TO_SELF, &CAntiFloodDlg::OnBnClickedChkSendGiftToSelf)
+    ON_BN_CLICKED(IDC_BTN_SET_GIFT_DISPLAY_10, &CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay10)
+    ON_BN_CLICKED(IDC_BTN_SET_GIFT_DISPLAY_20, &CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay20)
+    ON_BN_CLICKED(IDC_BTN_SET_GIFT_DISPLAY_50, &CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay50)
+    ON_BN_CLICKED(IDC_BTN_SET_GIFT_DISPLAY_100, &CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay100)
+    ON_BN_CLICKED(IDC_BTN_SET_GIFT_DISPLAY_200, &CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay200)
+    ON_BN_CLICKED(IDC_BTN_CANCEL_BAN_DISPLAY_GIFT, &CAntiFloodDlg::OnBnClickedBtnCancelBanDisplayGift)
 END_MESSAGE_MAP()
 
 
@@ -1941,7 +1947,6 @@ void CAntiFloodDlg::OnBnClickedBtnBanEnter()
     BanEnter_(enterRoomUserInfos);
 }
 
-
 void CAntiFloodDlg::OnBnClickedBtnUnbanEnter()
 {
     if (!network_)
@@ -1957,7 +1962,6 @@ void CAntiFloodDlg::OnBnClickedBtnUnbanEnter()
     GetSelectViewers(&enterRoomUserInfos);
     UnbanEnter_(enterRoomUserInfos);
 }
-
 
 void CAntiFloodDlg::OnBnClickedChkSendGiftToSelf()
 {
@@ -1975,4 +1979,58 @@ void CAntiFloodDlg::OnBnClickedChkSendGiftToSelf()
     }
 
     giftStrategy_->SetSendToSelfHandle(handle_send_to_self);
+}
+
+void CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay10()
+{
+    CString strRoomid;
+    GetDlgItemText(IDC_EDIT_NAV, strRoomid);
+    uint32 roomid = 0;
+    base::StringToUint(strRoomid.GetBuffer(), &roomid);
+    network_->SetRoomGiftNotifyLevel(roomid, 10);
+}
+
+void CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay20()
+{
+    CString strRoomid;
+    GetDlgItemText(IDC_EDIT_NAV, strRoomid);
+    uint32 roomid = 0;
+    base::StringToUint(strRoomid.GetBuffer(), &roomid);
+    network_->SetRoomGiftNotifyLevel(roomid, 20);
+}
+
+void CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay50()
+{
+    CString strRoomid;
+    GetDlgItemText(IDC_EDIT_NAV, strRoomid);
+    uint32 roomid = 0;
+    base::StringToUint(strRoomid.GetBuffer(), &roomid);
+    network_->SetRoomGiftNotifyLevel(roomid, 50);
+}
+
+void CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay100()
+{
+    CString strRoomid;
+    GetDlgItemText(IDC_EDIT_NAV, strRoomid);
+    uint32 roomid = 0;
+    base::StringToUint(strRoomid.GetBuffer(), &roomid);
+    network_->SetRoomGiftNotifyLevel(roomid, 100);
+}
+
+void CAntiFloodDlg::OnBnClickedBtnSetGiftDisplay200()
+{
+    CString strRoomid;
+    GetDlgItemText(IDC_EDIT_NAV, strRoomid);
+    uint32 roomid = 0;
+    base::StringToUint(strRoomid.GetBuffer(), &roomid);
+    network_->SetRoomGiftNotifyLevel(roomid, 200);
+}
+
+void CAntiFloodDlg::OnBnClickedBtnCancelBanDisplayGift()
+{
+    CString strRoomid;
+    GetDlgItemText(IDC_EDIT_NAV, strRoomid);
+    uint32 roomid = 0;
+    base::StringToUint(strRoomid.GetBuffer(), &roomid);
+    network_->SetRoomGiftNotifyLevel(roomid, 0);
 }
