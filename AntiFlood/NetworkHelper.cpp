@@ -274,8 +274,8 @@ bool AntiStrategy::RemoveReceiveId(const std::string& receiveid)
     return true;
 }
 
-
 GiftStrategy::GiftStrategy()
+    :handle_send_gift_to_self(true)
 {
 
 }
@@ -435,6 +435,17 @@ bool GiftStrategy::GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* 
     chatmessage->assign(thanks.begin(), thanks.end());
 
     return true;
+}
+
+
+void GiftStrategy::SetSendToSelfHandle(bool handle)
+{
+    handle_send_gift_to_self = handle;
+}
+
+bool GiftStrategy::GetSendToSelfHandle() const
+{
+    return handle_send_gift_to_self;
 }
 
 NetworkHelper::NetworkHelper()
@@ -838,6 +849,17 @@ void NetworkHelper::NotifyCallback601(uint32 roomid, const RoomGiftInfo601& room
     {
         roomgiftinfo601.giftid*roomgiftinfo601.gitfnumber;
         // TODO:
+    }
+
+    if (giftStrategy_->GetSendToSelfHandle())
+    {
+        // 处理自己给自己送礼物的情况
+        if (roomgiftinfo601.senderid == roomgiftinfo601.receiverid)
+        {
+            uint32 gift_value = roomgiftinfo601.gitfnumber;
+
+            SetRoomGiftNotifyLevel(roomid_, gift_level);
+        }
     }
 
     std::wstring chatmsg;

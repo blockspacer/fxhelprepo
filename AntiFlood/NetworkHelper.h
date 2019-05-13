@@ -84,6 +84,10 @@ public:
     bool GetBanDisplaySeconds(const RoomGiftInfo601& giftinfo, uint32* seconds, 
         uint32* ban_gift_value);
     bool GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage);
+
+    void SetSendToSelfHandle(bool handle);
+    bool GetSendToSelfHandle() const;
+
 private:
 
     struct GiftInfo
@@ -104,6 +108,8 @@ private:
     bool thanksflag_ = false;
     uint32 ban_gift_value_ = 0;
     uint32 ban_gift_seconds_ = 0;
+
+    bool handle_send_gift_to_self = true;
 };
 
 class NetworkHelper

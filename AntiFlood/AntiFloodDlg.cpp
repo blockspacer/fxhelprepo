@@ -152,6 +152,7 @@ void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
     DDX_Control(pDX, IDC_EDIT_COOKIE, m_edit_cookie);
     DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
     DDX_Control(pDX, IDC_EDIT_GIFT_LEVET, m_edit_gift_level);
+    DDX_Control(pDX, IDC_CHK_SEND_GIFT_TO_SELF, m_chk_send_gift_to_self);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -215,6 +216,7 @@ BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
 
     ON_BN_CLICKED(IDC_BTN_BAN_ENTER, &CAntiFloodDlg::OnBnClickedBtnBanEnter)
     ON_BN_CLICKED(IDC_BTN_UNBAN_ENTER, &CAntiFloodDlg::OnBnClickedBtnUnbanEnter)
+    ON_BN_CLICKED(IDC_CHK_SEND_GIFT_TO_SELF, &CAntiFloodDlg::OnBnClickedChkSendGiftToSelf)
 END_MESSAGE_MAP()
 
 
@@ -1954,4 +1956,23 @@ void CAntiFloodDlg::OnBnClickedBtnUnbanEnter()
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectViewers(&enterRoomUserInfos);
     UnbanEnter_(enterRoomUserInfos);
+}
+
+
+void CAntiFloodDlg::OnBnClickedChkSendGiftToSelf()
+{
+    bool handle_send_to_self = !!m_chk_send_gift_to_self.GetCheck();
+    if (!network_)
+        return;
+
+    std::wstring privilegeMsg;
+    if (!network_->GetActionPrivilege(&privilegeMsg))
+    {
+        m_chk_robot.SetCheck(FALSE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
+        Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, privilegeMsg);
+        return;
+    }
+
+    giftStrategy_->SetSendToSelfHandle(handle_send_to_self);
 }

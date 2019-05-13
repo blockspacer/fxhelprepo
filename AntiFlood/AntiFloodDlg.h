@@ -119,6 +119,12 @@ protected:
 
     afx_msg void OnBnClickedBtnReceiveid();
 
+    afx_msg void OnBnClickedBtnSetGiftDisplayLevel();
+    afx_msg void OnBnClickedBtnAddToObserver();
+    afx_msg void OnBnClickedBtnBanEnter();
+    afx_msg void OnBnClickedBtnUnbanEnter();
+    afx_msg void OnBnClickedChkSendGiftToSelf();
+
     LRESULT OnNotifyMessage(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDataToViewerList(WPARAM wParam, LPARAM lParam);
     LRESULT OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam);
@@ -217,9 +223,7 @@ private:
     CEdit m_edit_cookie;
     CButton m_chk_use_cookie;
     CEdit m_edit_gift_level;
-public:
-    afx_msg void OnBnClickedBtnSetGiftDisplayLevel();
-    afx_msg void OnBnClickedBtnAddToObserver();
-    afx_msg void OnBnClickedBtnBanEnter();
-    afx_msg void OnBnClickedBtnUnbanEnter();
+
+    // 处理自己给自己送礼物的黑粉
+    CButton m_chk_send_gift_to_self;
 };
