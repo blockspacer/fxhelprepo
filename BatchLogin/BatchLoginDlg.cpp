@@ -10,7 +10,7 @@
 #include "UserRoomManager.h"
 #include "Network/WebsocketClientController.h"
 #include "Network/TcpClient.h"
-#include "BlacklistHelper.h"
+#include "common/BlacklistHelper.h"
 #include "afxdialogex.h"
 
 #include "third_party/chromium/base/strings/string_number_conversions.h"
@@ -58,6 +58,7 @@ namespace{
 CBatchLoginDlg::CBatchLoginDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CBatchLoginDlg::IDD, pParent)
     , userRoomManager_(nullptr)
+    , blacklistHelper_(new BlacklistHelper())
 {
     tcpManager_.reset(new WebsocketClientController());
     userRoomManager_.reset(new UserRoomManager(tcpManager_.get()));
@@ -99,6 +100,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_MESSAGE(WM_USER_NOTIFY_MESSAGE, &CBatchLoginDlg::OnNotifyMessage)
     ON_MESSAGE(WM_USER_USER_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToUserList)
     ON_MESSAGE(WM_USER_ROOM_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToRoomList)
+    ON_MESSAGE(WM_USER_ADD_TO_BLACK_LIST, &CBatchLoginDlg::OnDisplayDtatToBlackList)
 
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CBatchLoginDlg::OnBnClickedBtnLogin)
     ON_BN_CLICKED(IDC_BTN_SAVE_USER_PWD_COOKIE, &CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie)
@@ -714,22 +716,22 @@ void CBatchLoginDlg::OnBnClickedBtnSingelike()
 
 void CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname()
 {
-    BlacklistHelper blacklist_helper;
+    //BlacklistHelper blacklist_helper;
 
-    std::map<uint32, BlackInfo> blackInfoMap;
-    blacklist_helper.LoadFromFile(&blackInfoMap);
+    //std::map<uint32, BlackInfo> blackInfoMap;
+    //blacklist_helper.LoadFromFile(&blackInfoMap);
 
-    std::vector<std::wstring> name_list;
-    for (const auto& black : blackInfoMap)
-    {
-        name_list.push_back(base::UTF8ToWide(black.second.nickname));
-    }
+    //std::vector<std::wstring> name_list;
+    //for (const auto& black : blackInfoMap)
+    //{
+    //    name_list.push_back(base::UTF8ToWide(black.second.nickname));
+    //}
 
-    std::vector<std::wstring> users;
-    GetSelectUsers(&users);
+    //std::vector<std::wstring> users;
+    //GetSelectUsers(&users);
 
-    userRoomManager_->SetBreakRequest(false);
-    userRoomManager_->BatchChangeNicknameList(users, name_list);
+    //userRoomManager_->SetBreakRequest(false);
+    //userRoomManager_->BatchChangeNicknameList(users, name_list);
 }
 
 
@@ -805,7 +807,7 @@ void CBatchLoginDlg::OnBnClickedBtnRemoveBlack()
         {
             // 把要删除的消息发到日志记录列表上
             CString itemtext = m_ListCtrl_Blacks.GetItemText(i, 2);
-            itemtext + L"被从黑名单列表中删除";
+            itemtext += L"被从黑名单列表中删除";
             Notify(itemtext.GetBuffer());
 
             // 删除已经勾选的记录
@@ -817,41 +819,43 @@ void CBatchLoginDlg::OnBnClickedBtnRemoveBlack()
 
 void CBatchLoginDlg::OnBnClickedBtnLoadBlack()
 {
-    //std::vector<RowData> rowdatas;
-    //if (!blacklistHelper_->LoadBlackList(&rowdatas))
-    //{
-    //    CString itemtext = L"读取黑名单失败";
-    //    Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, itemtext.GetBuffer());
-    //    return;
-    //}
+    CString FilePathName;
+    CFileDialog dlg(TRUE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+        NULL,
+        NULL,
+        OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+        (LPCTSTR)_TEXT("TXT Files (*.txt)|*.txt|All Files (*.*)|*.*||"),
+        NULL);
 
-    //blackRowdataMutex_.lock();
-    //for (const auto& rowdata : rowdatas)
-    //{
-    //    assert(rowdata.size() == 2);
-    //    blackRowdataQueue_.push_back(rowdata);
-    //}
-    //blackRowdataMutex_.unlock();
+    if (dlg.DoModal() != IDOK)
+        return;
 
-    //this->PostMessage(WM_USER_ADD_TO_BLACK_LIST, 0, 0);
+    FilePathName = dlg.GetPathName(); //文件名保存在了FilePathName里
+    if (FilePathName.IsEmpty())
+        return;
+
+    std::vector<RowData> rowdatas;
+    if (!blacklistHelper_->LoadBlackList(FilePathName.GetBuffer(), &rowdatas))
+    {
+        CString itemtext = L"读取黑名单失败";
+        Notify(itemtext.GetBuffer());
+        return;
+    }
+
+    blackRowdataMutex_.lock();
+    for (const auto& rowdata : rowdatas)
+    {
+        assert(rowdata.size() == 2);
+        blackRowdataQueue_.push_back(rowdata);
+    }
+
+    blackRowdataMutex_.unlock();
+    this->PostMessage(WM_USER_ADD_TO_BLACK_LIST, 0, 0);
 }
 
 
 void CBatchLoginDlg::OnBnClickedBtnSaveBlack()
 {
-    //std::vector<EnterRoomUserInfo> enterRoomUserInfos;
-    //GetSelectBlacks(&enterRoomUserInfos);
-
-    //std::vector<RowData> rowdatas;
-    //for (const auto& enterRoomUserInfo : enterRoomUserInfos)
-    //{
-    //    RowData rowdata;
-    //    rowdata.push_back(base::UTF8ToWide(enterRoomUserInfo.nickname));
-    //    rowdata.push_back(base::UintToString16(enterRoomUserInfo.userid));
-    //    rowdatas.push_back(rowdata);
-    //}
-
-    //blacklistHelper_->SaveBlackList(rowdatas);
 }
 
 
@@ -922,4 +926,43 @@ void CBatchLoginDlg::OnBnClickedBtnUnbanEnter()
     //std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     //GetSelectBlacks(&enterRoomUserInfos);
     //UnbanEnter_(enterRoomUserInfos);
+}
+
+LRESULT CBatchLoginDlg::OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam)
+{
+    if (blackRowdataQueue_.empty())
+        return 0;
+
+    std::vector<RowData> rowdatas;
+    blackRowdataMutex_.lock();
+    rowdatas.swap(blackRowdataQueue_);
+    blackRowdataMutex_.unlock();
+
+    int itemcount = m_ListCtrl_Blacks.GetItemCount();
+
+    for (uint32 i = 0; i < rowdatas.size(); ++i)
+    {
+        bool exist = false;
+        // 检测是否存在相同用户id
+        for (int index = 0; index < itemcount; index++)
+        {
+            CString text = m_ListCtrl_Blacks.GetItemText(index, 1);
+            if (rowdatas[i][1].compare(text.GetBuffer()) == 0) // 相同用户id
+            {
+                exist = true;
+                break;
+            }
+        }
+
+        if (!exist) // 如果不存在，需要插入新数据
+        {
+            int nitem = m_ListCtrl_Blacks.InsertItem(itemcount + i, rowdatas[i][0].c_str());
+            for (uint32 j = 0; j < rowdatas[i].size(); ++j)
+            {
+                m_ListCtrl_Blacks.SetItemText(nitem, j, rowdatas[i][j].c_str());
+            }
+        }
+    }
+
+    return 0;
 }

@@ -25,11 +25,13 @@ public:
     bool Initialize();
     void Finalize();
 
-    bool LoadBlackList(std::vector<RowData>* rowdata);
-    bool SaveBlackList(const std::vector<RowData>& rowdata);
+    bool LoadBlackList(const std::wstring& path_filename, std::vector<RowData>* rowdata);
+    bool SaveBlackList(const std::wstring& path_filename, const std::vector<RowData>& rowdata);
+    bool LoadFromFile(
+        const std::wstring& path_filename, std::map<uint32, BlackInfo>* blackInfoMap);
 private:
-    bool LoadFromFile(std::map<uint32, BlackInfo>* blackInfoMap);
-    bool SaveToFile(const std::map<uint32, BlackInfo>& blackInfoMap) const;
+    bool SaveToFile(const std::wstring& path_filename, 
+        const std::map<uint32, BlackInfo>& blackInfoMap) const;
 
     std::map<uint32, BlackInfo> blackInfoMap_;
 };

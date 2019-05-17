@@ -14,6 +14,7 @@
 
 class UserRoomManager;
 class WebsocketClientController;
+class BlacklistHelper;
 // CBatchLoginDlg 对话框
 class CBatchLoginDlg : public CDialogEx
 {
@@ -29,6 +30,8 @@ public:
         WM_USER_NOTIFY_MESSAGE = WM_USER + 1,
         WM_USER_USER_LIST_INFO = WM_USER + 2,
         WM_USER_ROOM_LIST_INFO = WM_USER + 3,
+        WM_USER_ADD_TO_BLACK_LIST = WM_USER + 4,
+        WM_USER_ADD_RETRIVE_GIFT_COIN = WM_USER + 5,
     };
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 支持
@@ -103,6 +106,10 @@ private:
     CEdit m_edit_chat_message;
 
     CListCtrl m_ListCtrl_Blacks;
+    std::unique_ptr<BlacklistHelper> blacklistHelper_;
+
+    std::vector<RowData> blackRowdataQueue_;
+    std::mutex blackRowdataMutex_;
 public:
     afx_msg void OnBnClickedBtnSelectAllBlack();
     afx_msg void OnBnClickedBtnSelectReverseBlack();
@@ -115,4 +122,6 @@ public:
     afx_msg void OnBnClickedBtnUnsilentBlack();
     afx_msg void OnBnClickedBtnBanEnter();
     afx_msg void OnBnClickedBtnUnbanEnter();
+
+    LRESULT OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam);
 };

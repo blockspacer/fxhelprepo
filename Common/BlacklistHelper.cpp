@@ -45,10 +45,11 @@ void BlacklistHelper::Finalize()
     return;
 }
 
-bool BlacklistHelper::LoadBlackList(std::vector<RowData>* rowdatas)
+bool BlacklistHelper::LoadBlackList(const std::wstring& path_filename, 
+    std::vector<RowData>* rowdatas)
 {
     std::map<uint32, BlackInfo> blackInfoMap;
-    if (!LoadFromFile(&blackInfoMap))
+    if (!LoadFromFile(path_filename, &blackInfoMap))
         return false;
     
     for (const auto& blackInfo : blackInfoMap)
@@ -59,7 +60,8 @@ bool BlacklistHelper::LoadBlackList(std::vector<RowData>* rowdatas)
     return true;
 }
 
-bool BlacklistHelper::SaveBlackList(const std::vector<RowData>& rowdatas)
+bool BlacklistHelper::SaveBlackList(const std::wstring& path_filename, 
+    const std::vector<RowData>& rowdatas)
 {
     std::map<uint32, BlackInfo> blackInfoMap;
     for (const auto& rowdata : rowdatas)
@@ -75,31 +77,22 @@ bool BlacklistHelper::SaveBlackList(const std::vector<RowData>& rowdatas)
         blackInfoMap[blackInfo.userid] = blackInfo;
     }
 
-    bool result = SaveToFile(blackInfoMap);
+    bool result = SaveToFile(path_filename, blackInfoMap);
     return result;
 }
 
-bool BlacklistHelper::LoadFromFile(std::map<uint32, BlackInfo>* blackInfoMap)
+bool BlacklistHelper::LoadFromFile(const std::wstring& path_filename, 
+    std::map<uint32, BlackInfo>* blackInfoMap)
 {
     if (!blackInfoMap)
         return false;
 
-    base::FilePath dirPath;
-    bool result = PathService::Get(base::DIR_EXE, &dirPath);
-    std::wstring filename = L"Blacklist.txt";
-    base::FilePath pathname = dirPath.Append(filename);
+    base::FilePath dirPath(path_filename);
 
-    std::ifstream ovrifs;
-    ovrifs.open(pathname.value());
-    if (!ovrifs)
+    std::string data;
+    if (!base::ReadFileToString(dirPath, &data))
         return false;
-
-    std::stringstream ss;
-    ss << ovrifs.rdbuf();
-    if (ss.str().empty())
-        return false;
-
-    std::string data = ss.str();
+    
     try
     {
         Json::Reader reader;
@@ -133,12 +126,12 @@ bool BlacklistHelper::LoadFromFile(std::map<uint32, BlackInfo>* blackInfoMap)
     return true;
 }
 
-bool BlacklistHelper::SaveToFile(
+bool BlacklistHelper::SaveToFile(const std::wstring& path_filename,
     const std::map<uint32, BlackInfo>& blackInfoMap) const
 {
     base::FilePath dirPath;
     bool result = PathService::Get(base::DIR_EXE, &dirPath);
-    std::wstring filename = L"Blacklist.txt";
+    std::wstring filename = path_filename;
     base::FilePath pathname = dirPath.Append(filename);
 
     Json::FastWriter writer;

@@ -59,7 +59,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir);$(BOOST_DIR_MICHAEL)\lib32-msvc</AdditionalLibraryDirectories>
-      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib;libevent.lib</AdditionalDependencies>
+      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib;libevent.lib;common.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -88,7 +88,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir);$(BOOST_DIR_MICHAEL)\lib32-msvc</AdditionalLibraryDirectories>
-      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib;libevent.lib</AdditionalDependencies>
+      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;Wldap32.lib;libevent.lib;common.lib</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -107,7 +107,6 @@
   <ItemGroup>
     <ClInclude Include="BatchLogin.h" />
     <ClInclude Include="BatchLoginDlg.h" />
-    <ClInclude Include="BlacklistHelper.h" />
     <ClInclude Include="MVBillboard.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="RoomController.h" />
@@ -119,7 +118,6 @@
   <ItemGroup>
     <ClCompile Include="BatchLogin.cpp" />
     <ClCompile Include="BatchLoginDlg.cpp" />
-    <ClCompile Include="BlacklistHelper.cpp" />
     <ClCompile Include="MVBillboard.cpp" />
     <ClCompile Include="RoomController.cpp" />
     <ClCompile Include="stdafx.cpp">
