@@ -60,7 +60,7 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total) const
     // 读文件
     base::FilePath path;
     PathService::Get(base::DIR_EXE, &path);
-    path = path.Append(L"BatchLogin.User.cfg");
+    path = path.Append(L"BatchSinger.User.cfg");
     base::File userfile(path, base::File::FLAG_OPEN|base::File::FLAG_READ);
     if (!userfile.IsValid())
     {
@@ -69,20 +69,13 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total) const
         return false;
     }
 
-    const uint32 memlen = 1024;
     std::string data;
-    char str[memlen] = { 0 };
-    userfile.Seek(base::File::FROM_BEGIN, 0);
-    int read = userfile.ReadAtCurrentPos(str, memlen);
-    DWORD err = GetLastError();
-    while (read > 0)
+    if (!base::ReadFileToString(path, &data))
     {
-        data.insert(data.end(), str, str + read);
-        if (read < memlen)//读完了
-            break;
-        read = userfile.ReadAtCurrentPos(str, memlen);
+        assert(false);
+        return false;
     }
-
+    
     assert(!data.empty());
 
     std::vector<std::string> userinfos = SplitString(data, "\n");
@@ -91,21 +84,23 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total) const
     for (const auto& it : userinfos)
     {
         std::vector<std::string> userinfo = SplitString(it, "\t");
-        if (userinfo.size() < 2) // 用户名和密码, 还有可能有cookie
+        if (userinfo.size() < 3) // 用户名和密码, 还有可能有cookie
         {
             assert(false && L"account info error!");
             continue;
         }
-        std::string username = userinfo[0];
-        std::string password = userinfo[1];
+        std::string roomid = userinfo[0];
+        std::string username = userinfo[1];
+        std::string password = userinfo[2];
         std::string cookies = "";
         if (userinfo.size() > 2)
         {
-            cookies = userinfo[2];
+            cookies = userinfo[3];
         }
         RemoveSpace(&username);
         RemoveSpace(&password);
         RowData row;
+        row.push_back(base::UTF8ToWide(roomid));
         row.push_back(base::UTF8ToWide(username));
         row.push_back(base::UTF8ToWide(password));
         row.push_back(base::UTF8ToWide(cookies));
@@ -671,8 +666,25 @@ bool UserRoomManager::BatchSendStar(const std::vector<std::wstring>& users,
 
 }
 
+bool UserRoomManager::BatchBanEnter(uint32 roomid, const std::wstring& username, 
+    const std::map<uint32, std::string>& id_name_map)
+{
+    std::string account = base::WideToUTF8(username);
+    return runner_->PostTask(
+        FROM_HERE, base::Bind(&UserRoomManager::DoBatchBanEnter, this,
+        roomid, account, id_name_map));
+}
+
+void UserRoomManager::DoBatchBanEnter(uint32 roomid, const std::string& account, 
+    const std::map<uint32, std::string>& id_name_map)
+{
+    userController_->BatchBanEnter(roomid, account, id_name_map);
+}
+
 void UserRoomManager::DoBatchSendStar(const std::vector<std::string>& users,
     uint32 roomid, uint32 star_count)
 {
     userController_->BatchSendStar(users, roomid, star_count);
 }
+
+

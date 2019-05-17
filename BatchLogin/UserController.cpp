@@ -380,6 +380,28 @@ bool UserController::BatchSendStar(const std::vector<std::string>& users,
     return true;
 }
 
+bool UserController::BatchBanEnter(uint32 roomid, const std::string user,
+    const std::map<uint32, std::string>& viewers)
+{
+    auto find_user = users_.find(user);
+    if (find_user == users_.end())
+    {
+        assert(false);
+        return false;
+    }
+
+    for (auto viewer : viewers)
+    {
+        EnterRoomUserInfo userinfo;
+        userinfo.userid = viewer.first;
+        userinfo.nickname = viewer.second;
+        userinfo.roomid = roomid;
+        find_user->second->BanEnter(roomid, userinfo);
+    }
+
+    return true;
+}
+
 bool UserController::FillRoom(uint32 roomid, const std::vector<std::string>& users,
     const std::function<void(const std::wstring& msg)>& callback)
 {

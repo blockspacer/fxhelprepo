@@ -67,6 +67,9 @@ public:
     bool BatchSendStar(const std::vector<std::wstring>& users, const std::wstring& roomid,
         uint32 star_count);
 
+    bool BatchBanEnter(uint32 roomid, const std::wstring& userid,
+        const std::map<uint32, std::string>& id_name_map);
+
 protected:
     void Notify(const std::wstring& msg);
     void DoSaveUserLoginConfig();
@@ -92,6 +95,9 @@ protected:
 
     void DoBatchSendStar(const std::vector<std::string>& users, 
         uint32 roomid, uint32 star_count);
+
+    void DoBatchBanEnter(uint32 roomid, const std::string& userid,
+        const std::map<uint32, std::string>& id_name_map);
 
 private:
     base::Thread workerThread_;

@@ -22,6 +22,7 @@
 
 namespace{
     const wchar_t* usercolumnlist[] = {
+        L"房间号",
         L"用户名",
         L"密码",
         L"Cookie",
@@ -253,8 +254,8 @@ void CBatchLoginDlg::OnBnClickedBtnImportUser()
         // 检测是否存在相同用户id
         for (int index = 0; index < itemcount; index++)
         {
-            CString text = m_ListCtrl_Users.GetItemText(index, 0);
-            if (griddata[i][0].compare(text.GetBuffer()) == 0) // 相同用户名
+            CString text = m_ListCtrl_Users.GetItemText(index, 1);
+            if (griddata[i][1].compare(text.GetBuffer()) == 0) // 相同用户名
             {
                 exist = true;
                 break;
@@ -285,9 +286,10 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
         CString account = m_ListCtrl_Users.GetItemText(index, 0);
         if (!!m_ListCtrl_Users.GetCheck(index))
         {
-            CString account = m_ListCtrl_Users.GetItemText(index, 0);
-            CString password = m_ListCtrl_Users.GetItemText(index, 1);
-            CString cookies = m_ListCtrl_Users.GetItemText(index, 2);
+            CString roomid = m_ListCtrl_Users.GetItemText(index, 0);
+            CString account = m_ListCtrl_Users.GetItemText(index, 1);
+            CString password = m_ListCtrl_Users.GetItemText(index, 2);
+            CString cookies = m_ListCtrl_Users.GetItemText(index, 3);
 
             // 暂时全部走用户名密码登录流程
             if (use_cookie)
@@ -561,12 +563,33 @@ void CBatchLoginDlg::GetSelectUsers(std::vector<std::wstring>* users)
     // 从界面获取勾选的用户名
     for (int32 index = 0; index < itemcount; ++index)
     {
-        CString account = m_ListCtrl_Users.GetItemText(index, 0);
+        CString account = m_ListCtrl_Users.GetItemText(index, 1);
         if (!!m_ListCtrl_Users.GetCheck(index))
         {
             users->push_back(account.GetBuffer());
         }
     }
+}
+
+bool CBatchLoginDlg::GetSelectBlacks(std::map<uint32, std::string>* id_name_map)
+{
+    if (!id_name_map)
+        return false;
+
+    int count = m_ListCtrl_Blacks.GetItemCount();
+    for (int i = count - 1; i >= 0; --i)
+    {
+        if (m_ListCtrl_Blacks.GetCheck(i))
+        {
+            // 发送踢出房间的网络请求
+            std::string nickname = base::WideToUTF8(m_ListCtrl_Blacks.GetItemText(i, 0).GetBuffer());
+            uint32 userid = 0;
+            base::StringToUint(m_ListCtrl_Blacks.GetItemText(i, 1).GetBuffer(), &userid);
+            (*id_name_map)[userid] = nickname;
+        }
+    }
+
+    return true;
 }
 
 void CBatchLoginDlg::OnBnClickedBtnSelectAll()
@@ -621,30 +644,29 @@ void CBatchLoginDlg::OnBnClickedBtnGetUserinfo()
     std::vector<UserStorageInfo> user_storage_infos;
     userRoomManager_->GetUserStorageInfos(users, &user_storage_infos);
 
-
     int count = m_ListCtrl_Users.GetItemCount();
     for (int index = count - 1; index >= 0; --index)
     {
         if (!m_ListCtrl_Users.GetCheck(index))
             continue;
 
-        CString cs_username = m_ListCtrl_Users.GetItemText(index, 0);
+        CString cs_username = m_ListCtrl_Users.GetItemText(index, 1);
         std::string username = base::WideToUTF8(cs_username.GetBuffer());
         for (const auto& user_storage_info : user_storage_infos)
         {
             if (username.compare(user_storage_info.accountname) == 0)
             {
-                m_ListCtrl_Users.SetItemText(index, 4,
+                m_ListCtrl_Users.SetItemText(index, 4+1,
                     base::UTF8ToWide(user_storage_info.nickname).c_str());
-                m_ListCtrl_Users.SetItemText(index, 5,
+                m_ListCtrl_Users.SetItemText(index, 5+1,
                     base::UintToString16(user_storage_info.rich_level).c_str());
-                m_ListCtrl_Users.SetItemText(index, 6,
+                m_ListCtrl_Users.SetItemText(index, 6+1,
                     base::UintToString16(user_storage_info.coin).c_str());
-                m_ListCtrl_Users.SetItemText(index, 7,
+                m_ListCtrl_Users.SetItemText(index, 7+1,
                     base::UintToString16(user_storage_info.star_count).c_str());
-                m_ListCtrl_Users.SetItemText(index, 8,
+                m_ListCtrl_Users.SetItemText(index, 8+1,
                     base::UintToString16(user_storage_info.gift_award).c_str());
-                m_ListCtrl_Users.SetItemText(index, 9,
+                m_ListCtrl_Users.SetItemText(index, 9+1,
                     base::UintToString16(user_storage_info.gift_single).c_str());
                 break;
             }
@@ -897,35 +919,38 @@ void CBatchLoginDlg::OnBnClickedBtnUnsilentBlack()
 
 void CBatchLoginDlg::OnBnClickedBtnBanEnter()
 {
-    //if (!network_)
-    //    return;
+    std::map<uint32, std::string> id_name_map;
+    GetSelectBlacks(&id_name_map);
 
-    //std::wstring privilegeMsg;
-    //if (!network_->GetActionPrivilege(&privilegeMsg))
-    //{
-    //    Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
-    //    return;
-    //}
-    //std::vector<EnterRoomUserInfo> enterRoomUserInfos;
-    //GetSelectBlacks(&enterRoomUserInfos);
-    //BanEnter_(enterRoomUserInfos);
+    int itemcount = m_ListCtrl_Users.GetItemCount();
+    for (int32 index = 0; index < itemcount; ++index)
+    {
+        if (!!m_ListCtrl_Users.GetCheck(index))
+        {
+            CString cs_roomid = m_ListCtrl_Users.GetItemText(index, 0);
+            std::string s_roomid = base::WideToUTF8(cs_roomid.GetBuffer());
+            uint32 roomid = 0;
+            if (!base::StringToUint(s_roomid, &roomid))
+                continue;
+            
+            CString account = m_ListCtrl_Users.GetItemText(index, 1);
+            CString password = m_ListCtrl_Users.GetItemText(index, 2);
+            CString cookies = m_ListCtrl_Users.GetItemText(index, 3);
+
+            userRoomManager_->BatchBanEnter(roomid, account.GetBuffer(), id_name_map);
+        }
+    }
 }
 
 
 void CBatchLoginDlg::OnBnClickedBtnUnbanEnter()
 {
-    //if (!network_)
-    //    return;
-
-    //std::wstring privilegeMsg;
-    //if (!network_->GetActionPrivilege(&privilegeMsg))
-    //{
-    //    Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, NOPRIVILEGE_NOTICE);
-    //    return;
-    //}
     //std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     //GetSelectBlacks(&enterRoomUserInfos);
-    //UnbanEnter_(enterRoomUserInfos);
+
+    //userRoomManager_->SetBreakRequest(false);
+    //userRoomManager_->BatchSendChat(cs_roomid.GetBuffer(), users, cs_chat_message.GetBuffer());
+
 }
 
 LRESULT CBatchLoginDlg::OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam)

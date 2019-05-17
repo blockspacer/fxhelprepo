@@ -71,6 +71,20 @@ protected:
     afx_msg void OnBnClickedBtnChangeConfigNickname();
     afx_msg void OnBnClickedBtnBatchChat();
 
+    afx_msg void OnBnClickedBtnSelectAllBlack();
+    afx_msg void OnBnClickedBtnSelectReverseBlack();
+    afx_msg void OnBnClickedBtnRemoveBlack();
+    afx_msg void OnBnClickedBtnLoadBlack();
+    afx_msg void OnBnClickedBtnSaveBlack();
+    afx_msg void OnBnClickedBtnKickoutMonthBlack();
+    afx_msg void OnBnClickedBtnKickoutHourBlack();
+    afx_msg void OnBnClickedBtnSilentBlack();
+    afx_msg void OnBnClickedBtnUnsilentBlack();
+    afx_msg void OnBnClickedBtnBanEnter();
+    afx_msg void OnBnClickedBtnUnbanEnter();
+
+    LRESULT OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam);
+
 	DECLARE_MESSAGE_MAP()
 
 private:
@@ -80,6 +94,7 @@ private:
     LRESULT OnDisplayDataToRoomList(WPARAM wParam, LPARAM lParam);
     bool SendGifts(uint32 gift_id);
     void GetSelectUsers(std::vector<std::wstring>* users);
+    bool GetSelectBlacks(std::map<uint32, std::string>* id_name_map);
 
     std::unique_ptr<UserRoomManager> userRoomManager_;
     std::unique_ptr<WebsocketClientController> tcpManager_;
@@ -110,18 +125,5 @@ private:
 
     std::vector<RowData> blackRowdataQueue_;
     std::mutex blackRowdataMutex_;
-public:
-    afx_msg void OnBnClickedBtnSelectAllBlack();
-    afx_msg void OnBnClickedBtnSelectReverseBlack();
-    afx_msg void OnBnClickedBtnRemoveBlack();
-    afx_msg void OnBnClickedBtnLoadBlack();
-    afx_msg void OnBnClickedBtnSaveBlack();
-    afx_msg void OnBnClickedBtnKickoutMonthBlack();
-    afx_msg void OnBnClickedBtnKickoutHourBlack();
-    afx_msg void OnBnClickedBtnSilentBlack();
-    afx_msg void OnBnClickedBtnUnsilentBlack();
-    afx_msg void OnBnClickedBtnBanEnter();
-    afx_msg void OnBnClickedBtnUnbanEnter();
 
-    LRESULT OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam);
 };

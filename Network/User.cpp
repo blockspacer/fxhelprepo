@@ -859,14 +859,14 @@ bool User::BanEnter(uint32 roomid, const EnterRoomUserInfo& enterRoomUserInfo)
 {
     std::vector<std::string> keys;
     keys.push_back("KuGoo");
-    keys.push_back("_fx_coin");
-    keys.push_back("_fxNickName");
-    keys.push_back("_fxRichLevel");
-    keys.push_back("FANXING_COIN");
-    keys.push_back("FANXING");
-    keys.push_back("fxClientInfo");
-    keys.push_back("LoginCheckCode");
-    keys.push_back("kg_mid");
+    //keys.push_back("_fx_coin");
+    //keys.push_back("_fxNickName");
+    //keys.push_back("_fxRichLevel");
+    //keys.push_back("FANXING_COIN");
+    //keys.push_back("FANXING");
+    //keys.push_back("fxClientInfo");
+    //keys.push_back("LoginCheckCode");
+    //keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
 
     std::string strroomid = base::IntToString(static_cast<int>(enterRoomUserInfo.roomid));
