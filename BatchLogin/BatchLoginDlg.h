@@ -102,4 +102,17 @@ private:
 
     CEdit m_edit_chat_message;
 
+    CListCtrl m_ListCtrl_Blacks;
+public:
+    afx_msg void OnBnClickedBtnSelectAllBlack();
+    afx_msg void OnBnClickedBtnSelectReverseBlack();
+    afx_msg void OnBnClickedBtnRemoveBlack();
+    afx_msg void OnBnClickedBtnLoadBlack();
+    afx_msg void OnBnClickedBtnSaveBlack();
+    afx_msg void OnBnClickedBtnKickoutMonthBlack();
+    afx_msg void OnBnClickedBtnKickoutHourBlack();
+    afx_msg void OnBnClickedBtnSilentBlack();
+    afx_msg void OnBnClickedBtnUnsilentBlack();
+    afx_msg void OnBnClickedBtnBanEnter();
+    afx_msg void OnBnClickedBtnUnbanEnter();
 };
