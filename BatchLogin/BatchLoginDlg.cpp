@@ -148,6 +148,8 @@ BOOL CBatchLoginDlg::OnInitDialog()
 
 	ShowWindow(SW_NORMAL);
 
+    m_chk_use_cookie.SetCheck(TRUE);
+
     DWORD dwStyle = m_ListCtrl_Users.GetExtendedStyle();
     dwStyle |= LVS_EX_CHECKBOXES;
     dwStyle |= LVS_EX_FULLROWSELECT;//选中某行使整行高亮（只适用与report风格的listctrl）
