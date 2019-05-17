@@ -31,3 +31,7 @@
 *.opensdf
 *.sdf
 *.suo
+/BatchLogin/*.user
+*.aps
+/BatchLogin/Debug
+/BatchLogin/Release
