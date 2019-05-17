@@ -64,7 +64,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;libevent.lib;Wldap32.lib;libcurl.lib;ssleay32.lib</AdditionalDependencies>
+      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;libevent.lib;Wldap32.lib;libcurl.lib;ssleay32.lib;common.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration);$(SolutionDir)$(Configuration)\lib\;$(OutDir);$(BOOST_DIR_MICHAEL)\lib32-msvc</AdditionalLibraryDirectories>
     </Link>
     <Midl>
@@ -95,7 +95,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\lib\;$(OutDir);$(BOOST_DIR_MICHAEL)\lib32-msvc</AdditionalLibraryDirectories>
-      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;libevent.lib;Wldap32.lib</AdditionalDependencies>
+      <AdditionalDependencies>network.lib;dbghelp.lib;psapi.lib;Version.lib;Ws2_32.lib;libevent.lib;Wldap32.lib;common.lib</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
     </Link>
@@ -115,7 +115,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AuthorityHelper.h" />
-    <ClInclude Include="BlacklistHelper.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="AntiFlood.h" />
     <ClInclude Include="AntiFloodDlg.h" />
@@ -131,7 +130,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AuthorityHelper.cpp" />
-    <ClCompile Include="BlacklistHelper.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="AntiFlood.cpp" />
     <ClCompile Include="AntiFloodDlg.cpp" />

@@ -10,7 +10,7 @@
 #include "WelcomeSettingDlg.h"
 #include "afxdialogex.h"
 #include "NetworkHelper.h"
-#include "BlacklistHelper.h"
+#include "Common/BlacklistHelper.h"
 #include "Config.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
@@ -1382,8 +1382,23 @@ void CAntiFloodDlg::OnBnClickedBtnRemoveBlack()
 
 void CAntiFloodDlg::OnBnClickedBtnLoadBlack()
 {
+    CString FilePathName;
+    CFileDialog dlg(TRUE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+        NULL,
+        NULL,
+        OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+        (LPCTSTR)_TEXT("TXT Files (*.txt)|*.txt|All Files (*.*)|*.*||"),
+        NULL);
+
+    if (dlg.DoModal() != IDOK)
+        return;
+
+    FilePathName = dlg.GetPathName(); //文件名保存在了FilePathName里
+    if (FilePathName.IsEmpty())
+        return;
+
     std::vector<RowData> rowdatas;
-    if (!blacklistHelper_->LoadBlackList(&rowdatas))
+    if (!blacklistHelper_->LoadBlackList(FilePathName.GetBuffer(), &rowdatas))
     {
         CString itemtext = L"读取黑名单失败";
         Notify(MessageLevel::MESSAGE_LEVEL_DISPLAY, itemtext.GetBuffer());
@@ -1422,6 +1437,21 @@ void CAntiFloodDlg::OnBnClickedBtnAddToObserver()
 
 void CAntiFloodDlg::OnBnClickedBtnSaveBlack()
 {
+    CString FilePathName;
+    CFileDialog dlg(TRUE, //TRUE为OPEN对话框，FALSE为SAVE AS对话框
+        NULL,
+        NULL,
+        OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+        (LPCTSTR)_TEXT("TXT Files (*.txt)|*.txt|All Files (*.*)|*.*||"),
+        NULL);
+
+    if (dlg.DoModal() != IDOK)
+        return;
+
+    FilePathName = dlg.GetPathName(); //文件名保存在了FilePathName里
+    if (FilePathName.IsEmpty())
+        return;
+
     std::vector<EnterRoomUserInfo> enterRoomUserInfos;
     GetSelectBlacks(&enterRoomUserInfos);
 
@@ -1434,7 +1464,7 @@ void CAntiFloodDlg::OnBnClickedBtnSaveBlack()
         rowdatas.push_back(rowdata);
     }
 
-    blacklistHelper_->SaveBlackList(rowdatas);
+    blacklistHelper_->SaveBlackList(FilePathName.GetBuffer(), rowdatas);
 }
 
 void CAntiFloodDlg::OnBnClickedBtnClearInfo()

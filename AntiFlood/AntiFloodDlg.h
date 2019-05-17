@@ -7,11 +7,11 @@
 #include <mutex>
 
 #include "NetworkHelper.h"
-#include "BlacklistHelper.h"
 
 #include "afxwin.h"
 #include "afxcmn.h"
 
+class BlacklistHelper;
 
 // CFanXingDlg ¶Ô»°¿ò
 class CAntiFloodDlg : public CDialogEx
