@@ -83,7 +83,7 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total) const
     *total = userinfos.size();
     for (const auto& it : userinfos)
     {
-        std::vector<std::string> userinfo = SplitString(it, "\t");
+        std::vector<std::string> userinfo = SplitString(it, ",");
         if (userinfo.size() < 3) // 用户名和密码, 还有可能有cookie
         {
             assert(false && L"account info error!");
@@ -93,7 +93,7 @@ bool UserRoomManager::LoadUserConfig(GridData* userpwd, uint32* total) const
         std::string username = userinfo[1];
         std::string password = userinfo[2];
         std::string cookies = "";
-        if (userinfo.size() > 2)
+        if (userinfo.size() > 3)
         {
             cookies = userinfo[3];
         }
@@ -324,6 +324,7 @@ void UserRoomManager::DoBatchLogUsersWithCookie(
     {
         std::string account = base::WideToUTF8(it.first);
         std::string cookie = base::WideToUTF8(it.second);
+        RemoveSpace(&cookie);
         std::string errormsg;
         std::wstring message = base::UTF8ToWide(account) + L" cookie登录";
         if (!userController_->AddUserWithCookies(account, cookie, ipproxy, &errormsg))

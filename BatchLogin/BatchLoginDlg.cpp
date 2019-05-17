@@ -290,7 +290,6 @@ void CBatchLoginDlg::OnBnClickedBtnLogin()
             CString account = m_ListCtrl_Users.GetItemText(index, 1);
             CString password = m_ListCtrl_Users.GetItemText(index, 2);
             CString cookies = m_ListCtrl_Users.GetItemText(index, 3);
-
             // 暂时全部走用户名密码登录流程
             if (use_cookie)
                 accountCookies[account.GetBuffer()] = cookies.GetBuffer(); 
