@@ -129,10 +129,7 @@ bool BlacklistHelper::LoadFromFile(const std::wstring& path_filename,
 bool BlacklistHelper::SaveToFile(const std::wstring& path_filename,
     const std::map<uint32, BlackInfo>& blackInfoMap) const
 {
-    base::FilePath dirPath;
-    bool result = PathService::Get(base::DIR_EXE, &dirPath);
-    std::wstring filename = path_filename;
-    base::FilePath pathname = dirPath.Append(filename);
+    base::FilePath pathname(path_filename);
 
     Json::FastWriter writer;
     Json::Value root(Json::arrayValue);
