@@ -688,4 +688,19 @@ void UserRoomManager::DoBatchSendStar(const std::vector<std::string>& users,
     userController_->BatchSendStar(users, roomid, star_count);
 }
 
+bool UserRoomManager::BatchKickHour(uint32 roomid, const std::wstring& userid, 
+	const std::map<uint32, std::string>& id_name_map)
+{
+	std::string account = base::WideToUTF8(userid);
+	return runner_->PostTask(
+		FROM_HERE, base::Bind(&UserRoomManager::DoBatchKickHour, this,
+		roomid, account, id_name_map));
+}
+
+void UserRoomManager::DoBatchKickHour(uint32 roomid, const std::string& account,
+	const std::map<uint32, std::string>& id_name_map)
+{
+	userController_->BatchKickHour(roomid, account, id_name_map);
+}
+
 

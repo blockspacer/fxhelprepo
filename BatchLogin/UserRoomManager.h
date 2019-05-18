@@ -70,6 +70,9 @@ public:
     bool BatchBanEnter(uint32 roomid, const std::wstring& userid,
         const std::map<uint32, std::string>& id_name_map);
 
+	bool BatchKickHour(uint32 roomid, const std::wstring& userid,
+		const std::map<uint32, std::string>& id_name_map);
+
 protected:
     void Notify(const std::wstring& msg);
     void DoSaveUserLoginConfig();
@@ -96,9 +99,11 @@ protected:
     void DoBatchSendStar(const std::vector<std::string>& users, 
         uint32 roomid, uint32 star_count);
 
-    void DoBatchBanEnter(uint32 roomid, const std::string& userid,
+	void DoBatchBanEnter(uint32 roomid, const std::string& account,
         const std::map<uint32, std::string>& id_name_map);
 
+	void DoBatchKickHour(uint32 roomid, const std::string& account,
+		const std::map<uint32, std::string>& id_name_map);
 private:
     base::Thread workerThread_;
     scoped_refptr<base::TaskRunner> runner_;

@@ -74,7 +74,10 @@ public:
         uint32 roomid, uint32 star_count);
 
     bool BatchBanEnter(uint32 roomid, const std::string user,
-        const std::map<uint32, std::string>& views);
+		const std::map<uint32, std::string>& viewers);
+
+	bool BatchKickHour(uint32 roomid, const std::string user,
+		const std::map<uint32, std::string>& viewers);
 
     bool FillRoom(uint32 roomid, const std::vector<std::string>& users,
         const std::function<void(const std::wstring& msg)>& callback);

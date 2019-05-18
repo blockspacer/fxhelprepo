@@ -902,7 +902,27 @@ void CBatchLoginDlg::OnBnClickedBtnKickoutMonthBlack()
 
 void CBatchLoginDlg::OnBnClickedBtnKickoutHourBlack()
 {
-    // TODO:  在此添加控件通知处理程序代码
+	std::map<uint32, std::string> id_name_map;
+	GetSelectBlacks(&id_name_map);
+
+	int itemcount = m_ListCtrl_Users.GetItemCount();
+	for (int32 index = 0; index < itemcount; ++index)
+	{
+		if (!!m_ListCtrl_Users.GetCheck(index))
+		{
+			CString cs_roomid = m_ListCtrl_Users.GetItemText(index, 0);
+			std::string s_roomid = base::WideToUTF8(cs_roomid.GetBuffer());
+			uint32 roomid = 0;
+			if (!base::StringToUint(s_roomid, &roomid))
+				continue;
+
+			CString account = m_ListCtrl_Users.GetItemText(index, 1);
+			CString password = m_ListCtrl_Users.GetItemText(index, 2);
+			CString cookies = m_ListCtrl_Users.GetItemText(index, 3);
+
+			userRoomManager_->BatchBanEnter(roomid, account.GetBuffer(), id_name_map);
+		}
+	}
 }
 
 

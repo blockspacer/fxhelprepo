@@ -474,3 +474,25 @@ void UserController::ConnectionBreakCallback(const std::string& user_name,
 {
 
 }
+
+bool UserController::BatchKickHour(uint32 roomid, const std::string user, 
+	const std::map<uint32, std::string>& viewers)
+{
+	auto find_user = users_.find(user);
+	if (find_user == users_.end())
+	{
+		assert(false);
+		return false;
+	}
+
+	for (auto viewer : viewers)
+	{
+		EnterRoomUserInfo userinfo;
+		userinfo.userid = viewer.first;
+		userinfo.nickname = viewer.second;
+		userinfo.roomid = roomid;
+		find_user->second->KickoutUser(KICK_TYPE::KICK_TYPE_HOUR, roomid, userinfo);
+	}
+
+	return true;
+}
