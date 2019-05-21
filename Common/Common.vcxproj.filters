@@ -21,9 +21,15 @@
     <ClCompile Include="BlacklistHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ClanHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlacklistHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ClanHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

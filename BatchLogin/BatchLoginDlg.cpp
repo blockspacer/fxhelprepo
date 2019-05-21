@@ -11,6 +11,7 @@
 #include "Network/WebsocketClientController.h"
 #include "Network/TcpClient.h"
 #include "common/BlacklistHelper.h"
+#include "Common/ClanHelper.h"
 #include "afxdialogex.h"
 
 #include "third_party/chromium/base/strings/string_number_conversions.h"
@@ -42,6 +43,13 @@ namespace{
         L"有效期",
     };
 
+	const wchar_t* clansingerlist[] = {
+		L"房间号",
+		L"昵称",
+		L"在线人数",
+		L"在线状态",
+	};
+
     const wchar_t* proxycolumnlist[] = {
         L"代理协议",
         L"代理ip",
@@ -52,6 +60,16 @@ namespace{
         L"昵称",
         L"用户id"
     };
+
+	RowData ClanSingerInfoToRowdata(const ClanSingerInfo& singerinfo)
+	{
+		RowData rowdata;
+		rowdata.push_back(base::UintToString16(singerinfo.roomid));
+		rowdata.push_back(base::UTF8ToWide(singerinfo.nickname));
+		rowdata.push_back(base::UintToString16(singerinfo.viewer_num));
+		rowdata.push_back(base::UintToString16(singerinfo.live_status));
+		return rowdata;
+	}
 }
 
 // CBatchLoginDlg 对话框
@@ -74,21 +92,24 @@ CBatchLoginDlg::~CBatchLoginDlg()
 
 void CBatchLoginDlg::DoDataExchange(CDataExchange* pDX)
 {
-    CDialogEx::DoDataExchange(pDX);
-    DDX_Control(pDX, IDC_LIST_USERS, m_ListCtrl_Users);
-    //DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
-    DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
-    DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
-    DDX_Control(pDX, IDC_EDIT_ROOMID, m_roomid);
-    //DDX_Control(pDX, IDC_EDIT_GIFT_COUNT, m_gift_count);
-    DDX_Control(pDX, IDC_EDIT_NICKNAME_PRE, m_nickname);
-    DDX_Control(pDX, IDC_EDIT_PIC_PATH, m_logo_path);
-    DDX_Control(pDX, IDC_EDIT_SONG_NAME, m_edit_singlike);
-    DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
-    DDX_Control(pDX, IDC_EDIT_DELTA, m_edit_delta);
-    DDX_Control(pDX, IDC_EDIT_CHAT_MESSAGE, m_edit_chat_message);
-    DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
-    DDX_Control(pDX, IDC_LIST_GUEST, m_ListCtrl_Blacks);
+	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_LIST_USERS, m_ListCtrl_Users);
+	//DDX_Control(pDX, IDC_LIST_ROOM, m_ListCtrl_Rooms);
+	DDX_Control(pDX, IDC_LIST_INFO, InfoList_);
+	DDX_Control(pDX, IDC_LIST_PROXY, m_list_proxy);
+	DDX_Control(pDX, IDC_EDIT_ROOMID, m_roomid);
+	//DDX_Control(pDX, IDC_EDIT_GIFT_COUNT, m_gift_count);
+	//DDX_Control(pDX, IDC_EDIT_NICKNAME_PRE, m_nickname);
+	//DDX_Control(pDX, IDC_EDIT_PIC_PATH, m_logo_path);
+	//DDX_Control(pDX, IDC_EDIT_SONG_NAME, m_edit_singlike);
+	DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
+	//DDX_Control(pDX, IDC_EDIT_DELTA, m_edit_delta);
+	//DDX_Control(pDX, IDC_EDIT_CHAT_MESSAGE, m_edit_chat_message);
+	//DDX_Control(pDX, IDC_EDIT_MV_ID, m_mv_id);
+	DDX_Control(pDX, IDC_LIST_GUEST, m_ListCtrl_Blacks);
+	DDX_Control(pDX, IDC_EDIT_OBSERVER_COOKIE, m_observer_cookie);
+	DDX_Control(pDX, IDC_EDIT_CLAN_ID, m_edit_clan_id);
+	DDX_Control(pDX, IDC_LIST_CLAN_SINGER, m_list_clan_singer);
 }
 
 BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
@@ -102,6 +123,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_MESSAGE(WM_USER_USER_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToUserList)
     ON_MESSAGE(WM_USER_ROOM_LIST_INFO, &CBatchLoginDlg::OnDisplayDataToRoomList)
     ON_MESSAGE(WM_USER_ADD_TO_BLACK_LIST, &CBatchLoginDlg::OnDisplayDtatToBlackList)
+	ON_MESSAGE(WM_USER_ADD_TO_CLAN_SINGER_LIST, &CBatchLoginDlg::OnDisplayDtatToClanSingerList)
 
     ON_BN_CLICKED(IDC_BTN_LOGIN, &CBatchLoginDlg::OnBnClickedBtnLogin)
     ON_BN_CLICKED(IDC_BTN_SAVE_USER_PWD_COOKIE, &CBatchLoginDlg::OnBnClickedBtnSaveUserPwdCookie)
@@ -115,11 +137,9 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_DELETE, &CBatchLoginDlg::OnBnClickedBtnDelete)
     ON_BN_CLICKED(IDC_BTN_GET_USERINFO, &CBatchLoginDlg::OnBnClickedBtnGetUserinfo)
     ON_BN_CLICKED(IDC_BTN_CHANGE_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeNickname)
-    ON_BN_CLICKED(IDC_BTN_CHANGE_LOGO, &CBatchLoginDlg::OnBnClickedBtnChangeLogo)
     ON_BN_CLICKED(IDC_BTN_SINGELIKE, &CBatchLoginDlg::OnBnClickedBtnSingelike)
     ON_BN_CLICKED(IDC_BTN_CHANGE_CONFIG_NICKNAME, &CBatchLoginDlg::OnBnClickedBtnChangeConfigNickname)
     ON_BN_CLICKED(IDC_BTN_BATCH_CHAT, &CBatchLoginDlg::OnBnClickedBtnBatchChat)
-    ON_BN_CLICKED(IDC_BTN_SEND_STAR, &CBatchLoginDlg::OnBnClickedBtnSendStar)
     ON_BN_CLICKED(IDC_BTN_MV_Billboard, &CBatchLoginDlg::OnBnClickedBtnMvBillboard)
     ON_BN_CLICKED(IDC_BTN_SELECT_ALL_BLACK, &CBatchLoginDlg::OnBnClickedBtnSelectAllBlack)
     ON_BN_CLICKED(IDC_BTN_SELECT_REVERSE_BLACK, &CBatchLoginDlg::OnBnClickedBtnSelectReverseBlack)
@@ -132,6 +152,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_UNSILENT_BLACK, &CBatchLoginDlg::OnBnClickedBtnUnsilentBlack)
     ON_BN_CLICKED(IDC_BTN_BAN_ENTER, &CBatchLoginDlg::OnBnClickedBtnBanEnter)
     ON_BN_CLICKED(IDC_BTN_UNBAN_ENTER, &CBatchLoginDlg::OnBnClickedBtnUnbanEnter)
+	ON_BN_CLICKED(IDC_BTN_GET_CLAN_SINGER, &CBatchLoginDlg::OnBnClickedBtnGetClanSinger)
 END_MESSAGE_MAP()
 
 
@@ -185,6 +206,15 @@ BOOL CBatchLoginDlg::OnInitDialog()
     //for (const auto& it : roomcolumnlist)
     //    m_ListCtrl_Rooms.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
     
+	// 家族主播列表
+	m_list_clan_singer.SetExtendedStyle(dwStyle); //设置扩展风格
+	nColumnCount = m_list_clan_singer.GetHeaderCtrl()->GetItemCount();
+	for (int i = nColumnCount - 1; i >= 0; i--)
+		m_list_clan_singer.DeleteColumn(i);
+	index = 0;
+	for (const auto& it : clansingerlist)
+		m_list_clan_singer.InsertColumn(index++, it, LVCFMT_LEFT, 100);//插入列
+
     m_list_proxy.SetExtendedStyle(dwStyle); //设置扩展风格
     nColumnCount = m_list_proxy.GetHeaderCtrl()->GetItemCount();
     for (int i = nColumnCount - 1; i >= 0; i--)
@@ -1012,3 +1042,68 @@ LRESULT CBatchLoginDlg::OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam)
 
     return 0;
 }
+
+LRESULT CBatchLoginDlg::OnDisplayDtatToClanSingerList(WPARAM wParam, LPARAM lParam)
+{
+	std::vector<RowData>* datas = (std::vector<RowData>*)(wParam);
+
+	std::vector<RowData> rowdatas;
+	rowdatas.swap(*datas);
+	delete datas;
+
+	int itemcount = m_list_clan_singer.GetItemCount();
+
+	for (uint32 i = 0; i < rowdatas.size(); ++i)
+	{
+		bool exist = false;
+		// 检测是否存在相同用户id
+		for (int index = 0; index < itemcount; index++)
+		{
+			CString text = m_list_clan_singer.GetItemText(index, 1);
+			if (rowdatas[i][1].compare(text.GetBuffer()) == 0) // 相同用户id
+			{
+				exist = true;
+				break;
+			}
+		}
+
+		if (!exist) // 如果不存在，需要插入新数据
+		{
+			int nitem = m_list_clan_singer.InsertItem(itemcount + i, rowdatas[i][0].c_str());
+			for (uint32 j = 0; j < rowdatas[i].size(); ++j)
+			{
+				m_list_clan_singer.SetItemText(nitem, j, rowdatas[i][j].c_str());
+			}
+		}
+	}
+
+	return 0;
+}
+
+void CBatchLoginDlg::OnBnClickedBtnGetClanSinger()
+{
+	CString cs_clan_id;
+	m_edit_clan_id.GetWindowTextW(cs_clan_id);
+	int clanid = 0;
+	if (!base::StringToInt(base::WideToUTF8(cs_clan_id.GetBuffer()), &clanid))
+		return;
+
+	if (!clanid)
+		return;
+
+	ClanHelper clan_helper(clanid);
+
+	std::vector<ClanSingerInfo>* singer_infos = new std::vector<ClanSingerInfo>();
+	bool result = clan_helper.GetAllClanSingers(singer_infos);
+
+	std::vector<RowData>* row_datas = new std::vector<RowData>();
+	for (auto singer_info : *singer_infos)
+	{
+		RowData rowdata = ClanSingerInfoToRowdata(singer_info);
+		row_datas->push_back(rowdata);
+	}
+
+	this->PostMessage(WM_USER_ADD_TO_CLAN_SINGER_LIST, (WPARAM)(row_datas), 0);
+}
+
+

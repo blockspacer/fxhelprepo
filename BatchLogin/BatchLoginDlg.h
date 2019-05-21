@@ -32,6 +32,7 @@ public:
         WM_USER_ROOM_LIST_INFO = WM_USER + 3,
         WM_USER_ADD_TO_BLACK_LIST = WM_USER + 4,
         WM_USER_ADD_RETRIVE_GIFT_COIN = WM_USER + 5,
+		WM_USER_ADD_TO_CLAN_SINGER_LIST = WM_USER + 6,
     };
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV Ö§³Ö
@@ -84,6 +85,7 @@ protected:
     afx_msg void OnBnClickedBtnUnbanEnter();
 
     LRESULT OnDisplayDtatToBlackList(WPARAM wParam, LPARAM lParam);
+	LRESULT OnDisplayDtatToClanSingerList(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -126,4 +128,10 @@ private:
     std::vector<RowData> blackRowdataQueue_;
     std::mutex blackRowdataMutex_;
 
+	CEdit m_observer_cookie;
+public:
+	afx_msg void OnBnClickedBtnGetClanSinger();
+private:
+	CEdit m_edit_clan_id;
+	CListCtrl m_list_clan_singer;
 };
