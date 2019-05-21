@@ -163,10 +163,46 @@ HANDLE_TYPE AntiStrategy::GetUserHandleType(uint32 rich_level,
     if (rich_level >= rich_level_)// 指定等级以上的不处理
         return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 
+    std::wstring w_nickname = base::UTF8ToWide(nickname);
     for (const auto& it : vestnames_)
     {
-        if (nickname.find(it) != std::string::npos)
-            return handletype_;
+        std::wstring target = base::UTF8ToWide(it);
+        if (target.size()<2)
+        {
+            continue;
+        }
+        bool pre = true;
+        bool post = true;
+        if (target.rfind(L"*") == target.size()-1)
+        {
+            post = false;
+            target = target.substr(0, target.size() - 1);
+        }
+
+        if (target.find(L"*") == 0)
+        {
+            pre = false;
+            target = target.substr(1, target.size() - 1);
+        }
+
+        if (!pre && !post)
+        {
+            if (w_nickname.find(target) != std::string::npos)
+                return handletype_;
+        }
+
+        if (pre)
+        {
+            if (w_nickname.find(target) == 0)
+                return handletype_;
+        }
+
+        if (post)
+        {
+            if (w_nickname.rfind(target) == (w_nickname.size() - target.size()))
+                return handletype_;
+        }
+
     }
     return HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
 }
