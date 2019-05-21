@@ -255,7 +255,7 @@ BOOL CAntiFloodDlg::OnInitDialog()
     // 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
     //  执行此操作
 
-    SetWindowText(L"房间管理工具6.4_支持黑名单设置");
+    SetWindowText(L"房间管理工具6.5_支持黑名单设置");
 
     SetIcon(m_hIcon, TRUE);            // 设置大图标
     SetIcon(m_hIcon, FALSE);        // 设置小图标
