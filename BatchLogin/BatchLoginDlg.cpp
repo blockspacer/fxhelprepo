@@ -22,6 +22,7 @@
 #endif
 
 namespace{
+    const wchar_t* observeruser = L"observeruser";
     const wchar_t* usercolumnlist[] = {
         L"房间号",
         L"用户名",
@@ -153,6 +154,7 @@ BEGIN_MESSAGE_MAP(CBatchLoginDlg, CDialogEx)
     ON_BN_CLICKED(IDC_BTN_BAN_ENTER, &CBatchLoginDlg::OnBnClickedBtnBanEnter)
     ON_BN_CLICKED(IDC_BTN_UNBAN_ENTER, &CBatchLoginDlg::OnBnClickedBtnUnbanEnter)
 	ON_BN_CLICKED(IDC_BTN_GET_CLAN_SINGER, &CBatchLoginDlg::OnBnClickedBtnGetClanSinger)
+    ON_BN_CLICKED(IDC_BTN_OBSERVER_LOGIN, &CBatchLoginDlg::OnBnClickedBtnObserverLogin)
 END_MESSAGE_MAP()
 
 
@@ -415,30 +417,20 @@ void CBatchLoginDlg::OnBnClickedBtnGetProxy()
 void CBatchLoginDlg::OnBnClickedBtnBatchEnterRoom()
 {
     userRoomManager_->SetBreakRequest(false);
-    //int itemcount = m_ListCtrl_Rooms.GetItemCount();
-    //std::vector<std::wstring> roomids;
-    //for (int32 index = 0; index < itemcount; ++index)
-    //{
-    //    if (!!m_ListCtrl_Rooms.GetCheck(index))
-    //    {
-    //        CString roomid = m_ListCtrl_Rooms.GetItemText(index, 0);
-    //        roomids.push_back(roomid.GetBuffer());
-    //    }
-    //}
-
-    std::vector<std::wstring> users;
-    GetSelectUsers(&users);
-
-    if (users.empty())
+    int itemcount = m_list_clan_singer.GetItemCount();
+    std::vector<std::wstring> roomids;
+    for (int32 index = 0; index < itemcount; ++index)
     {
-        Notify(L"没有设置用户的投票任务");
-        return;
+        if (!!m_list_clan_singer.GetCheck(index))
+        {
+            CString roomid = m_list_clan_singer.GetItemText(index, 0);
+
+            roomids.push_back(roomid.GetBuffer());
+        }
     }
 
-    std::vector<std::wstring> roomids;
-    CString cs_roomid;
-    m_roomid.GetWindowTextW(cs_roomid);
-    roomids.push_back(cs_roomid.GetBuffer());
+    std::vector<std::wstring> users;
+    users.push_back(observeruser);
     userRoomManager_->FillRooms(users, roomids);
 }
 
@@ -1106,4 +1098,13 @@ void CBatchLoginDlg::OnBnClickedBtnGetClanSinger()
 	this->PostMessage(WM_USER_ADD_TO_CLAN_SINGER_LIST, (WPARAM)(row_datas), 0);
 }
 
+void CBatchLoginDlg::OnBnClickedBtnObserverLogin()
+{
+    CString cs_cookie;
+    m_observer_cookie.GetWindowTextW(cs_cookie);
 
+    std::map<std::wstring, std::wstring> accountCookies;
+    accountCookies[observeruser] = cs_cookie.GetBuffer();
+    if (!accountCookies.empty())
+        userRoomManager_->BatchLogUsersWithCookie(accountCookies);
+}

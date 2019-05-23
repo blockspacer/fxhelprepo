@@ -134,4 +134,5 @@ public:
 private:
 	CEdit m_edit_clan_id;
 	CListCtrl m_list_clan_singer;
+    afx_msg void OnBnClickedBtnObserverLogin();
 };

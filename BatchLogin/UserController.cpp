@@ -408,18 +408,32 @@ bool UserController::FillRoom(uint32 roomid, const std::vector<std::string>& use
     bool first = true;
     for (const auto& it : users)
     {
-        auto user = users_.find(it);
-        if (user == users_.end())
+        auto user_it = users_.find(it);
+        if (user_it == users_.end())
             continue;
 
         //it.second->EnterRoomFopAlive(roomid);
         // 年度需求, 需要获取到足够信息，但是不需要连接信息
-        std::wstring msg = base::UTF8ToWide(user->first) + L" 进入房间";
+        std::wstring msg = base::UTF8ToWide(user_it->first) + L" 进入房间";
         std::string nickname;
+        auto& user = user_it->second;
+        //user->ExitRooms();
+        //user->SetNotify201(std::bind(&NetworkHelper::NotifyCallback201, this,
+        //    std::placeholders::_1));
+        //user->SetNotify501(std::bind(&NetworkHelper::NotifyCallback501, this,
+        //    std::placeholders::_1, std::placeholders::_2));
 
-        if (!user->second->EnterRoomFopAlive(roomid,
+        //user->SetNotify601(
+        //    std::bind(&NetworkHelper::NotifyCallback601,
+        //    this, roomid, std::placeholders::_1));
+
+        //user->SetNormalNotify(std::bind(&NetworkHelper::NotifyCallback, this,
+        //    std::placeholders::_1, std::placeholders::_2));
+        //roomid_ = roomid;
+
+        if (!user->EnterRoomFopAlive(roomid,
             base::Bind(&UserController::ConnectionBreakCallback,
-            base::Unretained(this), user->second->GetUsername(),
+            base::Unretained(this), user->GetUsername(),
             roomid)))
         {
             msg += L" 失败 ";
@@ -427,7 +441,7 @@ bool UserController::FillRoom(uint32 roomid, const std::vector<std::string>& use
         else
         {
             msg += L" 成功 ";
-            user->second->GetRoom(roomid, &shared_room);
+            user->GetRoom(roomid, &shared_room);
         }
 
         msg += base::UTF8ToUTF16(nickname);
