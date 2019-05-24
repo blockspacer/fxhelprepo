@@ -82,12 +82,17 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AntiStrategy.cpp" />
     <ClCompile Include="BlacklistHelper.cpp" />
     <ClCompile Include="ClanHelper.cpp" />
+    <ClCompile Include="GiftStrategy.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AntiStrategy.h" />
     <ClInclude Include="BlacklistHelper.h" />
     <ClInclude Include="ClanHelper.h" />
+    <ClInclude Include="CommonTypedef.h" />
+    <ClInclude Include="GiftStrategy.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

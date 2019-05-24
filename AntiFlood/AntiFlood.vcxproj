@@ -154,6 +154,9 @@
     <Image Include="res\FanXingUI.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common\Common.vcxproj">
+      <Project>{6ea05f3a-8260-42c9-9883-3e1dccdb8ecc}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Network\Network.vcxproj">
       <Project>{2147cb51-23f6-4022-8e4a-291b70570cb7}</Project>
     </ProjectReference>

@@ -14,6 +14,8 @@
 #include "Config.h"
 #include "third_party/chromium/base/strings/string_number_conversions.h"
 #include "third_party/chromium/base/strings/utf_string_conversions.h"
+#include "Common/AntiStrategy.h"
+#include "Common/GiftStrategy.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

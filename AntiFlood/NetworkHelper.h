@@ -18,6 +18,8 @@ class GiftNotifyManager;
 class GiftInfoHelper;
 class GiftInfo;
 class User;
+class AntiStrategy;
+class GiftStrategy;
 //class TcpClientController;
 class WebsocketClientController;
 
@@ -29,87 +31,6 @@ typedef std::function<void(const RowData&)> notify201;
 typedef std::function<void(const RowData&)> notify501;
 typedef std::function<void(uint32,const std::wstring&)> notify502;
 typedef std::function<void(const RoomGiftInfo601&, const GiftInfo&)> notify601;
-
-enum class HANDLE_TYPE
-{
-    HANDLE_TYPE_NOTHANDLE = 0,
-    HANDLE_TYPE_KICKOUT = 1,
-    HANDLE_TYPE_BANCHAT = 2
-};
-
-class AntiStrategy 
-    : public std::enable_shared_from_this<AntiStrategy>
-{
-public:
-    AntiStrategy();
-    ~AntiStrategy();
-
-    bool AntiStrategy::LoadAntiSetting(std::vector<RowData>* rowdatas);
-    bool AntiStrategy::SaveAntiSetting() const;
-
-    HANDLE_TYPE GetUserHandleType(uint32 rich_level, const std::string& nickname) const;
-    HANDLE_TYPE GetMessageHandleType(uint32 receiveid, uint32 rich_level, const std::string& message) const;
-    HANDLE_TYPE GetHandleType(uint32 rich_level) const;
-    void SetHandleType(HANDLE_TYPE handletype);
-    void SetHandleRichLevel(uint32 rich_level);
-
-    bool AddSensitive(const std::string& sensitive);
-    bool RemoveSensitive(const std::string& sensitive);
-    bool AddNickname(const std::string& vestname);
-    bool RemoveNickname(const std::string& vestname);
-    bool AddReceiveId(const std::string& receiveid);
-    bool RemoveReceiveId(const std::string& receiveid);
-
-private:
-    std::set<std::string> vestnames_;
-    std::set<std::string> sensitives_;
-    std::set<uint32> receiveids_;
-    HANDLE_TYPE handletype_ = HANDLE_TYPE::HANDLE_TYPE_NOTHANDLE;
-    uint32 rich_level_ = 3;
-};
-
-class GiftStrategy
-    :public std::enable_shared_from_this <GiftStrategy>
-{
-public:
-    GiftStrategy();
-    ~GiftStrategy();
-
-    bool Initialize(const std::string& content);
-    void SetThanksFlag(bool enable);
-    void SetGiftValue(uint32 gift_value);
-    bool GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage);
-
-    // 设置自己给对自己送礼物的人限制显示其礼物一段时间
-    void SetGiftDisplayValue(uint32 gift_value, uint32 seconds);
-    bool GetBanDisplaySeconds(const RoomGiftInfo601& giftinfo, uint32* seconds, 
-        uint32* ban_gift_value);
-    void SetSendToSelfHandle(bool handle);
-    bool GetSendToSelfHandle() const;
-
-private:
-
-    struct GiftInfo
-    {
-        uint32 giftid = 0;
-        std::string giftname = "";
-        uint32 price = 0;
-        double exchange = false;
-        uint32 category = 0;
-        std::string categoryname = "";
-    };
-
-    std::map<uint32, GiftInfo> giftmap_;
-    std::map<uint32, std::string> category_;
-    std::vector<uint32> ban_gift_setting_values_;
-
-    uint32 thank_gift_value_ = 0;
-    bool thanksflag_ = false;
-    uint32 ban_gift_value_ = 0;
-    uint32 ban_gift_seconds_ = 0;
-
-    bool handle_send_gift_to_self = true;
-};
 
 class NetworkHelper
     : public std::enable_shared_from_this <NetworkHelper>

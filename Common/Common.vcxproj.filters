@@ -24,12 +24,27 @@
     <ClCompile Include="ClanHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="AntiStrategy.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="GiftStrategy.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BlacklistHelper.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ClanHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="AntiStrategy.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GiftStrategy.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonTypedef.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
