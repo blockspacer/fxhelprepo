@@ -198,8 +198,8 @@ bool Room::GetGiftList(const std::string& cookies, std::string* content)
 
 // 主播繁星号, 礼物id, 数量, 房间号 _是时间
 // GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
-bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count,
-                    std::string* errormsg)
+bool Room::SendGift(const std::string& cookies, uint32 to_uid, 
+	uint32 gift_id, uint32 gift_count, std::string* errormsg)
 {
     assert(singerid_);
     assert(roomid_);
@@ -210,7 +210,7 @@ bool Room::SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_coun
     request.url = url;
     std::string time_string = GetNowTimeString();
     request.queries["d"] = time_string;
-    request.queries["args"] = "%5B%22" + base::UintToString(singerid_) +
+	request.queries["args"] = "%5B%22" + base::UintToString(to_uid) +
         "%22%2C%22" + base::UintToString(gift_id) + "%22%2C" + base::UintToString(gift_count) +
         "%2C%22" + base::UintToString(roomid_) + "%22%2Cfalse%5D";
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;

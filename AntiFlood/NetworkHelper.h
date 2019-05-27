@@ -103,6 +103,8 @@ public:
     void SetRobotApiKey(const std::wstring& apikey);
     bool SendChatMessageRobot(const RoomChatMessage& roomChatMessage);
 
+	bool SendGiftByCookie(const std::wstring& cookie, uint32 roomid, uint32 send_value);
+
     void GetCityRankInfos(uint32 roomid);
 
 private:

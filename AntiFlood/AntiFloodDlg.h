@@ -53,6 +53,7 @@ protected:
     afx_msg void OnBnClickedBtnGetmsg();
     afx_msg void OnBnClickedBtnClearInfo();
     afx_msg void OnBnClickedBtnSendChat();
+	afx_msg void OnBnClickedBtnSendGiftToSelf();
     
     // 观众列表操作
     afx_msg void OnBnClickedBtnAdd();
@@ -233,4 +234,8 @@ public:
     afx_msg void OnBnClickedBtnSetGiftDisplay100();
     afx_msg void OnBnClickedBtnSetGiftDisplay200();
     afx_msg void OnBnClickedBtnCancelBanDisplayGift();
+private:
+	CEdit m_edit_send_gift_time_delta;
+	CEdit m_edit_send_gift_value;
+	CEdit m_edit_sender_cookie;
 };

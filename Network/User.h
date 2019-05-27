@@ -126,6 +126,10 @@ public:
     bool RetrieveStar();
     bool SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
                   std::string* errormsg);
+
+	bool SendGiftById(uint32 roomid, uint32 to_userid, uint32 gift_id, uint32 gift_count,
+		std::string* errormsg);
+
     bool RealSingLike(uint32 roomid, const std::wstring& song_name,
         std::string* errormsg);
 

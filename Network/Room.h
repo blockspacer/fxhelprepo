@@ -61,8 +61,8 @@ public:
     bool GetGiftList(const std::string& cookies, std::string* content);
 
     // GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
-    bool SendGift(const std::string& cookies, uint32 gift_id, uint32 gift_count,
-        std::string* errormsg);
+    bool SendGift(const std::string& cookies, uint32 to_uid, uint32 gift_id, 
+		uint32 gift_count, std::string* errormsg);
 
     bool SendStar(const std::string& cookies, uint32 roomid, uint32 count,
         std::string* errormsg);

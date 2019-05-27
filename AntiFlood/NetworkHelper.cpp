@@ -645,3 +645,10 @@ void NetworkHelper::DoChatRepeat(const std::wstring& chatmsg)
     user_->SendChatMessage(roomid_, base::WideToUTF8(chatmsg));
 }
 
+bool NetworkHelper::SendGiftByCookie(const std::wstring& cookie, uint32 roomid, 
+	uint32 send_value)
+{
+	//user_->SendGiftById(roomid, )
+	return true;
+}
+
