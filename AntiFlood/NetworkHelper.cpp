@@ -648,7 +648,8 @@ void NetworkHelper::DoChatRepeat(const std::wstring& chatmsg)
 bool NetworkHelper::SendGiftByCookie(const std::wstring& cookie, uint32 roomid, 
 	uint32 send_value)
 {
-	//user_->SendGiftById(roomid, )
-	return true;
+    std::string error_msg;
+    int user_id = user_->GetKugouId();
+    return user_->SendGiftById(roomid, user_id, 1, 1, &error_msg);
 }
 

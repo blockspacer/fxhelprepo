@@ -303,6 +303,11 @@ uint32 User::GetFanxingId() const
     return fanxingid_;
 }
 
+uint32 User::GetKugouId() const
+{
+    return kugouid_;
+}
+
 uint32 User::GetClanId() const
 {
     return clanid_;
@@ -636,9 +641,9 @@ bool User::SendGift(uint32 roomid, uint32 gift_id, uint32 gift_count,
     keys.push_back("LoginCheckCode");
     keys.push_back("kg_mid");
     std::string cookies = cookiesHelper_->GetCookies(keys);
-	return room->second->SendGift(cookies, singerid, gift_id, gift_count, errormsg);
+    return room->second->SendGift(cookies, kugouid_, singerid, 
+        gift_id, gift_count, errormsg);
 }
-
 
 bool User::SendGiftById(uint32 roomid, uint32 to_userid, uint32 gift_id, uint32 gift_count, std::string* errormsg)
 {
@@ -648,6 +653,7 @@ bool User::SendGiftById(uint32 roomid, uint32 to_userid, uint32 gift_id, uint32 
 		return false;
 	}
 
+    DCHECK(to_userid>0);
 	std::vector<std::string> keys;
 	keys.push_back("KuGoo");
 	keys.push_back("_fx_coin");
@@ -659,7 +665,7 @@ bool User::SendGiftById(uint32 roomid, uint32 to_userid, uint32 gift_id, uint32 
 	keys.push_back("LoginCheckCode");
 	keys.push_back("kg_mid");
 	std::string cookies = cookiesHelper_->GetCookies(keys);
-	return room->second->SendGift(cookies, to_userid, gift_id, gift_count, errormsg);
+	return room->second->SendGift(cookies, kugouid_, to_userid, gift_id, gift_count, errormsg);
 }
 
 bool User::RealSingLike(uint32 roomid, const std::wstring& song_name,

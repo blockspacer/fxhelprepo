@@ -198,22 +198,34 @@ bool Room::GetGiftList(const std::string& cookies, std::string* content)
 
 // 主播繁星号, 礼物id, 数量, 房间号 _是时间
 // GET /UServices/GiftService/GiftService/sendGift?d=1476689413506&args=["141023689","869",1,"1070190",false]&_=1476689413506 HTTP/1.1
-bool Room::SendGift(const std::string& cookies, uint32 to_uid, 
+bool Room::SendGift(const std::string& cookies, uint32 from_uid, uint32 to_uid, 
 	uint32 gift_id, uint32 gift_count, std::string* errormsg)
 {
     assert(singerid_);
     assert(roomid_);
 
-    std::string url = "http://fanxing.kugou.com/";
-    url += "/UServices/GiftService/GiftService/sendGift";
+    std::string url = "https://fx.service.kugou.com";
+    url += "/mfx-gift/web/gift/sendGift";
     HttpRequest request;
     request.url = url;
     std::string time_string = GetNowTimeString();
-    request.queries["d"] = time_string;
-	request.queries["args"] = "%5B%22" + base::UintToString(to_uid) +
-        "%22%2C%22" + base::UintToString(gift_id) + "%22%2C" + base::UintToString(gift_count) +
-        "%2C%22" + base::UintToString(roomid_) + "%22%2Cfalse%5D";
-    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
+    request.queries["_"] = time_string;
+
+    request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_POST;
+    std::map<std::string, std::string> postmap;
+    postmap["pid"] = "7";
+    postmap["appId"] = "1010";
+    postmap["fromKugouId"] = base::UintToString(from_uid);
+    postmap["toKugouId"] = base::UintToString(to_uid); // kugouid, 不是繁星号
+    postmap["giftId"] = base::UintToString(gift_id); // kugouid, 不是繁星号
+    postmap["giftNum"] = base::UintToString(gift_count);
+    postmap["roomId"] = base::UintToString(roomid_);
+    postmap["isCustom"] = "0";
+    postmap["giftCombo"] = "1";
+    postmap["sourceRoomId"] = base::UintToString(roomid_);
+    postmap["timestamp"] = time_string;
+    MakePostdata(postmap, &request.postdata);
+
     request.referer = std::string("http://fanxing.kugou.com/") +
         base::UintToString(roomid_);
     request.cookies = cookies;
@@ -1192,11 +1204,10 @@ bool Room::GetRoomConnectionInfo(const std::string& cookies)
 void Room::TranferNotify601(const RoomGiftInfo601& roomgiftinfo)
 {
     // 如果不是在本房间送给主播的消息，过滤掉不回调
-    if ((roomid_ != roomgiftinfo.roomid)
-        || (singerid_ != roomgiftinfo.receiverid))
-    {
+    //if ((roomid_ != roomgiftinfo.roomid)
+    //    || (singerid_ != roomgiftinfo.receiverid))
+    if (roomid_ != roomgiftinfo.roomid) // 为了处理自己给自己送礼物捣乱的情况，需要上报
         return;
-    }
 
     // 重复的消息id需要忽略
     auto find_result = msgid_time_map_.find(roomgiftinfo.msgid);

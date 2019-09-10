@@ -121,12 +121,12 @@ void GiftStrategy::SetThanksFlag(bool enable)
     thanksflag_ = enable;
 }
 
-void GiftStrategy::SetGiftValue(uint32 gift_value)
+void GiftStrategy::SetThanksGiftValue(uint32 gift_value)
 {
     thank_gift_value_ = gift_value;
 }
 
-void GiftStrategy::SetGiftDisplayValue(uint32 gift_value, uint32 seconds)
+void GiftStrategy::SetBanGiftSecondAndValue(uint32 gift_value, uint32 seconds)
 {
     ban_gift_value_ = gift_value;
     ban_gift_seconds_ = seconds;

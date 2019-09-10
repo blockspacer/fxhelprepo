@@ -14,11 +14,11 @@ public:
 
     bool Initialize(const std::string& content);
     void SetThanksFlag(bool enable);
-    void SetGiftValue(uint32 gift_value);
+    void SetThanksGiftValue(uint32 gift_value);
     bool GetGiftThanks(const RoomGiftInfo601& giftinfo, std::wstring* chatmessage);
 
     // 设置自己给对自己送礼物的人限制显示其礼物一段时间
-    void SetGiftDisplayValue(uint32 gift_value, uint32 seconds);
+    void SetBanGiftSecondAndValue(uint32 gift_value, uint32 seconds);
     bool GetBanDisplaySeconds(const RoomGiftInfo601& giftinfo, uint32* seconds,
         uint32* ban_gift_value);
     void SetSendToSelfHandle(bool handle);

@@ -97,6 +97,7 @@ public:
 
     uint32 GetServerTime() const;
     uint32 GetFanxingId() const;
+    uint32 GetKugouId() const;
     uint32 GetClanId() const;
     uint32 GetRichlevel() const;
 

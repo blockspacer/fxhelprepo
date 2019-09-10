@@ -238,4 +238,5 @@ private:
 	CEdit m_edit_send_gift_time_delta;
 	CEdit m_edit_send_gift_value;
 	CEdit m_edit_sender_cookie;
+    CEdit m_ban_gift_seconds;
 };

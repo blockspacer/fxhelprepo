@@ -115,49 +115,50 @@ CAntiFloodDlg::~CAntiFloodDlg()
 
 void CAntiFloodDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_LIST1, InfoList_);
-	DDX_Control(pDX, IDC_LIST_USER_STATUS, m_ListCtrl_Viewers);
-	DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
-	DDX_Control(pDX, IDC_LIST_USER_STATUS_BLACK, m_ListCtrl_Blacks);
-	DDX_Control(pDX, IDC_STATIC_AUTH_INFO, m_static_auth_info);
-	DDX_Control(pDX, IDC_STATIC_LOGIN_INFO, m_static_login_info);
-	DDX_Control(pDX, IDC_EDIT_VEST, m_edit_vest);
-	DDX_Control(pDX, IDC_EDIT_CHAT_MSG, m_edit_chatmsg);
-	DDX_Control(pDX, IDC_LIST_VEST, m_list_vest);
-	DDX_Radio(pDX, IDC_RADIO_NOACTION, m_radiogroup);
-	DDX_Control(pDX, IDC_CHK_HANDLE_ALL, m_chk_handle_all);
-	DDX_Control(pDX, IDC_EDIT_VERIFYCODE, m_edit_verifycode);
-	DDX_Control(pDX, IDC_STATIC_VERIFYCODE, m_static_verifycode);
-	DDX_Control(pDX, IDC_CHK_ROBOT, m_chk_robot);
-	DDX_Control(pDX, IDC_EDIT_API_KEY, m_edit_api_key);
-	DDX_Control(pDX, IDC_CHK_WELCOME, m_chk_welcome);
-	DDX_Control(pDX, IDC_CHK_THANKS, m_chk_thanks);
-	DDX_Control(pDX, IDC_LIST_USER_STRATEGE, m_list_user_strategy);
-	DDX_Control(pDX, IDC_CHK_REPEAT_CHAT, m_chk_repeat_chat);
-	DDX_Control(pDX, IDC_COMBO_SECONDS, m_combo_seconds);
-	DDX_Control(pDX, IDC_EDIT_AUTO_CHAT, m_edit_auto_chat);
-	DDX_Control(pDX, IDC_COMBO_THANKS, m_combo_thanks);
-	DDX_Control(pDX, IDC_COMBO_WELCOME, m_combo_welcome);
-	DDX_Control(pDX, IDC_EDIT_SENSITIVE, m_edit_sensitive);
-	DDX_Control(pDX, IDC_COMBO_HANDLE_LEVEL, m_combo_handle_level);
-	DDX_Control(pDX, IDC_BTN_SENSITIVE, m_btn_add_sensitive);
-	DDX_Control(pDX, IDC_BTN_ADD_VEST, m_btn_add_vest);
-	DDX_Control(pDX, IDC_BTN_REMOVE_VEST, m_btn_remove_vest_sensitive);
-	DDX_Control(pDX, IDC_CHK_CHECK_VIP_V, m_chk_vip_v);
-	DDX_Control(pDX, IDC_CHK_PRIVATE_NOTIFY, m_chk_private_notify);
-	DDX_Control(pDX, IDC_BTN_WELCOME_SETTING, m_btn_welcome_setting);
-	DDX_Control(pDX, IDC_BTN_THANKS_SETTING, m_btn_thanks_setting);
-	DDX_Control(pDX, IDC_EDIT_RETRIVE_GIFT_COIN, m_edit_retrive_gift_coin);
-	DDX_Control(pDX, IDC_EDIT_ONCE_MESSAGE, m_edit_once_message);
-	DDX_Control(pDX, IDC_EDIT_RECEIVEID, m_edit_receiveid);
-	DDX_Control(pDX, IDC_EDIT_COOKIE, m_edit_cookie);
-	DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
-	DDX_Control(pDX, IDC_EDIT_GIFT_LEVET, m_edit_gift_level);
-	DDX_Control(pDX, IDC_CHK_SEND_GIFT_TO_SELF, m_chk_send_gift_to_self);
-	DDX_Control(pDX, IDC_EDIT_TIME_DELTA, m_edit_send_gift_time_delta);
-	DDX_Control(pDX, IDC_EDIT_GIFT_VALUE, m_edit_send_gift_value);
-	DDX_Control(pDX, IDC_EDIT_SENDER_COOKIE, m_edit_sender_cookie);
+    CDialogEx::DoDataExchange(pDX);
+    DDX_Control(pDX, IDC_LIST1, InfoList_);
+    DDX_Control(pDX, IDC_LIST_USER_STATUS, m_ListCtrl_Viewers);
+    DDX_Control(pDX, IDC_CHECK_REMEMBER, m_check_remember);
+    DDX_Control(pDX, IDC_LIST_USER_STATUS_BLACK, m_ListCtrl_Blacks);
+    DDX_Control(pDX, IDC_STATIC_AUTH_INFO, m_static_auth_info);
+    DDX_Control(pDX, IDC_STATIC_LOGIN_INFO, m_static_login_info);
+    DDX_Control(pDX, IDC_EDIT_VEST, m_edit_vest);
+    DDX_Control(pDX, IDC_EDIT_CHAT_MSG, m_edit_chatmsg);
+    DDX_Control(pDX, IDC_LIST_VEST, m_list_vest);
+    DDX_Radio(pDX, IDC_RADIO_NOACTION, m_radiogroup);
+    DDX_Control(pDX, IDC_CHK_HANDLE_ALL, m_chk_handle_all);
+    DDX_Control(pDX, IDC_EDIT_VERIFYCODE, m_edit_verifycode);
+    DDX_Control(pDX, IDC_STATIC_VERIFYCODE, m_static_verifycode);
+    DDX_Control(pDX, IDC_CHK_ROBOT, m_chk_robot);
+    DDX_Control(pDX, IDC_EDIT_API_KEY, m_edit_api_key);
+    DDX_Control(pDX, IDC_CHK_WELCOME, m_chk_welcome);
+    DDX_Control(pDX, IDC_CHK_THANKS, m_chk_thanks);
+    DDX_Control(pDX, IDC_LIST_USER_STRATEGE, m_list_user_strategy);
+    DDX_Control(pDX, IDC_CHK_REPEAT_CHAT, m_chk_repeat_chat);
+    DDX_Control(pDX, IDC_COMBO_SECONDS, m_combo_seconds);
+    DDX_Control(pDX, IDC_EDIT_AUTO_CHAT, m_edit_auto_chat);
+    DDX_Control(pDX, IDC_COMBO_THANKS, m_combo_thanks);
+    DDX_Control(pDX, IDC_COMBO_WELCOME, m_combo_welcome);
+    DDX_Control(pDX, IDC_EDIT_SENSITIVE, m_edit_sensitive);
+    DDX_Control(pDX, IDC_COMBO_HANDLE_LEVEL, m_combo_handle_level);
+    DDX_Control(pDX, IDC_BTN_SENSITIVE, m_btn_add_sensitive);
+    DDX_Control(pDX, IDC_BTN_ADD_VEST, m_btn_add_vest);
+    DDX_Control(pDX, IDC_BTN_REMOVE_VEST, m_btn_remove_vest_sensitive);
+    DDX_Control(pDX, IDC_CHK_CHECK_VIP_V, m_chk_vip_v);
+    DDX_Control(pDX, IDC_CHK_PRIVATE_NOTIFY, m_chk_private_notify);
+    DDX_Control(pDX, IDC_BTN_WELCOME_SETTING, m_btn_welcome_setting);
+    DDX_Control(pDX, IDC_BTN_THANKS_SETTING, m_btn_thanks_setting);
+    DDX_Control(pDX, IDC_EDIT_RETRIVE_GIFT_COIN, m_edit_retrive_gift_coin);
+    DDX_Control(pDX, IDC_EDIT_ONCE_MESSAGE, m_edit_once_message);
+    DDX_Control(pDX, IDC_EDIT_RECEIVEID, m_edit_receiveid);
+    DDX_Control(pDX, IDC_EDIT_COOKIE, m_edit_cookie);
+    DDX_Control(pDX, IDC_CHK_USE_COOKIE, m_chk_use_cookie);
+    DDX_Control(pDX, IDC_EDIT_GIFT_LEVET, m_edit_gift_level);
+    DDX_Control(pDX, IDC_CHK_SEND_GIFT_TO_SELF, m_chk_send_gift_to_self);
+    DDX_Control(pDX, IDC_EDIT_TIME_DELTA, m_edit_send_gift_time_delta);
+    DDX_Control(pDX, IDC_EDIT_GIFT_VALUE, m_edit_send_gift_value);
+    DDX_Control(pDX, IDC_EDIT_SENDER_COOKIE, m_edit_sender_cookie);
+    DDX_Control(pDX, IDC_EDIT_BAN_GIFT_SECONDS, m_ban_gift_seconds);
 }
 
 BEGIN_MESSAGE_MAP(CAntiFloodDlg, CDialogEx)
@@ -411,6 +412,9 @@ BOOL CAntiFloodDlg::OnInitDialog()
     m_combo_welcome.SetWindowTextW(base::UintToString16(level).c_str());
     m_combo_welcome.EnableWindow(!enable_welcome);
 
+    m_edit_gift_level.SetWindowTextW(L"20");
+    m_ban_gift_seconds.SetWindowTextW(L"120");
+
     return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -577,6 +581,13 @@ void CAntiFloodDlg::OnBnClickedButtonEnterRoom()
     UpdateThanksSetting();
     UpdateWelcomeSetting();
     UpdateRepeatChatSetting();
+
+    // 默认开启房间检测自动送礼物的功能
+    if (!m_chk_send_gift_to_self.GetCheck())
+    {
+        m_chk_send_gift_to_self.SetCheck(TRUE);
+        OnBnClickedChkSendGiftToSelf();
+    }
 }
 
 // 送星星功能
@@ -1706,7 +1717,7 @@ void CAntiFloodDlg::UpdateThanksSetting()
     m_combo_thanks.GetWindowTextW(cs_gift_value);
     uint32 gift_value = 0;
     base::StringToUint(base::WideToUTF8(cs_gift_value.GetBuffer()), &gift_value);
-    giftStrategy_->SetGiftValue(gift_value);
+    giftStrategy_->SetThanksGiftValue(gift_value);
 
     Config config;
     config.SaveGiftThanks(enable, gift_value);
@@ -2002,6 +2013,17 @@ void CAntiFloodDlg::OnBnClickedBtnUnbanEnter()
 void CAntiFloodDlg::OnBnClickedChkSendGiftToSelf()
 {
     bool handle_send_to_self = !!m_chk_send_gift_to_self.GetCheck();
+
+    CString cs_ban_gift_value;
+    m_edit_gift_level.GetWindowTextW(cs_ban_gift_value);
+    uint32 ban_gift_value = 0;
+    base::StringToUint(base::WideToUTF8(cs_ban_gift_value.GetBuffer()), &ban_gift_value);
+
+    CString cs_ban_second;
+    m_ban_gift_seconds.GetWindowTextW(cs_ban_second);
+    uint32 ban_second = 60;
+    base::StringToUint(cs_ban_second.GetBuffer(), &ban_second);
+
     if (!network_)
         return;
 
@@ -2014,6 +2036,7 @@ void CAntiFloodDlg::OnBnClickedChkSendGiftToSelf()
         return;
     }
 
+    giftStrategy_->SetBanGiftSecondAndValue(ban_gift_value, ban_second);
     giftStrategy_->SetSendToSelfHandle(handle_send_to_self);
 }
 
@@ -2082,6 +2105,6 @@ void CAntiFloodDlg::OnBnClickedBtnSendGiftToSelf()
 	GetDlgItemText(IDC_EDIT_NAV, strRoomid);
 	uint32 roomid = 0;
 	base::StringToUint(strRoomid.GetBuffer(), &roomid);
-
+    network_->SendGiftByCookie(sender_cookie.GetBuffer(), roomid, 0);
 
 }
