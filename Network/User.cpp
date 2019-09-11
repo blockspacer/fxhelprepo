@@ -1017,8 +1017,10 @@ bool User::SetRoomGiftNotifyLevel(uint32 roomid, uint32 gift_value)
     request.method = HttpRequest::HTTP_METHOD::HTTP_METHOD_GET;
     request.referer = std::string("http://fanxing.kugou.com/") +
         base::UintToString(roomid);
-    request.queries["args"] = "[" + base::IntToString(static_cast<int>(gift_value)) + "]";
-    request.queries["jsonpcallback"] = "jsonphttpsfxservicekugoucomUServicesGiftServiceGiftServicesetShowLimitargs0jsonpcallback";
+	std::string str_gift_value = base::IntToString(static_cast<int>(gift_value));
+	request.queries["args"] = "[" + str_gift_value + "]";
+	request.queries["jsonpcallback"] = "jsonphttpsfxservicekugoucomUServicesGiftServiceGiftServicesetShowLimitargs" + 
+		str_gift_value +"jsonpcallback";
     request.cookies = cookies;
     if (ipproxy_.GetProxyType() != IpProxy::PROXY_TYPE::PROXY_TYPE_NONE)
         request.ipproxy = ipproxy_;
